@@ -14,7 +14,7 @@ tags:
 
 选用了Next主题，主题优化参考了[Next主题官方文档](http://theme-next.iissnan.com/getting-started.html)以及[知乎：hexo的next主题个性化教程:打造炫酷网站](https://zhuanlan.zhihu.com/p/28128674)（其中访问量、统计功能教程已过期），可以把网站搭建的花里胡哨；
 
-编写博客使用的Markdown语言通过看[菜鸟教程：Markdown 教程](https://www.runoob.com/markdown/md-tutorial.html)非常简单，可以边学边写；
+编写博客使用的Markdown语言通过看[菜鸟教程：Markdown 教程](https://www.runoob.com/markdown/md-tutorial.html)非常简单，可以边学边写，使用VScode，安装``Markdown Preview Enhanced``及``markdown image``插件；
 
 其他工具有：logo下载：[iconfont](https://www.iconfont.cn/)，Next默认的icon网站（灰色为收费图标）：[Font Awesome](https://fontawesome.com/icons)，图床url链接生成：[SM.MS](https://sm.ms/)，此外，大多数网站需要用到~~科学上网~~。
 
