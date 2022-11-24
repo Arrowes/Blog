@@ -4,7 +4,7 @@
 
 # Site
 title: Arrow的笔记本
-subtitle: Arrow's notebook
+#subtitle: Arrow's notebook
 description: 记录一些杂七杂八的东西
 keywords:
 author: 王宇杰
@@ -46,7 +46,7 @@ future: true
 highlight:
   enable: true
   line_number: true
-  auto_detect: false
+  auto_detect: true
   tab_replace: ''
   wrap: true
   hljs: false
@@ -106,3 +106,16 @@ deploy:
   repo: https://github.com/Arrowes/Arrowes.github.io.git
   branch: master
 
+#搜索，好像可以不要
+search:
+  path: search.xml
+  field: post
+  format: html
+  limit: 10000
+
+#阅读全文
+excerpt:			# 一定要顶格写，注意格式
+  depth: 5			# 他的大小就是全文阅读预览长度设置
+  excerpt_excludes: []
+  more_excludes: []
+  hideWholePostExcerpts: true
