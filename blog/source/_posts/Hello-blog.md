@@ -1,7 +1,8 @@
 ---
 title: Hello Blog! 从零开始搭建自己的博客网站
 date: 2022-11-22 19:36:45
-tags:
+tags: 
+- 技术
 ---
 第一篇博客用来记录搭建该网站并成功发表这篇博客的流程，使用Hexo静态博客框架，托管于Github，参考了多篇文章[^1]。
 
@@ -80,6 +81,11 @@ a:not(.btn){
       ```
 
 3. 在主题配置文件中_config.yml里 excerpt_description 改为true
+
+#### 添加标签
+1. 配置 主题配置文件中删掉tags的注释
+2. 文件 新建tags文件 ``hexo new page "tags"``
+3. 文章 ``tags: - XXX``
 
 #### 插件
 ``npm install hexo-reference --save`` 支持Markdown脚注
