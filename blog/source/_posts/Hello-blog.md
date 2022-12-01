@@ -87,9 +87,39 @@ a:not(.btn){
 2. 文件 新建tags文件 ``hexo new page "tags"``
 3. 文章 ``tags: - XXX``
 
+#### 公式
+文章内：
+```
+---
+title:
+date:
+mathjax: true
+---
+ ```
+主题配置文件：
+ ```
+mathjax:
+enable: true
+ ```
+[markdown公式符号大全](https://blog.csdn.net/konglongdanfo1/article/details/85204312)
+
 #### 插件
 ``npm install hexo-reference --save`` 支持Markdown脚注
 ``npm install hexo-wordcount --save`` 字数统计
+**Markdown Preview Enhanced** markdown预览插件（vs code）
+
+**markdown image** markdown图片插件（vs code）
+ ```py
+Local
+E:\Github\Blog\blog\node_modules\hexo-theme-next\source\images\ #Path
+/images/ #Reference Path
+
+Github
+main #Branch
+/images #Path
+https://github.com/Arrowes/Arrowes-Blogbackup #Repository
+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 #Token
+ ```
 
 ### 常用[Hexo指令](https://hexo.io/zh-cn/docs/commands)
 `hexo init [folder]` 新建一个网站

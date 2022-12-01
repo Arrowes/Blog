@@ -2,6 +2,7 @@
 title: Bookmarks：常用书签汇总
 date: 2022-11-23 19:26:05
 tags: 
+- 工具
 ---
 从Chrome的书签管理器导出，使用[html-to-markdown](https://codebeautify.org/html-to-markdown)在线转换为.md文件。
 ### 工具
