@@ -115,7 +115,26 @@ search:
 
 #阅读全文
 excerpt:			# 一定要顶格写，注意格式
-  depth: 5			# 他的大小就是全文阅读预览长度设置
+  depth: 1			# 他的大小就是全文阅读预览长度设置
   excerpt_excludes: []
   more_excludes: []
   hideWholePostExcerpts: true
+
+#阅读时间
+symbols_count_time:
+
+  symbols: true
+
+  time: true
+
+  total_symbols: false
+
+  total_time: false
+
+  exclude_codeblock: false
+
+  awl: 4
+
+  wpm: 275
+
+  suffix: "mins."

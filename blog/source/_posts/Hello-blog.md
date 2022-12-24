@@ -13,7 +13,7 @@ tags:
 
 域名在[阿里云](https://dc.console.aliyun.com/next/index?spm=5176.12818093.ProductAndResource--ali--widget-product-recent.dre1.265516d0P13nxv&accounttraceid=b4a1b2c1dcab4588a55aa2f5926041aazltv#/overview)购买,买的 *wangyujie.site* 首年6元，这也是唯一的开销，如果愿意使用原网站 *<arrowes.github.io>* ,这一步甚至可以省略；
 
-选用了Next主题，主题优化参考了[Next主题官方文档](http://theme-next.iissnan.com/getting-started.html)以及[知乎：hexo的next主题个性化教程:打造炫酷网站](https://zhuanlan.zhihu.com/p/28128674)（其中访问量、统计功能教程已过期），可以把网站搭建的花里胡哨；
+选用了Next主题，主题优化参考了[Next主题官方文档](http://theme-next.iissnan.com/getting-started.html)以及[知乎：hexo的next主题个性化教程:打造炫酷网站](https://zhuanlan.zhihu.com/p/28128674)（其中访问量、统计功能教程已过期,很多配置next主题已内置），可以把网站搭建的花里胡哨；
 
 编写博客使用的Markdown语言通过看[菜鸟教程：Markdown 教程](https://www.runoob.com/markdown/md-tutorial.html)非常简单，可以边学边写，使用VScode，安装``Markdown Preview Enhanced``及``markdown image``插件；
 
@@ -27,6 +27,7 @@ Github网站项目地址：[Arrowes.github.io](https://github.com/Arrowes/Arrowe
 #### hexo 添加自定义单静态页面 跳过hexo渲染，以resume为例:
 1. 将resume文件夹放进Theme主题文件夹下的/source
 2. Hexo-config: skip_render: resume/** （可省略）
+3. 引用时直接 /resume/
 
 #### 添加动态背景，以动态线条为例：
 1. themes/next/layout/_layout 在`</body>`末尾添加如下代码：
@@ -42,14 +43,31 @@ Github网站项目地址：[Arrowes.github.io](https://github.com/Arrowes/Arrowe
      ```
 
 #### 统计功能
-打开themes\next\layout\_partial\footer.swig文件，在文件末尾添加：
-```html
+/next/_config：找到busuanzi_count进行配置
+或自定义配置：
+打开themes\next\layout_partial\footer.swig文件，在文件末尾添加：
+```
 <div class="theme-info">
   <div class="powered-by"></div>
   <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
   <span class="post-count">全站共{{ totalcount(site) }}字</span> | 访问量<span id="busuanzi_value_site_pv"></span>次
 </div>
 ```
+阅读时间：
+1. npm install hexo-word-counter
+2. Hexo _config.yml：
+```
+symbols_count_time:
+  symbols: true
+  time: true
+  total_symbols: true
+  total_time: true
+  exclude_codeblock: false
+  awl: 4
+  wpm: 275
+  suffix: "mins."
+```
+3. /next/_config:将设置item_text_total为true
 #### 配置网站超链接颜色
 打开 `Blog\themes\next\source\css\_common\components\post` 路径下的post.styl , 并在底部添加如下代码:
 
@@ -67,11 +85,11 @@ a:not(.btn){
 
 #### 搜索功能
 1. 在项目根目录下运行 ``npm install hexo-generator-searchdb --save``
-2. 更改主题配置文件 themes/next/_config.yml，将local_search下的enable从false改为true
+2. 更改主题配置文件 /next/_config 将local_search下的enable从false改为true
 
 #### 设置阅读全文
 1. 在项目根目录下执行 ``npm install hexo-excerpt --save``
-2. 在站点配置文件_config.yml添加:
+2. 在站点配置文件/hexo/_config.yml添加:
     ```css
     excerpt:			# 一定要顶格写，注意格式
       depth: 5			# 他的大小就是全文阅读预览长度设置
@@ -80,7 +98,7 @@ a:not(.btn){
       hideWholePostExcerpts: true
       ```
 
-3. 在主题配置文件中_config.yml里 excerpt_description 改为true
+3. 在主题配置文件/next/_config中 excerpt_description 改为true
 
 #### 添加标签
 1. 配置 主题配置文件中删掉tags的注释
@@ -88,20 +106,19 @@ a:not(.btn){
 3. 文章 ``tags: - XXX``
 
 #### 公式
+[markdown公式符号大全](https://blog.csdn.net/konglongdanfo1/article/details/85204312)
 文章内：
 ```
----
 title:
 date:
 mathjax: true
 ---
  ```
-主题配置文件：
- ```
-mathjax:
-enable: true
- ```
-[markdown公式符号大全](https://blog.csdn.net/konglongdanfo1/article/details/85204312)
+主题配置文件：``mathjax:  enable: true``
+
+#### 流程图
+``npm install hexo-filter-mermaid-diagrams``
+主题配置文件：``mermaid:  enable: true``
 
 #### 插件
 ``npm install hexo-reference --save`` 支持Markdown脚注

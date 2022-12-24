@@ -2,7 +2,6 @@
 title: Python工具：Anaconda，Pycharm，Jupyter，Pytorch
 date: 2022-11-24 21:26:44
 tags: 
-- 学习
 - python
 ---
 # Anaconda Prompt

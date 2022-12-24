@@ -2,7 +2,6 @@
 title: Yolo：Colab，Config，Ideas
 date: 2022-11-27 16:04:02
 tags:
-- 学习
 - python
 - 深度学习
 ---

@@ -2,7 +2,6 @@
 title: Linux：Ubuntu，Docker
 date: 2022-11-28 10:32:42
 tags:
-- 学习
 - Linux
 ---
 ## Ubuntu
@@ -23,6 +22,7 @@ Could not get lock /var/lib/dpkg/lock – open > 执行 ``sudo rm -rf /var/lib/d
  
 
 ## Docker
+[🐳Docker概念，工作流和实践](https://www.bilibili.com/video/BV1MR4y1Q738/)![图 1](/images/d526d9d2a480a5a8e1c132f305ce080ca6e8b2bfe3554a40d253e84b7fe8471e.png)  ![图 2](/images/6dc1e73e12bff3e522c1fbe3918fac4cbe43c13d725ef3cca849308809194f0b.png)  
 ### 配置
 ```shell
 # 查看当前运⾏的docker实例状态 

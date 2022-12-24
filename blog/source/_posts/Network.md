@@ -2,7 +2,6 @@
 title: Network：从神经网络到深度学习
 date: 2022-11-25 16:20:08
 tags:
-- 学习
 - python
 - 深度学习
 ---
