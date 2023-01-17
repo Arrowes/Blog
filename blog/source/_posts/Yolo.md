@@ -39,6 +39,10 @@ drive.mount('/content/drive')
 续航插件：Colab Alive
 
 ## Yolo
+### 知识点
+[YOLO系列算法精讲：从yolov1至yolov5的进阶之路](https://blog.csdn.net/wjinjie/article/details/107509243?ops_request_misc=%257B%2522request%255Fid%2522%253A%2522163082957716780366599375%2522%252C%2522scm%2522%253A%252220140713.130102334%E2%80%A6%2522%257D&request_id=163082957716780366599375&biz_id=0&utm_medium=distribute.pc_search_result.none-task-blog-2alltop_positive~default-1-107509243.first_rank_v2_pc_rank_v29&utm_term=yolo&spm=1018.2226.3001.4187)
+[深入浅出Yolo系列之Yolov5核心基础知识完整讲解](https://zhuanlan.zhihu.com/p/172121380)
+[理解yolov7网络结构](https://blog.csdn.net/athrunsunny/article/details/125951001?utm_medium=distribute.pc_relevant.none-task-blog-2~default~baidujs_title~default-0-125951001-blog-125883770.pc_relevant_show_downloadRating&spm=1001.2101.3001.4242.1&utm_relevant_index=1) [Yolov7 基础网络结构详解](https://blog.csdn.net/u010899190/article/details/125883770)
 ### Detect参数
 调用电脑摄像头:
 ``--view-img --source 0``
@@ -56,7 +60,7 @@ DroidCamX App，关闭代理 连同一个网：
 ## Ideas
 ### 数据集
 混合数据集：彩色+红外
-开源驾驶员行为数据集：StateFarm-distracted-driver-detection
+开源驾驶员行为数据集：[StateFarm-distracted-driver-detection](https://www.kaggle.com/c/state-farm-distracted-driver-detection/data)
 最好输入图像大小设置成和作者一样，输入图像的大小要求必须是32的倍数
 针对红外图像优化
 数据增强：抖动模糊
@@ -66,27 +70,36 @@ DroidCamX App，关闭代理 连同一个网：
 WBF预处理
 合成三通道
 
-类别：c0：安全驾驶 c1：玩手机 c2：喝水c3:危险驾驶（双手脱离方向盘） c4：疲劳驾驶（打哈欠）
+``类别：c0：安全驾驶 c1：玩手机 c2：喝水c3:危险驾驶（双手脱离方向盘） c4：疲劳驾驶（打哈欠）``
 
 ### anchor
 设计——anchor的计算函数autoanchor
 ![图 2](/images/5fa9f11acfa0f2a400cb70630314bf87fb6670a72a3ddd3ed9a7071a4785d6ad.png)  
 
+### 网络结构
+models/common.py：加入新的结构代码
+models/yolo.py的parse_model函数：引入上面新写的结构名称
+.yaml:修改网络结构
+![图 2](/images/77c2bef1cba713cd8573b5115b983e41448ddb1399c3681df539bbbd14b91242.png)  
+
 ### 注意力模块
+[CV中即插即用的注意力模块](https://zhuanlan.zhihu.com/p/330535757)
+[手把手带你YOLOv5 (v6.1)添加注意力机制](https://blog.csdn.net/weixin_43694096/article/details/124443059?spm=1001.2014.3001.5502)
 通道注意力机制
 在上采样+concat之后接一个注意力机制可能会更好？
 channel-wise比spatial-wise更好用？
 backbone结尾使用一个注意力机制？
 每个block（如residual block）结尾使用比每个Conv里使用更好？
 
-transformer自注意力模块
-CBAM注意力模块:很常用
-CA注意力模块:这个模块没做过什么实验，可以做做消融实验，不同位置或者SE+CA结合等等。
-SE注意力模块
+transformer自注意力模块 CBAM注意力模块 CA注意力模块 SE注意力模块
 
 ### 激活函数 activations.py
+![图 1](/images/f539efce7ea9687323fb7fb3a5faf5e95df2ada73ba97313d9823cb67232230b.png)  
 FRELU激活函数（Funnel Activiation）
-我比较看好的激活函数是 DyReLU和meta-AconC这两个激活函数
+比较看好的激活函数是 DyReLU和meta-AconC这两个激活函数
+
+> activations.py：激活函数代码写在了activations.py文件里，可引入新的激活函数
+common.py：替换激活函数，很多卷积组都涉及到了激活函数（Conv，BottleneckCSP），所以改的时候要全面
 
 ### 其他
 构建一个初始模型：①YoloV5-XL ②图像的分辨率从3K调整为512

@@ -80,21 +80,25 @@ CBAM (Convolutional Block Attention Module)是SENet的一种拓展，SENet主要
 ![图 17](/images/3bacb5b697b3f89632f000291f5f832066eae51cb75d9d2456e3da41a1b433b5.png)  
 X横坐标为正确的分类（即你用标签所标注的真实分类）
 Y纵坐标为模型所预测的分类（即图片经过模型推理后模型将其辨别为的分类）
-> True positives (TP): 缺陷的图片被正确识别成了缺陷。（本缺陷的正确分类预测）
-True negatives(TN): 背景的图片被正确识别为背景。（非本缺陷被预测为其他分类缺陷或背景）
-False positives(FP): 背景的图片被错误识别为缺陷。（非本缺陷被预测为本缺陷）
-False negatives(FN): 缺陷的图片被错误识别为背景。（本缺陷被预测为其他缺陷或者背景）
+> True positives (TP): 猫🐱的图片被正确识别成了猫🐱。（猫🐱的正确分类预测）
+True negatives(TN): 背景的图片被正确识别为背景。（非猫🐱被预测为其他动物或背景）
+False positives(FP): 背景的图片被错误识别为猫🐱。（非猫🐱被预测为猫🐱）
+False negatives(FN): 猫🐱的图片被错误识别为背景。（猫🐱被预测为其他动物或者背景）
 
 ## Evaluation parameters
-$$Accuracy=\frac{TP+TN}{TP+FP+TN+FN}$$
-![图 18](/images/88cdba6e4b215ff778c3989d4054adcde943355ed84cf99ef856631a7fce7d67.png)  
 **准确率 Accuracy**：在正负样本数量接近的情况下，准确率越高，模型的性能越好（当测试样本不平衡时，该指标会失去意义。）
+$$Accuracy=\frac{TP+TN}{TP+FP+TN+FN}$$  
 **精准率（查准率） precision**：代表在总体预测结果中真阳性的预测数，针对预测结果，当区分能力强时，容易将部分（与负样本相似度高）正样本排除。
+$$precision(P)=\frac{TP}{TP+FP}$$
 **召回率（查全率） recall**：所有ground truths中真阳性的预测数，针对原样本，当敏感度高时，容易将部分（与正样本相似度高）负样本也判断为正样本。
-**F1 score**：正确率和召回率的调和平均数，F1分值越高，目标检测的准确性越好。
+$$recall(R)=\frac{TP}{TP+FN}$$
+**F1 score**：对Precision和Recall两个指标的调和平均值（类似平均速度），F1分值越高，目标检测的准确性越好。
+$$F_1 score=2\cdot \frac{P\cdot R}{P+R}$$
 **AP**：同时考察Precision和Recall两个指标来衡量模型对于各个类别的性能。 
+$$AP_i=\int_0^1P_i(R_i)dR_i$$
 **mAP**：表示AP的平均值，并用作衡量目标检测算法的总体检测精度的度量。
 将recall设置为横坐标，precision设置为纵坐标。PR曲线下围成的面积即AP，所有类别AP平均值即mAP.
+$$mAP=\frac1n\sum_{i = 1}^{n}AP_i$$
 **置信度 Confidence**：置信度设定越大，Prediction约接近1，Recall越接近0，要寻找最优的F1分数，需要遍历置信度。
 ![图 19](/images/ece9df2376a4c708a78f34277acd60b4bc05822dfc7e08b00313bd6418d9d48c.png)  
 **交并比 IoU**（Intersection over Union）：是目标检测中使用的一个概念，IoU计算的是“预测的边框”和“真实的边框”的交叠率，即它们的交集和并集的比值。最理想情况是完全重叠，即比值为1。map@0.5即IoU=0.5，预测框和标注框的交集与非交集占比相同，都为50%。 ![图 20](/images/29079e96d09fec2291bc4fe2172db27c1d63681908c45aebc4af5a0dd2091ba4.png)  
@@ -102,7 +106,7 @@ $$Accuracy=\frac{TP+TN}{TP+FP+TN+FN}$$
 **ROC曲线**(Receiver Operating Characteristic 受试者工作特征)
 $$TPR=\frac{TP}{TP+FN},FPR=\frac{FP}{FP+TN}$$可以理解为分类器对正样本的覆盖敏感性和对负样本的敏感性的权衡。
 在ROC曲线图中，每个点以对应的FPR值为横坐标，以TPR值为纵坐标![图 9](/images/e8ac2b4d0adec392c93af2ec345dcab77ac5628b88cde8e28224c8003b66f1c0.png)  
-**AUC值**：ROC曲线围成的面积
+**AUC值**：PR曲线下方的面积
 ![图 21](/images/b9d32332516f48892a5e94bc80f4966a343a6685185ee7d81b506dcca28b23db.png)  
 > 1.AUC = 1，是完美分类器，采用这个预测模型时，存在至少一个阈值能得出完美预测。绝大多数预测的场合，不存在完美分类器。
 2.0.5 < AUC < 1，优于随机猜测。这个分类器（模型）妥善设定阈值的话，能有预测价值。
@@ -110,6 +114,34 @@ $$TPR=\frac{TP}{TP+FN},FPR=\frac{FP}{FP+TN}$$可以理解为分类器对正样�
 4.AUC < 0.5，比随机猜测还差；但只要总是反预测而行，就优于随机猜测。
 
 ROC曲线图中，越靠近(0,1)的点对应的模型分类性能越好。而且可以明确的一点是，ROC曲线图中的点对应的模型，它们的不同之处仅仅是在分类时选用的阈值(Threshold)不同，每个点所选用的阈值都对应某个样本被预测为正类的概率值。
+## 模型计算量(FLOPs)和参数量(Params)
+**计算量 FLOPs**：FLOP时指浮点运算次数，s是指秒，即每秒浮点运算次数的意思，考量一个网络模型的计算量的标准。硬件要求是在于芯片的floaps（指的是gpu的运算能力）
+**参数量 Params**：是指网络模型中需要训练的参数总数。硬件要求在于显存大小
+1.**卷积层**
+计算时间复杂度(计算量)
+$$Time\sim O(\sum_{l=1}^D M_l^2\cdot K_l^2\cdot C_{l-1}\cdot C_l)$$
+
+计算空间复杂度(参数量)
+$$Space\sim O(\sum_{l=1}^D K_l^2\cdot C_{l-1}\cdot C_l+\sum_{l=1}^D M^2\cdot C_l)$$
+
+```
+参数量
+(kernel*kernel) *channel_input*channel_output
+kernel*kernel 就是 weight * weight
+其中kernel*kernel ＝ 1个feature的参数量
+
+计算量
+(kernel*kernel*map*map) *channel_input*channel_output
+kernel*kernel 就是weight*weight
+map*map是下个featuremap的大小，也就是上个weight*weight到底做了多少次运算
+其中kernel*kernel*map*map＝　1个feature的计算量
+```
+2.池化层
+无参数
+3.**全连接层**
+``参数量＝计算量＝weight_in*weight_out  #模型里面最费参数的就是全连接层``
+
+**换算计算量**,一般一个参数是值一个float，也就是４个字节,1kb=1024字节
 
 # Transformer
 ![图 14](/images/2e94102787d56e7b4d268071f643aa27b65ad2e4a90dd0cd0f6132990924811f.png) ![图 15](/images/6558163262d7b38fd0622153099684d42af7d3a1c4a3b715b1e8e38e3e65d53c.png) ![图 16](/images/97b9e0eeacec4859c3759422ffa214c05f1184c05511136017169f00bf09374d.png)  
