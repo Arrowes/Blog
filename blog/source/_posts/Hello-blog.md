@@ -137,7 +137,7 @@ E:\Github\Blog\blog\node_modules\hexo-theme-next\source\images\ #Path
 Github
 main #Branch
 /images #Path
-https://github.com/Arrowes/Arrowes-Blogbackup #Repository
+https://github.com/Arrowes/Blog #Repository
 github_pat_11AV245NA0ZkjSgYjmtK5T_fyxLh1yhNVlT13FFsC #TokenMjaEB4LKd
 
 #使用raw.sevencdn.com代替raw.githubusercontent.com,实现github图片加速
