@@ -6,7 +6,7 @@ tags:
 ---
 第一篇博客用来记录搭建该网站并成功发表这篇博客的流程，使用Hexo静态博客框架，托管于Github，参考了多篇文章[^1]。
 
-<img decoding="async" src="https://s2.loli.net/2022/11/20/LG4pSfyvVZ6iBWc.jpg" width=100>
+<img alt="图 1" src="https://raw.sevencdn.com/Arrowes/Arrowes-Blogbackup/main/images/Hello-blogBlogPhoto.jpg" width = "50%"/>  
 
 ### 总体流程
 其中主流程参考[知乎：GitHub+Hexo 搭建个人网站详细教程](https://zhuanlan.zhihu.com/p/26625249)，虽然是老文章，但每一步都非常详细，框架搭建过程存在问题可以看文章的评论区或[Hexo官方文档](https://hexo.io/zh-cn/docs/)进行补充；
@@ -123,10 +123,13 @@ mathjax: true
 #### 插件
 ``npm install hexo-reference --save`` 支持Markdown脚注
 ``npm install hexo-wordcount --save`` 字数统计
-**Markdown Preview Enhanced** markdown预览插件（vs code）
 
-**markdown image** markdown图片插件（vs code）
- ```py
+**Markdown Preview Enhanced** markdown预览插件（vs code）
+Chrome Puppeteer导出PDF > 搜索“chrome”，在相应选项中填入你的浏览器的“chrome.exe”文件的地址即可
+``C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe``
+
+**markdown image** 图片插件（vs code）
+ ```
 Local
 E:\Github\Blog\blog\node_modules\hexo-theme-next\source\images\ #Path
 /images/ #Reference Path
@@ -135,7 +138,11 @@ Github
 main #Branch
 /images #Path
 https://github.com/Arrowes/Arrowes-Blogbackup #Repository
-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 #Token
+github_pat_11AV245NA0ZkjSgYjmtK5T_fyxLh1yhNVlT13FFsC #TokenMjaEB4LKd
+
+#使用raw.sevencdn.com代替raw.githubusercontent.com,实现github图片加速
+https://raw.sevencdn.com/${username}/${repository}/${branch}/${filepath} #Github: Cdn
+q3mbRZwwnnKUXHcibZg6UN8ulCHE2UDXMjaEB4LKd
  ```
 
 ### 常用[Hexo指令](https://hexo.io/zh-cn/docs/commands)

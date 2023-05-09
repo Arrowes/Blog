@@ -1,5 +1,5 @@
 ---
-title: Network：从神经网络到深度学习
+title: Network：神经网络代码
 date: 2022-11-25 16:20:08
 tags:
 - python
@@ -53,7 +53,8 @@ for data in dataloader:
     print(output.shape)
 ```
 ## CIFAR 10 model结构
-![图 18](/images/800c1e2ff7a5177eed449271d07b7d8025e56a1fd5eba73bae57ad5249579985.png)  
+![图 1](https://raw.sevencdn.com/Arrowes/Arrowes-Blogbackup/main/images/Network1.png)  
+
 ```py
 import torch
 from torch import nn

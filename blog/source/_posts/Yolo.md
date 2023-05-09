@@ -1,64 +1,64 @@
 ---
-title: Yolo：Colab，Config，Ideas
+title: Yolo：Code，Config，Ideas
 date: 2022-11-27 16:04:02
 tags:
 - python
 - 深度学习
 ---
-## Google Colab
-查看GPU
-```py
-#修改>笔记本设置>GPU
-import tensorflow as tf
-tf.test.gpu_device_name()
+# Yolo
+## 配置
+### Windows环境配置
+1. 安装[Anaconda](https://www.anaconda.com/)，修改user目录下.condarc文件里的默认地址，防止环境装在C盘占空间 或执行``conda config --add D:\Anaconda3\envs ``,然后``conda info``检查envs directories,若报错The channel is not accessible or is invalid 运行``conda config --remove-key channels``
+2. 安装[Pychram](https://www.jetbrains.com/pycharm/), 用pycharm打开YOLO项目文件夹，配置编辑器``D:P\Anaconda3\envs\pytorch\python.exe``
+3. 安装显卡驱动对应的CUDA，``nvidia-smi`` 查询支持CUDA版本，再到[Pytorch官网](https://pytorch.org/get-started/locally/)复制对应code进行安装``conda install pytorch torchvision torchaudio pytorch-cuda=11.8 -c pytorch -c nvidia``
+4. 验证 先``import torch``，再``torch.cuda.is_available()``,返回True说明GPU可以被使用
+5. ``pip install -r requirements.txt``,补装失败的包``pip install opencv-python -i https://pypi.tuna.tsinghua.edu.cn/simple/``
+## Linux 环境配置
+1. 安装[Anaconda](https://www.anaconda.com/)，执行这个.sh文件，输入``bash XXX.sh``，然后一路enter和yes，``cd ///root/anaconda3/bin``,然后输入：``source ./activate`` 激活anaconda,终端前出现``(base)``,然后创建环境``conda create -n pytorch python=3.6``
+2. pycharm导入环境``.conda/envs/pytorch/bin/python3.6``
+3. (tensorflow) cuda:``conda install cudatoolkit=10.1``,cuDNN:``conda install cudnn=7.6``,tf:``pip install tensorflow-gpu==2.1.0``(注意版本匹配)
 
-!/opt/bin/nvidia-smi #详情
-```
-### 基本指令
-```py
-!unzip /content/yolov5-master.zip -d /content/yolov5-master #解压
-%cd /content/yolov5-master #进入：
-!pip install -r requirements.txt #安装
-%load_ext tensorboard #加载
-%tensorboard --logdir=runs/train #执行
-!python train.py --rect #训练
-!rm -rf /content/yolov5-master/mydata #删除
-```
+## 资料
+YOLOv1 - v5历程：[从yolov1至yolov5的进阶之路](https://blog.csdn.net/wjinjie/article/details/107509243)
+YOLOv3论文精读视频：[同济子豪兄YOLOV3目标检测](https://www.bilibili.com/video/BV1Vg411V7bJ/?)
+YOLOv5知识精讲：[Yolov5核心基础知识完整讲解](https://zhuanlan.zhihu.com/p/172121380)
+YOLOv7网络结构：[理解yolov7网络结构](https://blog.csdn.net/athrunsunny/article/details/125951001) ,[Yolov7 基础网络结构详解](https://blog.csdn.net/u010899190/article/details/125883770)
+全流程指导视频：[目标检测 YOLOv5 开源代码项目调试与讲解实战](https://www.bilibili.com/video/BV1tf4y1t7ru/)
 
-### 云盘
-```py
- #指定Google Drive云端硬盘的根目录，名为drive
-!mkdir -p drive
-!google-drive-ocamlfuse drive
+## Paper & Code
+[YOLOv1](https://arxiv.org/pdf/1506.02640.pdf) & [Code](https://pjreddie.com/darknet/yolov1/); [YOLOv2](https://arxiv.org/pdf/1612.08242.pdf) & [Code](https://pjreddie.com/darknet/yolo/); [YOLOv3](https://arxiv.org/pdf/1804.02767.pdf) & [Code](https://github.com/ultralytics/yolov3); YOLOv4 & [Code](https://github.com/Tianxiaomo/pytorch-YOLOv4); YOLOv5 & [Code](https://github.com/search?q=yolov5); [YOLOv6](https://arxiv.org/pdf/2209.02976.pdf) & [Code](https://github.com/meituan/YOLOv6); [YOLOv7](https://arxiv.org/abs/2207.02696) & [Code](https://github.com/WongKinYiu/yolov7); YOLOv8 & [Code](https://github.com/ultralytics/ultralytics)
+算法复现精品仓库：[Bubbliiiing](https://github.com/bubbliiiing)
 
-#connect to self drive
-from google.colab import drive
-drive.mount('/content/drive')
-#云训练时还是要将盘里的文件拿出来再开始，否则容易直接断连!
-```
-续航插件：Colab Alive
-
-## Yolo
-### 知识点
-[YOLO系列算法精讲：从yolov1至yolov5的进阶之路](https://blog.csdn.net/wjinjie/article/details/107509243?ops_request_misc=%257B%2522request%255Fid%2522%253A%2522163082957716780366599375%2522%252C%2522scm%2522%253A%252220140713.130102334%E2%80%A6%2522%257D&request_id=163082957716780366599375&biz_id=0&utm_medium=distribute.pc_search_result.none-task-blog-2alltop_positive~default-1-107509243.first_rank_v2_pc_rank_v29&utm_term=yolo&spm=1018.2226.3001.4187)
-[深入浅出Yolo系列之Yolov5核心基础知识完整讲解](https://zhuanlan.zhihu.com/p/172121380)
-[理解yolov7网络结构](https://blog.csdn.net/athrunsunny/article/details/125951001?utm_medium=distribute.pc_relevant.none-task-blog-2~default~baidujs_title~default-0-125951001-blog-125883770.pc_relevant_show_downloadRating&spm=1001.2101.3001.4242.1&utm_relevant_index=1) [Yolov7 基础网络结构详解](https://blog.csdn.net/u010899190/article/details/125883770)
-### Detect参数
-调用电脑摄像头:
+### 代码
+**Detect参数**
+调用电脑摄像头: 
+右上角py配置 > Edit Configurations > Parameters
 ``--view-img --source 0``
-![图 1](/images/bce32bd51c230995cacfc6c64597d2551a7812527b4d38b5d68746a1c2282a31.png)  
 
 调用手机摄像头：
 DroidCamX App，关闭代理 连同一个网：
 ``http://192.168.0.102:4747/video`` 
 
-
-### Train参数
-
+**Train参数**
 ``action='store_true' #触发了为true，否则为false 和 default=False 效果一样``
 
-## Ideas
-### 数据集
+**YOLOv8**
+该版本参数集中配置ultralytics/yolo/configs/default.yaml
+model参数可以是pt也可以是yaml。
+>pt:相当于使用预训练权重进行训练，比如选择为yolov8n.pt，就是训练一个yolov8n模型，并且训练前导入这个pt的权重。
+yaml:相当于直接初始化一个模型进行训练，比如选择为yolov8n.yaml，就是训练一个yolov8n模型，权重是随机初始化。
+
+data.yaml数据只能用绝对地址
+要修改代码先卸ultralytics包，利用setup.py
+
+# Ideas
+## 数据集
+> https://www.kaggle.com/datasets
+https://gas.graviti.cn/open-datasets
+https://universe.roboflow.com/roboflow-100
+https://ieee-dataport.org/datasets
+
+标注工具：[Roboflow](https://app.roboflow.com/395841716-qq-com)
 混合数据集：彩色+红外
 开源驾驶员行为数据集：[StateFarm-distracted-driver-detection](https://www.kaggle.com/c/state-farm-distracted-driver-detection/data)
 最好输入图像大小设置成和作者一样，输入图像的大小要求必须是32的倍数
@@ -66,23 +66,20 @@ DroidCamX App，关闭代理 连同一个网：
 数据增强：抖动模糊
 扩大数据集 旋转 偏移（数据量不够？）
 各集种类分配不均，测试集用不同的人
-测试集怎么用
-WBF预处理
 合成三通道
 
-``类别：c0：安全驾驶 c1：玩手机 c2：喝水c3:危险驾驶（双手脱离方向盘） c4：疲劳驾驶（打哈欠）``
+## Anchor
+设计——anchor的计算函数Aautoanchor
+![图 1](https://raw.sevencdn.com/Arrowes/Arrowes-Blogbackup/main/images/Yolo1.png)  
 
-### anchor
-设计——anchor的计算函数autoanchor
-![图 2](/images/5fa9f11acfa0f2a400cb70630314bf87fb6670a72a3ddd3ed9a7071a4785d6ad.png)  
 
-### 网络结构
+## 网络结构
 models/common.py：加入新的结构代码
 models/yolo.py的parse_model函数：引入上面新写的结构名称
 .yaml:修改网络结构
-![图 2](/images/77c2bef1cba713cd8573b5115b983e41448ddb1399c3681df539bbbd14b91242.png)  
+![图 2](https://raw.sevencdn.com/Arrowes/Arrowes-Blogbackup/main/images/Yolo2.png)  
 
-### 注意力模块
+## 注意力模块
 [CV中即插即用的注意力模块](https://zhuanlan.zhihu.com/p/330535757)
 [手把手带你YOLOv5 (v6.1)添加注意力机制](https://blog.csdn.net/weixin_43694096/article/details/124443059?spm=1001.2014.3001.5502)
 通道注意力机制
@@ -93,35 +90,64 @@ backbone结尾使用一个注意力机制？
 
 transformer自注意力模块 CBAM注意力模块 CA注意力模块 SE注意力模块
 
-### 激活函数 activations.py
-![图 1](/images/f539efce7ea9687323fb7fb3a5faf5e95df2ada73ba97313d9823cb67232230b.png)  
-FRELU激活函数（Funnel Activiation）
-比较看好的激活函数是 DyReLU和meta-AconC这两个激活函数
-
+## 激活函数 activations.py
 > activations.py：激活函数代码写在了activations.py文件里，可引入新的激活函数
 common.py：替换激活函数，很多卷积组都涉及到了激活函数（Conv，BottleneckCSP），所以改的时候要全面
 
-### 其他
-构建一个初始模型：①YoloV5-XL ②图像的分辨率从3K调整为512
+例：插入激活函数：Mish
+1. 在utils/activation.py中定义Mish激活函数
+2. 重构Conv模块，改激活函数：
+```
+class Conv(nn.Module):
+    # Standard convolution
+    def __init__(self, c1, c2, k=1, s=1, p=None, g=1, act=True):  # ch_in, ch_out, kernel, stride, padding, groups
+        super(Conv, self).__init__()
+        self.conv = nn.Conv2d(c1, c2, k, s, autopad(k, p), groups=g, bias=False)
+        self.bn = nn.BatchNorm2d(c2)
+        #self.act = nn.SiLU() if act is True else (act if isinstance(act, nn.Module) else nn.Identity())
+        self.act = nn.Mish() if act is True else (act if isinstance(act, nn.Module) else nn.Identity())
+```
 
+## Loss Function
+EIOU loss
+1. 修改general.py，增加EIOU。
+```
+elif EIoU:
+                w=(w1-w2)*(w1-w2)
+                h=(h1-h2)*(h1-h2)
+                return iou-(rho2/c2+w/(cw**2)+h/(ch**2))#EIOU  2021.12.29
+```
+2. 将loss.py中边框位置回归损失函数改为eiou。
+```
+            iou = bbox_iou(pbox.T, tbox[i], x1y1x2y2=False, EIoU=True)  # iou(prediction, target)
+```
+
+## 其他未实现的想法
 融合EfficientNet和YoloV5：主要思想是训练一个图像分类模型(EfficientNet)，它可以实现非常高的AUC(约0.99)，并找到一种方法将其与目标检测模型融合。这被称为“2 class filter”
+
+双流网络
 
 加权框融合(WBF)后处理：对目标检测模型产生的框进行过滤，从而使结果更加准确和正确的技术。它的性能超过了现有的类似方法，如NMS和soft-NMS。
 
 用5折交叉验证
 
-矩形训练
-![图 3](/images/1d0d9b858bfa9a9517a89072d8d201aa8d88dddfbedf616d86295a67bbaa343f.png)  
+The author uses ArcFace loss to measure the error of prediction. This loss was proposed for facial recognition in 2018. Other sophisticated approaches have also been published in recent years, such as [ElasticFace](https://openaccess.thecvf.com/content/CVPR2022W/Biometrics/papers/Boutros_ElasticFace_Elastic_Margin_Loss_for_Deep_Face_Recognition_CVPRW_2022_paper.pdf). author can compare the proposed loss with this approach.
 
-## Note
-### 操作
-safe重新标注√
-通道压缩 *
-Resize × 保持原始图像比例调整大小更安全
-删mosic
-删卷积层
-把通道扩展图像增强工作流加入算法？
-### 笔记
+[YOLOV5 模型和代码修改——针对小目标识别](https://blog.csdn.net/weixin_56184890/article/details/119840555?ops_request_misc=%257B%2522request%255Fid%2522%253A%2522165173285816781667828444%2522%252C%2522scm%2522%253A%252220140713.130102334..%2522%257D&request_id=165173285816781667828444&biz_id=0&utm_medium=distribute.pc_search_result.none-task-blog-2~all~baidu_landing_v2~default-4-119840555.142^v9^control,157^v4^control&utm_term=yolov5%E4%BF%AE%E6%94%B9&spm=1018.2226.3001.4187)
+
+矩形训练
+
+![图 3](https://raw.sevencdn.com/Arrowes/Arrowes-Blogbackup/main/images/Yolo3.png)  
+
+PERCLOS值怎么显示？
+
+## 炼丹经验
+标注，标注框的设计影响精度
+通道压缩，注意输入图片的通道数
+Resize，保持原始图像比例调整大小更安全
+删mosic，有时没用
+删卷积层，减少计算量
+把图像增强工作流加入算法？
 数据集扩大时，若显存不足，需要调小batchsize或分辨率
 可以从小模型中学到的权重开始，对更大模型进行训练
 
@@ -129,3 +155,12 @@ Resize × 保持原始图像比例调整大小更安全
 
 参数调优过程一般要反复多次进行微调<->训练<->测试，最终得出符合需求/较优的HyperPara，应用在项目中	``data/hyps/hyp.finetune.yaml``
 
+小目标检测：小目标检测效果不好主要原因为小目标尺寸问题。
+以网络的输入608×608为例，yolov5中下采样使用了5次，因此最后的特征图大小是19×19，38×38，76×76。
+三个特征图中，最大的76×76负责检测小目标，而对应到608×608上，每格特征图的感受野是608/76=8×8大小。
+即如果原始图像中目标的宽或高小于8像素，网络很难学习到目标的特征信息。
+另外很多图像分辨率很大，如果简单的进行下采样，下采样的倍数太大，容易丢失数据信息。但是倍数太小，网络前向传播需要在内存中保存大量的特征图，极大耗尽GPU资源,很容易发生显存爆炸，无法正常的训练及推理。
+这种情况可以使用分割的方式，将大图先分割成小图，再对每个小图检测，不过这样方式有优点也有缺点： 
+> 优点：准确性 分割后的小图，再输入目标检测网络中，对于最小目标像素的下限会大大降低。
+比如分割成608×608大小，送入输入图像大小608×608的网络中，按照上面的计算方式，原始图片上，长宽大于8个像素的小目标都可以学习到特征。
+缺点：增加计算量 比如原本1920×1080的图像，如果使用直接大图检测的方式，一次即可检测完。但采用分割的方式，切分成4张912×608大小的图像，再进行N次检测，会大大增加检测时间。

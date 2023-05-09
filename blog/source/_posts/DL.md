@@ -5,6 +5,9 @@ mathjax: true
 tags:
 - 深度学习
 ---
+从机器学习到深度学习：[从机器学习谈起](https://www.cnblogs.com/subconscious/p/4107357.html)，[从神经元到深度学习](https://www.cnblogs.com/subconscious/p/5058741.html)
+什么是卷积讲解视频：[：大白话讲解卷积神经网络工作原理](https://www.bilibili.com/video/BV1sb411P7pQ/?share_source=copy_web&vd_source=b148fb6f311bfe6f3870ad8f4dfda92a)
+
 # [深度学习框架](bilibili.com/video/BV14f4y1q7ms?p=3)
 ```mermaid
 graph LR
@@ -16,37 +19,62 @@ C-->4.优化函数
 C-->5.模型保存
 A-->E[C.定义]
 ```
-![图 10](/images/344cde48d397b26519717e0fceb12a89a93ce710b1289e55c503e3209f6fbd61.png)  
+
+<img src="https://raw.sevencdn.com/Arrowes/Arrowes-Blogbackup/main/images/DL1.png" width = "80%" />
+
 GPU 网络和数据要同时送进GPU
 
 ## 感受野
-感受野被定义为卷积神经网络特征所能看到输入图像的区域，换句话说特征输出受感受野区域内的像素点的影响。![图 11](/images/ed608fbfae27bd5e0a2b0d5e517c47d1d49d249d7fab85b1e90e8aa329307381.png) 
+感受野被定义为卷积神经网络特征所能看到输入图像的区域，换句话说特征输出受感受野区域内的像素点的影响。
+<img src="https://raw.sevencdn.com/Arrowes/Arrowes-Blogbackup/main/images/DL2.png" width = "50%" />
+
+## 反向传播
+待续
 
 ## Optimizer
-### Adam和SGD
-![图 12](/images/588eef77b3289781adf9761b6693e036a88ffe462efd70033b319dce91997f1e.gif)  
+<img src="https://raw.sevencdn.com/Arrowes/Arrowes-Blogbackup/main/images/DL3.gif" width = "60%" />
+
 $$SGD → SGDM → NAG → AdaGrad → AdaDelta → Adam → Nadam$$
-![图 13](/images/100f42c80b5ce9a14ca53d2ca5ffc3597a7f9a64cd2b39edb339ce47caba89dc.png)  
+![图 4](https://raw.sevencdn.com/Arrowes/Arrowes-Blogbackup/main/images/DL4.png)  
+
 
 ## Batch size
-batch size的大小影响的是训练过程中的完成①*每个epoch所需的时间*（假设算力确定了）和每次迭代(iteration)之间②*梯度的平滑程度*。
-> ①假设训练集大小为N，每个epoch中mini-batch大小为b，那么完成每个epoch所需的迭代次数为 N/b , 因此完成每个epoch所需的时间会随着迭代次数的增加而增加
-②如pytorch\tensorflow等深度学习框架，在进行mini-batch的loss反向传播时，一般都是先将每个mini-batch中每个样本得到的loss求sum后再平均化之后再反求梯度，进行迭代，因此b的大小决定了相邻迭代batch之间的梯度平滑程度。一个batch内所含样本越多，这个batch的梯度应该越能反映真实的梯度，因此这样的大batch间梯度不会跨越太大
+batch size的大小影响的是训练过程中的完成*每个epoch所需的时间* ^1^（假设算力确定了）和每次迭代(iteration)之间*梯度的平滑程度* ^2^。
+> 1. 假设训练集大小为N，每个epoch中mini-batch大小为b，那么完成每个epoch所需的迭代次数为 N/b , 因此完成每个epoch所需的时间会随着迭代次数的增加而增加
+2. 如pytorch\tensorflow等深度学习框架，在进行mini-batch的loss反向传播时，一般都是先将每个mini-batch中每个样本得到的loss求sum后再平均化之后再反求梯度，进行迭代，因此b的大小决定了相邻迭代batch之间的梯度平滑程度。一个batch内所含样本越多，这个batch的梯度应该越能反映真实的梯度，因此这样的大batch间梯度不会跨越太大
 
 因此：大的batch_size往往建议可以相应取大点learning_rate, 因为梯度震荡小，大 learning_rate可以加速收敛过程，也可以防止陷入到局部最小值，而小batch_size用小learning_rate迭代，防止错过最优点，一直上下震荡没法收敛 
 >1. 若是loss还能降，指标还在升，那说明欠拟合，还没收敛，应该继续train，增大epoch。
 2. 若是loss还能再降，指标也在降，说明过拟合了，那就得采用提前终止（减少epoch）或采用weight_decay等防过拟合措施。
 3. 若是设置epoch=16，到第8个epoch，loss也不降了，指标也不动了，说明8个epoch就够了，剩下的白算了。
 
-## 损失函数
-### 交叉熵损失函数「Cross Entropy Loss」
+## 损失函数「loss function」
+来度量模型的预测值$\hat{y}$与真实值$y$的差异程度的运算函数，它是一个非负实值函数，通常使用$L(y, \hat{y})$来表示，损失函数越小，模型的鲁棒性就越好。
+### 基于距离度量的损失函数
+基于距离度量的损失函数通常将输入数据映射到基于距离度量的特征空间上，如欧氏空间、汉明空间等，将映射后的样本看作空间上的点，采用合适的损失函数度量特征空间上样本真实值和模型预测值之间的距离。特征空间上两个点的距离越小，模型的预测性能越好。
+**L1范数损失函数（MAE）**
+$$L_{MSE}=\frac{1}{n}\sum_{i=1}^{n}|y_i-\hat{y_i}|$$
+又称为曼哈顿距离，表示残差的绝对值之和。L1损失函数对离群点有很好的鲁棒性，但它在残差为零处却不可导,且更新的梯度始终相同；
+**L2损失函数（MSE均方误差损失函数）**
+$$L_{MSE}=\frac{1}{n}\sum_{i=1}^{n}(y_i-\hat{y_i})^2$$
+在回归问题中，均方误差损失函数用于度量样本点到回归曲线的距离，通过最小化平方损失使样本点可以更好地拟合回归曲线。（L2损失又被称为欧氏距离，是一种常用的距离度量方法，通常用于度量数据点之间的相似度。）
+### 基于概率分布度量的损失函数
+基于概率分布度量的损失函数是将样本间的相似性转化为随机事件出现的可能性，即通过度量样本的真实分布与它估计的分布之间的距离，判断两者的相似度，一般用于涉及概率分布或预测类别出现的概率的应用问题中，在分类问题中尤为常用。
+**KL散度（ Kullback-Leibler divergence）**
+$$L_{MSE}=\sum_{i=1}^{n}\hat{y_i}log(\frac{y_i}{\hat{y_i}})$$
+也被称为相对熵，是一种非对称度量方法，常用于度量两个概率分布之间的距离。KL散度也可以衡量两个随机分布之间的距离，两个随机分布的相似度越高的，它们的KL散度越小，可以用于比较文本标签或图像的相似性。
+**交叉熵损失函数「Cross Entropy Loss」**
 $$L=-[ylog\hat{y}+(1-y)log(1-\hat{y})]$$
 $$L=\sum_{i=1}^{N}y^ilog\hat{y}^i+(1-y^i)log(1-\hat{y}^i)$$
+交叉熵是信息论中的一个概念，最初用于估算平均编码长度，引入机器学习后，用于评估当前训练得到的概率分布与真实分布的差异情况。为了使神经网络的每一层输出从线性组合转为非线性逼近，以提高模型的预测精度，在以交叉熵为损失函数的神经网络模型中一般选用tanh、sigmoid、softmax或ReLU作为激活函数。
+
+交叉熵损失函数刻画了实际输出概率与期望输出概率之间的相似度，也就是交叉熵的值越小，两个概率分布就越接近，特别是在正负样本不均衡的分类问题中，常用交叉熵作为损失函数。目前，交叉熵损失函数是卷积神经网络中最常使用的分类损失函数，它可以有效避免梯度消散。在二分类情况下也叫做对数损失函数
+
+在多分类任务中，经常采用 softmax 激活函数+交叉熵损失函数，因为交叉熵描述了两个概率分布的差异，然而神经网络输出的是向量，并不是概率分布的形式。所以需要 softmax激活函数将一个向量进行“归一化”成概率分布的形式，再采用交叉熵损失函数计算 loss。
+
 在Pytorch中，BCELoss和BCEWithLogitsLoss是一组常用的二元交叉熵损失函数，常用于二分类问题。区别在于BCELoss的输入需要先进行Sigmoid处理，而BCEWithLogitsLoss则是将Sigmoid和BCELoss合成一步，也就是说BCEWithLogitsLoss函数内部自动先对output进行Sigmoid处理，再对output 和target进行BCELoss计算。 
-BCELoss和BCEWithLogitsLoss还提供了两个重要参数： 
-> weight：可用于控制各样本的权重，常用作对对齐后的数据进行mask操作（设为0） 
-reduction：控制损失输出模式。设为"sum"表示对样本进行求损失和；设为"mean"表示对样本进行求损失的平均值；而设为"none"表示对样本逐个求损失，输出与输入的shape一样。
-此外BCEWithLogitsLoss还提供了参数pos_weight用于设置损失的class权重，用于缓解样本的不均衡问题。
+
+one-hot独热编码：将类别变量转换为机器学习算法易于利用的一种形式的过程。
 
 # 注意力机制（Attention Mechanism）
 自上而下有意识的聚焦称为**聚焦式注意力**，自下而上无意识、由外界刺激引发的注意力称为**显著式注意力**。
@@ -58,12 +86,15 @@ reduction：控制损失输出模式。设为"sum"表示对样本进行求损失
 ### 空间域（Spatial Domain）
 空间域将原始图片中的空间信息变换到另一个空间中并保留了关键信息。
 普通的卷积神经网络中的池化层（pooling layer）直接用一些max pooling 或者average pooling 的方法，将图片信息压缩，减少运算量提升准确率。
-发明者认为之前pooling的方法太过于暴力，直接将信息合并会导致关键信息无法识别出来，所以提出了一个叫 **空间转换器（spatial transformer）** 的模块，将图片中的的空间域信息做对应的空间变换，从而能将关键的信息提取出来。![图 1](/images/b755f4e3ca501037ef4f31cdf20e76226dab60729dda8999131f3d91b8c73029.png)  
+发明者认为之前pooling的方法太过于暴力，直接将信息合并会导致关键信息无法识别出来，所以提出了一个叫 **空间转换器（spatial transformer）** 的模块，将图片中的的空间域信息做对应的空间变换，从而能将关键的信息提取出来。
+<img src="https://raw.sevencdn.com/Arrowes/Arrowes-Blogbackup/main/images/DL5.png" width = "50%" />
+
 ### 通道域（Channel Domain）
 通道注意力机制在计算机视觉中，更关注特征图中channel之间的关系，而普通的卷积会对通道做通道融合，这个开山鼻祖是SENet,后面有GSoP-Net，FcaNet 对SENet中的squeeze部分改进，EACNet对SENet中的excitation部分改进，SRM,GCT等对SENet中的scale部分改进。
 
 [SENet](https://arxiv.org/abs/1709.01507),[pytorch](https://github.com/moskomule/senet.pytorch)
-SENet《Squeeze-and-Excitation Networks》是CVPR17年的一篇文章，提出SE module。在卷积神经网络中，卷积操作更多的是关注感受野，在通道上默认为是所有通道的融合（深度可分离卷积不对通道进行融合，但是没有学习通道之间的关系，其主要目的是为了减少计算量），SENet提出SE模块，将注意力放到通道之间，希望模型可以学习到不同通道之间的权重：![图 8](/images/0c5214adad74f71cd2e5a5fb88b290102edf2a73b2c8678c2d5e7b6a6406878c.png)  
+SENet《Squeeze-and-Excitation Networks》是CVPR17年的一篇文章，提出SE module。在卷积神经网络中，卷积操作更多的是关注感受野，在通道上默认为是所有通道的融合（深度可分离卷积不对通道进行融合，但是没有学习通道之间的关系，其主要目的是为了减少计算量），SENet提出SE模块，将注意力放到通道之间，希望模型可以学习到不同通道之间的权重：
+![图 6](https://raw.sevencdn.com/Arrowes/Arrowes-Blogbackup/main/images/DL6.png)  
 
 ### 时域注意力机制
 时域注意力机制在cv领域主要考虑有时序信息的领域，如视频领域中的动作识别方向，其注意力机制主要是在时序列中，关注某一时序即某一帧的信息。
@@ -72,12 +103,14 @@ SENet《Squeeze-and-Excitation Networks》是CVPR17年的一篇文章，提出SE
 通道和空间注意力是基于通道注意力和空间注意力机制，将两者有效的结合在一起，让注意力能关注到两者，又称混合注意力机制，如CBAM,BAM,scSE等，同时基于混合注意力机制的一些关注点，如Triplet Attention 关注各种跨维度的相互作用；Coordinate Attention, DANet关注长距离的依赖；RGA 关注关系感知注意力。还有一种混合注意力机制，为3D的attention :Residual attention,SimAM, Strip Pooling, SCNet等。
 
 [CBAM](https://arxiv.org/abs/1807.06521),[github](https://github.com/luuuyi/CBAM.PyTorch) 
-CBAM (Convolutional Block Attention Module)是SENet的一种拓展，SENet主要基于通道注意力，CBAM是通道注意力和空间注意力融合的注意力机制。![图 6](/images/1153e98fa26db00008fadc4159bd04f5e0062eb261e9c5b8d9fd9f70373698f0.png)  
+CBAM (Convolutional Block Attention Module)是SENet的一种拓展，SENet主要基于通道注意力，CBAM是通道注意力和空间注意力融合的注意力机制。
+![图 7](https://raw.sevencdn.com/Arrowes/Arrowes-Blogbackup/main/images/DL7.png)  
 如上图所示，输入一个h*w*c的特征图，通过channel Attention Module 生成通道注意力权重对输入特征图在通道层添加权重，再通过spatial Attention Module 生成空间注意力权重，对特征图在空间层添加权重，输出特征图。
 
 # Metrics 评估
 ## 混淆矩阵
-![图 17](/images/3bacb5b697b3f89632f000291f5f832066eae51cb75d9d2456e3da41a1b433b5.png)  
+<img src="https://raw.sevencdn.com/Arrowes/Arrowes-Blogbackup/main/images/DL8.png" width = "70%" />
+
 X横坐标为正确的分类（即你用标签所标注的真实分类）
 Y纵坐标为模型所预测的分类（即图片经过模型推理后模型将其辨别为的分类）
 > True positives (TP): 猫🐱的图片被正确识别成了猫🐱。（猫🐱的正确分类预测）
@@ -100,14 +133,19 @@ $$AP_i=\int_0^1P_i(R_i)dR_i$$
 将recall设置为横坐标，precision设置为纵坐标。PR曲线下围成的面积即AP，所有类别AP平均值即mAP.
 $$mAP=\frac1n\sum_{i = 1}^{n}AP_i$$
 **置信度 Confidence**：置信度设定越大，Prediction约接近1，Recall越接近0，要寻找最优的F1分数，需要遍历置信度。
-![图 19](/images/ece9df2376a4c708a78f34277acd60b4bc05822dfc7e08b00313bd6418d9d48c.png)  
-**交并比 IoU**（Intersection over Union）：是目标检测中使用的一个概念，IoU计算的是“预测的边框”和“真实的边框”的交叠率，即它们的交集和并集的比值。最理想情况是完全重叠，即比值为1。map@0.5即IoU=0.5，预测框和标注框的交集与非交集占比相同，都为50%。 ![图 20](/images/29079e96d09fec2291bc4fe2172db27c1d63681908c45aebc4af5a0dd2091ba4.png)  
+![图 9](https://raw.sevencdn.com/Arrowes/Arrowes-Blogbackup/main/images/DL9.png)  
+
+**交并比 IoU**（Intersection over Union）：是目标检测中使用的一个概念，IoU计算的是“预测的边框”和“真实的边框”的交叠率，即它们的交集和并集的比值。最理想情况是完全重叠，即比值为1。map@0.5即IoU=0.5，预测框和标注框的交集与非交集占比相同，都为50%。 
+<img src="https://raw.sevencdn.com/Arrowes/Arrowes-Blogbackup/main/images/DL10.png" width = "60%" />
 
 **ROC曲线**(Receiver Operating Characteristic 受试者工作特征)
 $$TPR=\frac{TP}{TP+FN},FPR=\frac{FP}{FP+TN}$$可以理解为分类器对正样本的覆盖敏感性和对负样本的敏感性的权衡。
-在ROC曲线图中，每个点以对应的FPR值为横坐标，以TPR值为纵坐标![图 9](/images/e8ac2b4d0adec392c93af2ec345dcab77ac5628b88cde8e28224c8003b66f1c0.png)  
+在ROC曲线图中，每个点以对应的FPR值为横坐标，以TPR值为纵坐标 
+<img src="https://raw.sevencdn.com/Arrowes/Arrowes-Blogbackup/main/images/DL11ROC.jpg" width = "50%" />
+
 **AUC值**：PR曲线下方的面积
-![图 21](/images/b9d32332516f48892a5e94bc80f4966a343a6685185ee7d81b506dcca28b23db.png)  
+<img src="https://raw.sevencdn.com/Arrowes/Arrowes-Blogbackup/main/images/DL12AUC.png" width = "70%" />
+
 > 1.AUC = 1，是完美分类器，采用这个预测模型时，存在至少一个阈值能得出完美预测。绝大多数预测的场合，不存在完美分类器。
 2.0.5 < AUC < 1，优于随机猜测。这个分类器（模型）妥善设定阈值的话，能有预测价值。
 3.AUC = 0.5，跟随机猜测一样（例：丢铜板），模型没有预测价值。
@@ -144,4 +182,6 @@ map*map是下个featuremap的大小，也就是上个weight*weight到底做了�
 **换算计算量**,一般一个参数是值一个float，也就是４个字节,1kb=1024字节
 
 # Transformer
-![图 14](/images/2e94102787d56e7b4d268071f643aa27b65ad2e4a90dd0cd0f6132990924811f.png) ![图 15](/images/6558163262d7b38fd0622153099684d42af7d3a1c4a3b715b1e8e38e3e65d53c.png) ![图 16](/images/97b9e0eeacec4859c3759422ffa214c05f1184c05511136017169f00bf09374d.png)  
+![图 13](https://raw.sevencdn.com/Arrowes/Arrowes-Blogbackup/main/images/DL13.png)  
+![图 14](https://raw.sevencdn.com/Arrowes/Arrowes-Blogbackup/main/images/DL14.png)  
+![图 15](https://raw.sevencdn.com/Arrowes/Arrowes-Blogbackup/main/images/DL15.png)  

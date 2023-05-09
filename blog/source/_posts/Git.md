@@ -21,9 +21,9 @@ tags:
 2.``git pull origin master(main)`` 将远端修改过的代码再更新到本地
 3.``git checkout xxx`` 回到xxx分支
 4.``git rebase main`` 我在xxx分支上，先把main移过来，然后根据我的commit来修改成新的内容
-（中途可能会出现，rebase conflict -----》手动选择保留哪段代码）
+（中途可能会出现，rebase conflict --> 手动选择保留哪段代码）
 5.``git push -f origin xxx`` 把rebase后并且更新过的代码再push到远端github上
-（-f ---》强行）
+（-f --> 强行）
 6.原项目主人采用pull request 中的 squash and merge 合并所有不同的commit
 
 远端完成更新后
@@ -121,62 +121,62 @@ tags:
 ``git rebase main`` 把 my-feature 的修改先放在一边, 然后把 main 的修改同步到 my-feature, 如果有冲突, 需要先手动去解决冲突 
 > 状态
 •	remote: 
-o	main(master): Init --> update
-o	my-feature: Init --> f-commit
+	main(master): Init --> update
+	my-feature: Init --> f-commit
 •	local: 
-o	main(master): Init --> update
-o	my-feature: Init --> update --> f-commit
+	main(master): Init --> update
+	my-feature: Init --> update --> f-commit
 •	Disk: 
-o	my-feature: Init --> update --> f-commit
+	my-feature: Init --> update --> f-commit
 
 更新完 my-feature 之后, 需要把 local git 的 my-feature 分支同步到 remote git 的 my-feature 分支 
 ``git push -f origin my-feature``
 > 状态
 •	remote: 
-o	main(master): Init --> update
-o	my-feature: Init --> update --> f-commit
+	main(master): Init --> update
+	my-feature: Init --> update --> f-commit
 •	local: 
-o	main(master): Init --> update
-o	my-feature: Init --> update --> f-commit
+	main(master): Init --> update
+	my-feature: Init --> update --> f-commit
 •	Disk: 
-o	my-feature: Init --> update --> f-commit
+	my-feature: Init --> update --> f-commit
 
 此时需要把我们更新的代码合并到 main branch 上, 这个过程就是 pull request, 在 main 分支的维护者, 审查完 my-feature 的代码后, 进行一个 Squash and merge 操作.
 •	Squash and merge 把一个分支上面的所有改变, 合并成一个改变, 然后把这个 commit 放到 main branch
 > 状态 
-o	remote: 
-	main(master): Init --> update --> update2
-	my-feature: Init --> update --> f-commit
-o	local: 
-	main(master): Init --> update
-	my-feature: Init --> update --> f-commit
-o	Disk: 
-	my-feature: Init --> update --> f-commit
+•	remote: 
+	main(master): Init --> update --> update2
+	my-feature: Init --> update --> f-commit
+•	local: 
+	main(master): Init --> update
+	my-feature: Init --> update --> f-commit
+•	Disk: 
+	my-feature: Init --> update --> f-commit
 
-一般情况下, main branch 的维护者会在 merge 完这个分之后, 把这个分支删除掉 delete branch 此时在本地, ``git checkout main``
+一般情况下, main branch 的维护者会在 merge 完这个分支之后, 把这个分支删除掉 delete branch 此时在本地, ``git checkout main``
 > 状态
 •	remote: 
-o	main(master): Init --> update --> update2
+	main(master): Init --> update --> update2
 •	local: 
-o	main(master): Init --> update
-o	my-feature: Init --> update --> f-commit
+	main(master): Init --> update
+	my-feature: Init --> update --> f-commit
 •	Disk: 
-o	main(master): Init --> update
+	main(master): Init --> update
 
 然后使用, ``git branch -D my-feature`` 删除 local git 的 my-feature 
 > 状态
 •	remote: 
-o	main(master): Init --> update --> update2
+	main(master): Init --> update --> update2
 •	local: 
-o	main(master): Init --> update
+	main(master): Init --> update
 •	Disk: 
-o	main(master): Init --> update
+	main(master): Init --> update
 
 最后, git pull origin master
 > 状态
 •	remote: 
-o	main(master): Init --> update --> update2
+	main(master): Init --> update --> update2
 •	local: 
-o	main(master): Init --> update --> update2
+	main(master): Init --> update --> update2
 •	Disk: 
-o	main(master): Init --> update --> update2
+	main(master): Init --> update --> update2

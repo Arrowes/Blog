@@ -66,9 +66,12 @@ tags:
 ## 修图
 修图流程：lr定调（不加颗粒）、 液化、 修瑕疵、 磨皮、 其它、 锐化
 液化：压力8-16
-![图 3](/images/1979438017bcf1cb204d5433d64ca7b442fefbbf55e93ed1657f77786adfc47f.png)![图 4](/images/b26f1eb4e339e9642fdce479ee851598dffd99d5d42bbec0995498ddf811581a.png)  
+![图 1](https://raw.sevencdn.com/Arrowes/Arrowes-Blogbackup/main/images/Photograph1.png)  
+![图 2](https://raw.sevencdn.com/Arrowes/Arrowes-Blogbackup/main/images/Photograph2.png)  
+  
 **直方图**
-![图 1](/images/668d810b1579185c8b8ef8e1c9eda524a78f97575df2116d4779648f3d99b237.jpeg)以12位图像为例，12位图像记录的单个通道色彩深度是4096，但是4096并不是平均分布在直方图上，而是从亮部到暗部倍减。
+![图 3](https://raw.sevencdn.com/Arrowes/Arrowes-Blogbackup/main/images/Photograph3.jpeg)  
+以12位图像为例，12位图像记录的单个通道色彩深度是4096，但是4096并不是平均分布在直方图上，而是从亮部到暗部倍减。
 所以在不过曝的前提下，尽量把图像信息向直方图的右边推进，直方图越向右，记录的色调信息就越多；进光量越充分，画质越好。
 
 ## 文字
@@ -132,7 +135,8 @@ B-->C
 3.尽量使用RAW格式
 焰火：不长不短的曝光时间，拍1张焰火+1张背景，后期混合模式：变亮
 # 摄影名词解释
-![图 7](/images/c17ebbe596bb1940396bdc1cf38963380c170de924c54f7d69a010881053ef44.png)[几个必要的摄影名词解释](http://iphoto.blog.163.com/blog/static/174404124200832982358951/?utm_source=qq&utm_medium=social)
+![图 4](https://raw.sevencdn.com/Arrowes/Arrowes-Blogbackup/main/images/Photograph4.png)  
+[几个必要的摄影名词解释](http://iphoto.blog.163.com/blog/static/174404124200832982358951/?utm_source=qq&utm_medium=social)
 ## 感光度 ISO
 International Standards Organization，曾是制订胶卷的生产标准，现为CCD/CMOS（或胶卷）对光线的敏感程度。
 > 设 ISO100，$T_{正确曝光} = 2s$
@@ -153,7 +157,8 @@ International Standards Organization，曾是制订胶卷的生产标准，现�
 F1， F1.4， F2， F2.8， F4， F5.6， F8， F11， F16， F22， F32， F44， F64。
 ```
 每两挡相邻光圈值之间进光量相差一倍。
-![图 1](/images/429f283b00c52f2769ea94d454e4725c80f2628b66859972f601b9f42cefa4b9.gif)最佳光圈：镜头在**中等光圈**的时候成像最好（图片最清晰）。
+![图 5](https://raw.sevencdn.com/Arrowes/Arrowes-Blogbackup/main/images/Photograph5.gif)  
+最佳光圈：镜头在**中等光圈**的时候成像最好（图片最清晰）。
 光圈大一级则镜片大很多，加工难度高，重量大，价格贵，适合弱光且无三脚架的情况。
 
 光圈有三个作用：
@@ -211,7 +216,9 @@ F1， F1.4， F2， F2.8， F4， F5.6， F8， F11， F16， F22， F32， F44�
 大于300mm|超长焦/望远|适合拍摄超远距离物体比如野生动物
 
 **焦距转换系数**:
-镜头的视角是由镜头焦距和胶卷（或CCD/CMOS）尺寸两者联合决定的。尺寸变小相当于焦距变大。大部分数码相机CCD/CMOS面积都比原胶片小。![图 2](/images/61b0ed6601df191ab8b9a922187e9feffba994d4d1dc0cafe3cf11f822cfebe8.gif) 假如焦距不变，CCD/CMOS越小，镜头视角越小，镜头转换系数只影响视角 。
+镜头的视角是由镜头焦距和胶卷（或CCD/CMOS）尺寸两者联合决定的。尺寸变小相当于焦距变大。大部分数码相机CCD/CMOS面积都比原胶片小。
+![图 6](https://raw.sevencdn.com/Arrowes/Arrowes-Blogbackup/main/images/Photograph6.gif)  
+假如焦距不变，CCD/CMOS越小，镜头视角越小，镜头转换系数只影响视角 。
 $$镜头转换系数=\frac{135胶片对角线长度}{非全幅的CCD/CMOS对角线长度}$$
 佳能：1.6， 
 尼康，Sony：1.5

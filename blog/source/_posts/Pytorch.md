@@ -4,26 +4,47 @@ date: 2022-11-24 21:26:44
 tags: 
 - python
 ---
-# Anaconda Prompt
+视频：[PyTorch深度学习快速入门教程](https://www.bilibili.com/video/BV1hE411t7RN/)
+# Anaconda
 Anaconda创建环境 ``conda create -n pytorch python=3.6``
 更新 ``conda update python`` ``pip install --upgrade pip``
 激活环境 ``conda activate pytorch``
 退出虚拟环境 ``deactivate``
-安装[pytorch](https://pytorch.org/): 
-``conda install pytorch torchvision torchaudio cudatoolkit=10.2 -c pytorch``
-
-**查包**
-```py
-pip list #列包
-
-import torch
-torch.cuda.is_available() #返回True说明GPU可以被使用
-torch.__version__ #查pytorch
-
-nvidia-smi #查GPU CUDA
-python –version #查python版本
-```
+删除环境``conda remove pytorch --all``
 安装特定版本/卸载 ``pip install XXX==2.0`` / ``pip uninstall XXX``
+pip换源``pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple``,查源``pip config list -v``
+pip换源安装``pip install opencv-python -i https://pypi.tuna.tsinghua.edu.cn/simple/``
+<details>
+  <summary>其他国内镜像源</summary>
+  
+    清华大学：https://pypi.tuna.tsinghua.edu.cn/simple
+    阿里云：http://mirrors.aliyun.com/pypi/simple
+    豆瓣：http://pypi.douban.com/simple
+</details>
+
+<details>
+  <summary>其他常用命令</summary>
+
+    conda list：查看环境中的所有包
+    conda install XXX：安装 XXX 包
+    conda remove XXX：删除 XXX 包
+    conda env list：列出所有环境
+    conda create -n XXX：创建名为 XXX 的环境
+    conda create -n env_name jupyter notebook ：创建虚拟环境
+    activate noti（或 source activate noti）：启用/激活环境
+    conda env remove -n noti：删除指定环境
+    deactivate（或 source deactivate）：退出环境
+    jupyter notebook ：打开Jupyter Notebook
+    conda config --remove-key channels ：换回默认源
+</details>
+
+**修改环境创建路径**
+1. 找到用户目录下的.condarc文件（C:\Users\username）。
+2. 打开.condarc文件之后，添加或修改.condarc 中的 env_dirs 设置环境路径
+```
+envs_dirs:
+  - D:\Anaconda3\envs
+  ```
 
 # 编辑器
 ## Pycharm
@@ -42,7 +63,8 @@ ctrl+/ 批量注释
 调试：打断点>debug>使用工具栏内的“下一步”或“计算器内输入表达式”进行调试
 
 调试时使用Console的python调试台，print指令
-![图 1](/images/3d48dab87c260ef9d021d26f8218f569fece80b9bd7ed27c94cc835121291d52.png)![图 2](/images/d2e472375bbf282c764539c21d3b00d9f7077d85d09e247faf0f23f092f0b446.png)![图 3](/images/46d8a3df125599f7e7a98ecf67cc57f419fb6ecd521d180eb4278d435bfbad4d.png)  
+![图 1](https://raw.sevencdn.com/Arrowes/Arrowes-Blogbackup/main/images/Pytorch1.png)  
+![图 2](https://raw.sevencdn.com/Arrowes/Arrowes-Blogbackup/main/images/Pytorch2.png)  
 
 ## Jupyter notebook
 激活pytorch环境后 ``conda install nb_conda``
@@ -50,47 +72,65 @@ ctrl+/ 批量注释
 ``New>选择环境：Python [conda env:pytorch]``
 IDLE Ctrl+N 编辑多行代码
 输入一半按tab可以补全
+
 ```py
-#cd 路径
-	C：\Users\Arrow> cd E：\桌面
-	C：\Users\Arrow> E：
-        得E：\桌面>i.py
+ #cd 路径
+	C:\Users\Arrow> cd E:\桌面
+	C:\Users\Arrow> E:
+        得E:\桌面>i.py
 #亦或直接	
-        E：\桌面> python E：\桌面\i.py
+        E:\桌面> python E:\桌面\i.py
 ```
 
-**打包下载：**
- ```py
-import os
-import tarfile
+<details>
+  <summary>打包下载：点击查看代码块</summary>
 
-def recursive_files(dir_name='.', ignore=None):
-    for dir_name,subdirs,files in os.walk(dir_name):
-        if ignore and os.path.basename(dir_name) in ignore: 
-            continue
-
-        for file_name in files:
-            if ignore and file_name in ignore:
+    import os
+    import tarfile
+    def recursive_files(dir_name='.', ignore=None):
+        for dir_name,subdirs,files in os.walk(dir_name):
+            if ignore and os.path.basename(dir_name) in ignore: 
                 continue
 
-            yield os.path.join(dir_name, file_name)
+            for file_name in files:
+                if ignore and file_name in ignore:
+                    continue
 
-def make_tar_file(dir_name='.', tar_file_name='tarfile.tar', ignore=None):
-    tar = tarfile.open(tar_file_name, 'w')
+                yield os.path.join(dir_name, file_name)
 
-    for file_name in recursive_files(dir_name, ignore):
-        tar.add(file_name)
+    def make_tar_file(dir_name='.', tar_file_name='tarfile.tar', ignore=None):
+        tar = tarfile.open(tar_file_name, 'w')
 
-    tar.close()
+        for file_name in recursive_files(dir_name, ignore):
+            tar.add(file_name)
 
-dir_name = '.'
-tar_file_name = 'archive.tar'
-ignore = {'.ipynb_checkpoints', '__pycache__', tar_file_name}
-make_tar_file(dir_name, tar_file_name, ignore)
- ```
+        tar.close()
 
-# 库
-## 两大查询函数
+    dir_name = '.'
+    tar_file_name = 'archive.tar'
+    ignore = {'.ipynb_checkpoints', '__pycache__', tar_file_name}
+    make_tar_file(dir_name, tar_file_name, ignore)
+</details>
+
+# Pytorch
+要调用GPU进行训练的话，需要安装显卡驱动对应的CUDA
+1. ``nvidia-smi`` 查询支持CUDA版本
+![图 3](https://raw.sevencdn.com/Arrowes/Arrowes-Blogbackup/main/images/Pytorch3.png)  
+2. 到[Pytorch官网](https://pytorch.org/get-started/locally/)复制对应code进行安装
+![图 4](https://raw.sevencdn.com/Arrowes/Arrowes-Blogbackup/main/images/Pytorch4.png)  
+
+**查GPU**
+```py
+import torch
+torch.cuda.is_available() #返回True说明GPU可以被使用
+torch.__version__ #查pytorch
+
+nvidia-smi #查GPU CUDA
+python –version #查python版本
+```
+
+## 库
+### 两大查询函数
 dir（）函数，能让我们知道工具箱以及工具箱中的分隔区有什么东西。
 help（）函数，能让我们知道每个工具是如何使用的，工具的使用方法。
 ``Jupyter>XX??``
@@ -123,7 +163,7 @@ print(c['name'])
 ```
 
 
-## Tensorboard可视化
+### Tensorboard可视化
 pytorch下安装 ``pip install tensorboard (conda)``
 使用
 ```py
@@ -147,19 +187,21 @@ AttributeError: module 'distutils' has no attribute 'version'
 pip install setuptools==59.5.0
 pip install brotli
 ```
-## Transform
+### Transform
 transforms.py图像处理工具箱
 ```
 1.调用工具tool=transforms.XXX()	2.使用 result=tool(input)
 如	Totensor>转向量	Normalize>归一化		Resize>缩放	
 Compose>组合		RandomCrop>随机裁剪
 ```
-## ToTensor（桥梁，很多输入都要求tensor类型）
+### ToTensor
 ```py
+#（桥梁，很多输入都要求tensor类型）
 from torchvision import transforms
 tensor_tool=transforms.ToTensor()
 tensor_result=tensor_tool(img)
 ```
+
 ```py
 class Person:
 	_ _call_ _(self,name)	
@@ -167,6 +209,7 @@ class Person:
 ```
 ## torchvision
 torchvision.datasets 数据集处理
+
 ```py
 import torchvision
 train_set = torchvision.datasets.CIFAR10(root="./dataset", train=True, #训练集
@@ -174,19 +217,58 @@ transform=dataset_transform, download=True)
 test_set = torchvision.datasets.CIFAR10(root="./dataset", train=False, #测试集
 transform=dataset_transform, download=True)
 ```
-## Dataloader
+### Dataloader
 ```py
 from torch.utils.data import DataLoader
 test_loader = DataLoader(dataset=test_data, batch_size=64, shuffle=True, num_workers=0, drop_last=True)
 ```
-例：
+
+<details>
+  <summary>例</summary>
+
+    writer = SummaryWriter("dataloader")
+    for epoch in range(2):
+        step = 0
+        for data in test_loader: #读数据
+            imgs, targets = data
+            writer.add_images("Epoch: {}".format(epoch), imgs, step)
+            step = step + 1
+    writer.close()
+</details>
+
+## [Google Colab](https://colab.research.google.com/)
+
+```py
+#设置并查看GPU 修改>笔记本设置>GPU
+import tensorflow as tf
+tf.test.gpu_device_name()
+
+!/opt/bin/nvidia-smi #详情
 ```
-writer = SummaryWriter("dataloader")
-for epoch in range(2):
-    step = 0
-    for data in test_loader: #读数据
-        imgs, targets = data
-        writer.add_images("Epoch: {}".format(epoch), imgs, step)
-        step = step + 1
-writer.close()
+
+### 基本指令
+```py
+!unzip /content/XX.zip -d /content/XX   #解压
+%cd /content/XX     #进入
+!pip install -r requirements.txt    #安装requirements
+!python XX.py --rect #运行
+!rm -rf /content/XX/mydata #删除
+
+
+%load_ext tensorboard   #加载tensorboard
+%tensorboard --logdir=runs/train    #执行tensorboard
 ```
+
+### 云盘
+```py
+#先装载谷歌云盘，在云盘里运行以防数据丢失
+ #指定Google Drive云端硬盘的根目录，名为drive
+!mkdir -p drive
+!google-drive-ocamlfuse drive
+
+#connect to self drive
+from google.colab import drive
+drive.mount('/content/drive')
+#云训练时还是要将盘里的文件拿出来再开始，否则容易直接断连!
+```
+续航插件：[Colab Alive](https://chrome.google.com/webstore/detail/colab-alive/eookkckfbbgnhdgcbfbicoahejkdoele?hl=zh-CN), 防止训练时掉线

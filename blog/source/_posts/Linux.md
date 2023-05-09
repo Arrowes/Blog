@@ -11,6 +11,8 @@ Host 键:右ctrl
 换源：华为云，更新索引
 ### 指令
 ``Ctrl+alt+T``	Terminal
+``Ctrl+h``	显示隐藏文件
+
 ``sudo nautilu``	执行文件操作
 ``ls``	检索
 ``chmod u+x …``		添加可执行文件
@@ -22,7 +24,10 @@ Could not get lock /var/lib/dpkg/lock – open > 执行 ``sudo rm -rf /var/lib/d
  
 
 ## Docker
-[🐳Docker概念，工作流和实践](https://www.bilibili.com/video/BV1MR4y1Q738/)![图 1](/images/d526d9d2a480a5a8e1c132f305ce080ca6e8b2bfe3554a40d253e84b7fe8471e.png)  ![图 2](/images/6dc1e73e12bff3e522c1fbe3918fac4cbe43c13d725ef3cca849308809194f0b.png)  
+[🐳Docker概念，工作流和实践](https://www.bilibili.com/video/BV1MR4y1Q738/)
+![图 1](https://raw.sevencdn.com/Arrowes/Arrowes-Blogbackup/main/images/Linux1.png)  
+![图 2](https://raw.sevencdn.com/Arrowes/Arrowes-Blogbackup/main/images/Linux2.png)  
+
 ### 配置
 ```shell
 # 查看当前运⾏的docker实例状态 
