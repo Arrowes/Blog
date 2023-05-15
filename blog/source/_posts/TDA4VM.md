@@ -18,8 +18,8 @@ Jacinto 7系列架构芯片含两款汽车级芯片：TDA4VM 处理器和 DRA829
 *GHz-每秒钟执行10亿次计算，GFLOPS-每秒10亿次浮点运算，GOPS-每秒10亿次通用操作。*
 + **深度学习矩阵乘法加速器 (MMA)，性能高达8TOPS (8b)（频率为1.0GHz）**：可以高效地执行矩阵乘法和卷积等运算。
 *TOPS-每秒万亿次操作，8b-8位精度的运算。*
-+ **具有图像信号处理器 (ISP) 和多个视觉辅助加速器的视觉处理加速器 (VPAC)**：可以高效地执行图像处理、计算机视觉和感知任务。
-+ **深度和运动处理加速器(DMPAC)**：可以高效地执行深度计算和运动估计等任务。
++ __具有图像信号处理器 (ISP) 和多个视觉辅助加速器的视觉处理加速器 (VPAC)__：可以高效地执行图像处理、计算机视觉和感知任务。
++ __深度和运动处理加速器(DMPAC)__：可以高效地执行深度计算和运动估计等任务。
 + **双核 64 位 Arm® Cortex®-A72 微处理器子系统，性能高达 2.0GHz**：可以高效地执行复杂的应用程序。
     * 每个双核 Cortex®-A72 集群具有 1MB L2 共享缓存 
     * 每个 Cortex®-A72 内核具有 32KB L1 数据缓存 和 48KB L1 指令缓存
@@ -144,6 +144,7 @@ vxProcessGraph( graph ); //执行图像处理
 
 [^4]
 [^4]:[TIOVX – TI’s OpenVX Implementation](https://www.ti.com/content/dam/videos/external-videos/2/3816841626001/5624955361001.mp4/subassets/openvx-implementation-on-ti-tda-adas-socs-presentation.pdf)
+
 ### 基本数据结构
 ``Vx_image, Vx_tensor, Vx_matrix, Vx_array, Vx_user_object_data``
 OpenVX规范了标准化的数据结构，基本满足了嵌入式系统的主要需求，尤其是这种数据结构的描述方法对嵌入式系统非常友好：支持虚拟地址、物理地址等异构内存；提供了数据在多种地址之间映射的接口；提供了统一化的自定义结构体的描述方法。
