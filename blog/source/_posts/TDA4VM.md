@@ -36,15 +36,12 @@ Jacinto 7系列架构芯片含两款汽车级芯片：TDA4VM 处理器和 DRA829
 
 # SDK
 Download：[PROCESSOR-SDK-J721E](https://www.ti.com.cn/tool/cn/PROCESSOR-SDK-J721E)，提供Linux SDK、QNX SDK和RTOS SDK
-Document：[Linux SDK](https://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-rt-jacinto7/08_06_00_11/exports/docs/devices/J7/linux/index.html)，[RTOS SDK](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/08_06_00_12/exports/docs/psdk_rtos/docs/user_guide/index.html)（[Processor SDK Linux for Edge AI](https://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-sk-tda4vm/latest/exports/docs/index.html#)，[~~QNX SDK~~](https://software-dl.ti.com/jacinto7/esd/processor-sdk-qnx-jacinto7/08_06_00_07/exports/docs/index.html)）
-
-*To run many of the demos in this SDK, the companion Processor SDK Linux(PSDK_Linux) for J721E also needs to be downloaded separately, together form a multi-processor software development kit for the J721E platform*
-
+Document：[RTOS SDK](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/08_06_00_12/exports/docs/psdk_rtos/docs/user_guide/index.html)，[Linux SDK](https://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-rt-jacinto7/08_06_00_11/exports/docs/devices/J7/linux/index.html)，（[Processor SDK Linux for Edge AI](https://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-sk-tda4vm/latest/exports/docs/index.html#)，[~~QNX SDK~~](https://software-dl.ti.com/jacinto7/esd/processor-sdk-qnx-jacinto7/08_06_00_07/exports/docs/index.html)）
+*RTOS and Linux SDK work together as a multi-processor software development kit for the J721E platform*
 
 ## Processor SDK RTOS (PSDK RTOS) 
 **PSDK RTOS Block Diagram**
 <img alt="图 4" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/TDA4VMSDKedit.png" />  
-
 **Hardware**
 Evaluation Module (EVM):Ti 推出的硬件开发板。用于快速原型设计和新产品开发，可以帮助开发人员在短时间内实现复杂的嵌入式系统功能, [EVM Setup for J721E](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/08_06_00_12/exports/docs/psdk_rtos/docs/user_guide/evm_setup_j721e.html)
 JTAG:debug execution, load program via JTAG-*No Boot Mode*
@@ -55,8 +52,8 @@ Recommend IDE:Code Composer Studio (CCS), [CCS Setup for J721E](https://software
 Prebuilt Demos:直装
 Build Demos from Source: Linux, Windows(很少)
 
-### [SDK Components](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/08_06_00_12/exports/docs/psdk_rtos/docs/user_guide/sdk_components_j721e.html#vxlib)
-The following table lists some of the top-level folders in the SDK package and the component it represents.
+[**SDK Components**](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/08_06_00_12/exports/docs/psdk_rtos/docs/user_guide/sdk_components_j721e.html#vxlib)
+The following table lists *part* of the top-level folders in the SDK package and the component it represents.
 
 Folder|Component|User guide
 ------|---------|----------
@@ -67,14 +64,54 @@ tidl_j7_*|TI Deep learning Product|[TIDL](https://software-dl.ti.com/jacinto7/es
 tiovx|TI OpenVX|[TIOVX](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/08_06_00_12/exports/docs/tiovx/docs/user_guide/index.html)
 tiadalg|TI Autonomous Driving Algorithms|[TIADALG](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/08_06_00_12/exports/docs/tiadalg/TIAutonomousDrivingAlgorithmLibrary_ReleaseNotes.html#Documentation)
 
+## Processor SDK Linux
+Folder|Component
+------|---------
+bin | 包含用于配置主机系统的帮助程序脚本和目标设备。这些脚本中的大多数都由setup.sh使用脚本。
+board-support | 主要包含linux内核源码，uboot源码，及其他组件。
+configs | yocto工具的构建链接（yocto构建大约需要十几个小时，一般情况下不会去编译yocto。）。
+docs | 直接打开index.html，即可阅读整个SDK的官方文档。
+example-applications | 包含一些benchmarks等app demo。
+filesystem | 存放默认、最小的文件系统。
+linux-devkit | 交叉编译工具链和库以加快目标设备的开发速度。
+Makefile | 顶级编译脚本（make）。
+patches | 补丁、预留目录。
+Rules.make | 设置顶级生成文件使用的默认值以及子组件生成文件。
+setup .sh | 配置用户主机系统和目标开发系统。
+yocto-build | 此目录允许重建SDK组件和使用Yocto Bitbake的文件系统。
+Linux SDK最主要是用于A72核心上的启动引导、操作系统、文件系统，一般只有在修改到这部分的时候才会使用到Linux SDK。
+## SDK环境搭建
+下载RTOS SDK与Linux SDK并安装
 
+**Linux SDK**
+```shell
+添加执行文件并执行
+chmod +x ./ti-processor-sdk-linux-j7-evm-08_06_01_02-Linux-x86-Install.bin 
+./ti-processor-sdk-linux-j7-evm-08_06_01_02-Linux-x86-Install.bin
+
+安装依赖的系统软件包和工具，跳过需要连EVM的NFS、minicom、TFTP(若Ubuntu版本不匹配 > /setup-host-check.sh > if [ "$host" != "bionic" ] 改为 if [ "$host" != "focal" ] )
+sudo ./setup.sh 
+```
+**RTOS SDK**
+```
+On Linux PC
+解压
+tar -xf ti-processor-sdk-rtos-j721e-evm-08_06_01_03.tar.gz
+./psdk_rtos/scripts/setup_psdk_rtos.sh
+
+On Window PC（components do not support）
+配置
+Download and Untar the Windows code gen tools tar ball ti-processor-sdk-rtos-j721e-evm-xx_xx_xx_xx-windows_codegen_tools.tar.gz
+Delete the following components in the SDK tar ball and replace with the corresponding components in the windows installation
+ti-cgt-armllvm_<version>.LTS, ti-cgt-c6000_<version>, ti-cgt-c7000_<version>.LTS
+```
 
 ## TIDL
 [TIDL](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/08_06_00_12/exports/docs/tidl_j721e_08_06_00_10/ti_dl/docs/user_guide_html/index.html)（TI Deep Learning Library）是TI平台基于深度学习算法的*软件生态系统*，可以将一些常见的深度学习算法模型快速的部署到TI嵌入式平台。
 
 ```
 Features: Understand the trained output of popular frameworks, Layer types, Sparse convolution, Quantized inference and on-the-fly quantization, Host emulation, Support for a variety of training frameworks, Low power consumption.
-Popular operators supported: Convolution，Pooling，Element Wise，Inner-Product，Soft-Max，Bias Add，Concatenate，Scale，Batch Normalization，Re-size ，Arg-max，Slice，Crop，Flatten，Shuffle Channel，Detection output ，Deconvolution/Transpose convolution 
+Popular operators supported: Convolution, Pooling, Element Wise, Inner-Product, Soft-Max, Bias Add, Concatenate, Scale, Batch Normalization, Re-size, Arg-max, Slice, Crop, Flatten, Shuffle Channel, Detection output, Deconvolution/Transpose convolution 
 ```
 [^1]
 [^1]:[Embedded low-power deep learning with TIDL](https://www.ti.com.cn/cn/lit/wp/spry314/spry314.pdf)
@@ -128,7 +165,7 @@ RTOS SDK 中集成了众多的Demo展示TIDL在TDA4处理器上对实时的语�
 
 <img alt="图 4" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/openvxflow.png" />  
 
-```
+```c
 //Example Program
 vx_context context = vxCreateContext(); //创建 OpenVX 上下文,即整个应用程序的运行环境
 vx_graph graph = vxCreateGraph( context ); //在上下文中创建一个图，表示图像处理的流程
@@ -150,7 +187,7 @@ vxProcessGraph( graph ); //执行图像处理
 OpenVX规范了标准化的数据结构，基本满足了嵌入式系统的主要需求，尤其是这种数据结构的描述方法对嵌入式系统非常友好：支持虚拟地址、物理地址等异构内存；提供了数据在多种地址之间映射的接口；提供了统一化的自定义结构体的描述方法。
 ### TIOVX
 [TIOVX](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/08_06_00_12/exports/docs/tiovx/docs/user_guide/index.html) 是TI公司对OpenVX的实现。
-<img src="https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/08_06_00_12/exports/docs/tiovx/docs/user_guide/tiovx_block_diagram_j7.png">
+<img src="https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/08_06_00_12/exports/docs/tiovx/docs/user_guide/tiovx_block_diagram_j7.png" width="80%">
 
 TIOVX Platform提供了特定硬件(如TDAx, AM65x)的操作系统(如TI-RTOS, Linux)调用API。TIOVX Framework包含了官方OpenVX的标准API和TI扩展的API，其中包括
 ```
@@ -164,7 +201,7 @@ TI: Target, Target Kernel, Obj Desc。
 + OpenVX提供了数据流调度机制，能够支持流水线运行，简化了多线程和并行调度的工作。结合RTOS的实时特性，减少Linux非实时操作系统带来的负面影响[^5]
 [^5]:[OpenVX视觉加速中间件与TDA4VM平台上的应用](https://zhuanlan.zhihu.com/p/423179832) | [TDA4横扫行泊一体市场与其背后的OpenVX](https://zhuanlan.zhihu.com/p/606584605)
 
-<img alt="图 6" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/tiovx.png" />  
+<img alt="图 6" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/tiovx.png" width="80%"/>  
 
 [PyTIOVX](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/08_06_00_12/exports/docs/tiovx/docs/user_guide/PYTIOVX.html): Automated OpenVX “C” Code Generation
 
@@ -175,5 +212,4 @@ TI: Target, Target Kernel, Obj Desc。
 [^6]:[适用于嵌入式应用的深度学习推理参考设计](https://www.ti.com.cn/cn/lit/ug/zhcu546/zhcu546.pdf)
 
 + Deployment：
-<img alt="图 7" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/TDA4VMdeploy.png" />  
-
+<img alt="图 7" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/TDA4VMdeploy.png" width="70%"/>  
