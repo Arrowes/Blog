@@ -141,7 +141,7 @@ $$mAP=\frac1n\sum_{i = 1}^{n}AP_i$$
 **ROC曲线**(Receiver Operating Characteristic 受试者工作特征)
 $$TPR=\frac{TP}{TP+FN},FPR=\frac{FP}{FP+TN}$$可以理解为分类器对正样本的覆盖敏感性和对负样本的敏感性的权衡。
 在ROC曲线图中，每个点以对应的FPR值为横坐标，以TPR值为纵坐标 
-<img src="https://raw.sevencdn.com/Arrowes/Arrowes-Blogbackup/main/images/DL11ROC.jpg" width = "50%" />
+<img src="https://raw.sevencdn.com/Arrowes/Arrowes-Blogbackup/main/images/DL11ROC.jpg" width = "40%" />
 
 **AUC值**：PR曲线下方的面积
 <img src="https://raw.sevencdn.com/Arrowes/Arrowes-Blogbackup/main/images/DL12AUC.png" width = "70%" />
