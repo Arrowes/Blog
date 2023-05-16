@@ -18,8 +18,8 @@ Jacinto 7系列架构芯片含两款汽车级芯片：TDA4VM 处理器和 DRA829
 *GHz-每秒钟执行10亿次计算，GFLOPS-每秒10亿次浮点运算，GOPS-每秒10亿次通用操作。*
 + **深度学习矩阵乘法加速器 (MMA)，性能高达8TOPS (8b)（频率为1.0GHz）**：可以高效地执行矩阵乘法和卷积等运算。
 *TOPS-每秒万亿次操作，8b-8位精度的运算。*
-+ __具有图像信号处理器 (ISP) 和多个视觉辅助加速器的视觉处理加速器 (VPAC)__：可以高效地执行图像处理、计算机视觉和感知任务。
-+ __深度和运动处理加速器(DMPAC)__：可以高效地执行深度计算和运动估计等任务。
++ **具有图像信号处理器 (ISP) 和多个视觉辅助加速器的视觉处理加速器 (VPAC)**：可以高效地执行图像处理、计算机视觉和感知任务。
++ **深度和运动处理加速器(DMPAC)**：可以高效地执行深度计算和运动估计等任务。
 + **双核 64 位 Arm® Cortex®-A72 微处理器子系统，性能高达 2.0GHz**：可以高效地执行复杂的应用程序。
     * 每个双核 Cortex®-A72 集群具有 1MB L2 共享缓存 
     * 每个 Cortex®-A72 内核具有 32KB L1 数据缓存 和 48KB L1 指令缓存
@@ -79,6 +79,7 @@ patches | 补丁、预留目录。
 Rules.make | 设置顶级生成文件使用的默认值以及子组件生成文件。
 setup .sh | 配置用户主机系统和目标开发系统。
 yocto-build | 此目录允许重建SDK组件和使用Yocto Bitbake的文件系统。
+
 Linux SDK最主要是用于A72核心上的启动引导、操作系统、文件系统，一般只有在修改到这部分的时候才会使用到Linux SDK。
 ## SDK环境搭建
 下载RTOS SDK与Linux SDK并安装
@@ -106,7 +107,7 @@ Delete the following components in the SDK tar ball and replace with the corresp
 ti-cgt-armllvm_<version>.LTS, ti-cgt-c6000_<version>, ti-cgt-c7000_<version>.LTS
 ```
 
-## TIDL
+# TIDL
 [TIDL](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/08_06_00_12/exports/docs/tidl_j721e_08_06_00_10/ti_dl/docs/user_guide_html/index.html)（TI Deep Learning Library）是TI平台基于深度学习算法的*软件生态系统*，可以将一些常见的深度学习算法模型快速的部署到TI嵌入式平台。
 
 ```
@@ -116,16 +117,6 @@ Popular operators supported: Convolution, Pooling, Element Wise, Inner-Product, 
 [^1]
 [^1]:[Embedded low-power deep learning with TIDL](https://www.ti.com.cn/cn/lit/wp/spry314/spry314.pdf)
 
-TIDL is a fundamental software component of [TI’s Edge AI solution](https://www.ti.com/edgeai).
-
-**TI's Edge AI Tools**：
-+ [Edge AI Studio](https://dev.ti.com/edgeai/):Integrated development environment for development of AI applications for edge processors.（需授权）
-+ [Model zoo](https://github.com/TexasInstruments/edgeai-modelzoo):A large collection of pre-trained models for data scientists,其中有[YOLO例程](https://github.com/TexasInstruments/edgeai-modelzoo/tree/master/models/vision/detection)
-+ [Training and quantization tools](https://github.com/TexasInstruments/edgeai):make DNNs more suitable for TI devices.
-+ [Edge AI Benchmark](https://github.com/TexasInstruments/edgeai-benchmark):perform accuracy and performance benchmark.
-+ [Edge AI TIDL Tools](https://github.com/TexasInstruments/edgeai-tidl-tools#edgeai-tidl-tools):used for model compilation on X86. Artifacts from compilation process can used for Model inference. Model inference can happen on X86 machine (host emulation mode) or on development board with TI SOC. 
-<img src="https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/08_06_00_12/exports/docs/tidl_j721e_08_06_00_10/ti_dl/docs/user_guide_html/dnn-workflow.png">
-
 TIDL当前支持的训练框架有Tensorflow、Pytorch、Caffe等，用户可以根据需要选择合适的训练框架进行模型训练。TIDL可以将PC端训练好的模型导入编译生成TIDL可以识别的模型格式，同时在导入编译过程中进行层级合并以及量化等操作，方便导入编译后的模型高效的运行在具有高性能定点数据感知能力TDA4硬件加速器上。 TIDL提供了模型导入工具，模型可视化工具等，非常便捷地可以对训练好地模型进行导入。
 <img alt="图 5" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/TDA4VMTIDLflow.png" width = "80%"/>  
 
@@ -134,7 +125,17 @@ RTOS SDK 中集成了众多的Demo展示TIDL在TDA4处理器上对实时的语�
 
 <img alt="图 6" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/TDA4VMdemo.png" />  
 
-### TIDL-RT
+## TI's Edge AI
+TIDL is a fundamental software component of [TI’s Edge AI solution](https://www.ti.com/edgeai).
+**TI’s Edge AI Tools:**
++ [Edge AI Studio](https://dev.ti.com/edgeai/):Integrated development environment for development of AI applications for edge processors.（需授权）
++ [Model zoo](https://github.com/TexasInstruments/edgeai-modelzoo):A large collection of pre-trained models for data scientists,其中有[YOLO例程](https://github.com/TexasInstruments/edgeai-modelzoo/tree/master/models/vision/detection)
++ [Training and quantization tools](https://github.com/TexasInstruments/edgeai):make DNNs more suitable for TI devices.
++ [Edge AI Benchmark](https://github.com/TexasInstruments/edgeai-benchmark):provides higher level scripts for model compilation,and perform accuracy and performance benchmark.
++ [Edge AI TIDL Tools](https://github.com/TexasInstruments/edgeai-tidl-tools#edgeai-tidl-tools):used for model compilation on X86. Artifacts from compilation process can used for Model inference. Model inference can happen on X86 machine (host emulation mode) or on development board with TI SOC. 
+<img src="https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/08_06_00_12/exports/docs/tidl_j721e_08_06_00_10/ti_dl/docs/user_guide_html/dnn-workflow.png">
+
+## TIDL-RT
 [TIDL Runtime](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/08_06_00_12/exports/docs/tidl_j721e_08_06_00_10/ti_dl/docs/user_guide_html/md_tidl_overview.html) 是运行在TDA4端的实时推理单元，同时提供了TIDL的运行环境，对于input tensor，TIDL TIOVX Node 调用TIDL 的深度学习加速库进行感知，并将结果进行输出。 特点：互用性、高精度、高性能、可扩展。
 
 
