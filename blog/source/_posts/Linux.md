@@ -4,31 +4,59 @@ date: 2022-11-28 10:32:42
 tags:
 - Linux
 ---
-## Ubuntu
+# Ubuntu
 Virtual Box+Ubuntu 20.04
 64bit:Bios enable intel virsualization
 Host 键:右ctrl
 换源：华为云，更新索引
-### 指令
 ``Ctrl+alt+T``	Terminal
-``Ctrl+h``	显示隐藏文件
+``Ctrl+h``	显示隐藏文件   
+方向键上：可以获取上次的命令
+Tab：自动补全
+## Code
+```sh
+#系统
+lsb_release -a  #查ubuntu版本    
+sudo passwd root；su	#权限
+ps aux; kill [PID]  #查看进程; 根据进程号杀后台
+sudo apt update	#更新索引
 
-``sudo nautilu``	执行文件操作
-``ls``	检索
-``chmod u+x …``		添加可执行文件
-``sudo apt update``	更新索引
-``sudo passwd root；su``	权限
-### Debug
+#文件
+mkdir []   #新建文件夹  
+rmdir [] #删除文件夹    
+touch [] [] #创建文件
+rm []   #删除文件
+mv [file] [dir] #移动文件
+sudo nautilu	#执行文件操作    
+chmod u+x [] #添加可执行文件
+
+#cd
+cd - #切换到上一工作目录
+cd ~ #导航到家目录
+#.当前目录 ..父目录 cd XX相对路径，cd /XX绝对路径
+
+ls	#检索
+wget [url]  #下载
+tar -xf []  #解压
+vi []   #进入文件，编辑完按Esc返回命令模式，输入：x 退出
+```
+## VScode
+vscode远程访问：1.安装remote插件 2.连接服务器``ssh ywang85@she1-w50502`` 3.connect，打开terminal
+上传文件：vscode直接拖拽到目录
+
+## Debug
 Could not get lock /var/lib/dpkg/lock – open > 执行 ``sudo rm -rf /var/lib/dpkg/lock``
 共享文件夹ubuntu中不显示>重新安装VMware tools
  
 
-## Docker
+# Docker
+`Docker`是一种开源的容器化平台，可以帮助开发者更高效地打包、部署和运行应用程序。它基于 `Linux` 容器（LXC）技术，通过将应用程序及其所有依赖项打包到一个容器中，从而消除了应用程序在不同环境之间迁移所面临的问题。使用Docker，开发者可以快速构建、测试和部署应用程序，减少了与操作系统和基础设施相关的问题，从而提高了开发、测试和发布的速度。
+
 [🐳Docker概念，工作流和实践](https://www.bilibili.com/video/BV1MR4y1Q738/)
 ![图 1](https://raw.sevencdn.com/Arrowes/Arrowes-Blogbackup/main/images/Linux1.png)  
 ![图 2](https://raw.sevencdn.com/Arrowes/Arrowes-Blogbackup/main/images/Linux2.png)  
 
-### 配置
+## 配置
 ```shell
 # 查看当前运⾏的docker实例状态 
 sudo docker ps -a 
@@ -47,7 +75,7 @@ exit
 查看ip：``ifconfig``
 连接：``\\192.168.174.128\docker``
 
-### 文件拷贝
+## 文件拷贝
 ```shell
 #1、主机拷贝文件到docker编译环境里：
 sudo docker cp源文件openharmony:/目标文件
