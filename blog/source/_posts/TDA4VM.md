@@ -18,7 +18,7 @@ Jacinto 7系列架构芯片含两款汽车级芯片：TDA4VM 处理器和 DRA829
 *GHz-每秒钟执行10亿次计算，GFLOPS-每秒10亿次浮点运算，GOPS-每秒10亿次通用操作。*
 + **深度学习矩阵乘法加速器 (MMA)，性能高达8TOPS (8b)（频率为1.0GHz）**：可以高效地执行矩阵乘法和卷积等运算。
 *TOPS-每秒万亿次操作，8b-8位精度的运算。*
-+ **具有图像信号处理器 (ISP) 和多个视觉辅助加速器的视觉处理加速器 (VPAC)**：可以高效地执行图像处理、计算机视觉和感知任务。
++ **具有图像信号处理器(ISP)和多个视觉辅助加速器的视觉处理加速器(VPAC)**：可以高效地执行图像处理、计算机视觉和感知任务。
 + **深度和运动处理加速器(DMPAC)**：可以高效地执行深度计算和运动估计等任务。
 + **双核 64 位 Arm® Cortex®-A72 微处理器子系统，性能高达 2.0GHz**：可以高效地执行复杂的应用程序。
     * 每个双核 Cortex®-A72 集群具有 1MB L2 共享缓存 
@@ -125,16 +125,6 @@ RTOS SDK 中集成了众多的Demo展示TIDL在TDA4处理器上对实时的语�
 
 <img alt="图 6" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/TDA4VMdemo.png" />  
 
-## TI's Edge AI
-TIDL is a fundamental software component of [TI’s Edge AI solution](https://www.ti.com/edgeai).
-**TI’s Edge AI Tools:**
-+ [Edge AI Studio](https://dev.ti.com/edgeai/):Integrated development environment for development of AI applications for edge processors.（需授权）
-+ [Model zoo](https://github.com/TexasInstruments/edgeai-modelzoo):A large collection of pre-trained models for data scientists,其中有[YOLO例程](https://github.com/TexasInstruments/edgeai-modelzoo/tree/master/models/vision/detection)
-+ [Training and quantization tools](https://github.com/TexasInstruments/edgeai):make DNNs more suitable for TI devices.
-+ [Edge AI Benchmark](https://github.com/TexasInstruments/edgeai-benchmark):provides higher level scripts for model compilation,and perform accuracy and performance benchmark.
-+ [Edge AI TIDL Tools](https://github.com/TexasInstruments/edgeai-tidl-tools#edgeai-tidl-tools):used for model compilation on X86. Artifacts from compilation process can used for Model inference. Model inference can happen on X86 machine (host emulation mode) or on development board with TI SOC. 
-<img src="https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/08_06_00_12/exports/docs/tidl_j721e_08_06_00_10/ti_dl/docs/user_guide_html/dnn-workflow.png">
-
 ## TIDL-RT
 [TIDL Runtime](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/08_06_00_12/exports/docs/tidl_j721e_08_06_00_10/ti_dl/docs/user_guide_html/md_tidl_overview.html) 是运行在TDA4端的实时推理单元，同时提供了TIDL的运行环境，对于input tensor，TIDL TIOVX Node 调用TIDL 的深度学习加速库进行感知，并将结果进行输出。 特点：互用性、高精度、高性能、可扩展。
 
@@ -154,6 +144,17 @@ TIDL is a fundamental software component of [TI’s Edge AI solution](https://ww
         * 在EVM上使用OpenVX框架开发程序，在应用上进行验证
 
 <img alt="图 3" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/3step.png" />  
+
+## TI's Edge AI
+TIDL is a fundamental software component of [TI’s Edge AI solution](https://www.ti.com/edgeai).
+**TI’s Edge AI Tools:**
++ [Edge AI Studio](https://dev.ti.com/edgeai/):Integrated development environment for development of AI applications for edge processors.（需授权）
++ [Model zoo](https://github.com/TexasInstruments/edgeai-modelzoo):A large collection of pre-trained models for data scientists,其中有[YOLO例程](https://github.com/TexasInstruments/edgeai-modelzoo/tree/master/models/vision/detection)
++ [Training and quantization tools](https://github.com/TexasInstruments/edgeai):make DNNs more suitable for TI devices.
++ [Edge AI Benchmark](https://github.com/TexasInstruments/edgeai-benchmark):provides higher level scripts for model compilation,and perform accuracy and performance benchmark.
++ [Edge AI TIDL Tools](https://github.com/TexasInstruments/edgeai-tidl-tools#edgeai-tidl-tools):used for model compilation on X86. Artifacts from compilation process can used for Model inference， which can happen on X86 machine or on development board with TI SOC.
++ [EdgeAI-ModelMaker](https://github.com/TexasInstruments/edgeai-modelmaker): an end-to-end model development tool that integrates dataset handling, model training and model compilation and provides a simple config file interface that is friendly to beginners.  
+<img src="https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/08_06_00_12/exports/docs/tidl_j721e_08_06_00_10/ti_dl/docs/user_guide_html/dnn-workflow.png">
 
 ## OpenVX
 [OpenVX](https://www.khronos.org/openvx/) 视觉加速中间件是芯片内部的硬件加速器与视觉应用间的桥梁(中间件:用于简化编程人员开发复杂度、抽象软硬件平台差异的软件抽象层)，是个由Khronos定义的API框架，包括：宏的定义与含义，结构体的定义与含义，函数的定义与行为。
