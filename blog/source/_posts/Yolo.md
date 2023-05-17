@@ -53,10 +53,10 @@ data.yaml数据只能用绝对地址
 
 # Ideas
 ## 数据集
-> https://www.kaggle.com/datasets
-https://gas.graviti.cn/open-datasets
-https://universe.roboflow.com/roboflow-100
-https://ieee-dataport.org/datasets
+> [Kaggle数据集](https://www.kaggle.com/datasets)
+[格物钛数据集](https://gas.graviti.cn/open-datasets)
+[Roboflow数据集](https://universe.roboflow.com/roboflow-100)
+[IEEE DataPort](https://ieee-dataport.org/datasets)
 
 标注工具：[Roboflow](https://app.roboflow.com/395841716-qq-com)
 混合数据集：彩色+红外
