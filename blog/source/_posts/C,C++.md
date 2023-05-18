@@ -18,7 +18,7 @@ tags:
 [cmake-examples-Chinese](https://github.com/SFUMECJF/cmake-examples-Chinese) 例程
 
 ## [Cmake 实践](https://gavinliu6.github.io/CMake-Practice-zh-CN/#/)
-### 创建Hello world
+### t1 [创建Hello world](https://github.com/gavinliu6/CMake-Practice-zh-CN/blob/master/hello-world.md)
 建立main.c与CMakeLists.txt并编译（需要为每一个子目录建立一个CMakeLists.txt）
 ```sh
 PROJECT (HELLO)     #PROJECT(projectname [CXX] [C] [Java])
@@ -26,20 +26,24 @@ SET(SRC_LIST main.c)    #提供要编译的源代码文件列表，可定义多�
 MESSAGE([SEND_ERROR|STATUS|FATAL_ERROR] "message to display")
 ADD_EXECUTABLE(hello ${SRC_LIST})   #创建名为hello的可执行文件，IF不用${}引用变量
 
-#内部编译
+#内部编译(在文件夹中产生文件太多)
 cmake . #构建工程，生成makefile
 make    #构建目标文件hello二进制
 ./hello #运行目标文件
-make clean  #清理工程
-
 #外部编译(out of source build,推荐)
 mkdir build, cd build #新建并进入build文件夹
 cmake ..    #在父目录找到cmakelists构建工程
 make    #在build编译目录中获得目标文件，不影响原有工程
 ```
-### 完善项目并安装
+目标文件:在linux下，是ELF格式（Executable Linkable Format，可执行可链接格式），而在windows下是PE（Portable Executable，可移植可执行）。通常有三种形式：
+    + 可执行目标文件。即我们通常所认识的，可直接运行的二进制文件。
+    + 可重定位目标文件。包含了二进制的代码和数据，可以与其他可重定位目标文件合并，并创建一个可执行目标文件。
+    + 共享目标文件。它是一种在加载或者运行时进行链接的特殊可重定位目标文件。
+
+### t2 [完善项目并安装](https://github.com/gavinliu6/CMake-Practice-zh-CN/blob/master/better-hello-world.md)
 ```sh
 #在CMakeLists中加入
+ADD_SUBDIRECTORY(src bin) #把src子目录加入工程，编译输出路径为bin
 INSTALL(FILES COPYRIGHT README DESTINATION doc)
 INSTALL(PROGRAMS runhello.sh DESTINATION bin)
 INSTALL(DIRECTORY doc/ DESTINATION doc) #不同的安装类型
@@ -51,7 +55,8 @@ cmake -DCMAKE_INSTALL_PREFIX=tmp ..
 make
 make install
 ```
-### lib静态库和动态库构建
+### t3 [lib静态库和动态库构建](https://github.com/gavinliu6/CMake-Practice-zh-CN/blob/master/static-and-dynamic.md)
+
 ```sh
 SET(LIBHELLO_SRC hello.c)
 ADD_LIBRARY(hello SHARED ${LIBHELLO_SRC})   #SHARED动态库（.so）
@@ -61,9 +66,74 @@ SET_TARGET_PROPERTIES(hello PROPERTIES VERSION 1.2 SOVERSION 1) #动态库版本
 INSTALL(TARGETS hello hello_static LIBRARY DESTINATION lib ARCHIVE DESTINATION lib) #关键字ARCHIVE 特指静态库，LIBRARY 特指动态库，RUNTIME 特指可执行目标二进制
 INSTALL(FILES hello.h DESTINATION include/hello)
 ```
+静态库.a（Static Library），所有函数和数据都在编译时被静态链接到可执行文件中。文件较大，但不容易受到环境变量和库版本变化的影响，能够提供更好的性能和稳定性。
+动态库.so（Dynamic Library）（共享库），在程序运行时才被加载到内存中，而不是在程序编译时被静态链接到可执行文件中，每个动态库只需要一个副本，可以供多个程序使用，因此可以减小可执行文件的大小，减少内存占用，并且如果库文件更新，则只需要替换动态库文件即可，但由于需要在运行时加载库文件，因此可能会稍微降低程序的启动和运行速度。
 
+### t4 [使用外部共享库和头文件](https://github.com/gavinliu6/CMake-Practice-zh-CN/blob/master/the-use-of-lib-and-header-file.md)
+```sh
+#在src/CMakeLists.txt中添加头文件.h搜索路径
+INCLUDE_DIRECTORIES(XXX/include/hello)
+TARGET_LINK_LIBRARIES(main XXX/lib/libhello.so) #添加共享库链接
+#若要链接静态库：TARGET_LINK_LIBRARIES(main XXX/lib/libhello.a)
 
+#运行ldd查看链接情况
+ldd src/main
 
+#修改环境变量，在bash中运行：
+export CMAKE_INCLUDE_PATH=XXX/include/hello #然后利用FIND_PATH相关指令替换INCLUDE_DIRECTORIES
+```
+### [常用变量与环境变量](https://github.com/gavinliu6/CMake-Practice-zh-CN/blob/master/common-var.md)
+```sh
+#常用变量
+CMAKE_BINARY_DIR    #如果是 in source 编译，指工程顶层目录，如果是 out-of-source 编译，指工程编译发生的目录,还有PROJECT_BINARY_DIR，<projectname>_BINARY_DIR
+CMAKE_SOURCE_DIR    #工程顶层目录，PROJECT_SOURCE_DIR，<projectname>_SOURCE_DIR
+CMAKE_CURRENT_SOURCE_DIR    #当前处理的 CMakeLists.txt 所在的路径
+CMAKE_CURRRENT_BINARY_DIR   #若是 in-source 编译，同上一致，对out-ofsource 编译，他指的是 target 编译目录。
+CMAKE_CURRENT_LIST_FILE #输出调用这个变量的 CMakeLists.txt 的完整路径
+CMAKE_CURRENT_LIST_LINE #输出这个变量所在的行
+CMAKE_MODULE_PATH   #定义自己的 cmake 模块所在的路径
+EXECUTABLE_OUTPUT_PATH，LIBRARY_OUTPUT_PATH #分别用来重新定义最终结果的存放目录，如SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
+PROJECT_NAME    #返回通过 PROJECT 指令定义的项目名称
+
+#环境变量，使用$ENV{NAME} 调用系统环境变量
+SET(ENV{变量名} 值) #设置环境变量
+    CMAKE_INCLUDE_CURRENT_DIR
+    CMAKE_INCLUDE_DIRECTORIES_PROJECT_BEFORE
+    CMAKE_INCLUDE_PATH，CMAKE_LIBRARY_PATH
+```
+
+### [cmake常用指令](https://github.com/gavinliu6/CMake-Practice-zh-CN/blob/master/common-directives.md)
+```sh
+make VERBOSE=1  #查看make过程
+make clean  #清理工程
+```
+### [t5 模块](https://github.com/gavinliu6/CMake-Practice-zh-CN/blob/master/module.md)
+```sh
+#系统预定义的模块
+FIND_PACKAGE(CURL)  #FindCURL模块
+IF(CURL_FOUND)  #判断模块是否被找到
+   INCLUDE_DIRECTORIES(${CURL_INCLUDE_DIR})
+   TARGET_LINK_LIBRARIES(curltest ${CURL_LIBRARY})
+ELSE(CURL_FOUND)
+     MESSAGE(FATAL_ERROR ”CURL library not found”)
+ENDIF(CURL_FOUND)
+
+#自定义FindHELLO模块
+FIND_PATH(HELLO_INCLUDE_DIR hello.h /usr/include/hello /usr/local/include/hello)    # 在指定目录中搜索hello.h文件
+FIND_LIBRARY(HELLO_LIBRARY NAMES hello PATH /usr/lib /usr/local/lib)    # 在指定目录中搜索名为hello的库文件
+IF(HELLO_INCLUDE_DIR AND HELLO_LIBRARY) # 如果找到了头文件和库，则标记为HELLO_FOUND
+   SET(HELLO_FOUND TRUE)
+ENDIF(HELLO_INCLUDE_DIR AND HELLO_LIBRARY)
+IF(HELLO_FOUND) # 如果找到了头文件和库，则输出一个消息
+   IF(NOT HELLO_FIND_QUIETLY)   #如果没有被标记为“安静模式”，则输出
+       MESSAGE(STATUS "Found Hello: ${HELLO_LIBRARY}")
+   ENDIF(NOT HELLO_FIND_QUIETLY)
+ELSE(HELLO_FOUND)   # 如果没有找到，并且被标记为必需，则输出错误信息
+   IF(HELLO_FIND_REQUIRED)  #如果被标记为“必需”，则输出致命错误消息
+      MESSAGE(FATAL_ERROR "Could not find hello library")
+   ENDIF(HELLO_FIND_REQUIRED)
+ENDIF(HELLO_FOUND)
+```
 ## gcc/g++,MinGW/MSVC与make/CMake/qmake
 **GNU**/Linux：简称Linux，包括Ubuntu，Debian，CentOS，自带gcc；
 **gcc/g++**：GNU编译器套件（GNU Compiler Collection）,在*Linux*或MacOS上使用，gcc主要用于C语言,g++支持更多的C++特性。
