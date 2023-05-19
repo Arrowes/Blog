@@ -67,7 +67,7 @@ tiadalg|TI Autonomous Driving Algorithms|[TIADALG](https://software-dl.ti.com/ja
 RTOS SDK 中集成了众多的Demo展示TIDL在TDA4处理器上对实时的语义分割和 SSD 目标检测的能力。如下图,	Vision Apps User Guide 中 [AVP Demo](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/07_02_00_06/exports/docs/vision_apps/docs/user_guide/group_apps_dl_demos_app_tidl_avp3.html) 的展示了使用TIDL对泊车点、车辆的检测。[^1]
 [^1]:[Deep Learning with Jacinto™ 7 SoCs: TDA4x](https://www.ti.com.cn/cn/lit/ml/slyp667/slyp667.pdf?raw=true) | [当深度学习遇上TDA4](https://e2echina.ti.com/blogs_/b/behindthewheel/posts/tda4)
 
-<img alt="图 7" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/AVP.jpg" />  
+<img alt="图 7" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/TDA4VMAVP.jpg" />  
 
 ## Processor SDK Linux
 <details>
@@ -181,7 +181,7 @@ TIDL is a fundamental software component of [TI’s Edge AI solution](https://ww
 每个进程内可以有多个context（上下文），每个context内可以有多个graph（图，或连接关系），每个graph内可以有多个node（节点）。[^4]
 [^4]:[TIOVX – TI’s OpenVX Implementation](https://www.ti.com/content/dam/videos/external-videos/2/3816841626001/5624955361001.mp4/subassets/openvx-implementation-on-ti-tda-adas-socs-presentation.pdf)
 
-<img alt="图 4" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/openvxflow.png" />  
+<img alt="图 4" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/TDA4VMopenvxflow.png" />  
 
 ```c
 //Example Program
@@ -195,7 +195,7 @@ vx_node F2 = vxF2Node( graph, intermediate, output ); //创建两个节点，分
 vxVerifyGraph( graph ); //验证图的正确性
 vxProcessGraph( graph ); //执行图像处理
 ```
-<img alt="图 5" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/openvxexample.png" width="80%"/>  
+<img alt="图 5" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/TDA4VMopenvxexample.png" width="80%"/>  
 
 ### 基本数据结构
 ``Vx_image, Vx_tensor, Vx_matrix, Vx_array, Vx_user_object_data``
@@ -214,7 +214,7 @@ TI: Target, Target Kernel, Obj Desc。
 + TI官方提供OpenVX的支持，提供标准算法的硬件加速实现，提供各个功能的Demo，能够简化开发调试工作。
 + 简化多核异构的开发，可以在X86模拟运行，所有的板级开发和调试都位于A72 Linux端，减少了对RTOS调试的工作量。
 + OpenVX提供了数据流调度机制，能够支持流水线运行，简化了多线程和并行调度的工作。结合RTOS的实时特性，减少Linux非实时操作系统带来的负面影响[^5]
-<img alt="图 6" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/tiovx.png" width="80%"/>  
+<img alt="图 6" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/TDA4VMtiovx.png" width="80%"/>  
 
 [PyTIOVX](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/08_06_00_12/exports/docs/tiovx/docs/user_guide/PYTIOVX.html): Automated OpenVX “C” Code Generation
 [^5]:[OpenVX视觉加速中间件与TDA4VM平台上的应用](https://zhuanlan.zhihu.com/p/423179832) | [TDA4横扫行泊一体市场与其背后的OpenVX](https://zhuanlan.zhihu.com/p/606584605)
