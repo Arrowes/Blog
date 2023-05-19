@@ -65,7 +65,7 @@ tiovx|TI OpenVX|[TIOVX](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rt
 tiadalg|TI Autonomous Driving Algorithms|[TIADALG](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/08_06_00_12/exports/docs/tiadalg/TIAutonomousDrivingAlgorithmLibrary_ReleaseNotes.html#Documentation)
 
 RTOS SDK 中集成了众多的Demo展示TIDL在TDA4处理器上对实时的语义分割和 SSD 目标检测的能力。如下图,	Vision Apps User Guide 中 [AVP Demo](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/07_02_00_06/exports/docs/vision_apps/docs/user_guide/group_apps_dl_demos_app_tidl_avp3.html) 的展示了使用TIDL对泊车点、车辆的检测。[^2]
-[^2]:[Deep Learning with Jacinto™ 7 SoCs: TDA4x](https://www.ti.com.cn/cn/lit/ml/slyp667/slyp667.pdf) | [当深度学习遇上TDA4](https://e2echina.ti.com/blogs_/b/behindthewheel/posts/tda4)
+[^2]:[Deep Learning with Jacinto™ 7 SoCs: TDA4x](https://www.ti.com.cn/cn/lit/ml/slyp667/slyp667.pdf?raw=true) | [当深度学习遇上TDA4](https://e2echina.ti.com/blogs_/b/behindthewheel/posts/tda4)
 
 <img alt="图 6" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/TDA4VMdemo.png" />  
 
@@ -118,7 +118,7 @@ ti-cgt-armllvm_<version>.LTS, ti-cgt-c6000_<version>, ti-cgt-c7000_<version>.LTS
 
 # TIDL
 [TIDL](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/06_01_01_12/exports/docs/tidl_j7_01_00_01_00/ti_dl/docs/user_guide_html/index.html)（TI Deep Learning Library）是TI平台基于深度学习算法的*软件生态系统*，其特性和支持[^1]可以将一些常见的深度学习算法模型快速的部署到TI嵌入式平台。
-[^1]:[Embedded low-power deep learning with TIDL](https://www.ti.com.cn/cn/lit/wp/spry314/spry314.pdf)
+[^1]:[Embedded low-power deep learning with TIDL](https://www.ti.com.cn/cn/lit/wp/spry314/spry314.pdf?raw=true)
 
 ```
 Features: Interoperability, High Compute, High Memory Bandwidth, Scalability
@@ -130,9 +130,7 @@ Functions:
 + Execute the network on PC using the imported ``.bin`` files and validate the results
 + Execute the network on TI Jacinto7 SoC using the imported ``.bin`` files and validate the results
 
-<img alt="图 10" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/TDA4VMppt1.png" width="80%"/>  
-<img alt="图 11" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/TDA4VMppt2.png" width="80%"/>  
-
+<img alt="图 14" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/TDA4VMTIDLppt.jpg" width="90%"/>  
 
 TIDL当前支持的训练框架有Tensorflow、Pytorch、Caffe等，用户可以根据需要选择合适的训练框架进行模型训练。TIDL可以将PC端训练好的模型导入编译生成TIDL可以识别的模型格式，同时在导入编译过程中进行层级合并以及量化等操作，方便导入编译后的模型高效的运行在具有高性能定点数据感知能力TDA4硬件加速器上。 TIDL提供了 [TIDL Importer](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/06_01_01_12/exports/docs/tidl_j7_01_00_01_00/ti_dl/docs/user_guide_html/md_tidl_model_import.html) 模型导入工具，模型可视化工具等，非常便捷地可以对训练好的模型进行导入。
 
@@ -153,7 +151,7 @@ Performance simulation results for network analysis in
     * EVM上验证并部署
         * 在EVM上使用TIDL推理引擎进行模型测试。
         * 在EVM上使用OpenVX框架开发程序，在应用上进行验证[^3]
-[^3]:[基于Pytorch训练并在TDA4上部署ONNX模型](https://www.ti.com/cn/lit/an/zhcabs1/zhcabs1.pdf)
+[^3]:[基于Pytorch训练并在TDA4上部署ONNX模型](https://www.ti.com/cn/lit/an/zhcabs1/zhcabs1.pdf?raw=true)
 
 ## TI's Edge AI
 TIDL is a fundamental software component of [TI’s Edge AI solution](https://www.ti.com/edgeai).
@@ -171,7 +169,7 @@ TIDL is a fundamental software component of [TI’s Edge AI solution](https://ww
 
 + [Edge AI Studio](https://dev.ti.com/edgeai/):Integrated development environment for development of AI applications for edge processors.（需授权）
 + [EdgeAI-ModelMaker](https://github.com/TexasInstruments/edgeai-modelmaker): Command line Integrated environment for training & compilation.
-<img alt="图 9" src="https://github.com/TexasInstruments/edgeai/blob/master/assets/workblocks_tools_software.png?raw=true" width="90%">  
+<img alt="图 9" src="https://raw.sevencdn.com/TexasInstruments/edgeai/blob/master/assets/workblocks_tools_software.png?raw=true" width="90%">  
 
 ## OpenVX
 [OpenVX](https://www.khronos.org/openvx/) 视觉加速中间件是芯片内部的硬件加速器与视觉应用间的桥梁(中间件:用于简化编程人员开发复杂度、抽象软硬件平台差异的软件抽象层)，是个由Khronos定义的API框架，包括：宏的定义与含义，结构体的定义与含义，函数的定义与行为。
