@@ -107,7 +107,7 @@ SET(ENV{变量名} 值) #设置环境变量
 make VERBOSE=1  #查看make过程
 make clean  #清理工程
 ```
-### [t5 模块](https://github.com/gavinliu6/CMake-Practice-zh-CN/blob/master/module.md)
+### [t5,t6 模块](https://github.com/gavinliu6/CMake-Practice-zh-CN/blob/master/module.md)
 ```sh
 #系统预定义的模块
 FIND_PACKAGE(CURL)  #FindCURL模块
@@ -134,9 +134,69 @@ ELSE(HELLO_FOUND)   # 如果没有找到，并且被标记为必需，则输出�
    ENDIF(HELLO_FIND_REQUIRED)
 ENDIF(HELLO_FOUND)
 ```
+## Cmake Opencv Demo
+**安装OpenCV**
+```
+git clone https://github.com/opencv/opencv.git
+cd opencv
+#cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local ..   #cmake把opencv的一些库和可执行文件安装到系统目录下 需要权限
+cmake -DCMAKE_INSTALL_PREFIX=$HOME/opencv .. #本地安装无需权限
+make -j8 #使用8个线程进行编译,否则很久
+make install   #安装库文件
+
+#配置OpenCV环境变量
+export LD_LIBRARY_PATH=/home/ywang85/opencv/lib:$LD_LIBRARY_PATH  #链接库文件
+export PKG_CONFIG_PATH=/home/ywang85/opencv/lib/cmake/opencv4/:$PKG_CONFIG_PATH  #链接配置文件
+```
+**写主程序**
+<details>
+  <summary>边缘提取程序</summary>
+
+      #include <opencv2/core/core.hpp>
+      #include <opencv2/imgproc/imgproc.hpp>
+      #include <opencv2/highgui/highgui.hpp>
+      #include <math.h>
+      #include <iostream>
+      using namespace cv;
+      using namespace std;
+      
+      int threshold_value = 100, threshold_max = 255;
+      int threshold_type = 0, threshold_type_max = 4;
+      string outwindow = "threshold img";
+      Mat src, dst;
+      int main(){
+         Mat src1;
+         src1 = imread("1.jpg");
+         resize(src1, src, Size(src1.cols, src1.rows)); 
+         //resize(src1, src, Size(src1.cols/2, src1.rows/2)); //缩小一半
+         if (!src.data){
+            printf("cannot load image ...");
+            return -1;
+         }
+         Mat src_gray;
+         cvtColor(src, src_gray, COLOR_BGR2GRAY);
+         Canny(src_gray, dst, 100, 200);//canny边缘检测算子
+         imwrite("canny.jpg", dst);
+         imwrite("canny2.jpg", ~dst); //dst按照像素值取反
+         return 0;
+      }
+</details>
+使用OpenCV的canny算子检测边缘
+
+**写CMake**
+```
+cmake_minimum_required(VERSION 2.8)
+project(EDGE)
+set(OpenCV_DIR "${CMAKE_SOURCE_DIR}/opencv/lib/cmake/opencv4/") #设置 OpenCV 的 CMake 路径
+find_package(OpenCV REQUIRED)
+add_executable(EDGE main.cpp)
+target_include_directories(EDGE PUBLIC ${OpenCV_INCLUDE_DIRS})  #头文件路径添加到编译器的include路径中
+target_link_libraries(EDGE PUBLIC ${OpenCV_LIBS})   #链接OpenCV库
+```
+
 ## gcc/g++,MinGW/MSVC与make/CMake/qmake
-**GNU**/Linux：简称Linux，包括Ubuntu，Debian，CentOS，自带gcc；
-**gcc/g++**：GNU编译器套件（GNU Compiler Collection）,在*Linux*或MacOS上使用，gcc主要用于C语言,g++支持更多的C++特性。
+**GNU**/Linux：简称Linux，包括Ubuntu，Debian，CentOS，自带gcc； 
+**gcc/g++** ：GNU编译器套件（GNU Compiler Collection）,在*Linux*或MacOS上使用，gcc主要用于C语言,g++支持更多的C++特性。
 
 **MinGW**(Minimalist GNUfor Windows)，是*Windows*下运行的GNU环境，包含gcc和一系列工具，让开发者在Windows下可以写GNU的c/c++代码, 编译的结果是windows的可执行文件exe；
 **MSVC**:微软开发的C/C++编译器，在*Windows*下编译C/C++程序。它被集成在Visual Studio IDE中。
