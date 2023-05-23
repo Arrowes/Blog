@@ -11,7 +11,7 @@ tags:
 适用于 ADAS 和自动驾驶汽车的TDA4VM Jacinto™ 处理器,具有深度学习、视觉功能和多媒体加速器的双核 Arm® Cortex®-A72 SoC 和 C7x DSP.
 Jacinto 7系列架构芯片含两款汽车级芯片：TDA4VM 处理器和 DRA829V 处理器，前者应用于 ADAS，后者应用于网关系统，以及加速数据密集型任务的专用加速器，如计算机视觉和深度学习。二者都基于J721E平台开发。
 ## 整体架构
-<img alt="图 3" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/TDA4VMedit.jpg" />  
+<img alt="图 3" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/TDA4VMedit.jpg"/>  
 
 ## 处理器内核
 + **C7x 浮点矢量 DSP，性能高达 1.0GHz、 80GFLOPS、256GOPS**：C7x是TI的一款高性能数字信号处理器，其中的浮点矢量 DSP 可以进行高效的信号处理、滤波和计算，大幅提高神经网络模型的计算效率。
@@ -36,8 +36,10 @@ Jacinto 7系列架构芯片含两款汽车级芯片：TDA4VM 处理器和 DRA829
 
 # SDK
 Download：[PROCESSOR-SDK-J721E](https://www.ti.com.cn/tool/cn/PROCESSOR-SDK-J721E)，提供Linux SDK、QNX SDK和RTOS SDK
-Document：[RTOS SDK](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/08_06_00_12/exports/docs/psdk_rtos/docs/user_guide/index.html)，[Linux SDK](https://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-rt-jacinto7/08_06_00_11/exports/docs/devices/J7/linux/index.html)，（[Processor SDK Linux for Edge AI](https://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-sk-tda4vm/latest/exports/docs/index.html#)，[~~QNX SDK~~](https://software-dl.ti.com/jacinto7/esd/processor-sdk-qnx-jacinto7/08_06_00_07/exports/docs/index.html)）
-*RTOS and Linux SDK work together as a multi-processor software development kit for the J721E platform*
+Document：[RTOS SDK](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/08_06_00_12/exports/docs/psdk_rtos/docs/user_guide/index.html)，[Linux SDK](https://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-rt-jacinto7/08_06_00_11/exports/docs/devices/J7/linux/index.html)，[Edge AI SDK](https://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-sk-tda4vm/latest/exports/docs/index.html#)，[~~QNX SDK~~](https://software-dl.ti.com/jacinto7/esd/processor-sdk-qnx-jacinto7/08_06_00_07/exports/docs/index.html)
+*RTOS and Linux SDK work together as a multi-processor software development kit for the J721E platform
+Edge AI SDK主要基于Linux开发，用于工业领域，工作量少但实时性差*[^0]
+[^0]:[深度学习算法在ADAS处理器TDA4VM的应用与部署](https://www.ti.com.cn/zh-cn/video/6301563648001)
 
 ## Processor SDK RTOS (PSDK RTOS) 
 **PSDK RTOS Block Diagram**
