@@ -36,8 +36,8 @@ YOLOv7网络结构：[理解yolov7网络结构](https://blog.csdn.net/athrunsunn
 ``--view-img --source 0``
 
 调用手机摄像头：
-DroidCamX App，关闭代理 连同一个网：
-``http://192.168.0.102:4747/video`` 
+下载 [IP摄像头](https://www.123pan.com/s/goS7Vv-QeKbd.html) App，关闭代理，连同一个网，Parameters配置为：
+``--source http://admin:admin@192.168.43.1:8081`` 具体地址见APP
 
 **Train参数**
 ``action='store_true' #触发了为true，否则为false 和 default=False 效果一样``
