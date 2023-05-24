@@ -31,14 +31,14 @@ cmake . #构建工程，生成makefile
 make    #构建目标文件hello二进制
 ./hello #运行目标文件
 #外部编译(out of source build,推荐)
-mkdir build, cd build #新建并进入build文件夹
+mkdir build && cd build #新建并进入build文件夹
 cmake ..    #在父目录找到cmakelists构建工程
 make    #在build编译目录中获得目标文件，不影响原有工程
 ```
 目标文件:在linux下，是ELF格式（Executable Linkable Format，可执行可链接格式），而在windows下是PE（Portable Executable，可移植可执行）。通常有三种形式：
-    + 可执行目标文件。即我们通常所认识的，可直接运行的二进制文件。
-    + 可重定位目标文件。包含了二进制的代码和数据，可以与其他可重定位目标文件合并，并创建一个可执行目标文件。
-    + 共享目标文件。它是一种在加载或者运行时进行链接的特殊可重定位目标文件。
+ + 可执行目标文件。即我们通常所认识的，可直接运行的二进制文件。
+ + 可重定位目标文件。包含了二进制的代码和数据，可以与其他可重定位目标文件合并，并创建一个可执行目标文件。
+ + 共享目标文件。它是一种在加载或者运行时进行链接的特殊可重定位目标文件。
 
 ### t2 [完善项目并安装](https://github.com/gavinliu6/CMake-Practice-zh-CN/blob/master/better-hello-world.md)
 ```sh
@@ -135,7 +135,7 @@ ELSE(HELLO_FOUND)   # 如果没有找到，并且被标记为必需，则输出�
 ENDIF(HELLO_FOUND)
 ```
 ## Cmake Opencv Demo
-**安装OpenCV**
+### 安装OpenCV
 ```
 git clone https://github.com/opencv/opencv.git
 cd opencv
@@ -148,7 +148,7 @@ make install   #安装库文件
 export LD_LIBRARY_PATH=/home/ywang85/opencv/lib:$LD_LIBRARY_PATH  #链接库文件
 export PKG_CONFIG_PATH=/home/ywang85/opencv/lib/cmake/opencv4/:$PKG_CONFIG_PATH  #链接配置文件
 ```
-**写主程序**
+### 写主程序
 <details>
   <summary>边缘提取程序</summary>
 
@@ -183,7 +183,7 @@ export PKG_CONFIG_PATH=/home/ywang85/opencv/lib/cmake/opencv4/:$PKG_CONFIG_PATH 
 </details>
 使用OpenCV的canny算子检测边缘
 
-**写CMake**
+### 写CMake
 ```
 cmake_minimum_required(VERSION 2.8)
 project(EDGE)
