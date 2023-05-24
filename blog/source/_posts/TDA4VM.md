@@ -92,31 +92,6 @@ yocto-build | 此目录允许重建SDK组件和使用Yocto Bitbake的文件系�
 </details>
 
 Linux SDK最主要是用于A72核心上的启动引导、操作系统、文件系统，一般只有在修改到这部分的时候才会使用到Linux SDK。
-## SDK环境搭建
-下载RTOS SDK与Linux SDK并安装
-
-**Linux SDK**
-```shell
-添加执行文件并执行
-chmod +x ./ti-processor-sdk-linux-j7-evm-08_06_01_02-Linux-x86-Install.bin 
-./ti-processor-sdk-linux-j7-evm-08_06_01_02-Linux-x86-Install.bin
-
-安装依赖的系统软件包和工具，跳过需要连EVM的NFS、minicom、TFTP(若Ubuntu版本不匹配 > /setup-host-check.sh > if [ "$host" != "bionic" ] 改为 if [ "$host" != "focal" ] )
-sudo ./setup.sh 
-```
-**RTOS SDK**
-```
-On Linux PC
-解压
-tar -xf ti-processor-sdk-rtos-j721e-evm-08_06_01_03.tar.gz
-./psdk_rtos/scripts/setup_psdk_rtos.sh
-
-On Window PC（components do not support）
-配置
-Download and Untar the Windows code gen tools tar ball ti-processor-sdk-rtos-j721e-evm-xx_xx_xx_xx-windows_codegen_tools.tar.gz
-Delete the following components in the SDK tar ball and replace with the corresponding components in the windows installation
-ti-cgt-armllvm_<version>.LTS, ti-cgt-c6000_<version>, ti-cgt-c7000_<version>.LTS
-```
 
 # TIDL
 [TIDL](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/06_01_01_12/exports/docs/tidl_j7_01_00_01_00/ti_dl/docs/user_guide_html/index.html)（TI Deep Learning Library）是TI平台基于深度学习算法的*软件生态系统*，其特性和支持[^2]可以将一些常见的深度学习算法模型快速的部署到TI嵌入式平台。
