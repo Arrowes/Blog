@@ -4,22 +4,22 @@ date: 2022-11-28 10:32:42
 tags:
 - Linux
 ---
-# Ubuntu
-Virtual Box+Ubuntu 20.04
-64bit:Bios enable intel virsualization
-Host 键:右ctrl
-换源：华为云，更新索引
-``Ctrl+alt+T``	Terminal
-``Ctrl+h``	显示隐藏文件   
-方向键上：可以获取上次的命令
-Tab：自动补全
-## Code
+
+# Code
 ```sh
 #系统
 lsb_release -a  #查ubuntu版本    
-sudo passwd root；su	#权限
+sudo passwd root；
+su	#切换到root用户，$ 是普通权限， #是管理员权限
+su username #切换到其他用户
+sudo usermod -aG sudo username   #添加用户为root
+sudo nautilus   #以root进入文件夹
 ps aux; kill [PID]  #查看进程; 根据进程号杀后台
-sudo apt update	#更新索引
+
+#安装 换源
+sudo apt-get install [] #安装 失败则换源
+sudo gedit /ect/apt/source.list #最后一行加入其他源
+sudo apt update	#更新索引(源)
 
 #文件
 mkdir []   #新建文件夹  
@@ -43,6 +43,20 @@ wget [url]  #下载
 tar -xf []  #解压
 vi []   #进入文件，编辑完按Esc返回命令模式，输入：x 退出
 ```
+# Ubuntu
+## 虚拟机
+[Virtual Box](https://www.virtualbox.org/wiki/Downloads) + [Ubuntu 20.04](http://releases.ubuntu.com/20.04/)（速度慢则换[镜像源](https://mirrors.tuna.tsinghua.edu.cn/ubuntu-releases/20.04/)）
+> 新建 > 导入.iso镜像 > 配置（分4G内存,100G硬盘）
+设置 > 共享文件夹 > 添加（自动挂载，固定分配）
+设置 > 共享粘贴板、拖放 > 双向
+
+64bit:Bios enable intel virsualization
+Host 键:右ctrl
+换源：华为云，更新索引
+``Ctrl+alt+T``	Terminal
+``Ctrl+h``	显示隐藏文件   
+方向键上：可以获取上次的命令
+Tab：自动补全
 ## VScode
 vscode远程访问：1.安装remote插件 2.连接服务器``ssh ywang85@she1-w50502`` 3.connect，打开terminal
 上传文件：vscode直接拖拽到目录
