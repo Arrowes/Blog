@@ -9,7 +9,7 @@ tags:
 ```sh
 #系统
 lsb_release -a  #查ubuntu版本    
-sudo passwd root；
+sudo passwd root  #更改root账户的密码
 su	#切换到root用户，$ 是普通权限， #是管理员权限
 su username #切换到其他用户
 sudo usermod -aG sudo username   #添加用户为root
@@ -42,28 +42,29 @@ find / -name "[]"   #查找
 wget [url]  #下载
 tar -xf []  #解压
 vi []   #进入文件，编辑完按Esc返回命令模式，输入：x 退出
+export 变量名=值    #设置或更新环境变量的值
+echo [] #输出指定的字符串或变量的值,用于调试程序、输出信息
 ```
 # Ubuntu
 ## 虚拟机
-[Virtual Box](https://www.virtualbox.org/wiki/Downloads) + [Ubuntu 20.04](http://releases.ubuntu.com/20.04/)（速度慢则换[镜像源](https://mirrors.tuna.tsinghua.edu.cn/ubuntu-releases/20.04/)）
+[Virtual Box](https://www.virtualbox.org/wiki/Downloads) + [Ubuntu 20.04](http://releases.ubuntu.com/20.04/),[18.04](https://releases.ubuntu.com/bionic/)（速度慢则换[镜像源](https://mirrors.tuna.tsinghua.edu.cn/ubuntu-releases/20.04/)）
 > 新建 > 导入.iso镜像 > 配置（分4G内存,100G硬盘）
 设置 > 共享文件夹 > 添加（自动挂载，固定分配）
 设置 > 共享粘贴板、拖放 > 双向
+若打不开终端：系统设置修改语言后重新登陆
 
-64bit:Bios enable intel virsualization
-Host 键:右ctrl
-换源：华为云，更新索引
-``Ctrl+alt+T``	Terminal
-``Ctrl+h``	显示隐藏文件   
-方向键上：可以获取上次的命令
-Tab：自动补全
+Host 键:右ctrl，方向键上：获取上次的命令，Tab：自动补全
+``Ctrl + alt + T``	Terminal
+``Ctrl + H``	显示隐藏文件   
+
 ## VScode
 vscode远程访问：1.安装remote插件 2.连接服务器``ssh ywang85@she1-w50502`` 3.connect，打开terminal
 上传文件：vscode直接拖拽到目录
 
 ## Debug
 Could not get lock /var/lib/dpkg/lock – open > 执行 ``sudo rm -rf /var/lib/dpkg/lock``
-共享文件夹ubuntu中不显示>重新安装VMware tools
+共享文件夹ubuntu中不显示 > 重新安装VMware tools
+``sudo apt-get install`` failed > 换源
  
 # Git主要指令
 
