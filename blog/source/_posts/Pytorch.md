@@ -10,7 +10,7 @@ tags:
 conda create -n pytorch python=3.6  #Anaconda创建环境
 conda update python, pip install --upgrade pip #更新
 conda activate pytorch  #激活环境
-deactivate  #退出虚拟环境
+conda deactivate  #退出虚拟环境
 conda remove pytorch --all  #删除环境
 pip install XXX==2.0, pip uninstall XXX #安装特定版本/卸载
 pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple  #pip换源
@@ -51,18 +51,18 @@ envs_dirs:
 
 # 编辑器
 ## Pycharm
-创建新项目	手动导入已存在的anaconda创建的环境：``D:\Anaconda3\envs\pytorch\python.exe``
+创建新项目	手动导入已存在的anaconda创建的环境``D:\Anaconda3\envs\pytorch\python.exe``
 更改环境：				``Settings > Project > interpreter``
-环境路径配置： ``接上interpreter > 齿轮 > Add > System Interpreter > 手动添加``
+环境路径配置： ``interpreter > 齿轮 > Add > System Interpreter > 手动添加``
 检验 : 				``Python Console``	``同上#查包处``
 Terminal：``File > Settings > Tools > Terminal > Shell path`` ``C:\Windows\System32\cmd.exe``
 
 **Pycharm使用**
-新建.py文件(用作工程)>右上角配置py解释器>运行/直接右键运行
-控制台(用作调试，查参数)>Shift+enter：输入多行>“↑”重新编辑
+> 新建.py文件(用作工程) > 右上角配置py解释器 > 运行/直接右键运行
+控制台(用作调试，查参数) > Shift+enter：输入多行 > “↑”重新编辑
 Ctrl + D 快速复制至下一行
 Ctrl + R 批量修改
-ctrl + / 批量注释
+Ctrl + / 批量注释
 调试：打断点 > debug > 使用工具栏内的“下一步”或“计算器内输入表达式”进行调试
 
 调试时使用Console的python调试台，print指令
@@ -72,7 +72,7 @@ ctrl + / 批量注释
 ## Jupyter notebook
 激活pytorch环境后 ``conda install nb_conda``
 打开 jupyter notebook
-``New>选择环境：Python [conda env:pytorch]``
+``New > 选择环境：Python [conda env:pytorch]``
 IDLE Ctrl+N 编辑多行代码
 输入一半按tab可以补全
 
