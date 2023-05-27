@@ -80,14 +80,74 @@ vision_apps/out/J7/R5F/SYSBIOS/$PROFILE
 vision_apps/out/J7/C66/SYSBIOS/$PROFILE
 vision_apps/out/J7/C71/SYSBIOS/$PROFILE
 ```
-### TIDL
-[TIDL-RT](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/08_06_00_12/exports/docs/tidl_j721e_08_06_00_10/ti_dl/docs/user_guide_html/md_tidl_dependency_info.html)
+## [TIDL](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/06_01_01_12/exports/docs/tidl_j7_01_00_01_00/ti_dl/docs/user_guide_html/md_tidl_user_model_deployment.html)
++ **Import** trained network models into files that can be used by TIDL. The following model formats are currently supported:
+    + .bin 二进制格式
+    + Caffe 模型（使用 .caffemodel 和 .prototxt 文件）
+    + Tensorflow 模型（使用 .pb 或 .tflite 文件）
+    + ONNX 模型（使用 .onnx 文件）
++ Run **performance simulation tool** on PC to estimate the expected performace of the network while executing the network for inference on TI Jacinto7 SoC
++ **Execute the network on PC** using the imported files and validate the results.bin
++ **Execute the network on TI** Jacinto7 SoC using the imported files and validate the results.bin
+### 配置
+```sh
+export TIDL_INSTALL_PATH=/home/wyj/SDK/ti-processor-sdk-rtos-j721e-evm-08_06_01_03/tidl_j721e_08_06_00_10
+
+#optional：tidlModelGraphviz tool 模型可视化工具
+sudo apt install graphviz-dev
+export TIDL_GRAPHVIZ_PATH=/usr
+cd ${TIDL_INSTALL_PATH}/ti_dl/utils/tidlModelGraphviz
+make
+```
+
+**Importing MobileNetV2 model for image classification**
+下载[.pb文件](https://storage.googleapis.com/mobilenet_v2/checkpoints/mobilenet_v2_1.0_224.tgz)，移到ti_dl/test/testvecs/models/public/tensorflow/mobilenet_v2
+```sh
+#模型推理优化
+pip install tensorflow
+cd /home/wyj/.local/lib/python3.6/site-packages/tensorflow/python/tools/
+#运行tensorflow下的optimize_for_inference工具
+python3  optimize_for_inference.py \
+                       --input=${TIDL_INSTALL_PATH}/ti_dl/test/testvecs/models/public/tensorflow/mobilenet_v2/mobilenet_v2_1.0_224_frozen.pb \
+                       --output=${TIDL_INSTALL_PATH}/ti_dl/test/testvecs/models/public/tensorflow/mobilenet_v2/mobilenet_v2_1.0_224_final.pb \
+                       --input_names="input" \
+                       --output_names="MobilenetV2/Predictions/Softmax"
+#生成mobilenet_v2_1.0_224_final.pb
+
+#Import
+cd ${TIDL_INSTALL_PATH}/ti_dl/utils/tidlModelImport
+./out/tidl_model_import.out ${TIDL_INSTALL_PATH}/ti_dl/test/testvecs/config/import/public/tensorflow/tidl_import_mobileNetv2.txt
+#配置文件tidl_import_mobileNetv2.txt及其相关文件在8.6的RTOSsdk中找不到，从SDK8.5复制
+#successful Memory allocation
+```
+**Importing PeleeNet model for object detection**
+[下载](https://drive.google.com/file/d/1KJHKYQ2nChZXlxroZRpg-tRsksTXUhe9/view)并提取.caffemodel，deploy.prototxt放入ti_dl/test/testvecs/models/public/caffe/peele/pelee_voc/
+deploy中改confidence_threshold: 0.4
+```sh
+cd ${TIDL_INSTALL_PATH}/ti_dl/utils/tidlModelImport
+./out/tidl_model_import.out ${TIDL_INSTALL_PATH}/ti_dl/test/testvecs/config/import/public/caffe/tidl_import_peeleNet.txt
+#successful Memory allocation
+```
+**Running PeleeNet for object detection**
+```sh
+#在文件ti_dl/test/testvecs/config/config_list.txt顶部加入:
+1 testvecs/config/infer/public/caffe/tidl_infer_pelee.txt
+0
+#运行，结果在ti_dl/test/testvecs/output/
+cd ${TIDL_INSTALL_PATH}/ti_dl/test
+./PC_dsp_test_dl_algo.out
+```
+
+### [TIDL-RT](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/08_06_00_12/exports/docs/tidl_j721e_08_06_00_10/ti_dl/docs/user_guide_html/md_tidl_dependency_info.html)
 ```sh
 export TIDL_INSTALL_PATH=/home/ywang85/SDK/RTOSSDK/tidl_j721e_08_06_00_10   #设置环境变量
-#../../inc/itidl_ti.h:91:21: fatal error: ivision.h: No such file or directory
-
+#TARGET_PLATFORM=PC make gv失败：../../inc/itidl_ti.h:91:21: fatal error: ivision.h: No such file or directory
+#跳过，不修改code暂时不要rebuild
 ```
-[EdgeAI TIDL Tools](https://github.com/TexasInstruments/edgeai-tidl-tools)
+
+
+
+### [EdgeAI TIDL Tools](https://github.com/TexasInstruments/edgeai-tidl-tools)
 ```sh
 sudo apt-get install libyaml-cpp-dev
 git clone https://github.com/TexasInstruments/edgeai-tidl-tools.git #failed：手动安装证书 git config --global http.sslVerify false，export GIT_SSL_NO_VERIFY=1
@@ -96,4 +156,26 @@ export SOC=am68pa
 source ./setup.sh   #有些包可能要手动安装，并注释掉
 
 Docker Based X86_PC Setup
+#sudo docker build失败：Get "https://registry-1.docker.io/v2/": x509: certificate signed by unknown authority
+```
+
+
+
+### [TIDL Importer](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/06_01_01_12/exports/docs/tidl_j7_01_00_01_00/ti_dl/docs/user_guide_html/md_tidl_model_import.html)
+1. Read import config file.
+2. Translate/import layers/operators to TIDL net file, Calculate layer size & buffer size. Merge layers if possible.
+3. Generate quant config file, call quant tool to do Range Collection, and update the TIDL net file.
+4. Generate config file for network compiler, and calls complier to do performance optimization.
+5. *[Optional]* call GraphVisualiser to generate a image of net structure.
+6. Import tool will check the model at the end of import process.
+7. Finally, if there is no error, it is ready to deploy.
+support：
+> Caffe - 0.17 (caffe-jacinto in gitHub)
+Tensorflow - 1.12
+ONNX - 1.3.0
+TFLite - Tensorflow 2.0-Alpha
+
+```sh
+#位于RTOSsdk的tidl_j721e/ti_dl/utils/tidlModelImport
+
 ```
