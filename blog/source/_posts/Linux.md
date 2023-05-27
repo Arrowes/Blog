@@ -28,7 +28,7 @@ touch [] [] #创建文件
 rm []   #删除文件
 mv [file] [dir] #移动文件 (dir不存在则为重命名）批量：[file1 file2]
 cp -r [] [] #复制文件
-sudo nautilu	#执行文件操作    
+sudo nautilus	#执行文件操作    
 chmod u+x [] #添加可执行文件
 
 #cd
