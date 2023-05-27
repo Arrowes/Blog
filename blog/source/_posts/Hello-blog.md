@@ -5,7 +5,7 @@ tags:
 - 技术
 ---
 第一篇博客用来记录搭建该网站并成功发表这篇博客的流程，使用Hexo静态博客框架，托管于Github，参考了多篇文章[^1]。
-
+<!--more-->
 <img alt="图 1" src="https://raw.sevencdn.com/Arrowes/Arrowes-Blogbackup/main/images/Hello-blogBlogPhoto.jpg" width = "50%"/>  
 
 ### 总体流程
@@ -24,11 +24,6 @@ Github网站项目地址：[Arrowes.github.io](https://github.com/Arrowes/Arrowe
 用关键词在谷歌里搜到自己的网页：[让Google搜索到自己的博客](https://zoharandroid.github.io/2019-08-03-%E8%AE%A9%E8%B0%B7%E6%AD%8C%E6%90%9C%E7%B4%A2%E5%88%B0%E8%87%AA%E5%B7%B1%E7%9A%84%E5%8D%9A%E5%AE%A2/)
 
 ### 网站配置
-#### hexo 添加自定义单静态页面 跳过hexo渲染，以resume为例:
-1. 将resume文件夹放进Theme主题文件夹下的/source
-2. Hexo-config: skip_render: resume/** （可省略）
-3. 引用时直接 /resume/
-
 #### 添加动态背景，以动态线条为例：
 1. themes/next/layout/_layout 在`</body>`末尾添加如下代码：
      ```html
@@ -43,34 +38,14 @@ Github网站项目地址：[Arrowes.github.io](https://github.com/Arrowes/Arrowe
      ```
 
 #### 统计功能
+统计人数、阅读次数：
 /next/_config：找到busuanzi_count进行配置
-或自定义配置：
-打开themes\next\layout_partial\footer.swig文件，在文件末尾添加：
-```
-<div class="theme-info">
-  <div class="powered-by"></div>
-  <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
-  <span class="post-count">全站共{{ totalcount(site) }}字</span> | 访问量<span id="busuanzi_value_site_pv"></span>次
-</div>
-```
-阅读时间：
+统计字数、阅读时间：
 1. npm install hexo-word-counter
-2. Hexo _config.yml：
-```
-symbols_count_time:
-  symbols: true
-  time: true
-  total_symbols: true
-  total_time: true
-  exclude_codeblock: false
-  awl: 4
-  wpm: 275
-  suffix: "mins."
-```
-3. /next/_config:将设置item_text_total为true
+2. /next/_config:设置item_text_total为true
+
 #### 配置网站超链接颜色
 打开 `Blog\themes\next\source\css\_common\components\post` 路径下的post.styl , 并在底部添加如下代码:
-
 ```css
 a:not(.btn){
   color:; //超链接显示颜色
@@ -85,20 +60,28 @@ a:not(.btn){
 
 #### 搜索功能
 1. 在项目根目录下运行 ``npm install hexo-generator-searchdb --save``
-2. 更改主题配置文件 /next/_config 将local_search下的enable从false改为true
+2. 更改主题配置文件 /next/_config 将local_search下的enable改为true
+
+#### 首页展示文章数
+```css
+#Hexo-config文件修改
+index_generator:
+  path: ''
+  per_page: 0 #不分页
+```
 
 #### 设置阅读全文
 1. 在项目根目录下执行 ``npm install hexo-excerpt --save``
 2. 在站点配置文件/hexo/_config.yml添加:
     ```css
     excerpt:			# 一定要顶格写，注意格式
-      depth: 5			# 他的大小就是全文阅读预览长度设置
+      depth: 1			# 他的大小就是全文阅读预览长度设置
       excerpt_excludes: []
       more_excludes: []
       hideWholePostExcerpts: true
       ```
 
-3. 在主题配置文件/next/_config中 excerpt_description 改为true
+3. 在主题配置文件/next/_config中 excerpt_description 改为false
 
 #### 添加标签
 1. 配置 主题配置文件中删掉tags的注释
@@ -107,14 +90,17 @@ a:not(.btn){
 
 #### 公式
 [markdown公式符号大全](https://blog.csdn.net/konglongdanfo1/article/details/85204312)
-文章内：
+主题配置文件：
 ```
-title:
-date:
-mathjax: true
----
- ```
-主题配置文件：``mathjax:  enable: true``
+math:
+  every_page: true
+  mathjax:  enable: true
+```
+
+#### hexo 添加自定义单静态页面 跳过hexo渲染，以resume为例:
+1. 将resume文件夹放进Theme主题文件夹下的/source
+2. Hexo-config: skip_render: resume/** （可省略）
+3. 引用时直接 /resume/
 
 #### 流程图
 ``npm install hexo-filter-mermaid-diagrams``
@@ -161,12 +147,12 @@ q3mbRZwwnnKUXHcibZg6UN8ulCHE2UDXMjaEB4LKd
 √ 网站底部的图标不显示:Font Awesome部分图标收费
 √ 访客数、文章字数没有数据：busuanzi链接过期
 √ 生成的文章目录结构混乱：避免写跨级结构
-部署经常超时 error：spawn failed，参考的[方法](https://blog.csdn.net/HTL2018/article/details/106876940)存疑
+部署经常超时 error：spawn failed，多试几次
 
 
 ### 总结
 熟悉了搭建网站流程，想起本科打电子商务比赛花钱请人做网站，还是本地的静态网站，有点冤种；
-对Github的工作流有了一定了解，比一键**Download ZIP**有所进步；
+对Github的工作流有了一定了解，比一键*Download ZIP*有所进步；
 看了很多人写的教程才完成，花了整整两天，还是有点费时间的，除了瞎折腾，更多的其实是想搭建一个**输出**的平台，锻炼一下自己的表达、总结能力，改善一下自己学了就忘，忘了就废的情况，希望自己能继续坚持，多写几篇！
 
 
