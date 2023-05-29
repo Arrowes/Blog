@@ -7,16 +7,18 @@ tags:
 ---
 # Yolo
 ## 配置
-### Windows环境配置
+详细配置见 [Anaconda，Pycharm，Jupyter，Pytorch](https://wangyujie.site/2022/11/24/Pytorch/)
+
+**Windows环境配置**
 1. 安装[Anaconda](https://www.anaconda.com/)，修改user目录下.condarc文件里的默认地址，防止环境装在C盘占空间 或执行``conda config --add D:\Anaconda3\envs ``,然后``conda info``检查envs directories
 （若报错 The channel is not accessible or is invalid 运行``conda config --remove-key channels``）
-2. 安装[Pychram](https://www.jetbrains.com/pycharm/), 用pycharm打开YOLO项目文件夹，配置编辑器``D:P\Anaconda3\envs\pytorch\python.exe``
-3. 安装显卡驱动对应的CUDA：``nvidia-smi`` 查询支持CUDA版本，再到[Pytorch官网](https://pytorch.org/get-started/locally/)复制对应code进行安装
-``conda install pytorch torchvision torchaudio pytorch-cuda=11.8 -c pytorch -c nvidia``
-4. 验证：先``import torch``，再``torch.cuda.is_available()``,返回True说明GPU可以被使用
-5. 安装包：``pip install -r requirements.txt``,补装失败的包``pip install opencv-python -i https://pypi.tuna.tsinghua.edu.cn/simple/``
+2. 配置环境：打开Anaconda Prompt, 创建环境``conda create -n pytorch python=3.6``, 激活环境``conda activate pytorch``
+3. 安装显卡驱动对应的CUDA：``nvidia-smi`` 查询支持CUDA版本，再到[Pytorch官网](https://pytorch.org/get-started/locally/)复制对应code进行安装``conda install pytorch torchvision torchaudio pytorch-cuda=11.8 -c pytorch -c nvidia``
+（验证：先``import torch``，再``torch.cuda.is_available()``,返回True说明GPU可以被使用）
+4. 安装[Pychram](https://www.jetbrains.com/pycharm/), 用pycharm打开YOLO项目文件夹，配置编辑器``D:P\Anaconda3\envs\pytorch\python.exe``，在pycharm的terminal中打开pytorch环境
+5. 安装各种包：``pip install -r requirements.txt``,补装失败的包``pip install opencv-python -i https://pypi.tuna.tsinghua.edu.cn/simple/``
 
-### Linux 环境配置
+**Linux 环境配置**
 1. 安装：[Anaconda](https://www.anaconda.com/)，执行这个.sh文件，输入``bash XXX.sh``，然后一路enter和yes；
 激活：``cd ///root/anaconda3/bin``,输入：``source ./activate``，终端前出现``(base)``则激活成功
 创建环境：``conda create -n pytorch python=3.6``
