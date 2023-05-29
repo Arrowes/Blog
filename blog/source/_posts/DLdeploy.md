@@ -17,7 +17,7 @@ tags:
 
 
 ## [ONNX](https://onnx.ai) (Open Neural Network Exchange)
-开源机器学习通用中间格式，兼容各种深度学习框架、推理引擎、终端硬件、操作系统，[Github](https://github.com/onnx/onnx)，[ONNX Runtime Web](https://onnx.coderai.cn)
+开源机器学习通用中间格式，兼容各种深度学习框架、推理引擎、终端硬件、操作系统，是深度学习框架到推理引擎的桥梁[Github](https://github.com/onnx/onnx)，[ONNX Runtime Web](https://onnx.coderai.cn)，[TORCH.ONNX](https://pytorch.org/docs/stable/onnx.html)
 
 
 
@@ -83,13 +83,24 @@ vision_apps/out/J7/C71/SYSBIOS/$PROFILE
 ## [TIDL](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/06_01_01_12/exports/docs/tidl_j7_01_00_01_00/ti_dl/docs/user_guide_html/md_tidl_user_model_deployment.html)
 + **Import** trained network models into files that can be used by TIDL. The following model formats are currently supported:
     + .bin 二进制格式
-    + Caffe 模型（使用 .caffemodel 和 .prototxt 文件）
-    + Tensorflow 模型（使用 .pb 或 .tflite 文件）
-    + ONNX 模型（使用 .onnx 文件）
+    + Caffe 模型（使用 .caffemodel 和 .prototxt 文件） - 0.17 (caffe-jacinto in gitHub)
+    + Tensorflow 模型（使用 .pb 或 .tflite 文件） - 1.12（TFLite - Tensorflow 2.0-Alpha）
+    + ONNX 模型（使用 .onnx 文件） - 1.3.0
 + Run **performance simulation tool** on PC to estimate the expected performace of the network while executing the network for inference on TI Jacinto7 SoC
 + **Execute the network on PC** using the imported files and validate the results.bin
 + **Execute the network on TI** Jacinto7 SoC using the imported files and validate the results.bin
-### 配置
+
+[TIDL Importer](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/06_01_01_12/exports/docs/tidl_j7_01_00_01_00/ti_dl/docs/user_guide_html/md_tidl_model_import.html), ``RTOSsdk/tidl_j721e/ti_dl/utils/tidlModelImport``
+1. Read import config file.
+2. Translate/import layers/operators to TIDL net file, Calculate layer size & buffer size. Merge layers if possible.
+3. Generate quant config file, call quant tool to do Range Collection, and update the TIDL net file.
+4. Generate config file for network compiler, and calls complier to do performance optimization.
+5. *[Optional]* call GraphVisualiser to generate a image of net structure.
+6. Import tool will check the model at the end of import process.
+7. Finally, if there is no error, it is ready to deploy.
+
+### Config, Import, Run
+**Config** TIDL
 ```sh
 export TIDL_INSTALL_PATH=/home/wyj/SDK/ti-processor-sdk-rtos-j721e-evm-08_06_01_03/tidl_j721e_08_06_00_10
 
@@ -100,7 +111,7 @@ cd ${TIDL_INSTALL_PATH}/ti_dl/utils/tidlModelGraphviz
 make
 ```
 
-**Importing MobileNetV2 model for image classification**
+**Import**ing MobileNetV2 model for image classification (tensorflow)
 下载[.pb文件](https://storage.googleapis.com/mobilenet_v2/checkpoints/mobilenet_v2_1.0_224.tgz)，移到ti_dl/test/testvecs/models/public/tensorflow/mobilenet_v2
 ```sh
 #模型推理优化
@@ -119,24 +130,79 @@ cd ${TIDL_INSTALL_PATH}/ti_dl/utils/tidlModelImport
 ./out/tidl_model_import.out ${TIDL_INSTALL_PATH}/ti_dl/test/testvecs/config/import/public/tensorflow/tidl_import_mobileNetv2.txt
 #配置文件tidl_import_mobileNetv2.txt及其相关文件在8.6的RTOSsdk中找不到，从SDK8.5复制
 #successful Memory allocation
+#Compiled network and I/O .bin files used for inference
+    #Compiled network file in ti_dl/test/testvecs/config/tidl_models/tensorflow/tidl_net_mobilenet_v2_1.0_224.bin
+    #Compiled I/O file in ti_dl/test/testvecs/config/tidl_models/tensorflow/tidl_net_mobilenet_v2_1.0_2241.bin
+#Performance simulation results for network analysis in ti_dl/utils/perfsim/tidl_import_mobileNetv2.txt/tidl_import_mobileNetv2.txt_Analysis_DSP1_FRQ1000_DATA1_MSMCS7936_DDRE0.60_EMIFP1_DDRMTS3733_224x224.csv
 ```
-**Importing PeleeNet model for object detection**
+
+**Import**ing PeleeNet model for object detection (caffe)
 [下载](https://drive.google.com/file/d/1KJHKYQ2nChZXlxroZRpg-tRsksTXUhe9/view)并提取.caffemodel，deploy.prototxt放入ti_dl/test/testvecs/models/public/caffe/peele/pelee_voc/
-deploy中改confidence_threshold: 0.4
+deploy.prototxt中改confidence_threshold: 0.4
 ```sh
 cd ${TIDL_INSTALL_PATH}/ti_dl/utils/tidlModelImport
 ./out/tidl_model_import.out ${TIDL_INSTALL_PATH}/ti_dl/test/testvecs/config/import/public/caffe/tidl_import_peeleNet.txt
 #successful Memory allocation
+# Compiled network and I/O .bin files used for inference
+    # Compiled network file in ti_dl/test/testvecs/config/tidl_models/caffe/tidl_net_peele_300.bin
+    # Compiled I/O file in ti_dl/test/testvecs/config/tidl_models/caffe/tidl_io_peele_300_1.bin
+# Performance simulation results for network analysis in ti_dl/utils/perfsim/tidl_import_peeleNet.txt/tidl_import_peeleNet.txt_Analysis_DSP1_FRQ1000_DATA0_MSMCS7936_DDRE0.60_EMIFP1_DDRMTS3733_1024x512.csv
 ```
-**Running PeleeNet for object detection**
+
+**Run**ning PeleeNet for object detection
 ```sh
 #在文件ti_dl/test/testvecs/config/config_list.txt顶部加入:
 1 testvecs/config/infer/public/caffe/tidl_infer_pelee.txt
 0
+
 #运行，结果在ti_dl/test/testvecs/output/
 cd ${TIDL_INSTALL_PATH}/ti_dl/test
 ./PC_dsp_test_dl_algo.out
+#若标注框尺寸不匹配，需要改deploy.prototxt文件顶部：dim: 512  dim: 1024
 ```
+<img alt="picture 1" src="https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/06_01_01_12/exports/docs/tidl_j7_01_00_01_00/ti_dl/docs/user_guide_html/out_ti_lindau_000020.png" width="70%"/>  
+
+### YOLO部署TDA4流程 
+TI官方在[ModelZOO](https://github.com/TexasInstruments/edgeai-modelzoo)中提供了一系列预训练模型可以直接拿来转换，也提供了[edgeai-YOLOv5](https://github.com/TexasInstruments/edgeai-yolov5)与[edgeai-YOLOX](https://github.com/TexasInstruments/edgeai-yolox)等开源项目，针对部署做了优化,可以在官方提供的基础上，训练自己的模型，并将 *.pth 权重文件，使用``tools/export_onnx.py``文件导出为onnx模型文件和prototxt架构配置文件。
+此处直接下载提供的yolov7_s的[onnx文件](http://software-dl.ti.com/jacinto7/esd/modelzoo/latest/models/vision/detection/coco/edgeai-yolox/yolox-s-ti-lite_39p1_57p9.onnx
+)和[prototxt文件](http://software-dl.ti.com/jacinto7/esd/modelzoo/latest/models/vision/detection/coco/edgeai-yolox/yolox_s_ti_lite_metaarch.prototxt
+):
+```sh
+#模型文件配置：拷贝onnx,prototxt 至/ti_dl/test/testvecs/models/public/onnx/，deploy.prototxt中改nms_threshold: 0.9，confidence_threshold: 0.2
+#编写转换配置文件：在/testvecs/config/import/public/onnx下新建（或复制参考目录下yolov3例程）tidl_import_yolox_s.txt：
+modelType          = 2  #模型类型，	0: Caffe, 1: TensorFlow, 2: ONNX, 3: tfLite
+numParamBits       = 8  #模型参数的位数，Bit depth for model parameters like Kernel, Bias etc.
+numFeatureBits     = 8  #Bit depth for Layer activation
+quantizationStyle  = 3  #量化方法，Quantization method. 2: Linear Mode. 3: Power of 2 scales（2的幂次）
+inputNetFile       = "../../test/testvecs/models/public/onnx/yolox-s-ti-lite_39p1_57p9.onnx"    #Net definition from Training frames work
+outputNetFile      = "../../test/testvecs/config/tidl_models/onnx/yolo/tidl_net_yolox_s.bin"    #Output TIDL model with Net and Parameters
+outputParamsFile   = "../../test/testvecs/config/tidl_models/onnx/yolo/tidl_io_yolox_s_"    #Input and output buffer descriptor file for TIDL ivision interface
+inDataNorm  = 1 #1Enable / 0Disable Normalization on input tensor.
+inMean = 0 0 0  #Mean value needs to be subtracted for each channel of all input tensors
+inScale = 1.0 1.0 1.0  #Scale value needs to be multiplied after means subtract for each channel of all input tensors，yolov3是0.003921568627 0.003921568627 0.003921568627
+inDataFormat = 1    #Input tensor color format. 0: BGR planar, 1: RGB planar
+inWidth  = 640  #each input tensors Width (可以在.prototxt文件中查找到)
+inHeight = 640  #each input tensors Height
+inNumChannels = 3   #each input tensors Number of channels
+numFrames = 1   #Number of input tensors to be processed from the input file
+inData  =   "../../test/testvecs/config/detection_list.txt" #Input tensors File for Reading
+perfSimConfig = ../../test/testvecs/config/import/device_config.cfg #Network Compiler Configuration file
+inElementType = 0   #Format for each input feature, 0 : 8bit Unsigned, 1 : 8bit Signed
+metaArchType = 6    #网络使用的元架构类型，Meta Architecture used by the network，yolov3是4
+metaLayersNamesList =  "../../test/models/pubilc/onnx/yolox_s_ti_lite_metaarch.prototxt"    #架构配置文件，Configuration files describing the details of Meta Arch
+postProcType = 2    #后处理，Post processing on output tensor. 0 : Disable, 1- Classification top 1 and 5 accuracy, 2 – Draw bounding box for OD, 3 - Pixel level color blending
+
+cd ${TIDL_INSTALL_PATH}/ti_dl/utils/tidlModelImport
+./out/tidl_model_import.out ${TIDL_INSTALL_PATH}/ti_dl/test/testvecs/config/import/public/onnx/tidl_import_yolox_s.txt
+
+#生成的文件分析：
+
+#运行测试
+```
+
+
+
+
 
 ### [TIDL-RT](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/08_06_00_12/exports/docs/tidl_j721e_08_06_00_10/ti_dl/docs/user_guide_html/md_tidl_dependency_info.html)
 ```sh
@@ -157,25 +223,8 @@ source ./setup.sh   #有些包可能要手动安装，并注释掉
 
 Docker Based X86_PC Setup
 #sudo docker build失败：Get "https://registry-1.docker.io/v2/": x509: certificate signed by unknown authority
+#跳过，好像RTOS SDK中是自带的
 ```
 
 
 
-### [TIDL Importer](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/06_01_01_12/exports/docs/tidl_j7_01_00_01_00/ti_dl/docs/user_guide_html/md_tidl_model_import.html)
-1. Read import config file.
-2. Translate/import layers/operators to TIDL net file, Calculate layer size & buffer size. Merge layers if possible.
-3. Generate quant config file, call quant tool to do Range Collection, and update the TIDL net file.
-4. Generate config file for network compiler, and calls complier to do performance optimization.
-5. *[Optional]* call GraphVisualiser to generate a image of net structure.
-6. Import tool will check the model at the end of import process.
-7. Finally, if there is no error, it is ready to deploy.
-support：
-> Caffe - 0.17 (caffe-jacinto in gitHub)
-Tensorflow - 1.12
-ONNX - 1.3.0
-TFLite - Tensorflow 2.0-Alpha
-
-```sh
-#位于RTOSsdk的tidl_j721e/ti_dl/utils/tidlModelImport
-
-```
