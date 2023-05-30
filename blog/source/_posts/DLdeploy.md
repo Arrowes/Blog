@@ -103,6 +103,7 @@ vision_apps/out/J7/C71/SYSBIOS/$PROFILE
 **Config** TIDL
 ```sh
 export TIDL_INSTALL_PATH=/home/wyj/SDK/ti-processor-sdk-rtos-j721e-evm-08_06_01_03/tidl_j721e_08_06_00_10
+#配置永久环境变量更方便，sudo gedit /etc/profile，末尾加入如上代码，然后source /etc/profile加载立即生效
 
 #optional：tidlModelGraphviz tool 模型可视化工具
 sudo apt install graphviz-dev
@@ -162,11 +163,37 @@ cd ${TIDL_INSTALL_PATH}/ti_dl/test
 ```
 <img alt="picture 1" src="https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/06_01_01_12/exports/docs/tidl_j7_01_00_01_00/ti_dl/docs/user_guide_html/out_ti_lindau_000020.png" width="70%"/>  
 
+
+
 ### YOLO部署TDA4流程 
-TI官方在[ModelZOO](https://github.com/TexasInstruments/edgeai-modelzoo)中提供了一系列预训练模型可以直接拿来转换，也提供了[edgeai-YOLOv5](https://github.com/TexasInstruments/edgeai-yolov5)与[edgeai-YOLOX](https://github.com/TexasInstruments/edgeai-yolox)等开源项目，针对部署做了优化,可以在官方提供的基础上，训练自己的模型，并将 *.pth 权重文件，使用``tools/export_onnx.py``文件导出为onnx模型文件和prototxt架构配置文件。
-此处直接下载提供的yolov7_s的[onnx文件](http://software-dl.ti.com/jacinto7/esd/modelzoo/latest/models/vision/detection/coco/edgeai-yolox/yolox-s-ti-lite_39p1_57p9.onnx
+TI官方在[ModelZOO](https://github.com/TexasInstruments/edgeai-modelzoo)中提供了一系列预训练模型可以直接拿来转换，也提供了[ edgeai-YOLOv5 ](https://github.com/TexasInstruments/edgeai-yolov5)与[ edgeai-YOLOX ](https://github.com/TexasInstruments/edgeai-yolox)等优化的开源项目，可以在官方提供的基础上训练自己的模型，得到 *.pth 权重文件，使用 export_onnx.py 文件导出为 onnx 模型文件和 prototxt 架构配置文件。
+可以直接下载提供的yolov7_s的[onnx文件](http://software-dl.ti.com/jacinto7/esd/modelzoo/latest/models/vision/detection/coco/edgeai-yolox/yolox-s-ti-lite_39p1_57p9.onnx
 )和[prototxt文件](http://software-dl.ti.com/jacinto7/esd/modelzoo/latest/models/vision/detection/coco/edgeai-yolox/yolox_s_ti_lite_metaarch.prototxt
-):
+)，这里尝试跑通全流程，在 edgeai-YOLOX 项目中使用export_onnx.py导出onnx模型文件，并导入TIDL，主要参考[edgeai-YOLOX文档](https://github.com/TexasInstruments/edgeai-yolox/blob/main/README_2d_od.md)
+
+**1. 模型文件转ONNX**
+~~pycharm进入edgeai-yolox项目，根据提示额外安装requirements~~，Window中配置该环境需要安装visual studio build tools，而且很多包报错，因此转ubuntu用vscode搭pytorch环境，非常顺利（vscode插件无法在线安装：如装python插件，直接进[ marketplace ](https://marketplace.visualstudio.com/vscode)下好拖到扩展位置）拓展设置中把Python Default Path改成创建的环境/home/wyj/anaconda3/envs/pytorch/bin/python，最后用vscode打开项目，F5运行py程序。
+```sh
+pip3 install -U pip && pip3 install -r requirements.txt
+pip3 install -v -e .  # or  python3 setup.py develop
+#安装pycocotools
+pip3 install cython
+pip3 install 'git+https://github.com/cocodataset/cocoapi.git#subdirectory=PythonAPI'
+#下载官方的yolox_s.pth放入项目文件夹，运行export，
+python3 tools/export_onnx.py --output-name yolox_s.onnx -f exps/default/yolox_s.py -c yolox_s.pth
+#Debug：
+TypeError: Descriptors cannot not be created directly. > pip install protobuf==3.19.6;
+AttributeError: module 'numpy' has no attribute 'object'. > pip install numpy==1.23.4
+#成功，生成onnx文件
+ __main__:main:245 - generated onnx model named yolox_s.onnx
+ __main__:main:261 - generated simplified onnx model named yolox_s.onnx
+ __main__:main:264 - generated prototxt yolox_s.prototxt
+```
+export.py参数如何配置：
+
+[ONNXRuntime Demo](https://github.com/TexasInstruments/edgeai-yolox/tree/main/demo/ONNXRuntime#yolox-onnxruntime-in-python)
+
+**2. ONNX导入TIDL**
 ```sh
 #模型文件配置：拷贝onnx,prototxt 至/ti_dl/test/testvecs/models/public/onnx/，deploy.prototxt中改nms_threshold: 0.9，confidence_threshold: 0.2
 #编写转换配置文件：在/testvecs/config/import/public/onnx下新建（或复制参考目录下yolov3例程）tidl_import_yolox_s.txt：
@@ -196,10 +223,34 @@ cd ${TIDL_INSTALL_PATH}/ti_dl/utils/tidlModelImport
 ./out/tidl_model_import.out ${TIDL_INSTALL_PATH}/ti_dl/test/testvecs/config/import/public/onnx/tidl_import_yolox_s.txt
 
 #生成的文件分析：
-
-#运行测试
 ```
 
+
+**3. TIDL运行**
+```sh
+#在文件ti_dl/test/testvecs/config/config_list.txt顶部加入:
+1 testvecs/config/infer/public/onnx/tidl_infer_yolox.txt
+0
+
+#tidl_infer_yolox.txt:
+inFileFormat    = 2
+numFrames   = 1
+netBinFile      = "testvecs/config/tidl_models/onnx/yolo/tidl_net_yolox_s.bin"
+ioConfigFile   = "testvecs/config/tidl_models/onnx/yolo/tidl_io_yolox_s_1.bin"
+inData  =   testvecs/config/detection_list.txt
+outData =   testvecs/output/tidl_yolox_od.bin
+inResizeMode = 0
+debugTraceLevel = 0
+writeTraceLevel = 0
+postProcType = 2
+
+#运行，结果在ti_dl/test/testvecs/output/，.txt文件能看到具体结果
+cd ${TIDL_INSTALL_PATH}/ti_dl/test
+./PC_dsp_test_dl_algo.out
+```
+
+
+**3. 板端运行**
 
 
 
