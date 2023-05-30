@@ -12,7 +12,7 @@ tags:
 **Windows环境配置**
 1. 安装[Anaconda](https://www.anaconda.com/)，修改user目录下.condarc文件里的默认地址，防止环境装在C盘占空间 或执行``conda config --add D:\Anaconda3\envs ``,然后``conda info``检查envs directories
 （若报错 The channel is not accessible or is invalid 运行``conda config --remove-key channels``）
-2. 配置环境：打开Anaconda Prompt, 创建环境``conda create -n pytorch python=3.6``, 激活环境``conda activate pytorch``
+2. 配置环境：打开Anaconda Prompt, 创建环境``conda create -n pytorch python=3.8``, 激活环境``conda activate pytorch``
 3. 安装显卡驱动对应的CUDA：``nvidia-smi`` 查询支持CUDA版本，再到[Pytorch官网](https://pytorch.org/get-started/locally/)复制对应code进行安装``conda install pytorch torchvision torchaudio pytorch-cuda=11.8 -c pytorch -c nvidia``
 （验证：先``import torch``，再``torch.cuda.is_available()``,返回True说明GPU可以被使用）
 4. 安装[Pychram](https://www.jetbrains.com/pycharm/), 用pycharm打开YOLO项目文件夹，配置编辑器``D:P\Anaconda3\envs\pytorch\python.exe``，在pycharm的terminal中打开pytorch环境
@@ -23,7 +23,7 @@ tags:
 激活：``cd ///root/anaconda3/bin``,输入：``source ./activate``，终端前出现``(base)``则激活成功
 创建环境：``conda create -n pytorch python=3.6``
 进入环境：``conda activate pytorch``
-2. 下载pycharm，解压，进入bin文件夹，运行``./pycharm.sh``以打开pycharm
+2. 下载pycharm，解压，进入bin文件夹，运行``./pycharm.sh``以打开pycharm（更简单且能生成图标的方法：``sudo snap install pycharm-community --classic``）
 在项目中导入环境``.conda/envs/pytorch/bin/python3.6``
 3. 安装cuda
     + pytorch
@@ -33,6 +33,7 @@ tags:
     cuDNN:``conda install cudnn=7.6``
     tf:``pip install tensorflow-gpu==1.15.0``(注意版本匹配)
 
+如果requirements中有包实在安不上，手动装包：进[网站](https://pypi.org/)搜索包，下载.whl，在包所在位置激活环境运行``pip install [].whl``(包名中cp38代表python3.8版本)
 
 ## 资料
 YOLOv1 - v5历程：[从yolov1至yolov5的进阶之路](https://blog.csdn.net/wjinjie/article/details/107509243)
@@ -44,6 +45,7 @@ YOLOv7网络结构：[理解yolov7网络结构](https://blog.csdn.net/athrunsunn
 ## Paper & Code
 [YOLOv1](https://arxiv.org/pdf/1506.02640.pdf) & [Code](https://pjreddie.com/darknet/yolov1/); [YOLOv2](https://arxiv.org/pdf/1612.08242.pdf) & [Code](https://pjreddie.com/darknet/yolo/); [YOLOv3](https://arxiv.org/pdf/1804.02767.pdf) & [Code](https://github.com/ultralytics/yolov3); YOLOv4 & [Code](https://github.com/Tianxiaomo/pytorch-YOLOv4); YOLOv5 & [Code](https://github.com/search?q=yolov5); [YOLOv6](https://arxiv.org/pdf/2209.02976.pdf) & [Code](https://github.com/meituan/YOLOv6); [YOLOv7](https://arxiv.org/abs/2207.02696) & [Code](https://github.com/WongKinYiu/yolov7); YOLOv8 & [Code](https://github.com/ultralytics/ultralytics)
 算法复现精品仓库：[Bubbliiiing](https://github.com/bubbliiiing)
+论文：[CEAM-YOLOv7:Improved YOLOv7 Based on Channel Expansion Attention Mechanism for Driver behavior detection](https://ieeexplore.ieee.org/document/9980374/metrics)，代码：[Github](https://github.com/Arrowes/CEAM-YOLOv7)
 
 ### 代码
 **Detect参数**
@@ -138,7 +140,7 @@ elif EIoU:
             iou = bbox_iou(pbox.T, tbox[i], x1y1x2y2=False, EIoU=True)  # iou(prediction, target)
 ```
 
-## 其他未实现的想法
+# 其他未实现的想法
 融合EfficientNet和YoloV5：主要思想是训练一个图像分类模型(EfficientNet)，它可以实现非常高的AUC(约0.99)，并找到一种方法将其与目标检测模型融合。这被称为“2 class filter”
 
 双流网络
@@ -157,7 +159,7 @@ The author uses ArcFace loss to measure the error of prediction. This loss was p
 
 PERCLOS值怎么显示？
 
-## 炼丹经验
+# 炼丹经验
 标注，标注框的设计影响精度
 通道压缩，注意输入图片的通道数
 Resize，保持原始图像比例调整大小更安全
