@@ -1,13 +1,15 @@
 ---
-title: Python工具：Anaconda，Pycharm，Jupyter，Pytorch
+title: Python：Anaconda，Pycharm，Pytorch
 date: 2022-11-24 21:26:44
 tags: 
 - python
 ---
+
 视频：[PyTorch深度学习快速入门教程](https://www.bilibili.com/video/BV1hE411t7RN/)
+
 # Anaconda
 ```
-conda create -n pytorch python=3.6  #Anaconda创建环境
+conda create -n pytorch python=3.8  #Anaconda创建环境
 conda update python, pip install --upgrade pip #更新
 conda activate pytorch  #激活环境
 conda deactivate  #退出虚拟环境
@@ -47,7 +49,7 @@ pip install opencv-python -i https://pypi.tuna.tsinghua.edu.cn/simple/  #pip换�
 ```
 envs_dirs:
   - D:\Anaconda3\envs
-  ```
+```
 
 # 编辑器
 ## Pycharm
@@ -106,6 +108,42 @@ IDLE Ctrl+N 编辑多行代码
     make_tar_file(dir_name, tar_file_name, ignore)
 </details>
 
+
+## [Google Colab](https://colab.research.google.com/)
+
+```py
+#设置并查看GPU 修改>笔记本设置>GPU
+import tensorflow as tf
+tf.test.gpu_device_name()
+
+!/opt/bin/nvidia-smi #详情
+```
+
+### 基本指令
+```py
+!unzip /content/XX.zip -d /content/XX   #解压
+%cd /content/XX     #进入
+!pip install -r requirements.txt    #安装requirements
+!python XX.py --rect #运行
+!rm -rf /content/XX/mydata #删除
+
+%load_ext tensorboard   #加载tensorboard
+%tensorboard --logdir=runs/train    #执行tensorboard
+```
+
+### 云盘
+```py
+#先装载谷歌云盘，在云盘里运行以防数据丢失，指定Google Drive云端硬盘的根目录，名为drive
+!mkdir -p drive
+!google-drive-ocamlfuse drive
+
+#connect to self drive
+from google.colab import drive
+drive.mount('/content/drive')
+#云训练时还是要将盘里的文件拿出来再开始，否则容易直接断连!
+```
+续航插件：[Colab Alive](https://chrome.google.com/webstore/detail/colab-alive/eookkckfbbgnhdgcbfbicoahejkdoele?hl=zh-CN), 防止训练时掉线
+
 # Pytorch
 要调用GPU进行训练的话，需要安装显卡驱动对应的CUDA
 1. ``nvidia-smi`` 查询支持CUDA版本
@@ -121,6 +159,7 @@ torch.__version__ #查pytorch
 
 nvidia-smi #查GPU CUDA
 python –version #查python版本
+conda install python=3.8  #升级(覆盖安装)python
 ```
 
 ## 库
@@ -151,7 +190,7 @@ a = (1, 2)  # 元组 tuple
 b = [1, 2, 3]  # 数组 list
 c = {'name': 'wyj', 'age': '23'}  
 # 字典 dict
- print(a[0])
+print(a[0])
 print(b[1])
 print(c['name'])
 ```
@@ -161,10 +200,10 @@ print(c['name'])
 pytorch下安装 ``pip install tensorboard (conda)``
 使用
 ```py
-	from torch.utils.tensorboard import SummaryWriter
-	writer=SummaryWriter(“logs“)
-	writer.add_image("name“，parameter，组内步数)
-	writer.close() #关闭读写 
+from torch.utils.tensorboard import SummaryWriter
+writer=SummaryWriter(“logs“)
+writer.add_image("name“，parameter，组内步数)
+writer.close() #关闭读写 
 ```
 打开
 ```py
@@ -229,40 +268,3 @@ test_loader = DataLoader(dataset=test_data, batch_size=64, shuffle=True, num_wor
             step = step + 1
     writer.close()
 </details>
-
-## [Google Colab](https://colab.research.google.com/)
-
-```py
-#设置并查看GPU 修改>笔记本设置>GPU
-import tensorflow as tf
-tf.test.gpu_device_name()
-
-!/opt/bin/nvidia-smi #详情
-```
-
-### 基本指令
-```py
-!unzip /content/XX.zip -d /content/XX   #解压
-%cd /content/XX     #进入
-!pip install -r requirements.txt    #安装requirements
-!python XX.py --rect #运行
-!rm -rf /content/XX/mydata #删除
-
-
-%load_ext tensorboard   #加载tensorboard
-%tensorboard --logdir=runs/train    #执行tensorboard
-```
-
-### 云盘
-```py
-#先装载谷歌云盘，在云盘里运行以防数据丢失
- #指定Google Drive云端硬盘的根目录，名为drive
-!mkdir -p drive
-!google-drive-ocamlfuse drive
-
-#connect to self drive
-from google.colab import drive
-drive.mount('/content/drive')
-#云训练时还是要将盘里的文件拿出来再开始，否则容易直接断连!
-```
-续航插件：[Colab Alive](https://chrome.google.com/webstore/detail/colab-alive/eookkckfbbgnhdgcbfbicoahejkdoele?hl=zh-CN), 防止训练时掉线
