@@ -8,8 +8,8 @@ tags:
 # 算法部署
 + Network selection：
 
-+ Optimization：分组卷积、深度可分离卷积、稀疏卷积[^0]
-[^0]:[适用于嵌入式应用的深度学习推理参考设计](https://www.ti.com.cn/cn/lit/ug/zhcu546/zhcu546.pdf)
++ Optimization：分组卷积、深度可分离卷积、稀疏卷积[^1]
+[^1]:[适用于嵌入式应用的深度学习推理参考设计](https://www.ti.com.cn/cn/lit/ug/zhcu546/zhcu546.pdf)
 
 + Deployment：
 <img alt="图 7" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/TDA4VMdeploy.png" width="70%"/>  
@@ -17,8 +17,19 @@ tags:
 
 ## [ONNX](https://onnx.ai) (Open Neural Network Exchange)
 开源机器学习通用中间格式，兼容各种深度学习框架、推理引擎、终端硬件、操作系统，是深度学习框架到推理引擎的桥梁[Github](https://github.com/onnx/onnx)，[ONNX Runtime Web](https://onnx.coderai.cn)，[TORCH.ONNX](https://pytorch.org/docs/stable/onnx.html)
+Pytorch 模型导出使用自带的接口：`torch.onnx.export`
+ PyTorch 转 ONNX，实际上就是把每个 PyTorch 的操作映射成了 ONNX 定义的算子。PyTorch 对 ONNX 的算子支持:[官方算子文档](https://link.zhihu.com/?target=https%3A//github.com/onnx/onnx/blob/main/docs/Operators.md)
+在转换普通的torch.nn.Module模型时，PyTorch 一方面会用跟踪法执行前向推理，把遇到的算子整合成计算图；另一方面，PyTorch 还会把遇到的每个算子翻译成 ONNX 中定义的算子。在这个翻译过程中，可能会碰到以下情况：
+> 该算子可以一对一地翻译成一个 ONNX 算子。
+该算子在 ONNX 中没有直接对应的算子，会翻译成一至多个 ONNX 算子。
+该算子没有定义翻译成 ONNX 的规则，报错。[^2]
 
+[^2]:[PyTorch 转 ONNX 详解](https://zhuanlan.zhihu.com/p/498425043)
 
+要使 PyTorch 算子顺利转换到 ONNX ，我们需要保证：
+> 算子在 PyTorch 中有实现
+有把该 PyTorch 算子映射成一个或多个 ONNX 算子的方法
+ONNX 有相应的算子
 
 
 # 基于TDA4VM的深度学习算法嵌入式部署
@@ -31,54 +42,82 @@ tags:
 #添加执行文件并执行
 chmod +x ./ti-processor-sdk-linux-j7-evm-08_06_01_02-Linux-x86-Install.bin 
 ./ti-processor-sdk-linux-j7-evm-08_06_01_02-Linux-x86-Install.bin
-
 #安装依赖的系统软件包和工具，安装过程中跳过需要连EVM的NFS、minicom、TFTP
 #(若Ubuntu版本不匹配 > bin/setup-host-check.sh > if [ "$host" != "bionic" ] 改为 if [ "$host" != "focal" ] )
 sudo ./setup.sh
 #TISDK setup completed!
 ```
-1.1.3章节说明了如何格式化SD卡。在TDA4VM的开发过程中，都是使用TF卡进行开发的。在单片机开发平台下，通常是直接用电脑使用USB方式将固件烧写到板卡的eMMC或FLASH中去。在TI平台下，首选的调试方法是使用TF卡：TF卡会被划分为两个分区，一个是BOOT分区（FAT32），用于存放bootloader如uboot等，另一个是rootfs分区（ext4），用于存放Linux需要的文件系统。每次Ubuntu编译完成的固件都需要手工拷贝到TF卡中，然后将TF卡插入EVM上电启动。
 
 1.1.4章节介绍了顶层的Makefile。通过在根目录下make linux或u-boot等各种命令，可以快速的让SDK编译出你所需要的产物。注意需要手工修改Rules.mak文件中的DESTDIR变量为你的TF卡挂载路径。
+编译命令 | 作用 (ti-processor-sdk-linux-j7-evm*/board-support/)
+--|--
+Make linux, Make linux_install|编译Linux kernel代码和dtb，主要用于内核驱动的修改和裁剪。安装命令可以将内核和驱动模块自动拷贝到TF卡中。然后执行make linux install才能生成built-images
+Make u-boot	| 编译u-boot代码，主要分为两部分：运行在MCU上的r5f部分和运行在A72上的a53部分。此处A72兼容A53指令集。
+Make sysfw-image| 生成sysfw固件，主要在修改MSMC大小的时候会用到。
+
+
 
 ### RTOS SDK
 [RTOS SDK](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/08_06_00_12/exports/docs/psdk_rtos/docs/user_guide/index.html)
-> ti-processor-sdk-rtos-j721e-evm-08_06_01_03.tar.gz
+> 下载：
+ti-processor-sdk-rtos-j721e-evm-08_06_01_03.tar.gz
 ti-processor-sdk-rtos-j721e-evm-08_06_01_03-prebuilt.tar
+两个dataset.tar.gz
 
 ```sh
 tar -xf ti-processor-sdk-rtos-j721e-evm-08_06_01_03.tar.gz  #解压
-
 #配置RTOS和Linux的安装环境变量
 export PSDKL_PATH=/home/wyj/SDK/ti-processor-sdk-linux-j7-evm-08_06_01_02
 export PSDKR_PATH=/home/wyj/SDK/ti-processor-sdk-rtos-j721e-evm-08_06_01_03
-
 #拷贝linux系统文件和linux启动文件到psdk rtos文件夹（或从rtos-prebuilt.tar）
 cp ${PSDKL_PATH}/board-support/prebuilt-images/boot-j7-evm.tar.gz ${PSDKR_PATH}/
 cp ${PSDKL_PATH}/filesystem/tisdk-default-image-j7-evm.tar.xz ${PSDKR_PATH}/
-
 #安装依赖库和下载编译器，若安装报错则需换源，有包没安上会影响之后的make
 ./psdk_rtos/scripts/setup_psdk_rtos.sh  #若卡在git clone则进.sh把git://换成https://
 #Packages installed successfully
 ```
-### Vision Apps Demo
+
+
+### [Vision Apps Demo](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/08_06_00_12/exports/docs/vision_apps/docs/user_guide/ENVIRONMENT_SETUP.html)
 ```sh
 #修改文件 tiovx/build_flags.mak（没修改过则是默认）
 BUILD_EMULATION_MODE=no #非模拟器模式
 BUILD_TARGET_MODE=yes
 BUILD_LINUX_A72=yes
 PROFILE=release
-
+#Optional:配置tiovx/build_flags.mak, vision_apps/vision_apps_build_flags.mak
 #开始编译vision apps
 cd vision_apps
-make vision_apps -j4    #若缺少core-secdev-k3包，手动导入
-
+make vision_apps -j8    #若缺少core-secdev-k3包，手动导入(https://git.ti.com/cgit/security-development-tools/core-secdev-k3/snapshot/core-secdev-k3-08.06.00.006.tar.gz)
 #编译成功可以看到对应目录下有产出文件，RTOS SDK主要使用了一个开源编译框架concerto，这个框架基于Makefile，他能够自动搜索当前目录内的所有concerto.mak文件，并且分析依赖，一次将各个核心的固件全部编译出来。编译生成的文件位于
 vision_apps/out/J7/A72/LINUX/$PROFILE
 vision_apps/out/J7/R5F/SYSBIOS/$PROFILE
 vision_apps/out/J7/C66/SYSBIOS/$PROFILE
 vision_apps/out/J7/C71/SYSBIOS/$PROFILE
+
+##If clean build of vision_apps/clean the full PSDK RTOS
+#cd vision_apps, make vision_apps_scrub/make sdk_scrub
 ```
+<details>
+<summary>配置SD卡(EVM)</summary>
+配置SD卡(EVM)，在TDA4VM的开发过程中，都是使用TF卡进行开发的。在单片机开发平台下，通常是直接用电脑使用USB方式将固件烧写到板卡的eMMC或FLASH中去。在TI平台下，首选的调试方法是使用TF卡：TF卡会被划分为两个分区，一个是 *BOOT* 分区（FAT32），用于存放bootloader如uboot等，另一个是 *rootfs* 分区（ext4），用于存放Linux需要的文件系统。每次Ubuntu编译完成的固件都需要手动拷贝到TF卡中，然后将TF卡插入EVM上电启动。
+
+``df -h``, 查得SD卡设备名 `/dev/sdb`
+使用RTOS SDK prebuilt中的脚本依次执行：
+脚本|作用
+--|--
+sudo ./mk-linux-card.sh /dev/sdb|用途：将TF卡重新分区、并且格式化
+./install_to_sd_card.sh|将该脚本旁边的文件系统压缩包直接拷贝到/media/USER/BOOT和/media/USER/rootfs中，需要十几分钟，之后该卡就可以启动了。
+./install_data_set_to_sd_card.sh ./psdk_rtos_ti_data_set_08_06_00.tar.gz|以及./psdk_rtos_ti_data_set_08_06_00_j721e.tar.gz，将数据集解压到TF卡中对应的位置，这样默认SDK配套的Demo就可以正常运行。
+
+添加可执行文件至SD card
+```sh
+cd ${PSDKR_PATH}/vision_apps
+make linux_fs_install_sd
+```
+然后即可插在EVM端运行，这里没有，跳过。
+</details>
+
 ## [TIDL](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/06_01_01_12/exports/docs/tidl_j7_01_00_01_00/ti_dl/docs/user_guide_html/md_tidl_user_model_deployment.html)
 + **Import** trained network models into files that can be used by TIDL. The following model formats are currently supported:
     + .bin 二进制格式
@@ -152,6 +191,8 @@ TI官方在[ModelZOO](https://github.com/TexasInstruments/edgeai-modelzoo)中提
 )和[prototxt文件](http://software-dl.ti.com/jacinto7/esd/modelzoo/latest/models/vision/detection/coco/edgeai-yolox/yolox_s_ti_lite_metaarch.prototxt
 )，这里尝试跑通全流程，在 edgeai-YOLOX 项目中使用export_onnx.py导出onnx模型文件，并导入TIDL，主要参考[edgeai-YOLOX文档](https://github.com/TexasInstruments/edgeai-yolox/blob/main/README_2d_od.md)以及[YOLOX模型训练结果导入及平台移植应用](https://blog.csdn.net/AIRKernel/article/details/126222505)
 
+<img alt="picture 1" src="https://github.com/TexasInstruments/edgeai-yolox/raw/main/yolox/utils/figures/Focus.png"/>  
+
 **1. 模型文件转ONNX**
 ~~pycharm进入edgeai-yolox项目，根据提示额外安装requirements~~
 Window中配置该环境需要安装visual studio build tools，而且很多包报错，因此转ubuntu用vscode搭pytorch环境，非常顺利（vscode插件离线安装：如装python插件，直接进[ marketplace ](https://marketplace.visualstudio.com/vscode)下好拖到扩展位置）拓展设置中把Python Default Path改成创建的环境 /home/wyj/anaconda3/envs/pytorch/bin/python，最后用vscode打开项目，F5运行py程序，将.pth转为 ``.onnx, .prototxt`` 文件。
@@ -161,10 +202,8 @@ pip3 install -v -e .  # or  python3 setup.py develop
 #安装pycocotools
 pip3 install cython
 pip3 install 'git+https://github.com/cocodataset/cocoapi.git#subdirectory=PythonAPI'
-
 #下载ti的yolox-s-ti-lite.pth放入项目文件夹，运行export，
 python3 tools/export_onnx.py --output-name yolox_s_ti_lite.onnx -f exps/default/yolox_s_ti_lite.py -c yolox-s-ti-lite.pth
-
 #Debug：
 TypeError: Descriptors cannot not be created directly. > pip install protobuf==3.19.6;
 AttributeError: module 'numpy' has no attribute 'object'. > pip install numpy==1.23.4
@@ -208,11 +247,11 @@ metaArchType = 6    #网络使用的元架构类型，Meta Architecture used by 
 metaLayersNamesList =  "../../test/models/pubilc/onnx/yolox_s_ti_lite.prototxt"    #架构配置文件，Configuration files describing the details of Meta Arch
 postProcType = 2    #后处理，Post processing on output tensor. 0 : Disable, 1- Classification top 1 and 5 accuracy, 2 – Draw bounding box for OD, 3 - Pixel level color blending
 ```
-3. 模型导入：使用TIDL import tool，得到可执行文件 ``.bin``
+3. 模型导入
+使用TIDL import tool，得到可执行文件 ``.bin``
 ```sh
 cd ${TIDL_INSTALL_PATH}/ti_dl/utils/tidlModelImport
 ./out/tidl_model_import.out ${TIDL_INSTALL_PATH}/ti_dl/test/testvecs/config/import/public/onnx/tidl_import_yolox_s.txt
-
 #successful Memory allocation
 #../../test/testvecs/config/tidl_models/onnx/生成的文件分析：
 tidl_net_yolox_s.bin    #Compiled network file 网络模型数据
@@ -248,9 +287,16 @@ cd ${TIDL_INSTALL_PATH}/ti_dl/test
 ./PC_dsp_test_dl_algo.out
 ```
 
-
-**3. 板端运行**
+**3. 板端运行([TDA4VM-SK](https://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-edgeai/TDA4VM/08_06_01/exports/docs/devices/TDA4VM/linux/getting_started.html))**
 通过USB挂载SD卡到Ubuntu
+下载[SDK包](https://www.ti.com/tool/download/PROCESSOR-SDK-LINUX-SK-TDA4VM)
+使用[Balena etcher tool 1.7.0](https://github.com/balena-io/etcher/releases/tag/v1.7.0)把 SD card .wic image flash到SD卡上
+然后插入SD卡到SK板，上电，进入界面。
+```sh
+#安装SDK Linux-SK
+chmod +x ./xxx.bin
+./xxx.bin
+```
 
 
 
