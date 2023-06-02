@@ -45,6 +45,7 @@ vi []   #命令行进入文件，编辑完按Esc返回命令模式，输入：x 
 gedit []    #图形界面进入文件直接编辑
 whereis []  #查找
 export 变量名=值    #设置或更新环境变量的值
+#配置永久环境变量更方便，sudo gedit /etc/profile，末尾加入如上代码，然后source /etc/profile加载立即生效
 echo [] #输出指定的字符串或变量的值,用于调试程序、输出信息
 ```
 # Ubuntu
