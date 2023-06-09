@@ -1,40 +1,15 @@
 ---
-title: TIDL模型转换
+title: TIDL:模型转换及部署
 date: 2023-05-18 16:28:00
 tags:
 - 嵌入式
 - 深度学习
 ---
-# 算法部署
-+ Network selection：
 
-+ Optimization：分组卷积、深度可分离卷积、稀疏卷积[^1]
-[^1]:[适用于嵌入式应用的深度学习推理参考设计](https://www.ti.com.cn/cn/lit/ug/zhcu546/zhcu546.pdf)
-
-+ Deployment：
-<img alt="图 7" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/TDA4VMdeploy.png" width="70%"/>  
-
-
-## [ONNX](https://onnx.ai) (Open Neural Network Exchange)
-开源机器学习通用中间格式，兼容各种深度学习框架、推理引擎、终端硬件、操作系统，是深度学习框架到推理引擎的桥梁[Github](https://github.com/onnx/onnx)，[ONNX Runtime Web](https://onnx.coderai.cn)，
-
-Pytorch 模型导出使用自带的接口：`torch.onnx.export`
-[TORCH.ONNX](https://pytorch.org/docs/stable/onnx.html)，[Github](https://github.com/pytorch/pytorch/tree/main/torch/onnx)
- PyTorch 转 ONNX，实际上就是把每个 PyTorch 的操作映射成了 ONNX 定义的算子。PyTorch 对 ONNX 的算子支持:[官方算子文档](https://github.com/onnx/onnx/blob/main/docs/Operators.md)
-在转换普通的torch.nn.Module模型时，PyTorch 一方面会用跟踪法执行前向推理，把遇到的算子整合成计算图；另一方面，PyTorch 还会把遇到的每个算子翻译成 ONNX 中定义的算子。要使 PyTorch 算子顺利转换到 ONNX ，我们需要保证[^2]：
-> 算子在 PyTorch 中有实现
-有把该 PyTorch 算子映射成一个或多个 ONNX 算子的方法
-ONNX 有相应的算子
-
-[^2]:[PyTorch 转 ONNX 详解](https://zhuanlan.zhihu.com/p/498425043)
-
-
-# 基于TDA4VM的深度学习算法嵌入式部署
-相关知识介绍见笔记：[[TDA4VM, TIDL, OpenVX]](https://wangyujie.site/2023/05/10/TDA4VM/)
-## SDK环境搭建与调试
-[PROCESSOR-SDK-J721E](https://www.ti.com.cn/tool/cn/PROCESSOR-SDK-J721E)
-### Linux SDK
-[Linux SDK](https://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-rt-jacinto7/08_06_00_11/exports/docs/devices/J7/linux/index.html)
+相关前置知识见笔记：[[TDA4VM, TIDL, OpenVX]](https://wangyujie.site/2023/05/10/TDA4VM/)
+环境搭建需要下载：[PROCESSOR-SDK-J721E](https://www.ti.com.cn/tool/cn/PROCESSOR-SDK-J721E)
+# Linux SDK 环境搭建与调试
+[Linux SDK Doc](https://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-rt-jacinto7/08_06_00_11/exports/docs/devices/J7/linux/index.html)
 ```shell
 #添加执行文件并执行
 chmod +x ./ti-processor-sdk-linux-j7-evm-08_06_01_02-Linux-x86-Install.bin 
@@ -44,8 +19,7 @@ chmod +x ./ti-processor-sdk-linux-j7-evm-08_06_01_02-Linux-x86-Install.bin
 sudo ./setup.sh
 #TISDK setup completed!
 ```
-
-1.1.4章节介绍了顶层的Makefile。通过在根目录下make linux或u-boot等各种命令，可以快速的让SDK编译出你所需要的产物。注意需要手工修改Rules.mak文件中的DESTDIR变量为你的TF卡挂载路径。
+通过在根目录下make linux或u-boot等各种命令，可以快速的让SDK编译出你所需要的产物。注意需要手工修改Rules.mak文件中的DESTDIR变量为你的TF卡挂载路径。
 编译命令 | 作用 (ti-processor-sdk-linux-j7-evm*/board-support/)
 --|--
 Make linux, Make linux_install|编译Linux kernel代码和dtb，主要用于内核驱动的修改和裁剪。安装命令可以将内核和驱动模块自动拷贝到TF卡中。然后执行make linux install才能生成built-images
@@ -53,14 +27,12 @@ Make u-boot	| 编译u-boot代码，主要分为两部分：运行在MCU上的r5f
 Make sysfw-image| 生成sysfw固件，主要在修改MSMC大小的时候会用到。
 
 
-
-### RTOS SDK
-[RTOS SDK](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/08_06_00_12/exports/docs/psdk_rtos/docs/user_guide/index.html)
+# RTOS SDK
+[RTOS SDK Doc](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/08_06_00_12/exports/docs/psdk_rtos/docs/user_guide/index.html)
 > 下载：
 ti-processor-sdk-rtos-j721e-evm-08_06_01_03.tar.gz
 ti-processor-sdk-rtos-j721e-evm-08_06_01_03-prebuilt.tar
 两个dataset.tar.gz
-
 ```sh
 tar -xf ti-processor-sdk-rtos-j721e-evm-08_06_01_03.tar.gz  #解压
 #配置RTOS和Linux的安装环境变量
@@ -75,7 +47,7 @@ cp ${PSDKL_PATH}/filesystem/tisdk-default-image-j7-evm.tar.xz ${PSDKR_PATH}/
 ```
 
 
-### [Vision Apps Demo](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/08_06_00_12/exports/docs/vision_apps/docs/user_guide/ENVIRONMENT_SETUP.html)
+# [Vision Apps Demo](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/08_06_00_12/exports/docs/vision_apps/docs/user_guide/ENVIRONMENT_SETUP.html)
 ```sh
 #修改文件 tiovx/build_flags.mak（没修改过则是默认）
 BUILD_EMULATION_MODE=no #非模拟器模式
@@ -115,28 +87,13 @@ make linux_fs_install_sd
 然后即可插在EVM端运行，这里没有，跳过。
 </details>
 
-## [TIDL](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/06_01_01_12/exports/docs/tidl_j7_01_00_01_00/ti_dl/docs/user_guide_html/md_tidl_user_model_deployment.html)
-+ **Import** trained network models into *.bin* files that can be used by TIDL. The following model formats are currently supported:
-    + Caffe 模型（使用 .caffemodel 和 .prototxt 文件） - 0.17 (caffe-jacinto in gitHub)
-    + Tensorflow 模型（使用 .pb 或 .tflite 文件） - 1.12（TFLite - Tensorflow 2.0-Alpha）
-    + *ONNX* 模型（使用 .onnx 文件 和 .prototxt 文件） - 1.3.0 （官方onnx已经到了1.14）
-+ Run **performance simulation tool** on PC to estimate the expected performace of the network while executing the network for inference on TI Jacinto7 SoC
-+ **Execute the network on PC** using the imported files and validate the results.bin
-+ **Execute the network on TI** Jacinto7 SoC using the imported files and validate the results.bin
-
-[TIDL Importer](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/06_01_01_12/exports/docs/tidl_j7_01_00_01_00/ti_dl/docs/user_guide_html/md_tidl_model_import.html), ``RTOSsdk/tidl_j721e/ti_dl/utils/tidlModelImport``
-1. 读取导入配置文件；
-2. 转换并导入网络层和算子（operators）到TIDL net file，计算层大小和缓冲区大小，并尽可能合并层；
-3. 生成量化配置文件，调用量化工具（quant tool）进行范围采集，并更新TIDL net file；
-4. 生成用于网络编译器（network compiler）的配置文件，并调用编译器进行性能优化；
-5. *[Optional]* 调用GraphVisualiser来生成网络图；
-6. 导入工具将在最后结束检查模型；
-7. 最后，如果没有错误，可以用于部署。
+# [TIDL](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/06_01_01_12/exports/docs/tidl_j7_01_00_01_00/ti_dl/docs/user_guide_html/md_tidl_user_model_deployment.html)
 
 <img src="https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/06_01_01_12/exports/docs/tidl_j7_01_00_01_00/ti_dl/docs/user_guide_html/TIDL_import_process.png" >
 
-### Config, Import, Run
+## Demo
 [Demo：MobileNetV2 Tensorflow model，PeleeNet Caffe model，JSegNet21V2 Caffe model](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/06_01_01_12/exports/docs/tidl_j7_01_00_01_00/ti_dl/docs/user_guide_html/md_tidl_user_model_deployment.html#importing-mobilenetv2-model-for-image-classification)
+
 **Config** TIDL
 ```sh
 export TIDL_INSTALL_PATH=/home/wyj/SDK/ti-processor-sdk-rtos-j721e-evm-08_06_01_03/tidl_j721e_08_06_00_10
@@ -183,7 +140,7 @@ cd ${TIDL_INSTALL_PATH}/ti_dl/test
 <img alt="picture 1" src="https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/06_01_01_12/exports/docs/tidl_j7_01_00_01_00/ti_dl/docs/user_guide_html/out_ti_lindau_000020.png" width="70%"/>  
 
 
-### YOLOX部署TDA4流程
+## YOLOX部署TDA4VM-SK流程
 TI官方在[ ModelZOO ](https://github.com/TexasInstruments/edgeai-modelzoo)中提供了一系列预训练模型可以直接拿来转换，也提供了[ edgeai-YOLOv5 ](https://github.com/TexasInstruments/edgeai-yolov5)与[ edgeai-YOLOX ](https://github.com/TexasInstruments/edgeai-yolox)等优化的开源项目，可以直接下载提供的yolov7_s的[ onnx文件 ](http://software-dl.ti.com/jacinto7/esd/modelzoo/latest/models/vision/detection/coco/edgeai-yolox/yolox-s-ti-lite_39p1_57p9.onnx
 )和[ prototxt文件 ](http://software-dl.ti.com/jacinto7/esd/modelzoo/latest/models/vision/detection/coco/edgeai-yolox/yolox_s_ti_lite_metaarch.prototxt
 )，也可以在官方项目上训练自己的模型后再导入。
@@ -193,7 +150,7 @@ TI官方在[ ModelZOO ](https://github.com/TexasInstruments/edgeai-modelzoo)中�
 
 <img alt="picture 1" src="https://github.com/TexasInstruments/edgeai-yolox/raw/main/yolox/utils/figures/Focus.png"/>  
 
-**1. 模型文件转ONNX**
+### 1. 模型文件转ONNX
 ~~pycharm进入edgeai-yolox项目，根据提示额外安装requirements~~
 Window中配置该环境需要安装visual studio build tools，而且很多包报错，因此转ubuntu用vscode搭pytorch环境，非常顺利（vscode插件离线安装：如装python插件，直接进[ marketplace ](https://marketplace.visualstudio.com/vscode)下好拖到扩展位置）拓展设置中把Python Default Path改成创建的环境 /home/wyj/anaconda3/envs/pytorch/bin/python，最后用vscode打开项目，F5运行py程序，将.pth转为 ``.onnx, .prototxt`` 文件。
 ```sh
@@ -256,7 +213,7 @@ python3 demo/ONNXRuntime/onnx_inference.py -m yolox_s_ti_lite.onnx -i assets/dog
 #TypeError: only size-1 arrays can be converted to Python scalars
 ```
 
-**2. ONNX导入TIDL**
+### 2. ONNX导入TIDL
 1. 模型文件配置：拷贝 .onnx, .prototxt 文件至/ti_dl/test/testvecs/models/public/onnx/，**yolox_s_ti_lite.prototxt**中改in_width&height，根据情况改nms_threshold: 0.4，confidence_threshold: 0.4
 2. 编写转换配置文件：在/testvecs/config/import/public/onnx下新建（或复制参考目录下yolov3例程）**tidl_import_yolox_s.txt**，参数配置见[文档](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/06_01_01_12/exports/docs/tidl_j7_01_00_01_00/ti_dl/docs/user_guide_html/md_tidl_model_import.html)
 ```sh
@@ -300,7 +257,7 @@ Step != 1 is NOT supported for Slice Operator -- /backbone/backbone/stem/Slice_3
 #因为"the slice operations in Focus layer are not embedded friendly"，因此ti提供yolox-s-ti-lite，优化后的才能直接导入
 ```
 
-**3. TIDL运行**
+### 3. TIDL运行
 ```sh
 #在文件ti_dl/test/testvecs/config/config_list.txt顶部加入:
 1 testvecs/config/infer/public/onnx/tidl_infer_yolox.txt
@@ -323,7 +280,7 @@ cd ${TIDL_INSTALL_PATH}/ti_dl/test
 ./PC_dsp_test_dl_algo.out
 ```
 
-**3. 板端运行([TDA4VM-SK](https://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-edgeai/TDA4VM/08_06_01/exports/docs/devices/TDA4VM/linux/getting_started.html))**
+### 4. 板端运行([TDA4VM-SK](https://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-edgeai/TDA4VM/08_06_01/exports/docs/devices/TDA4VM/linux/getting_started.html))
 通过USB挂载SD卡到Ubuntu
 下载[SDK包](https://www.ti.com/tool/download/PROCESSOR-SDK-LINUX-SK-TDA4VM)
 使用[Balena etcher tool 1.7.0](https://github.com/balena-io/etcher/releases/tag/v1.7.0)把 SD card .wic image flash到SD卡上
@@ -333,11 +290,37 @@ cd ${TIDL_INSTALL_PATH}/ti_dl/test
 chmod +x ./xxx.bin
 ./xxx.bin
 ```
-On going...
+挂载USB串口，使用[minicom](https://help.ubuntu.com/community/Minicom)串口通讯：
+```sh
+sudo apt-get install minicom  #安装minicom
+sudo minicom -D /dev/ttyUSB2 -c on
+#输入用户名：root，登录tda4vm-sk
+```
+试运行开箱即用的 GUI 应用程序
+```sh
+#Classification (python)
+cd /opt/edgeai-gst-apps/apps_python
+./app_edgeai.py ../configs/image_classification.yaml  #ctrl+c退出
+#Classification (c++)
+cd /opt/edgeai-gst-apps/apps_cpp
+./bin/Release/app_edgeai ../configs/image_classification.yaml
+#修改和构建C++应用：
+/opt/edgeai-gst-apps/apps_cpp# rm -rf build bin lib
+/opt/edgeai-gst-apps/apps_cpp# mkdir build
+/opt/edgeai-gst-apps/apps_cpp# cd build
+/opt/edgeai-gst-apps/apps_cpp/build# cmake ..
+/opt/edgeai-gst-apps/apps_cpp/build# make -j2
+
+#视频流车辆检测
+cd /opt/edgeai-gst-apps/scripts/optiflow# 
+`./optiflow.py ../../configs/object_detection.yaml -t`  #如果没有单引号，终端会将 -t 选项解释为一个单独的参数，而不是作为 optiflow.py 命令的选项之一
+```
+<img src="https://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-edgeai/TDA4VM/08_06_01/exports/docs/_images/edgeai_video_source_optiflow.jpg" width='80%'>
 
 
 
-### [TIDL-RT](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/08_06_00_12/exports/docs/tidl_j721e_08_06_00_10/ti_dl/docs/user_guide_html/md_tidl_dependency_info.html)
+
+## [TIDL-RT](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/08_06_00_12/exports/docs/tidl_j721e_08_06_00_10/ti_dl/docs/user_guide_html/md_tidl_dependency_info.html)
 ```sh
 export TIDL_INSTALL_PATH=/home/ywang85/SDK/RTOSSDK/tidl_j721e_08_06_00_10   #设置环境变量
 #TARGET_PLATFORM=PC make gv失败：../../inc/itidl_ti.h:91:21: fatal error: ivision.h: No such file or directory
@@ -346,7 +329,7 @@ export TIDL_INSTALL_PATH=/home/ywang85/SDK/RTOSSDK/tidl_j721e_08_06_00_10   #设
 
 
 
-### [EdgeAI TIDL Tools](https://github.com/TexasInstruments/edgeai-tidl-tools)
+## [EdgeAI TIDL Tools](https://github.com/TexasInstruments/edgeai-tidl-tools)
 ```sh
 sudo apt-get install libyaml-cpp-dev
 git clone https://github.com/TexasInstruments/edgeai-tidl-tools.git #failed：手动安装证书 git config --global http.sslVerify false，export GIT_SSL_NO_VERIFY=1
@@ -356,7 +339,7 @@ source ./setup.sh   #有些包可能要手动安装，并注释掉
 
 Docker Based X86_PC Setup
 #sudo docker build失败：Get "https://registry-1.docker.io/v2/": x509: certificate signed by unknown authority
-#跳过，好像RTOS SDK中是自带的
+
 ```
 
 

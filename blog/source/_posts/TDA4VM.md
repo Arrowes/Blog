@@ -102,23 +102,39 @@ Features: Interoperability, High Compute, High Memory Bandwidth, Scalability
 Popular operators supported: Convolution, Pooling, Element Wise, Inner-Product, Soft-Max, Bias Add, Concatenate, Scale, Batch Normalization, Re-size, Arg-max, Slice, Crop, Flatten, Shuffle Channel, Detection output, Deconvolution/Transpose convolution 
 ```
 Functions: 
-+ Import trained network models into ``.bin`` files that can be used by TIDL. formats supported:Caffe models (using .caffemodel and .prototxt files), Tensorflow models (using .pb or .tflite files), ONNX models (``.onnx`` files)
-+ Run performance simulation tool on PC to estimate the expected performace of the network while executing the network for inference on TI Jacinto7 SoC
-+ Execute the network on PC using the imported ``.bin`` files and validate the results
-+ Execute the network on TI Jacinto7 SoC using the imported ``.bin`` files and validate the results
++ **Import** trained network models into *.bin* files that can be used by TIDL. The following model formats are currently supported:
+    + Caffe 模型（使用 .caffemodel 和 .prototxt 文件） - 0.17 (caffe-jacinto in gitHub)
+    + Tensorflow 模型（使用 .pb 或 .tflite 文件） - 1.12（TFLite - Tensorflow 2.0-Alpha）
+    + *ONNX* 模型（使用 .onnx 文件 和 .prototxt 文件） - 1.3.0 （官方onnx已经到了1.14）
++ Run **performance simulation tool** on PC to estimate the expected performace of the network while executing the network for inference on TI Jacinto7 SoC
++ **Execute the network on PC** using the imported files and validate the results.bin
++ **Execute the network on TI** Jacinto7 SoC using the imported files and validate the results.bin
 
 <img alt="图 14" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/TDA4VMTIDLppt.jpg" width="80%"/>  
 
-TIDL当前支持的训练框架有Tensorflow、Pytorch、Caffe等，用户可以根据需要选择合适的训练框架进行模型训练。TIDL可以将PC端训练好的模型导入编译生成TIDL可以识别的模型格式，同时在导入编译过程中进行层级合并以及量化等操作，方便导入编译后的模型高效的运行在具有高性能定点数据感知能力TDA4硬件加速器上。 TIDL提供了 [TIDL Importer](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/06_01_01_12/exports/docs/tidl_j7_01_00_01_00/ti_dl/docs/user_guide_html/md_tidl_model_import.html) 模型导入工具，模型可视化工具等，非常便捷地可以对训练好的模型进行导入。
+TIDL当前支持的训练框架有Tensorflow、Pytorch、Caffe等，用户可以根据需要选择合适的训练框架进行模型训练。TIDL可以将PC端训练好的模型导入编译生成TIDL可以识别的模型格式，同时在导入编译过程中进行层级合并以及量化等操作，方便导入编译后的模型高效的运行在具有高性能定点数据感知能力TDA4硬件加速器上。 
+
+## TIDL Importer
+TIDL提供了 [TIDL Importer](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/06_01_01_12/exports/docs/tidl_j7_01_00_01_00/ti_dl/docs/user_guide_html/md_tidl_model_import.html) 模型导入工具，模型可视化工具等，非常便捷地可以对训练好的模型进行导入。
 
 <img alt="图 3" src="https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/06_01_01_12/exports/docs/tidl_j7_01_00_01_00/ti_dl/docs/user_guide_html/TIDL_blockDiagram.png" />  
 <img alt="图 4" src="https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/06_01_01_12/exports/docs/tidl_j7_01_00_01_00/ti_dl/docs/user_guide_html/tidl_import_design.jpg" />  
 
-导入工具将在内部运行quantization, network compilation, performance simulation internally, 并生成文件：
+``RTOSsdk/tidl_j721e/ti_dl/utils/tidlModelImport``
+1. 读取导入配置文件；
+2. 转换并导入网络层和算子（operators）到TIDL net file，计算层大小和缓冲区大小，并尽可能合并层；
+3. 生成量化配置文件，调用量化工具（quant tool）进行范围采集，并更新TIDL net file；
+4. 生成用于网络编译器（network compiler）的配置文件，并调用编译器进行性能优化；
+5. *[Optional]* 调用GraphVisualiser来生成网络图；
+6. 导入工具将在最后结束检查模型；
+7. 最后，如果没有错误，可以用于部署。
+
+总的来说，导入工具将在内部运行quantization, network compilation, performance simulation internally, 并生成文件：
 > Compiled network and I/O files used for inference
 Performance simulation results for network analysis in .csv
 
-在TIDL上，深度学习网络应用开发主要分为三个大的步骤: 
+## TI's Edge AI
+TIDL is a fundamental software component of [TI’s Edge AI solution](https://www.ti.com/edgeai).在TIDL上，深度学习网络应用开发主要分为三个大的步骤: 
 1. 基于Tensorflow、Pytorch、Caffe 等训练框架，训练模型
 2. 基于TDA4VM处理器导入模型： 训练好的模型，需要使用TIDL Importer工具导入成可在TIDL上运行的模型。导入的主要目的是对输入的模型进行量化、优化并保存为TIDL能够识别的网络模型和网络参数文件
 3. 基于TI Jacinto7TM SDK 验证模型，并在应用里面部署模型：
@@ -130,8 +146,6 @@ Performance simulation results for network analysis in .csv
         * 在EVM上使用OpenVX框架开发程序，在应用上进行验证[^3]
 [^3]:[基于Pytorch训练并在TDA4上部署ONNX模型](https://www.ti.com/cn/lit/an/zhcabs1/zhcabs1.pdf?raw=true)
 
-## TI's Edge AI
-TIDL is a fundamental software component of [TI’s Edge AI solution](https://www.ti.com/edgeai).
 <img src="https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/08_06_00_12/exports/docs/tidl_j721e_08_06_00_10/ti_dl/docs/user_guide_html/dnn-workflow.png">
 
 [TIDL Runtime](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/08_06_00_12/exports/docs/tidl_j721e_08_06_00_10/ti_dl/docs/user_guide_html/md_tidl_overview.html)（TIDL-RT）是运行在TDA4端的实时推理单元，同时提供了TIDL的运行环境，对于input tensor，TIDL TIOVX Node 调用TIDL 的深度学习加速库进行感知，并将结果进行输出。
