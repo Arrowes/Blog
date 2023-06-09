@@ -64,14 +64,16 @@ Host 键:右ctrl，方向键上：获取上次的命令，Tab：自动补全
 ## VScode
 vscode远程访问：1.安装remote插件 2.连接服务器``ssh ywang85@she1-w50502`` 3.connect，打开terminal
 上传文件：vscode直接拖拽到目录
+vscode插件离线安装：如装python插件，直接进[ marketplace ](https://marketplace.visualstudio.com/vscode)下好拖到扩展位置
 
 ## Debug
 Could not get lock /var/lib/dpkg/lock – open > 执行 ``sudo rm -rf /var/lib/dpkg/lock``
 共享文件夹ubuntu中不显示 > 重新安装VMware tools
 ``sudo apt-get install`` failed > 换源
  
-# Git主要指令
-
+# Git
+与 [TortoiseGit](https://tortoisegit.org/download/)配合使用，安装后在目标文件夹右键可执行push、clone等操作
+## 主要指令
 1.``git clone <X>`` // 到本地
 2.``git checkout -b xxx`` 切换至新分支xxx，相当于复制了remote的仓库到本地的xxx分支上
 3.修改或者添加本地代码（部署在硬盘的源文件上）
