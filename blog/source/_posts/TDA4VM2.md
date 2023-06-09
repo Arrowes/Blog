@@ -1,5 +1,5 @@
 ---
-title: TIDL:模型转换及部署
+title: TDA4:环境搭建、模型转换及Demo
 date: 2023-05-18 16:28:00
 tags:
 - 嵌入式
@@ -8,31 +8,35 @@ tags:
 
 相关前置知识见笔记：[[TDA4VM, TIDL, OpenVX]](https://wangyujie.site/2023/05/10/TDA4VM/)
 环境搭建需要下载：[PROCESSOR-SDK-J721E](https://www.ti.com.cn/tool/cn/PROCESSOR-SDK-J721E)
-# Linux SDK 环境搭建与调试
-[Linux SDK Doc](https://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-rt-jacinto7/08_06_00_11/exports/docs/devices/J7/linux/index.html)
+
+# [Linux SDK](https://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-rt-jacinto7/08_06_00_11/exports/docs/devices/J7/linux/index.html) 环境搭建
+
 ```shell
 #添加执行文件并执行
 chmod +x ./ti-processor-sdk-linux-j7-evm-08_06_01_02-Linux-x86-Install.bin 
 ./ti-processor-sdk-linux-j7-evm-08_06_01_02-Linux-x86-Install.bin
+
 #安装依赖的系统软件包和工具，安装过程中跳过需要连EVM的NFS、minicom、TFTP
 #(若Ubuntu版本不匹配 > bin/setup-host-check.sh > if [ "$host" != "bionic" ] 改为 if [ "$host" != "focal" ] )
 sudo ./setup.sh
 #TISDK setup completed!
 ```
 通过在根目录下make linux或u-boot等各种命令，可以快速的让SDK编译出你所需要的产物。注意需要手工修改Rules.mak文件中的DESTDIR变量为你的TF卡挂载路径。
-编译命令 | 作用 (ti-processor-sdk-linux-j7-evm*/board-support/)
---|--
-Make linux, Make linux_install|编译Linux kernel代码和dtb，主要用于内核驱动的修改和裁剪。安装命令可以将内核和驱动模块自动拷贝到TF卡中。然后执行make linux install才能生成built-images
-Make u-boot	| 编译u-boot代码，主要分为两部分：运行在MCU上的r5f部分和运行在A72上的a53部分。此处A72兼容A53指令集。
-Make sysfw-image| 生成sysfw固件，主要在修改MSMC大小的时候会用到。
+```sh
+#ti-processor-sdk-linux-j7-evm*/board-support/
+Make linux        #编译Linux kernel代码和dtb，主要用于内核驱动的修改和裁剪。安装命令可以将内核和驱动模块自动拷贝到TF卡中。
+Make linux_install  #生成built-images
+Make u-boot       #编译u-boot代码，主要分为两部分：运行在MCU上的r5f部分和运行在A72上的a53部分。此处A72兼容A53指令集。
+Make sysfw-image  #生成sysfw固件，主要在修改MSMC大小的时候会用到。
+```
 
 
-# RTOS SDK
-[RTOS SDK Doc](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/08_06_00_12/exports/docs/psdk_rtos/docs/user_guide/index.html)
+# [RTOS SDK](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/08_06_00_12/exports/docs/psdk_rtos/docs/user_guide/index.html) 环境搭建
+
 > 下载：
 ti-processor-sdk-rtos-j721e-evm-08_06_01_03.tar.gz
 ti-processor-sdk-rtos-j721e-evm-08_06_01_03-prebuilt.tar
-两个dataset.tar.gz
++两个dataset.tar.gz
 ```sh
 tar -xf ti-processor-sdk-rtos-j721e-evm-08_06_01_03.tar.gz  #解压
 #配置RTOS和Linux的安装环境变量
@@ -47,7 +51,7 @@ cp ${PSDKL_PATH}/filesystem/tisdk-default-image-j7-evm.tar.xz ${PSDKR_PATH}/
 ```
 
 
-# [Vision Apps Demo](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/08_06_00_12/exports/docs/vision_apps/docs/user_guide/ENVIRONMENT_SETUP.html)
+# [Vision Apps Demo](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/08_06_00_12/exports/docs/vision_apps/docs/user_guide/ENVIRONMENT_SETUP.html) 编译
 ```sh
 #修改文件 tiovx/build_flags.mak（没修改过则是默认）
 BUILD_EMULATION_MODE=no #非模拟器模式
@@ -58,12 +62,12 @@ PROFILE=release
 #开始编译vision apps
 cd vision_apps
 make vision_apps -j8    #若缺少core-secdev-k3包，手动导入(https://git.ti.com/cgit/security-development-tools/core-secdev-k3/snapshot/core-secdev-k3-08.06.00.006.tar.gz)
+
 #编译成功可以看到对应目录下有产出文件，RTOS SDK主要使用了一个开源编译框架concerto，这个框架基于Makefile，他能够自动搜索当前目录内的所有concerto.mak文件，并且分析依赖，一次将各个核心的固件全部编译出来。编译生成的文件位于
 vision_apps/out/J7/A72/LINUX/$PROFILE
 vision_apps/out/J7/R5F/SYSBIOS/$PROFILE
 vision_apps/out/J7/C66/SYSBIOS/$PROFILE
 vision_apps/out/J7/C71/SYSBIOS/$PROFILE
-
 ##If clean build of vision_apps/clean the full PSDK RTOS
 #cd vision_apps, make vision_apps_scrub/make sdk_scrub
 ```
@@ -87,6 +91,46 @@ make linux_fs_install_sd
 然后即可插在EVM端运行，这里没有，跳过。
 </details>
 
+# [TDA4VM-SK](https://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-edgeai/TDA4VM/08_06_01/exports/docs/devices/TDA4VM/linux/getting_started.html) 配置
+通过USB挂载SD卡到Ubuntu
+下载[SDK包](https://www.ti.com/tool/download/PROCESSOR-SDK-LINUX-SK-TDA4VM)
+使用[Balena etcher tool 1.7.0](https://github.com/balena-io/etcher/releases/tag/v1.7.0)把 SD card .wic image flash到SD卡上
+然后插入SD卡到SK板，SK板连接显示器，上电，进入界面。
+```sh
+#安装SDK Linux-SK
+chmod +x ./xxx.bin
+./xxx.bin
+```
+挂载USB串口，使用[minicom](https://help.ubuntu.com/community/Minicom)串口通讯：
+```sh
+sudo apt-get install minicom  #安装minicom
+sudo minicom -D /dev/ttyUSB2 -c on
+#输入用户名：root，登录tda4vm-sk
+```
+试运行开箱即用的 GUI 应用程序
+```sh
+#Classification (python)
+cd /opt/edgeai-gst-apps/apps_python
+./app_edgeai.py ../configs/image_classification.yaml  #ctrl+c退出
+#Classification (c++)
+cd /opt/edgeai-gst-apps/apps_cpp
+./bin/Release/app_edgeai ../configs/image_classification.yaml
+#修改和构建C++应用：
+/opt/edgeai-gst-apps/apps_cpp# rm -rf build bin lib
+/opt/edgeai-gst-apps/apps_cpp# mkdir build
+/opt/edgeai-gst-apps/apps_cpp# cd build
+/opt/edgeai-gst-apps/apps_cpp/build# cmake ..
+/opt/edgeai-gst-apps/apps_cpp/build# make -j2
+
+#视频流车辆检测
+cd /opt/edgeai-gst-apps/scripts/optiflow# 
+`./optiflow.py ../../configs/object_detection.yaml -t`  #如果没有单引号，终端会将 -t 选项解释为一个单独的参数，而不是作为 optiflow.py 命令的选项之一
+```
+<img src="https://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-edgeai/TDA4VM/08_06_01/exports/docs/_images/edgeai_video_source_optiflow.jpg" width='88%'>
+
+
+
+
 # [TIDL](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/06_01_01_12/exports/docs/tidl_j7_01_00_01_00/ti_dl/docs/user_guide_html/md_tidl_user_model_deployment.html)
 
 <img src="https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/06_01_01_12/exports/docs/tidl_j7_01_00_01_00/ti_dl/docs/user_guide_html/TIDL_import_process.png" >
@@ -107,9 +151,8 @@ make
 ```
 
 **Import**ing PeleeNet model for object detection (caffe)
-[下载](https://drive.google.com/file/d/1KJHKYQ2nChZXlxroZRpg-tRsksTXUhe9/view)并提取.caffemodel，deploy.prototxt放入ti_dl/test/testvecs/models/public/caffe/peele/pelee_voc/
+[下载](https://drive.google.com/file/d/1KJHKYQ2nChZXlxroZRpg-tRsksTXUhe9/view)并提取.caffemodel，deploy.prototxt放入`ti_dl/test/testvecs/models/public/caffe/peele/pelee_voc/`
 deploy.prototxt中改confidence_threshold: 0.4
-
 
 ```sh
 cd ${TIDL_INSTALL_PATH}/ti_dl/utils/tidlModelImport
@@ -152,7 +195,7 @@ TI官方在[ ModelZOO ](https://github.com/TexasInstruments/edgeai-modelzoo)中�
 
 ### 1. 模型文件转ONNX
 ~~pycharm进入edgeai-yolox项目，根据提示额外安装requirements~~
-Window中配置该环境需要安装visual studio build tools，而且很多包报错，因此转ubuntu用vscode搭pytorch环境，非常顺利（vscode插件离线安装：如装python插件，直接进[ marketplace ](https://marketplace.visualstudio.com/vscode)下好拖到扩展位置）拓展设置中把Python Default Path改成创建的环境 /home/wyj/anaconda3/envs/pytorch/bin/python，最后用vscode打开项目，F5运行py程序，将.pth转为 ``.onnx, .prototxt`` 文件。
+Window中配置该环境需要安装visual studio build tools，而且很多包报错，因此转ubuntu用vscode搭pytorch环境，非常顺利（vscode插件离线安装：如装python插件，直接进[ marketplace ](https://marketplace.visualstudio.com/vscode)下好拖到扩展位置）拓展设置中把Python Default Path改成创建的环境 `/home/wyj/anaconda3/envs/pytorch/bin/python`，最后用vscode打开项目，F5运行py程序，将.pth转为 ``.onnx, .prototxt`` 文件。
 ```sh
 pip3 install -U pip && pip3 install -r requirements.txt
 pip3 install -v -e .  # or  python3 setup.py develop
@@ -252,7 +295,7 @@ tidl_io_yolox_s_1.bin       #Compiled I/O file 网络输入配置文件
 tidl_net_yolox_s.bin.svg    #tidlModelGraphviz tool生成的网络图
 tidl_out.png, tidl_out.txt  #执行的目标检测测试结果，与第三步TIDL运行效果一致 txt:[class, source, confidence, Lower left point(x,y), upper right point(x,y) ]
 
-#Debug，使用官方的yolox_s.pth转成onnx后导入，发现报错：
+#Debug，本来使用官方的yolox_s.pth转成onnx后导入，发现报错：
 Step != 1 is NOT supported for Slice Operator -- /backbone/backbone/stem/Slice_3 
 #因为"the slice operations in Focus layer are not embedded friendly"，因此ti提供yolox-s-ti-lite，优化后的才能直接导入
 ```
@@ -280,42 +323,8 @@ cd ${TIDL_INSTALL_PATH}/ti_dl/test
 ./PC_dsp_test_dl_algo.out
 ```
 
-### 4. 板端运行([TDA4VM-SK](https://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-edgeai/TDA4VM/08_06_01/exports/docs/devices/TDA4VM/linux/getting_started.html))
-通过USB挂载SD卡到Ubuntu
-下载[SDK包](https://www.ti.com/tool/download/PROCESSOR-SDK-LINUX-SK-TDA4VM)
-使用[Balena etcher tool 1.7.0](https://github.com/balena-io/etcher/releases/tag/v1.7.0)把 SD card .wic image flash到SD卡上
-然后插入SD卡到SK板，上电，进入界面。
-```sh
-#安装SDK Linux-SK
-chmod +x ./xxx.bin
-./xxx.bin
-```
-挂载USB串口，使用[minicom](https://help.ubuntu.com/community/Minicom)串口通讯：
-```sh
-sudo apt-get install minicom  #安装minicom
-sudo minicom -D /dev/ttyUSB2 -c on
-#输入用户名：root，登录tda4vm-sk
-```
-试运行开箱即用的 GUI 应用程序
-```sh
-#Classification (python)
-cd /opt/edgeai-gst-apps/apps_python
-./app_edgeai.py ../configs/image_classification.yaml  #ctrl+c退出
-#Classification (c++)
-cd /opt/edgeai-gst-apps/apps_cpp
-./bin/Release/app_edgeai ../configs/image_classification.yaml
-#修改和构建C++应用：
-/opt/edgeai-gst-apps/apps_cpp# rm -rf build bin lib
-/opt/edgeai-gst-apps/apps_cpp# mkdir build
-/opt/edgeai-gst-apps/apps_cpp# cd build
-/opt/edgeai-gst-apps/apps_cpp/build# cmake ..
-/opt/edgeai-gst-apps/apps_cpp/build# make -j2
-
-#视频流车辆检测
-cd /opt/edgeai-gst-apps/scripts/optiflow# 
-`./optiflow.py ../../configs/object_detection.yaml -t`  #如果没有单引号，终端会将 -t 选项解释为一个单独的参数，而不是作为 optiflow.py 命令的选项之一
-```
-<img src="https://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-edgeai/TDA4VM/08_06_01/exports/docs/_images/edgeai_video_source_optiflow.jpg" width='80%'>
+### 4. 板端运行(TDA4VM-SK)
+ongoing
 
 
 

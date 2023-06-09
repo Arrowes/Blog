@@ -8,53 +8,51 @@ tags:
 # Code
 ```sh
 #系统
-lsb_release -a  #查ubuntu版本    
-sudo passwd root  #更改root账户的密码
-su	#切换到root用户，$ 是普通权限， #是管理员权限
-su username #切换到其他用户
+lsb_release -a      #查ubuntu版本    
+sudo passwd root    #更改root账户的密码
+su                  #切换到root用户，$ 是普通权限， #是管理员权限
+su username         #切换到其他用户
 sudo usermod -aG sudo username   #添加用户为root
-sudo nautilus   #以root进入文件夹
 ps aux; kill [PID]  #查看进程; 根据进程号杀后台
 
 #安装 换源
 sudo apt-get install [] #安装 失败则换源
 sudo gedit /ect/apt/source.list #最后一行加入其他源
-sudo apt update	#更新索引(源)
+sudo apt update	    #更新索引(源)
 
 #文件
-mkdir []   #新建文件夹  
-rmdir [] #删除文件夹    
-touch [] [] #创建文件
-rm []   #删除文件
-mv [file] [dir] #移动文件 (dir不存在则为重命名）批量：[file1 file2]
-cp -r [] [] #复制文件
-sudo nautilus	#执行文件操作    
-chmod u+x [] #添加可执行文件
+mkdir []            #新建文件夹  
+rmdir []            #删除文件夹  
+sudo nautilus       #以root进入文件夹     
+touch [] []         #创建文件
+rm []               #删除文件
+mv file1 [dir]      #移动文件 (无dir则相当于重命名)
+cp -r [] []         #复制文件
+chmod u+x []        #添加可执行文件
 
-#cd
-cd - #切换到上一工作目录
-cd ~ #导航到主目录 /home/user1
-#.当前目录 ..父目录 cd XX相对路径，cd /XX绝对路径
+cd -    #切换到上一工作目录
+cd ~    #导航到主目录 /home/user1
+#.当前目录 ..父目录； cd XX相对路径，cd /XX绝对路径
 
-ls	#检索
-tree [] #查看树状图
+ls                  #检索
+tree []             #查看树状图
+wget [url]          #下载, wget -O myfile.zip [url] 重命名文件
+tar -xf []          #解压
+vi []               #命令行进入文件，按Esc返回命令模式并输入:x 保存退出
+gedit []            #图形界面进入文件直接编辑
+whereis []          #查找
 find / -name "[]"   #查找
-wget [url]  #下载, wget -O myfile.zip [url] 重命名文件
-tar -xf []  #解压
-vi []   #命令行进入文件，编辑完按Esc返回命令模式，输入：x 退出
-gedit []    #图形界面进入文件直接编辑
-whereis []  #查找
-export 变量名=值    #设置或更新环境变量的值
+
+export 变量名=值     #设置或更新环境变量的值
 #配置永久环境变量更方便，sudo gedit /etc/profile，末尾加入如上代码，然后source /etc/profile加载立即生效
-echo [] #输出指定的字符串或变量的值,用于调试程序、输出信息
+echo []             #输出指定的字符串或变量的值,用于调试程序、输出信息
 ```
 # Ubuntu
 ## 虚拟机
-[Virtual Box](https://www.virtualbox.org/wiki/Downloads) + [Ubuntu 20.04](http://releases.ubuntu.com/20.04/),[18.04](https://releases.ubuntu.com/bionic/)（速度慢则换[镜像源](https://mirrors.tuna.tsinghua.edu.cn/ubuntu-releases/20.04/)）
+[Virtual Box](https://www.virtualbox.org/wiki/Downloads) + [Ubuntu 20.04](http://releases.ubuntu.com/20.04/), 或[18.04](https://releases.ubuntu.com/bionic/)（速度慢则换[镜像源](https://mirrors.tuna.tsinghua.edu.cn/ubuntu-releases/20.04/)）
 > 新建 > 导入.iso镜像 > 配置（分4G内存,100G硬盘）
 设置 > 共享文件夹 > 添加（自动挂载，固定分配）
 设置 > 共享粘贴板、拖放 > 双向
-若打不开终端：系统设置修改语言后重新登陆
 挂载U盘：USB > USB设置 > 添加一个USB > 在ubuntu设备中勾选
 
 Host 键:右ctrl，方向键上：获取上次的命令，Tab：自动补全
@@ -63,38 +61,42 @@ Host 键:右ctrl，方向键上：获取上次的命令，Tab：自动补全
 
 ## VScode
 vscode远程访问：1.安装remote插件 2.连接服务器``ssh ywang85@she1-w50502`` 3.connect，打开terminal
+
 上传文件：vscode直接拖拽到目录
+下载文件：右键download
+
 vscode插件离线安装：如装python插件，直接进[ marketplace ](https://marketplace.visualstudio.com/vscode)下好拖到扩展位置
 
 ## Debug
-Could not get lock /var/lib/dpkg/lock – open > 执行 ``sudo rm -rf /var/lib/dpkg/lock``
-共享文件夹ubuntu中不显示 > 重新安装VMware tools
-``sudo apt-get install`` failed > 换源
++ Could not get lock /var/lib/dpkg/lock – open > 执行 ``sudo rm -rf /var/lib/dpkg/lock``
++ 共享文件夹ubuntu中不显示 > 重新安装VMware tools
++ ``sudo apt-get install`` failed > 换源
++ 若打不开终端：系统设置修改语言后重新登陆
  
 # Git
-与 [TortoiseGit](https://tortoisegit.org/download/)配合使用，安装后在目标文件夹右键可执行push、clone等操作
+下载 [Git](https://git-scm.com/downloads)，与 [TortoiseGit](https://tortoisegit.org/download/) 小乌龟配合使用可以少记很多指令，在目标文件夹右键可执行push、clone、commit等操作
 ## 主要指令
-1.``git clone <X>`` // 到本地
-2.``git checkout -b xxx`` 切换至新分支xxx，相当于复制了remote的仓库到本地的xxx分支上
-3.修改或者添加本地代码（部署在硬盘的源文件上）
-4.``git diff`` 查看自己对代码做出的改变
-5.``git add`` 上传更新后的代码至暂存区
-6.``git commit`` 可以将暂存区里更新后的代码更新到本地git
-7.``git push origin xxx`` 将本地的xxxgit分支上传至github上的git
+1. ``git clone <X>`` // 到本地
+2. ``git checkout -b xxx`` 切换至新分支xxx，相当于复制了remote的仓库到本地的xxx分支上
+3. 修改或者添加本地代码（部署在硬盘的源文件上）
+4. ``git diff`` 查看自己对代码做出的改变
+5. ``git add`` 上传更新后的代码至暂存区
+6. ``git commit`` 可以将暂存区里更新后的代码更新到本地git
+7. ``git push origin xxx`` 将本地的xxxgit分支上传至github上的git
 
 如果在写自己的代码过程中发现远端GitHub上代码出现改变
-1.``git checkout main`` 切换回main分支
-2.``git pull origin master(main)`` 将远端修改过的代码再更新到本地
-3.``git checkout xxx`` 回到xxx分支
-4.``git rebase main`` 我在xxx分支上，先把main移过来，然后根据我的commit来修改成新的内容
+1. ``git checkout main`` 切换回main分支
+2. ``git pull origin master(main)`` 将远端修改过的代码再更新到本地
+3. ``git checkout xxx`` 回到xxx分支
+4. ``git rebase main`` 我在xxx分支上，先把main移过来，然后根据我的commit来修改成新的内容
 （中途可能会出现，rebase conflict --> 手动选择保留哪段代码）
-5.``git push -f origin xxx`` 把rebase后并且更新过的代码再push到远端github上
+5. ``git push -f origin xxx`` 把rebase后并且更新过的代码再push到远端github上
 （-f --> 强行）
-6.原项目主人采用pull request 中的 squash and merge 合并所有不同的commit
+6. 原项目主人采用pull request 中的 squash and merge 合并所有不同的commit
 
 远端完成更新后
-1.``git branch -d xxx`` 删除本地的git分支
-2.``git pull origin master`` 再把远端的最新代码拉至本地
+1. ``git branch -d xxx`` 删除本地的git分支
+2. ``git pull origin master`` 再把远端的最新代码拉至本地
 
 [十分钟学会正确的github工作流，和开源作者们使用同一套流程](https://www.bilibili.com/video/BV19e4y1q7JJ)
 

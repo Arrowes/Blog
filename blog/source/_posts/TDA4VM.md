@@ -1,5 +1,5 @@
 ---
-title: TDA4VM, TIDL, OpenVX
+title: TDA4:SDK, TIDL, OpenVX
 date: 2023-05-10 17:00:00
 tags:
 - 嵌入式
