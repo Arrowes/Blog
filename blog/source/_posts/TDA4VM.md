@@ -1,16 +1,17 @@
 ---
-title: TDA4:SDK, TIDL, OpenVX
+title: TDA4：SDK, TIDL, OpenVX
 date: 2023-05-10 17:00:00
 tags:
 - 嵌入式
 - 深度学习
 ---
 [TDA4VM官网](https://www.ti.com.cn/product/zh-cn/TDA4VM)， [TI e2e论坛](https://e2e.ti.com/support/processors-group/processors/f/processors-forum)
+下一篇：[TDA4：环境搭建、模型转换及Demo](https://wangyujie.site/2023/05/18/TDA4VM2/)
 # TDA4VM芯片数据手册研读
 [TDA4VM数据手册](https://www.ti.com.cn/cn/lit/ds/symlink/tda4vm.pdf)
 适用于 ADAS 和自动驾驶汽车的TDA4VM Jacinto™ 处理器,具有深度学习、视觉功能和多媒体加速器的双核 Arm® Cortex®-A72 SoC 和 C7x DSP.
 Jacinto 7系列架构芯片含两款汽车级芯片：TDA4VM 处理器和 DRA829V 处理器，前者应用于 ADAS，后者应用于网关系统，以及加速数据密集型任务的专用加速器，如计算机视觉和深度学习。二者都基于J721E平台开发。
-## 整体架构
+## 多核异构
 <img alt="图 3" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/TDA4VMedit.jpg"/>  
 
 ## 处理器内核
@@ -35,11 +36,14 @@ Jacinto 7系列架构芯片含两款汽车级芯片：TDA4VM 处理器和 DRA829
 
 
 # SDK
-Download：[PROCESSOR-SDK-J721E](https://www.ti.com.cn/tool/cn/PROCESSOR-SDK-J721E)，提供Linux SDK、QNX SDK和RTOS SDK
-Document：[RTOS SDK](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/08_06_00_12/exports/docs/psdk_rtos/docs/user_guide/index.html)，[Linux SDK](https://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-rt-jacinto7/08_06_00_11/exports/docs/devices/J7/linux/index.html)，[Edge AI SDK](https://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-sk-tda4vm/latest/exports/docs/index.html#)，[~~QNX SDK~~](https://software-dl.ti.com/jacinto7/esd/processor-sdk-qnx-jacinto7/08_06_00_07/exports/docs/index.html)
-*RTOS and Linux SDK work together as a multi-processor software development kit for the J721E platform
-Edge AI SDK主要基于Linux开发，用于工业领域，工作量少但实时性差*[^0]
-[^0]:[深度学习算法在ADAS处理器TDA4VM的应用与部署](https://www.ti.com.cn/zh-cn/video/6301563648001)
+Download：[PROCESSOR-SDK-J721E](https://www.ti.com.cn/tool/cn/PROCESSOR-SDK-J721E)，提供**两套SDK**（软件架构不同）：
+1. PSDK [RTOS](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/08_06_00_12/exports/docs/psdk_rtos/docs/user_guide/index.html) and [Linux](https://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-rt-jacinto7/08_06_00_11/exports/docs/devices/J7/linux/index.html)，用于J721E-EVM
+2. PSDK Linux for [Edge AI](https://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-sk-tda4vm/latest/exports/docs/index.html)，用于TDA4VM-SK
+
+> *RTOS and Linux SDK work together as a multi-processor software development kit，用于ADAS领域，更多的外设和驱动放在RTOS端，便于实时处理 ，自定义性更强，开发难度更大
+Edge AI SDK主要基于Linux开发，用于工业领域，工作量少但实时性差，无法发挥芯片全部性能* [^0]
+
+[^0]:[视频：深度学习算法在ADAS处理器TDA4VM的应用与部署](https://www.ti.com.cn/zh-cn/video/6301563648001)
 
 ## Processor SDK RTOS (PSDK RTOS) 
 **PSDK RTOS Block Diagram**
@@ -93,6 +97,15 @@ yocto-build | 此目录允许重建SDK组件和使用Yocto Bitbake的文件系�
 
 Linux SDK最主要是用于A72核心上的启动引导、操作系统、文件系统，一般只有在修改到这部分的时候才会使用到Linux SDK。
 
+## PSDK Linux for Edge AI
+对于Edge AI，无需对深度学习算法进行深入了解，使用python或C++即可进行部署，不支持的算法可以放在ARM端计算和实施推理，TI会自动生成推理文件，如下图；
+<img alt="图 sdk" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/TDA4VMsdk.png" />  
+
+而对于ADAS领域，要把深度学习算法都放在TIDL端，最大化利用算力，需要手写加速算子进行自定义层的设计；
+
+两套SDK部署深度学习算法的区别如下：
+<img alt="图 compare" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/TDA4VMcompare.png" />  
+<img alt="图 compare" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/TDA4VMcompare2.png" /> 
 # TIDL
 [TIDL](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/06_01_01_12/exports/docs/tidl_j7_01_00_01_00/ti_dl/docs/user_guide_html/index.html)（TI Deep Learning Library）是TI平台基于深度学习算法的*软件生态系统*，其特性和支持[^2]可以将一些常见的深度学习算法模型快速的部署到TI嵌入式平台。
 [^2]:[Embedded low-power deep learning with TIDL](https://www.ti.com.cn/cn/lit/wp/spry314/spry314.pdf?raw=true)
@@ -122,12 +135,12 @@ TIDL提供了 [TIDL Importer](https://software-dl.ti.com/jacinto7/esd/processor-
 
 ``RTOSsdk/tidl_j721e/ti_dl/utils/tidlModelImport``
 1. 读取导入配置文件；
-2. 转换并导入网络层和算子（operators）到TIDL net file，计算层大小和缓冲区大小，并尽可能合并层；
-3. 生成量化配置文件，调用量化工具（quant tool）进行范围采集，并更新TIDL net file；
-4. 生成用于网络编译器（network compiler）的配置文件，并调用编译器进行性能优化；
+2. 转换并**导入**网络层和算子（operators）到TIDL net file，计算层大小和缓冲区大小，并尽可能合并层；
+3. 生成**量化**配置文件，调用量化工具（quant tool）进行范围采集，并更新TIDL net file；
+4. 生成用于网络**编译**器（network compiler）的配置文件，并调用编译器进行性能优化；
 5. *[Optional]* 调用GraphVisualiser来生成网络图；
 6. 导入工具将在最后结束检查模型；
-7. 最后，如果没有错误，可以用于部署。
+7. 最后，如果没有错误，可以用于**部署**。
 
 总的来说，导入工具将在内部运行quantization, network compilation, performance simulation internally, 并生成文件：
 > Compiled network and I/O files used for inference
@@ -209,3 +222,8 @@ TI: Target, Target Kernel, Obj Desc。
 
 [PyTIOVX](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/08_06_00_12/exports/docs/tiovx/docs/user_guide/PYTIOVX.html): Automated OpenVX “C” Code Generation
 [^5]:[OpenVX视觉加速中间件与TDA4VM平台上的应用](https://zhuanlan.zhihu.com/p/423179832) | [TDA4横扫行泊一体市场与其背后的OpenVX](https://zhuanlan.zhihu.com/p/606584605)
+
+
+
+
+下一篇：[TDA4：环境搭建、模型转换及Demo](https://wangyujie.site/2023/05/18/TDA4VM2/)

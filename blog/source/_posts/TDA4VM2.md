@@ -1,5 +1,5 @@
 ---
-title: TDA4:环境搭建、模型转换及Demo
+title: TDA4：环境搭建、模型转换及Demo
 date: 2023-05-18 16:28:00
 tags:
 - 嵌入式
@@ -107,11 +107,24 @@ sudo apt-get install minicom  #安装minicom
 sudo minicom -D /dev/ttyUSB2 -c on
 #输入用户名：root，登录tda4vm-sk
 ```
-试运行开箱即用的 GUI 应用程序
+插入USB摄像头，配置：
+```sh
+#查摄像头参数
+cd 
+./.profile  #/dev/video2
+```
+可以鼠标点击试运行开箱即用的 GUI 应用程序
+也使用 Python 和C++参考示例开发边缘 AI 应用程序：
 ```sh
 #Classification (python)
 cd /opt/edgeai-gst-apps/apps_python
 ./app_edgeai.py ../configs/image_classification.yaml  #ctrl+c退出
+#配置
+cd /opt/edgeai-gst-apps/configs/  #app_config_template.yaml中有参数介绍
+vi image_classification.yaml  #flow参数配置为摄像头输入input0
+
+
+
 #Classification (c++)
 cd /opt/edgeai-gst-apps/apps_cpp
 ./bin/Release/app_edgeai ../configs/image_classification.yaml
@@ -123,7 +136,7 @@ cd /opt/edgeai-gst-apps/apps_cpp
 /opt/edgeai-gst-apps/apps_cpp/build# make -j2
 
 #视频流车辆检测
-cd /opt/edgeai-gst-apps/scripts/optiflow# 
+cd /opt/edgeai-gst-apps/scripts/optiflow
 `./optiflow.py ../../configs/object_detection.yaml -t`  #如果没有单引号，终端会将 -t 选项解释为一个单独的参数，而不是作为 optiflow.py 命令的选项之一
 ```
 <img src="https://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-edgeai/TDA4VM/08_06_01/exports/docs/_images/edgeai_video_source_optiflow.jpg" width='88%'>
@@ -339,6 +352,7 @@ export TIDL_INSTALL_PATH=/home/ywang85/SDK/RTOSSDK/tidl_j721e_08_06_00_10   #设
 
 
 ## [EdgeAI TIDL Tools](https://github.com/TexasInstruments/edgeai-tidl-tools)
+要求：OS——Ubuntu 18.04，Python Version——3.6
 ```sh
 sudo apt-get install libyaml-cpp-dev
 git clone https://github.com/TexasInstruments/edgeai-tidl-tools.git #failed：手动安装证书 git config --global http.sslVerify false，export GIT_SSL_NO_VERIFY=1
@@ -348,7 +362,6 @@ source ./setup.sh   #有些包可能要手动安装，并注释掉
 
 Docker Based X86_PC Setup
 #sudo docker build失败：Get "https://registry-1.docker.io/v2/": x509: certificate signed by unknown authority
-
 ```
 
 
