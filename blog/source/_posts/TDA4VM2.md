@@ -6,7 +6,7 @@ tags:
 - 深度学习
 ---
 
-相关前置知识见笔记：[[TDA4VM, TIDL, OpenVX]](https://wangyujie.site/2023/05/10/TDA4VM/)
+相关前置知识见笔记：[[TDA4：SDK, TIDL, OpenVX]](https://wangyujie.site/2023/05/10/TDA4VM/)
 环境搭建需要下载：[PROCESSOR-SDK-J721E](https://www.ti.com.cn/tool/cn/PROCESSOR-SDK-J721E)
 
 # [Linux SDK](https://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-rt-jacinto7/08_06_00_11/exports/docs/devices/J7/linux/index.html) 环境搭建
@@ -105,7 +105,7 @@ chmod +x ./xxx.bin
 ```sh
 sudo apt-get install minicom  #安装minicom
 sudo minicom -D /dev/ttyUSB2 -c on
-#输入用户名：root，登录tda4vm-sk
+#输入用户名：root，登录tda4vm-sk，若连接了USB摄像头此时会显示相关信息
 ```
 插入USB摄像头，配置：
 ```sh
@@ -353,16 +353,41 @@ export TIDL_INSTALL_PATH=/home/ywang85/SDK/RTOSSDK/tidl_j721e_08_06_00_10   #设
 
 ## [EdgeAI TIDL Tools](https://github.com/TexasInstruments/edgeai-tidl-tools)
 要求：OS——Ubuntu 18.04，Python Version——3.6
+<img alt="图 9" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/TDA4VM2onnxruntimeflow.png" width="70%"/>  
+
+1. OSRT(Open Source Runtimes:TFLite,ONNX,TVM) 作为用户应用程序的顶级推理 API
+2. 将子图卸载到 C7x/MMA 以使用TIDL进行加速执行
+3. 在 ARM 核心上运行优化代码，以支持 TIDL 不支持的层
+
 ```sh
 sudo apt-get install libyaml-cpp-dev
 git clone https://github.com/TexasInstruments/edgeai-tidl-tools.git #failed：手动安装证书 git config --global http.sslVerify false，export GIT_SSL_NO_VERIFY=1
 git checkout 08_06_00_05
 export SOC=am68pa
-source ./setup.sh   #有些包可能要手动安装，并注释掉
+source ./setup.sh   #仔细查看setup.sh文件，有些包可能要手动安装，并注释掉
+#gcc-arm的包解压到项目文件夹，
 
-Docker Based X86_PC Setup
-#sudo docker build失败：Get "https://registry-1.docker.io/v2/": x509: certificate signed by unknown authority
+#Docker Based X86_PC Setup 跳过，不用docker装
+
+#make过程中各种依赖库报错 SSLError
+
+```
+
+## [EdgeAI-ModelMaker](https://github.com/TexasInstruments/edgeai-modelmaker)
+An end-to-end model development tool that contains dataset handling, model training and compilation，集成了edgeai-modelzoo, edgeai-torchvision, edgeai-mmdetection, edgeai-benchmark, edgeai-modelmaker
+```sh
+Git clone 项目，按照文档在bash下配置环境，curl -L ... 运行失败改为-L -k忽略SSL检查
+.setup_all.sh 安装失败：torch1.10.0, dlr, tvm, onnuruntime-tidl, tflite-runtime
+SSLError
 ```
 
 
+## [Edge AI Studio](https://dev.ti.com/edgeaistudio/)
+TI官方提供的云端环境，无需本地搭环境，使用需要申请，基于jupyter notebook
+提供两个工具：
++ Model Analyzer：远程连接到真实的评估硬件，在 TI 嵌入式处理器上部署和测试 AI 模型性能，进行多个模型的Benchmark。前身叫做 TI edge AI cloud。
++ Model Composer： 为 TI 嵌入式处理器训练、优化和编译 AI 模型。支持数据采集，标注，模型训练，以及上板编译。比如，用自己的数据重新训练TI Model Zoo的模型和更多性能优化操作。
 
+### Model Analyzer
+分三个板块：Compare model performance、Model performance、Custom models
+选TDA4VM（3h）先试用Model performance的OD task, 选ONNX runtime

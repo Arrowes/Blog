@@ -172,7 +172,7 @@ TIDL is a fundamental software component of [TI’s Edge AI solution](https://ww
 + [Edge AI Benchmark](https://github.com/TexasInstruments/edgeai-benchmark):provides higher level scripts for model compilation,and perform accuracy and performance benchmark.
 
 + [Edge AI Studio](https://dev.ti.com/edgeai/):Integrated development environment for development of AI applications for edge processors.（需授权）
-+ [EdgeAI-ModelMaker](https://github.com/TexasInstruments/edgeai-modelmaker): Command line Integrated environment for training & compilation.
++ [EdgeAI-ModelMaker](https://github.com/TexasInstruments/edgeai-modelmaker): Command line Integrated environment for training & compilation，集成了edgeai-modelzoo, edgeai-torchvision, edgeai-mmdetection, edgeai-benchmark, edgeai-modelmaker
 <img alt="图 9" src="https://raw.sevencdn.com/TexasInstruments/edgeai/blob/master/assets/workblocks_tools_software.png?raw=true" width="90%">  
 
 ## OpenVX
