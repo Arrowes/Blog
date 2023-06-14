@@ -385,9 +385,21 @@ SSLError
 ## [Edge AI Studio](https://dev.ti.com/edgeaistudio/)
 TI官方提供的云端环境，无需本地搭环境，使用需要申请，基于jupyter notebook
 提供两个工具：
-+ Model Analyzer：远程连接到真实的评估硬件，在 TI 嵌入式处理器上部署和测试 AI 模型性能，进行多个模型的Benchmark。前身叫做 TI edge AI cloud。
-+ Model Composer： 为 TI 嵌入式处理器训练、优化和编译 AI 模型。支持数据采集，标注，模型训练，以及上板编译。比如，用自己的数据重新训练TI Model Zoo的模型和更多性能优化操作。
++ [Model Analyzer](https://dev.ti.com/edgeaisession/)：远程连接到真实的评估硬件，在 TI 嵌入式处理器上部署和测试 AI 模型性能，进行多个模型的Benchmark。前身叫做 TI edge AI cloud。
++ [Model Composer](https://dev.ti.com/modelcomposer/)： 为 TI 嵌入式处理器训练、优化和编译 AI 模型。支持数据采集，标注，模型训练，以及上板编译。比如，用自己的数据重新训练TI Model Zoo的模型和更多性能优化操作。
 
 ### Model Analyzer
-分三个板块：Compare model performance、Model performance、Custom models
-选TDA4VM（3h）先试用Model performance的OD task, 选ONNX runtime
+选TDA4VM设备，能使用3h，进入后分三个板块：Compare model performance、Model performance、Custom models
+先试用Model performance的OD task, 选ONNX runtime，一步步运行即可输出结果，文件在顶端My Workspace
+
+**Custom models**（onnxRT）
+- 编译模型（在异构模型编译期间，支持的层将被装载到`TI-DSP`，生成推理所需工件（artifacts））
+- 使用生成的工件进行推理
+- *执行输入预处理和输出后处理*
+- 启用调试日志
+- 使用deny-layer编译选项来隔离可能有问题的层并创建额外的模型子图
+- 使用生成的子图工件进行推理
+- *执行输入预处理和输出后处理*
+
+### Model Composer
+可以使用自定义数据集进行标注、模型选择、训练、编译、预览、部署

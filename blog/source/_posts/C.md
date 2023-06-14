@@ -135,7 +135,7 @@ ELSE(HELLO_FOUND)   # 如果没有找到，并且被标记为必需，则输出�
 ENDIF(HELLO_FOUND)
 ```
 ## Cmake Opencv Demo
-### 安装OpenCV
+**1.安装OpenCV**
 ```
 git clone https://github.com/opencv/opencv.git
 cd opencv
@@ -148,7 +148,7 @@ make install   #安装库文件
 export LD_LIBRARY_PATH=/home/ywang85/opencv/lib:$LD_LIBRARY_PATH  #链接库文件
 export PKG_CONFIG_PATH=/home/ywang85/opencv/lib/cmake/opencv4/:$PKG_CONFIG_PATH  #链接配置文件
 ```
-### 写主程序
+**2.写主程序**
 <details>
   <summary>边缘提取程序</summary>
 
@@ -183,8 +183,8 @@ export PKG_CONFIG_PATH=/home/ywang85/opencv/lib/cmake/opencv4/:$PKG_CONFIG_PATH 
 </details>
 使用OpenCV的canny算子检测边缘
 
-### 写CMake
-```
+**3.写CMake**
+```c
 cmake_minimum_required(VERSION 2.8)
 project(EDGE)
 set(OpenCV_DIR "${CMAKE_SOURCE_DIR}/opencv/lib/cmake/opencv4/") #设置 OpenCV 的 CMake 路径
@@ -192,7 +192,16 @@ find_package(OpenCV REQUIRED)
 add_executable(EDGE main.cpp)
 target_include_directories(EDGE PUBLIC ${OpenCV_INCLUDE_DIRS})  #头文件路径添加到编译器的include路径中
 target_link_libraries(EDGE PUBLIC ${OpenCV_LIBS})   #链接OpenCV库
+#需要注意opencv库的链接
 ```
+**4.编译运行**
+```c
+mkdir build && cd build
+cmake ..
+make  #生成可执行文件
+./EDGE   #运行边缘提取执行文件
+```
+<img src="https://raw.sevencdn.com/Arrowes/Arrowes-Blogbackup/main/images/Cedge.png" width="50%">
 
 ## gcc/g++,MinGW/MSVC与make/CMake/qmake
 **GNU**/Linux：简称Linux，包括Ubuntu，Debian，CentOS，自带gcc； 
