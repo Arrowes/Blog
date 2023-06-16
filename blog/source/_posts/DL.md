@@ -8,7 +8,7 @@ tags:
 从机器学习到深度学习：[从机器学习谈起](https://www.cnblogs.com/subconscious/p/4107357.html)，[从神经元到深度学习](https://www.cnblogs.com/subconscious/p/5058741.html)
 什么是卷积讲解视频：[：大白话讲解卷积神经网络工作原理](https://www.bilibili.com/video/BV1sb411P7pQ/?share_source=copy_web&vd_source=b148fb6f311bfe6f3870ad8f4dfda92a)
 
-# [深度学习框架]
+# 深度学习框架
 ```mermaid
 graph LR
 A[程序框架]-->B[A.黑箱]
@@ -179,7 +179,7 @@ map*map是下个featuremap的大小，也就是上个weight*weight到底做了�
 3.**全连接层**
 ``参数量＝计算量＝weight_in*weight_out  #模型里面最费参数的就是全连接层``
 
-**换算计算量**,一般一个参数是值一个float，也就是４个字节,1kb=1024字节
+**换算计算量**,一般一个参数是指一个float，也就是４个字节,1kb=1024字节
 
 # Transformer
 ![图 13](https://raw.sevencdn.com/Arrowes/Arrowes-Blogbackup/main/images/DL13.png)  

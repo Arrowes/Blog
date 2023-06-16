@@ -292,6 +292,6 @@ for num in tqdm.trange(len(calib_images)):
 ```
 
 Then using Onnx with the libtidl_onnxrt_EP inference library we run the model and collect benchmark data.
-<img src="">
+<img alt="图 9" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/TDA4VM2benchmark.png" width="88%"/>  
 
 [edgeai-tidl-tools:Python Examples](https://github.com/TexasInstruments/edgeai-tidl-tools/blob/master/examples/osrt_python/README.md)
