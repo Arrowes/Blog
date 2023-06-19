@@ -72,11 +72,11 @@ detection_output_param {
 
 [ONNXRuntime Demo](https://github.com/TexasInstruments/edgeai-yolox/tree/main/demo/ONNXRuntime#yolox-onnxruntime-in-python)
 ```sh
-cd <YOLOX_HOME>/demo/ONNXRuntime
-python3 demo/ONNXRuntime/onnx_inference.py -m yolox_s_ti_lite.onnx -i assets/dog.jpg -o output -s 0.3 --input_shape 640,640 --export-det
-失败 先pass
-#TypeError: only size-1 arrays can be converted to Python scalars
+cd <YOLOX_HOME>
+python3 demo/ONNXRuntime/onnx_inference.py -m yolox_s_ti_lite.onnx -i assets/dog.jpg -o output -s 0.3 --input_shape 640,640
+#成功输出预测结果
 ```
+<img alt="图 1" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/TDA4VM3onnxinference.png" width="70%"/>  
 
 ## 2. ONNX导入TIDL
 ### a. 使用[TIDL Importer](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/06_01_01_12/exports/docs/tidl_j7_01_00_01_00/ti_dl/docs/user_guide_html/md_tidl_model_import.html)
@@ -123,8 +123,8 @@ tidl_out.png, tidl_out.txt  #执行的目标检测测试结果，与第三步TID
 Step != 1 is NOT supported for Slice Operator -- /backbone/backbone/stem/Slice_3 
 #因为"the slice operations in Focus layer are not embedded friendly"，因此ti提供yolox-s-ti-lite，优化后的才能直接导入
 ```
-### b. 使用TIDL Tools
-
+### b. 使用TIDL Tools（[Edge AI Studio](https://dev.ti.com/edgeaistudio/)）
+将custom-model-onnx 替换为自己的模型后报错，且内核经常挂掉，ongoing
 
 ## 3. TIDL运行
 ```sh

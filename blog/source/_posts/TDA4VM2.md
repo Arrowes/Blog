@@ -116,33 +116,50 @@ cd
 可以鼠标点击试运行开箱即用的 GUI 应用程序
 也使用 Python 和C++参考示例开发边缘 AI 应用程序：
 ```sh
-#Classification (python)
-cd /opt/edgeai-gst-apps/apps_python
-./app_edgeai.py ../configs/image_classification.yaml  #ctrl+c退出
 #配置
 cd /opt/edgeai-gst-apps/configs/  #app_config_template.yaml中有参数介绍
 vi image_classification.yaml  #flow参数配置为摄像头输入input0
 
-
+#Classification (python)
+cd /opt/edgeai-gst-apps/apps_python
+./app_edgeai.py ../configs/image_classification.yaml  #ctrl+c退出
+#替换为configs下其他文件能执行不同任务如object_detection.yaml
 
 #Classification (c++)
 cd /opt/edgeai-gst-apps/apps_cpp
 ./bin/Release/app_edgeai ../configs/image_classification.yaml
-#修改和构建C++应用：
-/opt/edgeai-gst-apps/apps_cpp# rm -rf build bin lib
-/opt/edgeai-gst-apps/apps_cpp# mkdir build
-/opt/edgeai-gst-apps/apps_cpp# cd build
-/opt/edgeai-gst-apps/apps_cpp/build# cmake ..
-/opt/edgeai-gst-apps/apps_cpp/build# make -j2
 
 #视频流车辆检测
 cd /opt/edgeai-gst-apps/scripts/optiflow
 `./optiflow.py ../../configs/object_detection.yaml -t`  #如果没有单引号，终端会将 -t 选项解释为一个单独的参数，而不是作为 optiflow.py 命令的选项之一
+
+#多flows
+flows:
+    # flowname : [input,mode1,output,[mosaic_pos_x,mosaic_pos_y,width,height]]
+    flow0: [input0,model1,output0,[160,90,800,450]]
+    flow1: [input0,model2,output0,[960,90,800,450]]
+    flow2: [input1,model0,output0,[160,540,800,450]]
+    flow3: [input1,model3,output0,[960,540,800,450]]
 ```
-<img src="https://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-edgeai/TDA4VM/08_06_01/exports/docs/_images/edgeai_video_source_optiflow.jpg" width='88%'>
 
-
-
+**Dataflows**
+<img src="https://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-edgeai/TDA4VM/08_06_01/exports/docs/_images/edgeai_object_detection.png" width='90%'>
+GStreamer input pipeline:
+```
+v4l2src device=/dev/video18 io-mode=2 ! image/jpeg, width=1280, height=720 ! jpegdec ! tiovxdlcolorconvert ! video/x-raw, format=NV12 ! tiovxmultiscaler name=split_01
+split_01. ! queue ! video/x-raw, width=320, height=320 ! tiovxdlpreproc data-type=10 channel-order=1 mean-0=128.000000 mean-1=128.000000 mean-2=128.000000 scale-0=0.007812 scale-1=0.007812 scale-2=0.007812 tensor-format=rgb out-pool-size=4 ! application/x-tensor-tiovx ! appsink name=pre_0 max-buffers=2 drop=true
+split_01. ! queue ! video/x-raw, width=1280, height=720 ! tiovxdlcolorconvert out-pool-size=4 ! video/x-raw, format=RGB ! appsink name=sen_0 max-buffers=2 drop=true
+```
+GStreamer output pipeline:
+```
+appsrc format=GST_FORMAT_TIME is-live=true block=true do-timestamp=true name=post_0 ! tiovxdlcolorconvert ! video/x-raw,format=NV12, width=1280, height=720 ! queue ! mosaic_0.sink_0
+appsrc format=GST_FORMAT_TIME block=true num-buffers=1 name=background_0 ! tiovxdlcolorconvert ! video/x-raw,format=NV12, width=1920, height=1080 ! queue ! mosaic_0.background
+tiovxmosaic name=mosaic_0
+sink_0::startx="<320>"  sink_0::starty="<180>"  sink_0::widths="<1280>"   sink_0::heights="<720>"
+! video/x-raw,format=NV12, width=1920, height=1080 ! kmssink sync=false driver-name=tidss
+```
+[Edge AI application stack](https://github.com/TexasInstruments/edgeai-gst-apps/tree/44f4d44ddcda766d2abb5e89b9b112a1280f99ec)
+<img src='https://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-edgeai/TDA4VM/08_06_01/exports/docs/_images/edgeai-app-stack.jpg' width='80%'>
 
 # [TIDL](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/06_01_01_12/exports/docs/tidl_j7_01_00_01_00/ti_dl/docs/user_guide_html/md_tidl_user_model_deployment.html)
 
@@ -264,6 +281,7 @@ Model performance中代码都已配置好，试用OD task, 选ONNX runtime，无
 - *执行输入预处理和输出后处理*
 
 Create Onnx runtime with `tidl_model_import_onnx` library to generate artifacts that offload supported portion of the DL model to the TI DSP.
+参数配置见[User options for TIDL Acceleration](https://github.com/TexasInstruments/edgeai-tidl-tools/blob/master/examples/osrt_python/README.md#user-options-for-tidl-acceleration)
 ```py
 # 'sess' model compilation options
 compile_options = {
@@ -281,14 +299,17 @@ compile_options = {
 so = rt.SessionOptions() #此处默认参数
 # 设置执行提供者列表，包含 TIDLCompilationProvider 和 CPUExecutionProvider
 EP_list = ['TIDLCompilationProvider', 'CPUExecutionProvider'] #当第一个 Execution Provider 调用失败时，自动尝试使用下一个，直到成功为止。
-# 定义推理会话并设置编译选项以及会话选项
+# compile the model with TIDL acceleration by passing required compilation options.
 sess = rt.InferenceSession(onnx_model_path, providers=EP_list, provider_options=[compile_options, {}], sess_options=so)
-#sess 是一个 ONNX 推理会话对象，它的作用是载入 ONNX 模型并进行推理。可以使用 sess 对象来进行标准化、预处理、推理等操作，还可以获取模型的输入信息、输出信息、元图信息等
+# 载入 ONNX 模型并进行推理。可以使用 sess 对象来进行标准化、预处理、推理等操作，还可以获取模型的输入信息、输出信息、元图信息等
+# At the end of model compilation step, model-artifacts for inference will be generated in user specified path.
 
 input_details = sess.get_inputs() # 获取输入数据信息
+
 # 对校准图片进行预处理并进行推理，并将输出结果存储到 output 列表中
 for num in tqdm.trange(len(calib_images)):
     output = list(sess.run(None, {input_details[0].name : preprocess_for_onnx_resent18v2(calib_images[num])}))[0]
+# Create OSRT inference session with TIDL acceleration option for running inference with generated model artifacts in the above step.
 ```
 
 Then using Onnx with the libtidl_onnxrt_EP inference library we run the model and collect benchmark data.
