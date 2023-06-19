@@ -316,3 +316,4 @@ Then using Onnx with the libtidl_onnxrt_EP inference library we run the model an
 <img alt="图 9" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/TDA4VM2benchmark.png" width="88%"/>  
 
 [edgeai-tidl-tools:Python Examples](https://github.com/TexasInstruments/edgeai-tidl-tools/blob/master/examples/osrt_python/README.md)
+[适用于嵌入式应用的深度学习推理参考设计](https://www.ti.com.cn/cn/lit/ug/zhcu546/zhcu546.pdf)
