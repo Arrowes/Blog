@@ -7,7 +7,7 @@ tags:
 ---
 # Yolo
 ## 配置
-详细配置见 [Anaconda，Pycharm，Jupyter，Pytorch](https://wangyujie.site/2022/11/24/Pytorch/)
+详细配置见 [Anaconda，Pycharm，Jupyter，Pytorch](https://wangyujie.site/Pytorch/)
 
 **Windows环境配置**
 1. 安装[Anaconda](https://www.anaconda.com/)，修改user目录下.condarc文件里的默认地址，防止环境装在C盘占空间 或执行``conda config --add D:\Anaconda3\envs ``,然后``conda info``检查envs directories

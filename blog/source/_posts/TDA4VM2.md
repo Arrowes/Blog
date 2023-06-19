@@ -6,7 +6,7 @@ tags:
 - 深度学习
 ---
 
-相关前置知识见笔记：[[TDA4：SDK, TIDL, OpenVX]](https://wangyujie.site/2023/05/10/TDA4VM/)
+相关前置知识见笔记：[[TDA4：SDK, TIDL, OpenVX]](https://wangyujie.site/TDA4VM/)
 环境搭建需要下载：[PROCESSOR-SDK-J721E](https://www.ti.com.cn/tool/cn/PROCESSOR-SDK-J721E)
 
 # [Linux SDK](https://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-rt-jacinto7/08_06_00_11/exports/docs/devices/J7/linux/index.html) 环境搭建

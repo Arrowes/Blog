@@ -57,6 +57,7 @@ a:not(.btn){
 	}
   }
   ```
+配置博客链接：_config中``permalink: :title/``
 
 #### 搜索功能
 1. 在项目根目录下运行 ``npm install hexo-generator-searchdb --save``
