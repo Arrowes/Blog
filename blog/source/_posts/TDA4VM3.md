@@ -1,5 +1,5 @@
 ---
-title: TDA4：SK板端运行YOLO
+title: TDA4③：SK板端运行YOLO
 date: 2023-06-15 09:40:00
 tags:
 - 嵌入式
@@ -78,8 +78,8 @@ python3 demo/ONNXRuntime/onnx_inference.py -m yolox_s_ti_lite.onnx -i assets/dog
 ```
 <img alt="图 1" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/TDA4VM3onnxinference.jpg" width="50%"/>  
 
-## 2. ONNX导入TIDL
-### a. 使用[TIDL Importer](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/06_01_01_12/exports/docs/tidl_j7_01_00_01_00/ti_dl/docs/user_guide_html/md_tidl_model_import.html)
+## 2. 使用TIDL编译ONNX并运行
+### a. 使用[TIDL Importer](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/06_01_01_12/exports/docs/tidl_j7_01_00_01_00/ti_dl/docs/user_guide_html/md_tidl_model_import.html) (by RTOS SDK)
 1. 模型文件配置：拷贝 .onnx, .prototxt 文件至/ti_dl/test/testvecs/models/public/onnx/，**yolox_s_ti_lite.prototxt**中改in_width&height，根据情况改nms_threshold: 0.4，confidence_threshold: 0.4
 2. 编写转换配置文件：在/testvecs/config/import/public/onnx下新建（或复制参考目录下yolov3例程）**tidl_import_yolox_s.txt**，参数配置见[文档](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/06_01_01_12/exports/docs/tidl_j7_01_00_01_00/ti_dl/docs/user_guide_html/md_tidl_model_import.html), 元架构类型见 [Object detection meta architectures](https://github.com/TexasInstruments/edgeai-tidl-tools/blob/master/docs/tidl_fsg_od_meta_arch.md)
 ```sh
@@ -123,10 +123,8 @@ tidl_out.png, tidl_out.txt  #执行的目标检测测试结果，与第三步TID
 Step != 1 is NOT supported for Slice Operator -- /backbone/backbone/stem/Slice_3 
 #因为"the slice operations in Focus layer are not embedded friendly"，因此ti提供yolox-s-ti-lite，优化后的才能直接导入
 ```
-### b. 使用TIDL Tools（[Edge AI Studio](https://dev.ti.com/edgeaistudio/)）
-将custom-model-onnx 替换为自己的模型后报错，且内核经常挂掉，ongoing
 
-## 3. TIDL运行
+4. TIDL运行
 ```sh
 #在文件ti_dl/test/testvecs/config/config_list.txt顶部加入:
 1 testvecs/config/infer/public/onnx/tidl_infer_yolox.txt
@@ -148,6 +146,24 @@ postProcType    = 2
 cd ${TIDL_INSTALL_PATH}/ti_dl/test
 ./PC_dsp_test_dl_algo.out
 ```
+<img alt="图 2" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/TDA4VM3sdktidlyolox.png" width="50%"/>  
+
+### b. 使用TIDL Tools（by [Edge AI Studio](https://dev.ti.com/edgeaistudio/)）
+使用`Edge AI Studio > Model Analyzer > Custom models > ONNX runtime > custom-model-onnx.ipynb`例程, 并结合 `OD.ipynb` 例程进行修改
+```py
+
+```
+<img alt="图 2" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/TDA4VM3yoloxs.png" width="88%"/>  
+
+> Statistics : 
+ Inferences Per Second   :  104.44 fps
+ Inference Time Per Image :    9.57 ms  
+ DDR BW Per Image        :   16.22 MB
+
+debug:将custom-model-onnx 替换为自己的模型后报错，且内核经常挂掉，这不是服务器的问题，而是代码中有错误引发 Jupyter 中的某种内存分配问题并kill内核.（如，索引路径错误，模型不存在，config参数配置错误）
+在My Workspace中， 右上角`New > Terminal` 可以打开终端，便于进一步的调试
+prebuilt-models中的预训练模型每次重启EVM都要先`find . -name "*.tar.gz" -exec tar --one-top-level -zxvf "{}" \;`重新解压
+
 
 ## 4. 板端运行(TDA4VM-SK)
 ongoing

@@ -1,12 +1,12 @@
 ---
-title: TDA4：环境搭建、模型转换、Demo及Tools
+title: TDA4②：环境搭建、模型转换、Demo及Tools
 date: 2023-05-18 16:28:00
 tags:
 - 嵌入式
 - 深度学习
 ---
 
-相关前置知识见笔记：[[TDA4：SDK, TIDL, OpenVX]](https://wangyujie.site/TDA4VM/)
+相关前置知识见上一篇：[[TDA4：SDK, TIDL, OpenVX]](https://wangyujie.site/TDA4VM/)
 环境搭建需要下载：[PROCESSOR-SDK-J721E](https://www.ti.com.cn/tool/cn/PROCESSOR-SDK-J721E)
 
 # [Linux SDK](https://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-rt-jacinto7/08_06_00_11/exports/docs/devices/J7/linux/index.html) 环境搭建
