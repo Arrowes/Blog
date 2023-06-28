@@ -101,7 +101,7 @@ make linux_fs_install_sd
 chmod +x ./xxx.bin
 ./xxx.bin
 ```
-挂载USB串口，使用[minicom](https://help.ubuntu.com/community/Minicom)串口通讯：
+连接串口线，在虚拟机设置中挂载USB串口，使用[minicom](https://help.ubuntu.com/community/Minicom)串口通讯：
 ```sh
 sudo apt-get install minicom  #安装minicom
 sudo minicom -D /dev/ttyUSB2 -c on
@@ -242,11 +242,8 @@ git checkout 08_06_00_05
 export SOC=am68pa
 source ./setup.sh   #仔细查看setup.sh文件，有些包可能要手动安装，并注释掉
 #gcc-arm的包解压到项目文件夹，
-
 #Docker Based X86_PC Setup 跳过，不用docker装
-
-#make过程中各种依赖库报错 SSLError
-
+#make过程中各种依赖库报错 SSLError，放弃，转用studio
 ```
 
 ## [EdgeAI-ModelMaker](https://github.com/TexasInstruments/edgeai-modelmaker)
