@@ -26,6 +26,7 @@ pip3 install cython
 pip3 install 'git+https://github.com/cocodataset/cocoapi.git#subdirectory=PythonAPI'
 #下载ti的yolox-s-ti-lite.pth放入项目文件夹，运行export，
 python3 tools/export_onnx.py --output-name yolox_s_ti_lite.onnx -f exps/default/yolox_s_ti_lite.py -c yolox-s-ti-lite.pth
+
 #Debug：
 TypeError: Descriptors cannot not be created directly. > pip install protobuf==3.19.6;
 AttributeError: module 'numpy' has no attribute 'object'. > pip install numpy==1.23.4
@@ -67,14 +68,14 @@ detection_output_param {
   in_height: 640
   output: "detections"}
 ```
-</details>
+</details>           
 
-
-[ONNXRuntime Demo](https://github.com/TexasInstruments/edgeai-yolox/tree/main/demo/ONNXRuntime#yolox-onnxruntime-in-python)
+---
+[ONNXRuntime inference](https://github.com/TexasInstruments/edgeai-yolox/tree/main/demo/ONNXRuntime#yolox-onnxruntime-in-python)
 ```sh
 cd <YOLOX_HOME>
 python3 demo/ONNXRuntime/onnx_inference.py -m yolox_s_ti_lite.onnx -i assets/dog.jpg -o output -s 0.3 --input_shape 640,640
-#成功输出预测结果
+#成功基于ONNXRuntime输出预测结果
 ```
 <img alt="图 1" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/TDA4VM3onnxinference.jpg" width="50%"/>  
 
@@ -82,8 +83,9 @@ python3 demo/ONNXRuntime/onnx_inference.py -m yolox_s_ti_lite.onnx -i assets/dog
 ### a. 使用[TIDL Importer](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/06_01_01_12/exports/docs/tidl_j7_01_00_01_00/ti_dl/docs/user_guide_html/md_tidl_model_import.html) (by RTOS SDK)
 1. 模型文件配置：拷贝 .onnx, .prototxt 文件至/ti_dl/test/testvecs/models/public/onnx/，**yolox_s_ti_lite.prototxt**中改in_width&height，根据情况改nms_threshold: 0.4，confidence_threshold: 0.4
 2. 编写转换配置文件：在/testvecs/config/import/public/onnx下新建（或复制参考目录下yolov3例程）**tidl_import_yolox_s.txt**，参数配置见[文档](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/06_01_01_12/exports/docs/tidl_j7_01_00_01_00/ti_dl/docs/user_guide_html/md_tidl_model_import.html), 元架构类型见 [Object detection meta architectures](https://github.com/TexasInstruments/edgeai-tidl-tools/blob/master/docs/tidl_fsg_od_meta_arch.md)
+
+*转换配置文件tidl_import_yolox_s.txt*
 ```sh
-#tidl_import_yolox_s.txt
 modelType       = 2     #模型类型，0: Caffe, 1: TensorFlow, 2: ONNX, 3: tfLite
 numParamBits    = 8     #模型参数的位数，Bit depth for model parameters like Kernel, Bias etc.
 numFeatureBits  = 8     #Bit depth for Layer activation
@@ -150,6 +152,8 @@ cd ${TIDL_INSTALL_PATH}/ti_dl/test
 
 ### b. 使用TIDL Tools（by [Edge AI Studio](https://dev.ti.com/edgeaistudio/)）
 使用`Edge AI Studio > Model Analyzer > Custom models > ONNX runtime > custom-model-onnx.ipynb`例程, 并结合 `OD.ipynb` 例程进行修改
+
+*YOLOX.ipynb*
 ```py
 import os
 import tqdm
@@ -160,20 +164,24 @@ from PIL import Image
 import matplotlib.pyplot as plt
 #/notebooks/scripts/utils.py:
 from scripts.utils import imagenet_class_to_name, download_model, loggerWritter, get_svg_path, get_preproc_props, single_img_visualise, det_box_overlay
-
+```
+其中scripts.utils中的代码细节在`/notebooks/scripts/utils.py`
+```py
 #预处理
 def preprocess(image_path):
-    img = cv2.imread(image_path)# read the image using openCV
-    img = img[:,:,::-1]# convert to RGB
+    img = cv2.imread(image_path) # 使用OpenCV读取图像
+    print('原始图像：', img.shape, img.dtype)
     img = cv2.resize(img, (640, 640), interpolation=cv2.INTER_CUBIC)
-    img = img.astype('uint8')
-    #img = img.astype('float32')
-    for mean, scale, ch in zip([0, 0, 0], [0.00392156862, 0.00392156862, 0.00392156862], range(img.shape[2])):
-            img[:,:,ch] = ((img.astype('uint8')[:,:,ch] - mean) * scale)
-    img = np.expand_dims(img,axis=0) #扩展图片数组维度
-    img = np.transpose(img, (0, 3, 1, 2)) #NHWC 格式（batch_size，height, width，channels）转换为 NCHW 格式
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    img = img.astype('float32') / 255.0
+    img = (img * 255).astype('uint8')
+    img = np.expand_dims(img, axis=0) # 扩展图片数组维度
+    img = np.transpose(img, (0, 3, 1, 2)) # NHWC 格式（batch_size，height, width，channels）转换为 NCHW 格式
+    print('处理后的图像：', img.shape, img.dtype)
     return img
-
+```
+图片的预处理十分重要，调试时注意print图片数据，避免处理出错
+```py
 #配置
 images = [
 'WYJ/dog.jpg',
@@ -181,8 +189,6 @@ images = [
 output_dir = 'WYJ/output'#优化后的ONNX模型将保存的输出目录
 onnx_model_path = 'WYJ/yolox_s_lite_640x640_20220221_model.onnx'
 prototxt_path = 'WYJ/yolox_s_lite_640x640_20220221_model.prototxt'
-#onnx_model_path = 'WYJ/yolox_s_ti_lite.onnx' #未优化的原始ONNX模型的文件
-#prototxt_path = 'WYJ/yolox_s_ti_lite.prototxt'
 with loggerWritter("WYJ/logs"):# stdout and stderr saved to a *.log file.
     compile_options = {
       'tidl_tools_path' : os.environ['TIDL_TOOLS_PATH'],
@@ -193,7 +199,7 @@ with loggerWritter("WYJ/logs"):# stdout and stderr saved to a *.log file.
       'advanced_options:calibration_iterations' : 3, # used if accuracy_level = 1
       'debug_level' : 1, # 设置调试级别，级别越高提供的调试信息越详细
       #'advanced_options:output_feature_16bit_names_list': '370, 680, 990, 1300',    
-      #'deny_list': 'MaxPool', #' Conv, Relu, Add, Concat, Resize', # MaxPool
+      #'deny_list': 'ScatterND', #' Conv, Relu, Add, Concat, Resize', # MaxPool
       'object_detection:meta_arch_type': 6,
       'object_detection:meta_layers_names_list': prototxt_path,    
     }
@@ -202,50 +208,81 @@ os.makedirs(output_dir, exist_ok=True)
 for root, dirs, files in os.walk(output_dir, topdown=False):
     [os.remove(os.path.join(root, f)) for f in files]
     [os.rmdir(os.path.join(root, d)) for d in dirs]
+```
+object_detection:meta_arch_type、meta_layers_names_list两个参数在OD任务中必须配置，否则内核直接奔溃，参数配置文档中也有说明：[object-detection-model-specific-options](https://github.com/TexasInstruments/edgeai-tidl-tools/blob/master/examples/osrt_python/README.md#object-detection-model-specific-options)
 
+```py
 #模型转换
 so = rt.SessionOptions()
 EP_list = ['TIDLCompilationProvider','CPUExecutionProvider']
 sess = rt.InferenceSession(onnx_model_path ,providers=EP_list, provider_options=[compile_options, {}], sess_options=so)
+# 获取所有输入输出详细信息
 input_details = sess.get_inputs()
+print("Model input details:")
+for i in input_details:
+    print(i)
+output_details = sess.get_outputs()
+print("Model output details:")
+for i in output_details:
+    print(i)
+#运行
 for i in tqdm.trange(len(images)):
-    output = list(sess.run(None, {input_details[0].name : preprocess(images[i])}))[0]
+    processed_image = preprocess(images[i])
+    output=None
+    output = list(sess.run(None, {input_details[0].name :processed_image }))
+```
+打印输入输出信息，运行编译
 
+```py
+#画框
+#def det_box_overlay(outputs, org_image_rgb, thr, postprocess, org_size, size):
+from PIL import Image, ImageDraw
+img = Image.open("WYJ/dog.jpg")
+width, height = img.size
+width_scale = 640 / width
+height_scale = 640 / height
+# 创建ImageDraw对象
+draw = ImageDraw.Draw(img)
+# 遍历所有边界框，画出矩形
+for i in range(int(output[0][0][0].shape[0])):
+    # 取出顶点坐标和置信度
+    xmin, ymin, xmax, ymax, conf = tuple(output[0][0][0][i].tolist())
+    if(conf > 0.4) :
+        cls = int(output[1][0][0][0][i])        # 取出类别编号
+        print('class:', cls, ', box:',output[0][0][0][i])
+        color = (255, i*100, i*30)        # 选择不同颜色表示不同类别
+        # 画出矩形框
+        draw.rectangle(((xmin/ width_scale, ymin/ height_scale), (xmax/ width_scale, ymax/ height_scale)), outline=color, width=2)
+# 显示画好的图像
+img.show()
+```
+画框，引入了缩放比例，否则框的位置不对
+<img alt="图 2" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/TDA4VM3studioyolox.png" width="50%"/>  
+
+```py
 #Subgraphs visualization
 from pathlib import Path
 from IPython.display import Markdown as md
+
 subgraph_link =get_svg_path(output_dir) 
 for sg in subgraph_link:
     hl_text = os.path.join(*Path(sg).parts[4:])
     sg_rel = os.path.join('../', sg)
     display(md("[{}]({})".format(hl_text,sg_rel)))
-
-#模型推理
-EP_list = ['TIDLExecutionProvider','CPUExecutionProvider']
-sess = rt.InferenceSession(onnx_model_path ,providers=EP_list, provider_options=[compile_options, {}], sess_options=so)
-input_details = sess.get_inputs()
-for i in range(5):  #Running inference several times to get an stable performance output
-    output = list(sess.run(None, {input_details[0].name : preprocess('WYJ/dog.jpg')}))
-    
-from scripts.utils import plot_TI_performance_data, plot_TI_DDRBW_data, get_benchmark_output
-stats = sess.get_TI_benchmark_data()
-fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(10,5))
-plot_TI_performance_data(stats, axis=ax)
-plt.show()
-
-tt, st, rb, wb = get_benchmark_output(stats)
-print(f'Statistics : \n Inferences Per Second   : {1000.0/tt :7.2f} fps')
-print(f' Inference Time Per Image : {tt :7.2f} ms  \n DDR BW Per Image        : {rb+ wb : 7.2f} MB')
 ```
-<img alt="图 2" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/TDA4VM3yoloxs.png" width="88%"/>  
+
+<img alt="图 2" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/TDA4VM3yoloxs.png" width="80%"/>  
 
 > Statistics : 
   Inferences Per Second   :  104.44 fps
   Inference Time Per Image :    9.57 ms  
   DDR BW Per Image        :   16.22 MB
 
-**debug**:将custom-model-onnx 替换为自己的模型后报错，且内核经常挂掉，这不是服务器的问题，而是代码中有错误引发 Jupyter 中的某种内存分配问题并kill内核.（如，索引路径错误，模型不存在，config参数配置错误）—— [E2E:Kills Kernel in Edge AI Studio](https://e2e.ti.com/support/processors-group/processors/f/processors-forum/1214094/tda4vm-inference-with-custom-artifacts-kills-kernel-in-edge-ai-studio/4658432?tisearch=e2e-sitesearch&keymatch=edge%252520ai%252520studio#4658432)
+**debug**:
+将custom-model-onnx 替换为自己的模型后报错，且内核经常挂掉，这不是服务器的问题，而是代码中有错误引发 Jupyter 中的某种内存分配问题并kill内核.（如，索引路径错误，模型不存在，config参数配置错误）—— [E2E:Kills Kernel in Edge AI Studio](https://e2e.ti.com/support/processors-group/processors/f/processors-forum/1214094/tda4vm-inference-with-custom-artifacts-kills-kernel-in-edge-ai-studio/4658432?tisearch=e2e-sitesearch&keymatch=edge%252520ai%252520studio#4658432)
+
 在My Workspace中， 右上角`New > Terminal` 可以打开终端，便于进一步的调试
+
 prebuilt-models中的预训练模型每次重启EVM都要先重新解压:
 `cd notebooks/prebuilt-models/8bits/`
 `find . -name "*.tar.gz" -exec tar --one-top-level -zxvf "{}" \;`

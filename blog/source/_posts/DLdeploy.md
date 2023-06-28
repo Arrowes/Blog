@@ -12,6 +12,7 @@ tags:
 + Deployment：
 <img alt="图 7" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/TDA4VMdeploy.png" width="70%"/>  
 
+Netron神经网络可视化: [软件下载](https://github.com/lutzroeder/netron/releases/tag/v7.0.0), [在线网站](https://netron.app/)
 # ONNX
 Open Neural Network Exchange 开源机器学习通用中间格式，兼容各种深度学习框架、推理引擎、终端硬件、操作系统，是深度学习框架到推理引擎的桥梁 
 链接：[ONNX](https://onnx.ai)，[Github](https://github.com/onnx/onnx)，[ONNX Runtime](https://onnxruntime.ai/)，[ONNX Runtime Web](https://onnx.coderai.cn)

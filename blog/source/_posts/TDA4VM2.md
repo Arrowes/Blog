@@ -233,7 +233,7 @@ export TIDL_INSTALL_PATH=/home/ywang85/SDK/RTOSSDK/tidl_j721e_08_06_00_10   #设
 
 1. OSRT(Open Source Runtimes:TFLite,ONNX,TVM) 作为用户应用程序的顶级推理 API
 2. 将子图卸载到 C7x/MMA 以使用TIDL进行加速执行
-3. 在 ARM 核心上运行优化代码，以支持 TIDL 不支持的层
+3. 在 ARM 核心上运行优化代码，以支持 TIDL 不支持的层（[支持情况](https://github.com/TexasInstruments/edgeai-tidl-tools/blob/master/docs/supported_ops_rts_versions.md)）
 
 ```sh
 sudo apt-get install libyaml-cpp-dev
