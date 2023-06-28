@@ -1,5 +1,5 @@
 ---
-title: TDA4③：SK板端运行YOLO
+title: TDA4③：YOLOX的模型转换与SK板端运行
 date: 2023-06-15 09:40:00
 tags:
 - 嵌入式
@@ -235,12 +235,11 @@ for i in tqdm.trange(len(images)):
 
 ```py
 #画框
-#def det_box_overlay(outputs, org_image_rgb, thr, postprocess, org_size, size):
 from PIL import Image, ImageDraw
 img = Image.open("WYJ/dog.jpg")
-width, height = img.size
-width_scale = 640 / width
-height_scale = 640 / height
+
+width_scale = 640 / img.size[0]
+height_scale = 640 / img.size[1]
 # 创建ImageDraw对象
 draw = ImageDraw.Draw(img)
 # 遍历所有边界框，画出矩形
@@ -248,16 +247,15 @@ for i in range(int(output[0][0][0].shape[0])):
     # 取出顶点坐标和置信度
     xmin, ymin, xmax, ymax, conf = tuple(output[0][0][0][i].tolist())
     if(conf > 0.4) :
-        cls = int(output[1][0][0][0][i])        # 取出类别编号
+        cls = int(output[1][0][0][0][i])  # 取出类别编号
         print('class:', cls, ', box:',output[0][0][0][i])
-        color = (255, i*100, i*30)        # 选择不同颜色表示不同类别
+        color = (255, cls*10, cls*100)        # 选择不同颜色表示不同类别
         # 画出矩形框
         draw.rectangle(((xmin/ width_scale, ymin/ height_scale), (xmax/ width_scale, ymax/ height_scale)), outline=color, width=2)
-# 显示画好的图像
-img.show()
+img.show()  # 显示画好的图像
 ```
 画框，引入了缩放比例，否则框的位置不对
-<img alt="图 2" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/TDA4VM3studioyolox.png" width="50%"/>  
+<img alt="图 3" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/TDA4VM3studioyolox.png" width="50%"/>  
 
 ```py
 #Subgraphs visualization
@@ -270,7 +268,28 @@ for sg in subgraph_link:
     sg_rel = os.path.join('../', sg)
     display(md("[{}]({})".format(hl_text,sg_rel)))
 ```
+生成两个.svg网络可视化图的链接
 
+```py
+#模型推理
+EP_list = ['TIDLExecutionProvider','CPUExecutionProvider']
+sess = rt.InferenceSession(onnx_model_path ,providers=EP_list, provider_options=[compile_options, {}], sess_options=so)
+
+input_details = sess.get_inputs()
+for i in range(5):#Running inference several times to get an stable performance output
+    output = list(sess.run(None, {input_details[0].name : preprocess('WYJ/dog.jpg')}))
+
+from scripts.utils import plot_TI_performance_data, plot_TI_DDRBW_data, get_benchmark_output
+stats = sess.get_TI_benchmark_data()
+fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(10,5))
+plot_TI_performance_data(stats, axis=ax)
+plt.show()
+
+tt, st, rb, wb = get_benchmark_output(stats)
+print(f'Statistics : \n Inferences Per Second   : {1000.0/tt :7.2f} fps')
+print(f' Inference Time Per Image : {tt :7.2f} ms  \n DDR BW Per Image        : {rb+ wb : 7.2f} MB')
+```
+推理，注意`TIDLCompilationProvider`和`TIDLExecutionProvider`的区别
 <img alt="图 2" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/TDA4VM3yoloxs.png" width="80%"/>  
 
 > Statistics : 
@@ -278,15 +297,31 @@ for sg in subgraph_link:
   Inference Time Per Image :    9.57 ms  
   DDR BW Per Image        :   16.22 MB
 
-**debug**:
-将custom-model-onnx 替换为自己的模型后报错，且内核经常挂掉，这不是服务器的问题，而是代码中有错误引发 Jupyter 中的某种内存分配问题并kill内核.（如，索引路径错误，模型不存在，config参数配置错误）—— [E2E:Kills Kernel in Edge AI Studio](https://e2e.ti.com/support/processors-group/processors/f/processors-forum/1214094/tda4vm-inference-with-custom-artifacts-kills-kernel-in-edge-ai-studio/4658432?tisearch=e2e-sitesearch&keymatch=edge%252520ai%252520studio#4658432)
-
-在My Workspace中， 右上角`New > Terminal` 可以打开终端，便于进一步的调试
-
-prebuilt-models中的预训练模型每次重启EVM都要先重新解压:
+**Debug**:
++ 将custom-model-onnx 替换为自己的模型后报错，且内核经常挂掉，这不是服务器的问题，而是代码中有错误引发 Jupyter 中的某种内存分配问题并kill内核.（如，索引路径错误，模型不存在，config参数配置错误）—— [E2E:Kills Kernel in Edge AI Studio](https://e2e.ti.com/support/processors-group/processors/f/processors-forum/1214094/tda4vm-inference-with-custom-artifacts-kills-kernel-in-edge-ai-studio/4658432?tisearch=e2e-sitesearch&keymatch=edge%252520ai%252520studio#4658432)
++ 在My Workspace中， 右上角`New > Terminal` 可以打开终端，便于进一步的调试
++ prebuilt-models中的预训练模型每次重启EVM都要先重新解压:
 `cd notebooks/prebuilt-models/8bits/`
 `find . -name "*.tar.gz" -exec tar --one-top-level -zxvf "{}" \;`
 
 
 ## 4. 板端运行(TDA4VM-SK)
-ongoing
+连接SK板进入minicom串口通讯传输模型文件(失败)（若能连网线通过jupyternotebook配置更方便）
+通过SD卡配置，object_detection.yaml修改模型，注意索引的模型是一个完整的文件夹：`artifacts  dataset.yaml  model  param.yaml  run.log`
+```sh
+sudo minicom -D /dev/ttyUSB2 -c on
+
+cd /opt/edgeai-gst-apps/apps_cpp
+./bin/Release/app_edgeai ../configs/object_detection.yaml
+```   
+
+### 性能评估
+```sh
+#构建工具
+cd /opt/edgeai-gst-apps/scripts/perf_stats
+mkdir build && cd build
+cmake .. && make 
+#运行
+cd /opt/edgeai-gst-apps/scripts/perf_stats/build
+../bin/Release/perf_stats -l
+```
