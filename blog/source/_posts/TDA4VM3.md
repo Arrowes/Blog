@@ -349,7 +349,7 @@ cd /opt/edgeai-gst-apps/scripts/perf_stats/build
 ../bin/Release/perf_stats -l
 ```
 此外，使用官方提供的可视化工具Visualization tool是最佳选择，但是要装Docker
-<img src="https://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-sk-tda4vm/latest/exports/docs/_images/perf_plots.png" width=90%>
+<img src="https://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-sk-tda4vm/latest/exports/docs/_images/perf_plots.png">
 
 # Performance Logs
 ## Summary of CPU load
