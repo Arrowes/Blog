@@ -305,7 +305,7 @@ print(f' Inference Time Per Image : {tt :7.2f} ms  \n DDR BW Per Image        : 
 `find . -name "*.tar.gz" -exec tar --one-top-level -zxvf "{}" \;`
 
 
-## 4. 板端运行(TDA4VM-SK)
+## 3. 板端运行(TDA4VM-SK)
 ~~连接SK板进入minicom串口通讯传输模型文件(失败)~~（若能连网线通过jupyternotebook配置更方便，这里网络有限制所以配置都通过SD卡进行）
 
 通过SD卡配置编译生成的模型：
@@ -334,7 +334,7 @@ cmake ..
 make
 ```
 
-## 5. 性能评估
+## 4. 性能评估
 Docs: [Performance Visualization Tool](https://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-sk-tda4vm/latest/exports/docs/performance_visualizer.html#)
 运行实例时，会在运行文件的上一级`../perf_Logs/`中生成 `.md` 格式的**Performance Logs**，最多15个，运行时会不断覆写
 
