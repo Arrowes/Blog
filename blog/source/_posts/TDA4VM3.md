@@ -290,7 +290,7 @@ print(f'Statistics : \n Inferences Per Second   : {1000.0/tt :7.2f} fps')
 print(f' Inference Time Per Image : {tt :7.2f} ms  \n DDR BW Per Image        : {rb+ wb : 7.2f} MB')
 ```
 推理，注意`TIDLCompilationProvider`和`TIDLExecutionProvider`的区别
-<img alt="图 2" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/TDA4VM3yoloxs.png" width="80%"/>  
+<img alt="图 2" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/TDA4VM3yoloxs.png" width="90%"/>  
 
 > Statistics : 
   Inferences Per Second   :  104.44 fps
@@ -349,9 +349,9 @@ cd /opt/edgeai-gst-apps/scripts/perf_stats/build
 ../bin/Release/perf_stats -l
 ```
 此外，使用官方提供的可视化工具Visualization tool是最佳选择，但是要装Docker
-<img src="https://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-sk-tda4vm/latest/exports/docs/_images/perf_plots.png" width=85%>
+<img src="https://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-sk-tda4vm/latest/exports/docs/_images/perf_plots.png" width=90%>
 
-# Performance Logs {#group_apps_Log15_datasheet}
+# Performance Logs
 ## Summary of CPU load
 CPU      | TOTAL LOAD %
 ----------|--------------
