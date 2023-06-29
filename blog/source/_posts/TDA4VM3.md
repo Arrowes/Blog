@@ -306,22 +306,232 @@ print(f' Inference Time Per Image : {tt :7.2f} ms  \n DDR BW Per Image        : 
 
 
 ## 4. 板端运行(TDA4VM-SK)
-连接SK板进入minicom串口通讯传输模型文件(失败)（若能连网线通过jupyternotebook配置更方便）
-通过SD卡配置，object_detection.yaml修改模型，注意索引的模型是一个完整的文件夹：`artifacts  dataset.yaml  model  param.yaml  run.log`
-```sh
-sudo minicom -D /dev/ttyUSB2 -c on
+~~连接SK板进入minicom串口通讯传输模型文件(失败)~~（若能连网线通过jupyternotebook配置更方便，这里网络有限制所以配置都通过SD卡进行）
 
+通过SD卡配置编译生成的模型：
+> 配置模型文件夹yolox_s_studio放入modelzoo文件夹
+>> artifacts：存放编译生成的工件，.bin, .txt
+model：原onnx模型，.onnx, .prototxt
+param.yaml：配置文件
+dataset.yaml：数据集类别对应文件
+
+通过SD卡配置object_detection.yaml，在model参数中索引上面建立的模型文件夹
+```sh
+#通过minicom连接串口
+sudo minicom -D /dev/ttyUSB2 -c on
+root #登录
+#运行yolox_s实例
 cd /opt/edgeai-gst-apps/apps_cpp
 ./bin/Release/app_edgeai ../configs/object_detection.yaml
 ```   
 
-### 性能评估
+### 修改app_edgeai（optional）
+在`opt\edgeai-gst-apps\apps_cpp\`完成修改后重新make:
+```sh
+#Regular builds (Build_Instructions.txt)
+mkdir build && cd build
+cmake ..
+make
+```
+
+## 5. 性能评估
+Docs: [Performance Visualization Tool](https://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-sk-tda4vm/latest/exports/docs/performance_visualizer.html#)
+运行实例时，会在运行文件的上一级`../perf_Logs/`中生成 `.md` 格式的**Performance Logs**，最多15个，运行时会不断覆写
+
+也可以使用Perfstats tool, 把运行状态在terminal print:
 ```sh
 #构建工具
 cd /opt/edgeai-gst-apps/scripts/perf_stats
 mkdir build && cd build
-cmake .. && make 
-#运行
+cmake .. && make
+#运行评估
 cd /opt/edgeai-gst-apps/scripts/perf_stats/build
 ../bin/Release/perf_stats -l
 ```
+此外，使用官方提供的可视化工具Visualization tool是最佳选择，但是要装Docker
+<img src="https://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-sk-tda4vm/latest/exports/docs/_images/perf_plots.png" width=85%>
+
+# Performance Logs {#group_apps_Log15_datasheet}
+## Summary of CPU load
+CPU      | TOTAL LOAD %
+----------|--------------
+mpu1_0    |  40.83 
+mcu2_0    |   7. 0 
+mcu2_1    |   1. 0 
+ c6x_1    |   0. 0 
+ c6x_2    |   1. 0 
+ c7x_1    |  32. 0 
+
+## HWA performance statistics
+HWA（Hardware Accelerator）| LOAD（Million Operations per second）
+----------|--------------
+  MSC0（Multiply and Accumulate）    |   6.94 % ( 42 MP/s )  
+  MSC1    |   6.74 % ( 55 MP/s )
+
+## DDR performance statistics
+DDR BW   | AVG          | PEAK
+----------|--------------|-------
+READ BW |   1509 MB/s  |   5713 MB/s
+WRITE BW |    721 MB/s  |   3643 MB/s
+TOTAL BW |   2230 MB/s  |   9356 MB/s
+
+## Detailed CPU performance/memory statistics
+### CPU: mcu2_0
+TASK          | TASK LOAD
+--------------|-------
+IPC_RX   |   0.34 %
+REMOTE_SRV   |   0.30 %
+LOAD_TEST   |   0. 0 %
+TIVX_CPU_0   |   0. 0 %
+TIVX_V1NF   |   0. 0 %
+TIVX_V1LDC1   |   0. 0 %
+TIVX_V1SC1   |   3. 9 %
+TIVX_V1MSC2   |   3.24 %
+TIVXVVISS1   |   0. 0 %
+TIVX_CAPT1   |   0. 0 %
+TIVX_CAPT2   |   0. 0 %
+TIVX_DISP1   |   0. 0 %
+TIVX_DISP2   |   0. 0 %
+TIVX_CSITX   |   0. 0 %
+TIVX_CAPT3   |   0. 0 %
+TIVX_CAPT4   |   0. 0 %
+TIVX_CAPT5   |   0. 0 %
+TIVX_CAPT6   |   0. 0 %
+TIVX_CAPT7   |   0. 0 %
+TIVX_CAPT8   |   0. 0 %
+TIVX_DPM2M1   |   0. 0 %
+TIVX_DPM2M2   |   0. 0 %
+TIVX_DPM2M3   |   0. 0 %
+TIVX_DPM2M4   |   0. 0 %
+
+#### CPU Heap Table
+HEAP   | Size  | Free | Unused
+--------|-------|------|---------
+   DDR_LOCAL_MEM |   16777216 B |   16768256 B |  99 %
+   L3_MEM |     262144 B |     261888 B |  99 %
+
+<details>
+<summary>CPU: mcu2_1</summary>
+
+### CPU: mcu2_1
+TASK          | TASK LOAD
+--------------|-------
+ IPC_RX   |   0. 0 %
+REMOTE_SRV   |   0.18 %
+   LOAD_TEST   |   0. 0 %
+TIVX_CPU_1   |   0. 0 %
+   TIVX_SDE   |   0. 0 %
+   TIVX_DOF   |   0. 0 %
+IPC_TEST_RX   |   0. 0 %
+IPC_TEST_TX   |   0. 0 %
+IPC_TEST_TX   |   0. 0 %
+IPC_TEST_TX   |   0. 0 %
+IPC_TEST_TX   |   0. 0 %
+IPC_TEST_TX   |   0. 0 %
+
+#### CPU Heap Table
+HEAP   | Size  | Free | Unused
+--------|-------|------|---------
+DDR_LOCAL_MEM |   16777216 B |   16773376 B |  99 %
+   L3_MEM |     262144 B |     262144 B | 100 %
+</details>
+
+<details>
+<summary>CPU: c6x_1</summary>
+
+### CPU: c6x_1
+TASK          | TASK LOAD
+--------------|-------
+IPC_RX   |   0. 0 %
+REMOTE_SRV   |   0. 0 %
+LOAD_TEST   |   0. 0 %
+TIVX_CPU   |   0. 0 %
+IPC_TEST_RX   |   0. 0 %
+IPC_TEST_TX   |   0. 0 %
+IPC_TEST_TX   |   0. 0 %
+IPC_TEST_TX   |   0. 0 %
+IPC_TEST_TX   |   0. 0 %
+IPC_TEST_TX   |   0. 0 %
+
+#### CPU Heap Table
+HEAP   | Size  | Free | Unused
+--------|-------|------|---------
+DDR_LOCAL_MEM |   16777216 B |   16773376 B |  99 %
+L2_MEM |     229376 B |     229376 B | 100 %
+DDR_SCRATCH_MEM |   50331648 B |   50331648 B | 100 %
+</details>
+
+<details>
+<summary>CPU: c6x_2</summary>
+
+### CPU: c6x_2
+TASK          | TASK LOAD
+--------------|-------
+IPC_RX   |   0. 0 %
+REMOTE_SRV   |   0. 0 %
+LOAD_TEST   |   0. 0 %
+TIVX_CPU   |   0. 0 %
+IPC_TEST_RX   |   0. 0 %
+IPC_TEST_TX   |   0. 0 %
+IPC_TEST_TX   |   0. 0 %
+IPC_TEST_TX   |   0. 0 %
+IPC_TEST_TX   |   0. 0 %
+IPC_TEST_TX   |   0. 0 %
+
+#### CPU Heap Table
+HEAP   | Size  | Free | Unused
+--------|-------|------|---------
+DDR_LOCAL_MEM |   16777216 B |   16773376 B |  99 %
+L2_MEM |     229376 B |     229376 B | 100 %
+DDR_SCRATCH_MEM |   50331648 B |   50331648 B | 100 %
+</details>
+
+### CPU: c7x_1
+TASK          | TASK LOAD
+--------------|-------
+IPC_RX   |   0. 5 %
+REMOTE_SRV   |   0. 1 %
+LOAD_TEST   |   0. 0 %
+TIVX_C71_P1   |  31.38 %
+TIVX_C71_P2   |   0. 0 %
+TIVX_C71_P3   |   0. 0 %
+TIVX_C71_P4   |   0. 0 %
+TIVX_C71_P5   |   0. 0 %
+TIVX_C71_P6   |   0. 0 %
+TIVX_C71_P7   |   0. 0 %
+TIVX_C71_P8   |   0. 0 %
+IPC_TEST_RX   |   0. 0 %
+IPC_TEST_TX   |   0. 0 %
+IPC_TEST_TX   |   0. 0 %
+IPC_TEST_TX   |   0. 0 %
+IPC_TEST_TX   |   0. 0 %
+IPC_TEST_TX   |   0. 0 %
+
+#### CPU Heap Table
+HEAP   | Size  | Free | Unused
+--------|-------|------|---------
+DDR_LOCAL_MEM |  268435456 B |  232984320 B |  86 %
+L3_MEM |    8159232 B |          0 B |   0 %
+L2_MEM |     458752 B |     458752 B | 100 %
+L1_MEM |      16384 B |          0 B |   0 %
+DDR_SCRATCH_MEM |  385875968 B |  367400145 B |  95 %
+
+##  Performance point statistics
+### Performance
+PERF      | avg (usecs)  | min/max (usecs)  | number of executions
+----------|----------|----------|----------
+||  33352 |      0 / 412578 |       9556
+
+### FPS
+PERF      | Frames per sec (FPS)
+----------|----------
+|   |29.98
+
+## Temperature statistics
+ZONE      | TEMPERATURE
+----------|--------------
+CPU   |   50.93 Celsius
+WKUP  |   49.52 Celsius
+C7X   |   51.86 Celsius
+GPU   |   51.63 Celsius
+R5F   |   50.93 Celsius

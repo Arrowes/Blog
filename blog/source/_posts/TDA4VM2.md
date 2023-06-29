@@ -102,6 +102,7 @@ chmod +x ./xxx.bin
 ./xxx.bin
 ```
 连接串口线，在虚拟机设置中挂载USB串口，使用[minicom](https://help.ubuntu.com/community/Minicom)串口通讯：
+(在minicom中自动换行：Ctrl+A Z W)
 ```sh
 sudo apt-get install minicom  #安装minicom
 sudo minicom -D /dev/ttyUSB2 -c on
@@ -165,8 +166,8 @@ sink_0::startx="<320>"  sink_0::starty="<180>"  sink_0::widths="<1280>"   sink_0
 
 <img src="https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/06_01_01_12/exports/docs/tidl_j7_01_00_01_00/ti_dl/docs/user_guide_html/TIDL_import_process.png" >
 
-## Demo
-[Demo：MobileNetV2 Tensorflow model，PeleeNet Caffe model，JSegNet21V2 Caffe model](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/06_01_01_12/exports/docs/tidl_j7_01_00_01_00/ti_dl/docs/user_guide_html/md_tidl_user_model_deployment.html#importing-mobilenetv2-model-for-image-classification)
+## Demo:使用TIDL实现多种模型的导入、运行
+[MobileNetV2 Tensorflow model，PeleeNet Caffe model，JSegNet21V2 Caffe model](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/06_01_01_12/exports/docs/tidl_j7_01_00_01_00/ti_dl/docs/user_guide_html/md_tidl_user_model_deployment.html#importing-mobilenetv2-model-for-image-classification)
 
 **Config** TIDL
 ```sh
@@ -229,7 +230,7 @@ export TIDL_INSTALL_PATH=/home/ywang85/SDK/RTOSSDK/tidl_j721e_08_06_00_10   #设
 
 ## [EdgeAI TIDL Tools](https://github.com/TexasInstruments/edgeai-tidl-tools)
 要求：OS——Ubuntu 18.04，Python Version——3.6
-<img alt="图 9" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/TDA4VM2onnxruntimeflow.png" width="70%"/>  
+<img alt="图 9" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/TDA4VM2onnxruntimeflow.png" width="60%"/>  
 
 1. OSRT(Open Source Runtimes:TFLite,ONNX,TVM) 作为用户应用程序的顶级推理 API
 2. 将子图卸载到 C7x/MMA 以使用TIDL进行加速执行
@@ -243,30 +244,33 @@ export SOC=am68pa
 source ./setup.sh   #仔细查看setup.sh文件，有些包可能要手动安装，并注释掉
 #gcc-arm的包解压到项目文件夹，
 #Docker Based X86_PC Setup 跳过，不用docker装
-#make过程中各种依赖库报错 SSLError，放弃，转用studio
+#make过程中各种依赖库报错 SSLError，暂时放弃，转用studio
 ```
 
 ## [EdgeAI-ModelMaker](https://github.com/TexasInstruments/edgeai-modelmaker)
 An end-to-end model development tool that contains dataset handling, model training and compilation，集成了edgeai-modelzoo, edgeai-torchvision, edgeai-mmdetection, edgeai-benchmark, edgeai-modelmaker
 ```sh
-Git clone 项目，按照文档在bash下配置环境，curl -L ... 运行失败改为-L -k忽略SSL检查
-.setup_all.sh 安装失败：torch1.10.0, dlr, tvm, onnuruntime-tidl, tflite-runtime
-SSLError
+#Git clone 项目，按照文档在bash下配置环境，curl -L ... 运行失败改为-L -k忽略SSL检查
+.setup_all.sh #安装失败：torch1.10.0, dlr, tvm, onnuruntime-tidl, tflite-runtime
+#SSLError 暂时放弃
 ```
 
 
 ## [Edge AI Studio](https://dev.ti.com/edgeaistudio/)
-TI官方提供的云端环境，集成了一系列工具,无需本地搭环境，使用需要申请，基于jupyter notebook，提供两个工具：
-+ [Model Analyzer](https://dev.ti.com/edgeaisession/)：远程连接到真实的评估硬件，在 TI 嵌入式处理器上部署和测试 AI 模型性能，进行多个模型的Benchmark。前身叫做 TI edge AI cloud。
-+ [Model Composer](https://dev.ti.com/modelcomposer/)： 为 TI 嵌入式处理器训练、优化和编译 AI 模型。支持数据采集，标注，模型训练，以及上板编译。比如，用自己的数据重新训练TI Model Zoo的模型和更多性能优化操作。目前仅支持分类和检测任务，只能使用modelzoo中的模型进行训练，比如OD任务只有yolox模型，灵活度不高，主打方便快捷。
+<img src="https://raw.sevencdn.com/Arrowes/Blog/main/images/TDA4VM2studio.png" width="80%"/>  
+
+TI官方提供的云端环境，集成了一系列工具,无需本地搭环境，使用需要申请，提供两个工具：
++ [Model Composer](https://dev.ti.com/modelcomposer/)： 为 TI 嵌入式处理器训练、优化和编译 AI 模型。支持数据采集，标注，模型训练，以及上板编译，**一步到位**。目前仅支持分类和检测任务，只能使用modelzoo中的模型进行训练，比如OD任务只有yolox模型，灵活度不高，主打方便快捷。
++ [Model Analyzer](https://dev.ti.com/edgeaisession/)：远程连接到真实的评估硬件，基于jupyter notebook，在 TI 嵌入式处理器上部署和测试 AI 模型性能，进行多个模型的Benchmark。前身叫做 TI edge AI cloud。
 
 ### Model Analyzer
-选TDA4VM设备，能使用3h，进入后分两大板块:
-+ Find your model: Compare model performance
-+ Get model benchmarks： Model performance， Custom models
-
-Find your model能查看不同模型在板端的表现，用来选择适合自己需求的模型；
-Model performance中代码都已配置好，试用OD task, 选ONNX runtime，无需修改一步步运行即可输出结果，文件在顶端My Workspace；下面重点使用Custom models：
+选TDA4VM设备，能使用3h，文件在顶端My Workspace;
+进入后分两大板块:
++ Find your model: Compare model performance, 能查看不同模型在板端的表现，用来选择适合自己需求的模型；
+<img src="https://raw.sevencdn.com/Arrowes/Blog/main/images/TDA4VM2perform.png" width="70%"/>  
++ Get model benchmarks：
+    + Model performance 是配置好的jupyter notebook，无需修改一步步运行即可输出结果；
+    + 下面重点使用Custom models：
 
 **Custom models**（onnxRT）
 - 编译模型（在异构模型编译期间，支持的层将被装载到`TI-DSP`，生成推理所需工件（artifacts））
@@ -295,7 +299,7 @@ compile_options = {
 # 创建一个会话选项对象，可以设置GPU加速、CPU 线程数、精度模式等会话参数
 so = rt.SessionOptions() #此处默认参数
 # 设置执行提供者列表，包含 TIDLCompilationProvider 和 CPUExecutionProvider
-EP_list = ['TIDLCompilationProvider', 'CPUExecutionProvider'] #当第一个 Execution Provider 调用失败时，自动尝试使用下一个，直到成功为止。
+EP_list = ['TIDLCompilationProvider', 'CPUExecutionProvider']
 # compile the model with TIDL acceleration by passing required compilation options.
 sess = rt.InferenceSession(onnx_model_path, providers=EP_list, provider_options=[compile_options, {}], sess_options=so)
 # 载入 ONNX 模型并进行推理。可以使用 sess 对象来进行标准化、预处理、推理等操作，还可以获取模型的输入信息、输出信息、元图信息等
