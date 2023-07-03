@@ -150,18 +150,20 @@ TIDL提供了 [TIDL Importer](https://software-dl.ti.com/jacinto7/esd/processor-
 Performance simulation results for network analysis in .csv
 
 ## [TIDL Quantization](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/06_01_01_12/exports/docs/tidl_j7_01_00_01_00/ti_dl/docs/user_guide_html/md_tidl_fsg_quantization.html) 量化方法
-[Tidl tools quantization](https://github.com/TexasInstruments/edgeai-tidl-tools/blob/master/docs/tidl_fsg_quantization.md)，把浮点计算转换成定点计算。
+[Tidl tools quantization](https://github.com/TexasInstruments/edgeai-tidl-tools/blob/master/docs/tidl_fsg_quantization.md)，把浮点计算（Float）转换成定点（Int）计算，是一种基于计算机存储和计算过程特点，提升（端侧）模型推理速度，并维持稳定精度的模型压缩方法。
 + 浮点计算在成本和功耗效率方面不高。这些浮点计算可以用定点计算(8 or 16 bit)来代替，同时不会丢失推理精度。
 + J7平台的矩阵乘法加速器(MMA)支持深度学习模型的8位、16位和32位推理。
 + 当进行64x64矩阵乘法时，8位推理支持4096 MACs(*Multiply–Accumulate Operations*) per cycle的乘法器吞吐量。因此，8位推理适用于J7平台。 (16位和32位推理会显著消耗性能。 16位推理的乘法器吞吐量为每个周期1024个MAC。 所需的内存I/O会很高。)
-> 8位和16位是指量化的位深度，表示用多少个二进制位来表示每个权重或激活值。在量化时，8位会将每个权重或激活值分成256个不同的离散值，而16位则分为65536个离散值，因此16位的表示范围更广，可以更精确地表示模型中的参数和激活值。但是，使用较高的位深度会增加存储要求和计算成本，因此需要在预测精度和计算开销之间进行权衡。
-<img src="https://img2018.cnblogs.com/blog/947235/201905/947235-20190513143437402-715176586.png" width='70%'>
-乘一个系数把float类型的小数部分转换成整数部分，然后用这个转换出来的整数进行计算，计算结果再还原成float
 
 TIDL中需要量化的层：Convolution Layer、De-convolution Layer、Inner-Product Layer、Batch Normalization (Scale/Mul, Bias/Add, PReLU)
 
-Quantization options：Post Training Quantization(PTQ)、Training for Quantization、Quantization aware Training
++ Quantization options：
+    + Post Training Quantization (PTQ, 训练后量化、离线量化)
+    + Training for Quantization (QAT，训练时量化，伪量化，在线量化)
+    + Quantization aware Training
 <img src="https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/06_01_01_12/exports/docs/tidl_j7_01_00_01_00/ti_dl/docs/user_guide_html/TIDL_Quant_Options.png" width='70%'>
+
+[从零开始玩转TDA4之模型量化](https://zhuanlan.zhihu.com/p/639245713)
 
 ## TI's Edge AI
 TIDL is a fundamental software component of [TI’s Edge AI solution](https://www.ti.com/edgeai).在TIDL上，深度学习网络应用开发主要分为三个大的步骤: 

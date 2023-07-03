@@ -323,7 +323,7 @@ root #登录
 #运行yolox_s实例
 cd /opt/edgeai-gst-apps/apps_cpp
 ./bin/Release/app_edgeai ../configs/object_detection.yaml
-```   
+```
 
 ### 修改app_edgeai（optional）
 在`opt\edgeai-gst-apps\apps_cpp\`完成修改后重新make:
