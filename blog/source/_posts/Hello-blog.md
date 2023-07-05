@@ -115,6 +115,10 @@ math:
 Chrome Puppeteer导出PDF > 搜索“chrome”，在相应选项中填入你的浏览器的“chrome.exe”文件的地址即可
 ``C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe``
 
+**Markdown 粘贴插件**
+Markdown paste 右键智能粘贴
+Paste URL Ctrl+Alt+P快速粘贴链接
+
 **markdown image** 图片插件（vs code）
  ```
 Local

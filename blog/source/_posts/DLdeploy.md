@@ -1,5 +1,5 @@
 ---
-title: DL模型转换及部署：量化、ONNX
+title: DL模型转换及部署
 date: 2023-06-09 11:36:00
 tags:
 - 嵌入式
@@ -14,33 +14,7 @@ tags:
 
 Netron神经网络可视化: [软件下载](https://github.com/lutzroeder/netron/releases/tag/v7.0.0), [在线网站](https://netron.app/)
 
-# 量化
-量化一般是指把模型的单精度参数（Float32）转化为低精度参数(Int8,Int4)，把推理过程中的浮点运算转化为定点运算。
-*（float和int的本质区别在于小数点是否固定）*
 
-浮点数格式 (float32)：$V = (-1)^s×M×2^E$
-符号位s|阶码E|尾数M|
----|--|--
-1|8|23|
-定点数格式 (int8)：
-符号位|整数位（设定）|小数位(量化系数)|
----|--|--
-1|4|3|
-若整数位占4位，小数位占3位，则其最大精度为0.125，最大值为15.875
-若整数位占5位，小数位占2位，则其最大精度为0.250，最大值为31.750
-$int8=float32∗2^3$
-$float32=int8/2^3$
-
-
-浮点运算在运算过程中，小数点的位置是变动的，而定点运算则是固定不变。如果将浮点数转换成定点数，就可以实现一次读取多个数进行计算（1 float32 = 4 int8），提高了运算效率。
-
-> 8位和16位是指量化的位深度，表示用多少个二进制位来表示每个权重或激活值。在量化时，8位会将每个权重或激活值分成256个不同的离散值，而16位则分为65536个离散值，因此16位的表示范围更广，可以更精确地表示模型中的参数和激活值。但是，使用较高的位深度会增加存储要求和计算成本，因此需要在预测精度和计算开销之间进行权衡。
-<img src="https://img2018.cnblogs.com/blog/947235/201905/947235-20190513143437402-715176586.png" width='70%'>
-乘一个系数把float类型的小数部分转换成整数部分，然后用这个转换出来的整数进行计算，计算结果再还原成float
-
-<img alt="图 3" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/DLdeployquantized.png" width="80%"/>  
-
-[A White Paper on Neural Network Quantization](https://arxiv.org/pdf/2106.08295.pdf)
 
 # ONNX
 Open Neural Network Exchange 开源机器学习通用中间格式，兼容各种深度学习框架、推理引擎、终端硬件、操作系统，是深度学习框架到推理引擎的桥梁 
@@ -52,8 +26,153 @@ Pytorch 模型导出使用自带的接口：`torch.onnx.export`
 
 
 在转换普通的torch.nn.Module模型时，PyTorch 一方面会用跟踪法执行前向推理，把遇到的算子整合成计算图；另一方面，PyTorch 还会把遇到的每个算子翻译成 ONNX 中定义的算子。要使 PyTorch 算子顺利转换到 ONNX ，我们需要保证：
-> 算子在 PyTorch 中有实现
-有把该 PyTorch 算子映射成一个或多个 ONNX 算子的方法
-ONNX 有相应的算子
+> 1.算子在 PyTorch 中有实现
+2.有把该 PyTorch 算子映射成一个或多个 ONNX 算子的方法
+3.ONNX 有相应的算子
+
+## [模型部署入门教程（一）：模型部署简介](https://zhuanlan.zhihu.com/p/477743341)
+<details>
+    <summary>SRCNN超分辨率代码</summary>
+
+```py
+class SuperResolutionNet(nn.Module):
+    def __init__(self, upscale_factor):
+        super().__init__()
+        self.upscale_factor = upscale_factor
+        self.img_upsampler = nn.Upsample(
+            scale_factor=self.upscale_factor,
+            mode='bicubic',
+            align_corners=False)
+
+        self.conv1 = nn.Conv2d(3, 64, kernel_size=9, padding=4)
+        self.conv2 = nn.Conv2d(64, 32, kernel_size=1, padding=0)
+        self.conv3 = nn.Conv2d(32, 3, kernel_size=5, padding=2)
+
+        self.relu = nn.ReLU()
+
+    def forward(self, x):
+        x = self.img_upsampler(x)
+        out = self.relu(self.conv1(x))
+        out = self.relu(self.conv2(out))
+        out = self.conv3(out)
+        return out
+
+    # Download checkpoint and test image
 
 
+urls = ['https://download.openmmlab.com/mmediting/restorers/srcnn/srcnn_x4k915_1x16_1000k_div2k_20200608-4186f232.pth',
+        'https://raw.githubusercontent.com/open-mmlab/mmediting/master/tests/data/face/000001.png']
+names = ['srcnn.pth', 'face.png']
+for url, name in zip(urls, names):
+    if not os.path.exists(name):
+        open(name, 'wb').write(requests.get(url).content)
+
+
+def init_torch_model():
+    torch_model = SuperResolutionNet(upscale_factor=3)
+
+    state_dict = torch.load('srcnn.pth')['state_dict']
+
+    # Adapt the checkpoint
+    for old_key in list(state_dict.keys()):
+        new_key = '.'.join(old_key.split('.')[1:])
+        state_dict[new_key] = state_dict.pop(old_key)
+
+    torch_model.load_state_dict(state_dict)
+    torch_model.eval()
+    return torch_model
+
+
+model = init_torch_model()
+input_img = cv2.imread('face.png').astype(np.float32)
+
+# HWC to NCHW
+input_img = np.transpose(input_img, [2, 0, 1])
+input_img = np.expand_dims(input_img, 0)
+
+# Inference
+torch_output = model(torch.from_numpy(input_img)).detach().numpy()
+
+# NCHW to HWC
+torch_output = np.squeeze(torch_output, 0)
+torch_output = np.clip(torch_output, 0, 255)
+torch_output = np.transpose(torch_output, [1, 2, 0]).astype(np.uint8)
+
+cv2.imwrite("face_torch.png", torch_output)
+
+input_img1 = cv2.imread('face.png')
+cv2.imshow("Input Image", input_img1)
+cv2.imshow("Torch Output", torch_output)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+```
+</details>
+
+以超分辨率模型为例，实现pytorch模型转onnx
+
+```py
+# pth2onnx
+x = torch.randn(1, 3, 256, 256)
+# 一种叫做追踪（trace）的模型转换方法：给定一组输入，再实际执行一遍模型，即把这组输入对应的计算图记录下来，保存为 ONNX 格式
+with torch.no_grad():
+    torch.onnx.export(
+        model,
+        x,  
+        "srcnn.onnx",
+        opset_version=11,
+        input_names=['input'],
+        output_names=['output'])    # 输入、输出 tensor 的名称
+
+#验证onnx, 此外可以使用Netron可视化检查网络结构
+onnx_model = onnx.load("srcnn.onnx")
+try:
+    onnx.checker.check_model(onnx_model)
+except Exception:
+    print("Model incorrect")
+else:
+    print("Model correct")
+
+
+#推理引擎 -ONNX Runtime
+import onnxruntime
+ort_session = onnxruntime.InferenceSession("srcnn.onnx")    #用于获取一个 ONNX Runtime 推理器
+ort_inputs = {'input': input_img}
+ort_output = ort_session.run(['output'], ort_inputs)[0]
+
+ort_output = np.squeeze(ort_output, 0)
+ort_output = np.clip(ort_output, 0, 255)
+ort_output = np.transpose(ort_output, [1, 2, 0]).astype(np.uint8)
+cv2.imwrite("face_ort.png", ort_output) #生成上采样图片，运行成功
+```
+## [模型部署入门教程（二）：解决模型部署中的难题](https://zhuanlan.zhihu.com/p/479290520)
+
+# 量化
+量化一般是指把模型的单精度参数（Float32）转化为低精度参数(Int8,Int4)，把推理过程中的浮点运算转化为定点运算。
+*（float和int的本质区别在于小数点是否固定）*
+
+浮点数格式 (float32)：$V = (-1)^s×M×2^E$
+符号位s|阶码E|尾数M|
+---|--|--
+1|8|23|
+
+定点数格式 (int8)：
+符号位|整数位（设定）|小数位(量化系数)|
+---|--|--
+1|4|3|
+
+若整数位占4位，小数位占3位，则其最大精度为0.125，最大值为15.875
+若整数位占5位，小数位占2位，则其最大精度为0.250，最大值为31.750
+$int8=float32∗2^3$
+$float32=int8/2^3$
+
+
+浮点运算在运算过程中，小数点的位置是变动的，而定点运算则是固定不变。如果将浮点数转换成定点数，就可以实现一次读取多个数进行计算（1 float32 = 4 int8），提高了运算效率。
+
+> 8位和16位是指量化的位深度，表示用多少个二进制位来表示每个权重或激活值。在量化时，8位会将每个权重或激活值分成256个不同的离散值，而16位则分为65536个离散值，因此16位的表示范围更广，可以更精确地表示模型中的参数和激活值。但是，使用较高的位深度会增加存储要求和计算成本，因此需要在预测精度和计算开销之间进行权衡。
+<img src="https://img2018.cnblogs.com/blog/947235/201905/947235-20190513143437402-715176586.png" width='70%'>
+
+乘一个系数把float类型的小数部分转换成整数部分，然后用这个转换出来的整数进行计算，计算结果再还原成float
+
+<img alt="图 3" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/DLdeployquantized.png" width="80%"/>  
+
+[A White Paper on Neural Network Quantization](https://arxiv.org/pdf/2106.08295.pdf)
