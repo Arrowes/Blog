@@ -30,19 +30,43 @@ Pytorch 模型导出使用自带的接口：`torch.onnx.export`
 2.有把该 PyTorch 算子映射成一个或多个 ONNX 算子的方法
 3.ONNX 有相应的算子
 
-## [模型部署入门教程（一）：模型部署简介](https://zhuanlan.zhihu.com/p/477743341)
+## 以超分辨率模型为例
+参考：[模型部署入门教程](https://zhuanlan.zhihu.com/p/477743341)
+以超分辨率模型为例，实现pytorch模型转onnx
+其中， PyTorch 的 interpolate 插值算子可以在运行阶段选择放大倍数，但该算子不兼容，需要**自定义算子**:
+```py
+class NewInterpolate(torch.autograd.Function):
+    # 自定义的插值算子，继承自torch.autograd.Function
+    @staticmethod
+    def symbolic(g, input, scales):
+        # 静态方法，用于定义符号图的构建过程, g: 符号图构建器, input: 输入张量, scales: 缩放因子
+        #ONNX 算子的具体定义由 g.op 实现。g.op 的每个参数都可以映射到 ONNX 中的算子属性
+        #对于其他参数，可以照着 Resize 算子文档填
+        return g.op("Resize",  # 使用Resize操作
+                    input,  # 输入张量
+                    g.op("Constant", value_t=torch.tensor([], dtype=torch.float32)),  # 空的常量张量
+                    scales,  # 缩放因子
+                    coordinate_transformation_mode_s="pytorch_half_pixel",  # 坐标转换模式为pytorch_half_pixel
+                    cubic_coeff_a_f=-0.75,  # cubic插值的系数a为-0.75
+                    mode_s='cubic',  # 插值模式为cubic
+                    nearest_mode_s="floor")  # 最近邻插值模式为floor
+
+    @staticmethod
+    def forward(ctx, input, scales):    #算子的推理行为由算子的 foward 方法决定
+        scales = scales.tolist()[-2:]   #截取输入张量的后两个元素,把 [1, 1, w, h] 格式的输入对接到原来的 interpolate 函数上
+        return interpolate(input,   #把这两个元素以 list 的格式传入 interpolate 的 scale_factor 参数。
+                           scale_factor=scales,
+                           mode='bicubic',
+                           align_corners=False)
+```
+
 <details>
     <summary>SRCNN超分辨率代码</summary>
 
 ```py
-class SuperResolutionNet(nn.Module):
-    def __init__(self, upscale_factor):
+class StrangeSuperResolutionNet(nn.Module):
+    def __init__(self):
         super().__init__()
-        self.upscale_factor = upscale_factor
-        self.img_upsampler = nn.Upsample(
-            scale_factor=self.upscale_factor,
-            mode='bicubic',
-            align_corners=False)
 
         self.conv1 = nn.Conv2d(3, 64, kernel_size=9, padding=4)
         self.conv2 = nn.Conv2d(64, 32, kernel_size=1, padding=0)
@@ -50,26 +74,16 @@ class SuperResolutionNet(nn.Module):
 
         self.relu = nn.ReLU()
 
-    def forward(self, x):
-        x = self.img_upsampler(x)
+    def forward(self, x, upscale_factor):
+        x = NewInterpolate.apply(x, upscale_factor)
         out = self.relu(self.conv1(x))
         out = self.relu(self.conv2(out))
         out = self.conv3(out)
         return out
 
-    # Download checkpoint and test image
-
-
-urls = ['https://download.openmmlab.com/mmediting/restorers/srcnn/srcnn_x4k915_1x16_1000k_div2k_20200608-4186f232.pth',
-        'https://raw.githubusercontent.com/open-mmlab/mmediting/master/tests/data/face/000001.png']
-names = ['srcnn.pth', 'face.png']
-for url, name in zip(urls, names):
-    if not os.path.exists(name):
-        open(name, 'wb').write(requests.get(url).content)
-
 
 def init_torch_model():
-    torch_model = SuperResolutionNet(upscale_factor=3)
+    torch_model = StrangeSuperResolutionNet()
 
     state_dict = torch.load('srcnn.pth')['state_dict']
 
@@ -84,6 +98,8 @@ def init_torch_model():
 
 
 model = init_torch_model()
+factor = torch.tensor([1, 1, 3, 3], dtype=torch.float)
+
 input_img = cv2.imread('face.png').astype(np.float32)
 
 # HWC to NCHW
@@ -91,15 +107,15 @@ input_img = np.transpose(input_img, [2, 0, 1])
 input_img = np.expand_dims(input_img, 0)
 
 # Inference
-torch_output = model(torch.from_numpy(input_img)).detach().numpy()
+torch_output = model(torch.from_numpy(input_img), factor).detach().numpy()
 
 # NCHW to HWC
 torch_output = np.squeeze(torch_output, 0)
 torch_output = np.clip(torch_output, 0, 255)
 torch_output = np.transpose(torch_output, [1, 2, 0]).astype(np.uint8)
 
-cv2.imwrite("face_torch.png", torch_output)
-
+# Show image
+cv2.imwrite("face_torch2.png", torch_output)
 input_img1 = cv2.imread('face.png')
 cv2.imshow("Input Image", input_img1)
 cv2.imshow("Torch Output", torch_output)
@@ -108,22 +124,21 @@ cv2.destroyAllWindows()
 ```
 </details>
 
-以超分辨率模型为例，实现pytorch模型转onnx
-
+---
+模型转换为ONNX，验证正确性，运行推理：
 ```py
 # pth2onnx
 x = torch.randn(1, 3, 256, 256)
 # 一种叫做追踪（trace）的模型转换方法：给定一组输入，再实际执行一遍模型，即把这组输入对应的计算图记录下来，保存为 ONNX 格式
 with torch.no_grad():
-    torch.onnx.export(
-        model,
-        x,  
-        "srcnn.onnx",
-        opset_version=11,
-        input_names=['input'],
-        output_names=['output'])    # 输入、输出 tensor 的名称
+    torch.onnx.export(model, (x, factor),
+                      "srcnn2.onnx",
+                      opset_version=11,
+                      input_names=['input', 'factor'],
+                      output_names=['output'])
 
-#验证onnx, 此外可以使用Netron可视化检查网络结构
+
+# 验证onnx, 此外可以使用Netron可视化检查网络结构
 onnx_model = onnx.load("srcnn.onnx")
 try:
     onnx.checker.check_model(onnx_model)
@@ -133,18 +148,49 @@ else:
     print("Model correct")
 
 
-#推理引擎 -ONNX Runtime
-import onnxruntime
-ort_session = onnxruntime.InferenceSession("srcnn.onnx")    #用于获取一个 ONNX Runtime 推理器
-ort_inputs = {'input': input_img}
-ort_output = ort_session.run(['output'], ort_inputs)[0]
+# 选择放大倍数，运行ONNX Runtime 推理
+input_factor = np.array([1, 1, 5, 5], dtype=np.float32)
+ort_session = onnxruntime.InferenceSession("srcnn2.onnx")   # 用于获取一个 ONNX Runtime 推理器
+ort_inputs = {'input': input_img, 'factor': input_factor}
+ort_output = ort_session.run(None, ort_inputs)[0]
 
 ort_output = np.squeeze(ort_output, 0)
 ort_output = np.clip(ort_output, 0, 255)
 ort_output = np.transpose(ort_output, [1, 2, 0]).astype(np.uint8)
-cv2.imwrite("face_ort.png", ort_output) #生成上采样图片，运行成功
+cv2.imwrite("face_torch2_run.png", ort_output)  # 生成上采样图片，运行成功
 ```
-## [模型部署入门教程（二）：解决模型部署中的难题](https://zhuanlan.zhihu.com/p/479290520)
+<img alt="picture 0" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/DLdeploynetron.png" width="80%"/>  
+
+## torch.onnx.export模型转换接口
+[torch.onnx ‒ PyTorch 1.11.0 documentation](https://link.zhihu.com/?target=https%3A//pytorch.org/docs/stable/onnx.html%23functions)
+[TorchScript](https://link.zhihu.com/?target=https%3A//pytorch.org/docs/stable/jit.html) 是一种序列化和优化 PyTorch 模型的格式，在优化过程中，一个`torch.nn.Module`模型会被转换成 TorchScript 的 `torch.jit.ScriptModule`模型。
+而要把普通 PyTorch 模型转一个 TorchScript 模型，有跟踪（trace）和记录（script）两种导出计算图的方法：
++ trace: 以上一节为例，跟踪法只能通过实际运行一遍模型的方法导出模型的静态图，即无法识别出模型中的控制流（如循环）,对于循环中不同的n, ONNX 模型的结构是不一样的
++ script: 记录法则能通过解析模型来正确记录所有的控制流,模型不需要实际运行，用 Loop 节点来表示循环
+
+```py
+def export(model, args, f, export_params=True, verbose=False, training=TrainingMode.EVAL, 
+           input_names=None, output_names=None, aten=False, export_raw_ir=False, 
+           operator_export_type=None, opset_version=None, _retain_param_name=True, 
+           do_constant_folding=True, example_outputs=None, strip_doc_string=True, 
+           dynamic_axes=None, keep_initializers_as_inputs=None, custom_opsets=None, 
+           enable_onnx_checker=True, use_external_data_format=False): 
+
+# model: 模型， args：输入， f：导出文件名，
+# export_params：是否存储模型权重， ONNX 是用同一个文件表示记录模型的结构和权重的。
+# input_names, output_names：设置输入和输出张量的名称。如果不设置的话，会自动分配一些简单的名字（如数字）
+# opset_version：转换时参考哪个 ONNX 算子集版本，默认为 9。
+# dynamic_axes：指定输入输出张量的哪些维度是动态的。为了效率，ONNX 默认所有参与运算的张量都是静态的（张量的形状不发生改变），必要时需要显式地指明输入输出张量的哪几个维度的大小是可变的。
+```
+
+
+
+
+
+
+
+
+
 
 # 量化
 量化一般是指把模型的单精度参数（Float32）转化为低精度参数(Int8,Int4)，把推理过程中的浮点运算转化为定点运算。
