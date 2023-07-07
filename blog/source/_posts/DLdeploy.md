@@ -31,7 +31,7 @@ Pytorch 模型导出使用自带的接口：`torch.onnx.export`
 3.ONNX 有相应的算子
 
 ## 以超分辨率模型为例
-参考：[模型部署入门教程](https://zhuanlan.zhihu.com/p/477743341)
+参考：[模型部署那些事](https://www.zhihu.com/column/c_1497987564452114432)
 以超分辨率模型为例，实现pytorch模型转onnx
 其中， PyTorch 的 interpolate 插值算子可以在运行阶段选择放大倍数，但该算子不兼容，需要**自定义算子**:
 ```py
@@ -183,8 +183,20 @@ def export(model, args, f, export_params=True, verbose=False, training=TrainingM
 # dynamic_axes：指定输入输出张量的哪些维度是动态的。为了效率，ONNX 默认所有参与运算的张量都是静态的（张量的形状不发生改变），必要时需要显式地指明输入输出张量的哪几个维度的大小是可变的。
 ```
 
+## 自定义算子
+-   PyTorch 算子
+    -   组合现有算子
+    -   添加 TorchScript 算子
+    -   添加普通 C++ 拓展算子
+-   映射方法
+    -   为 ATen 算子添加符号函数
+    -   为 TorchScript 算子添加符号函数
+    -   封装成 `torch.autograd.Function` 并添加符号函数
+-   ONNX 算子
+    -   使用现有 ONNX 算子
+    -   定义新 ONNX 算子
 
-
+[模型部署入门教程（四）：在 PyTorch 中支持更多 ONNX 算子](https://zhuanlan.zhihu.com/p/513387413)
 
 
 
