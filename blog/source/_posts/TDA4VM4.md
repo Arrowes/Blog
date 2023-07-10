@@ -23,20 +23,15 @@ Each Deep Neural Network has few components:
 
 [edgeai-benchmark](https://github.com/TexasInstruments/edgeai-benchmark): Custom model benchmark can also be easily done (please refer to the documentation and example). Uses [edgeai-tidl-tools](https://github.com/TexasInstruments/edgeai-tidl-tools) for model compilation and inference
 
-1\. First, train the model on pytorch and export the .onnx and prototxt file.
 
-2\. Second, use the edgeai-benchmark whose inputs are .onnx and prototxt file to get the param.yaml
+1. 首先，使用PyTorch训练模型并导出.onnx和prototxt文件;
+2. 其次，使用edgeai-benchmark来对.onnx和prototxt文件进行基准测试，以获取param.yaml文件。可以使用脚本[edgeai-benchmark/run_custom_pc.sh](https://github.com/TexasInstruments/edgeai-benchmark/blob/master/run\_custom\_pc.sh)来调用[edgeai-benchmark/custom.py](https://github.com/TexasInstruments/edgeai-benchmark/blob/master/scripts/benchmark\_custom.py)。如果模型不在该文件列出的类型之中，可以参考[edgeai-benchmark/configs](https://github.com/TexasInstruments/edgeai-benchmark/tree/master/configs)目录中的示例,
+这一步将创建一个编译后的模型文件包（tar.gz文件）;
+3. 第三步，通过flash手动将上述.tar.gz文件复制到SD卡中（或者在启动后，可以直接使用scp或其他工具进行复制）;
+4. 最后，运行/opt/edge_ai_apps/apps_python/app_edgeai.py。
 
-You can use the script [https://github.com/TexasInstruments/edgeai-benchmark/blob/master/run\_custom\_pc.sh](https://github.com/TexasInstruments/edgeai-benchmark/blob/master/run_custom_pc.sh) which calls [https://github.com/TexasInstruments/edgeai-benchmark/blob/master/scripts/benchmark\_custom.py](https://github.com/TexasInstruments/edgeai-benchmark/blob/master/scripts/benchmark_custom.py)
+除了上述的第二步，也可以使用edgeai-tidl-tools。但是需要手动编辑param.yaml文件，以使其与edgeai-benchmark生成的文件相匹配。 
 
-In the above .py file, make suitable modifications - for example comment out the portions that do not apply to your case and use your .onnx and .prototxt
 
-If your model is not one of the type that is listed in that file, you can look at the examples in: <https://github.com/TexasInstruments/edgeai-benchmark/tree/master/configs>
-
-The above step will create a compiled model artifact package - a tar.gz file
-
-3\. Third, copy manually the above .tar.gz file on sd card sd card by flash (or once the booted, you can copy directly via scp of some other utility)
-
-4\. Last, run /opt/edge\_ai\_apps/apps\_python/app\_edgeai.py
-
-Instead of Step 2, above, it also possible to use edgeai-tidl-tools. But then you have to manually edit the param.yaml file to match with edgeai-benchmark would generate.
+# [EdgeAI-Benchmark](https://github.com/TexasInstruments/edgeai-benchmark/tree/master)
+This repository provides a collection of scripts for various image recognition tasks such as classification, segmentation, detection and keypoint detection. (Uses [edgeai-tidl-tools](https://github.com/TexasInstruments/edgeai-tidl-tools) for model compilation and inference)

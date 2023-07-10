@@ -19,6 +19,11 @@ pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple  #pip�
 pip config list -v  #查源
 pip install opencv-python -i https://pypi.tuna.tsinghua.edu.cn/simple/  #pip换源安装
 ```
+
+修改环境创建路径(win):
+1.找到用户目录下的.condarc文件（C:\Users\username）。
+2.打开.condarc文件之后，添加或修改.condarc 中的 env_dirs 设置环境路径:``envs_dirs:  - D:\Anaconda3\envs``
+
 <details>
   <summary>其他国内镜像源</summary>
   
@@ -43,14 +48,6 @@ pip install opencv-python -i https://pypi.tuna.tsinghua.edu.cn/simple/  #pip换�
     conda config --remove-key channels ：换回默认源
 </details>
 
-**修改环境创建路径**
-1. 找到用户目录下的.condarc文件（C:\Users\username）。
-2. 打开.condarc文件之后，添加或修改.condarc 中的 env_dirs 设置环境路径
-```
-envs_dirs:
-  - D:\Anaconda3\envs
-```
-
 # 编辑器
 ## Pycharm
 创建新项目	手动导入已存在的anaconda创建的环境``D:\Anaconda3\envs\pytorch\python.exe``
@@ -68,13 +65,11 @@ Ctrl + / 批量注释
 调试：打断点 > debug > 使用工具栏内的“下一步”或“计算器内输入表达式”进行调试
 
 调试时使用Console的python调试台，print指令
-![图 1](https://raw.sevencdn.com/Arrowes/Arrowes-Blogbackup/main/images/Pytorch1.png)  
-![图 2](https://raw.sevencdn.com/Arrowes/Arrowes-Blogbackup/main/images/Pytorch2.png)  
+![图 1](https://raw.sevencdn.com/Arrowes/Arrowes-Blogbackup/main/images/Pytorch1.png) ![图 2](https://raw.sevencdn.com/Arrowes/Arrowes-Blogbackup/main/images/Pytorch2.png)  
 
 ## Jupyter notebook
-激活pytorch环境后 ``conda install nb_conda``
-打开 jupyter notebook
-``New > 选择环境：Python [conda env:pytorch]``
+激活pytorch环境后: ``conda install nb_conda``
+打开 jupyter notebook: ``New > 选择环境：Python [conda env:pytorch]``
 IDLE Ctrl+N 编辑多行代码
 输入一半按tab可以补全
 
@@ -158,7 +153,7 @@ torch.cuda.is_available() #返回True说明GPU可以被使用
 torch.__version__ #查pytorch
 
 nvidia-smi #查GPU CUDA
-python –version #查python版本
+python –-version #查python版本
 conda install python=3.8  #升级(覆盖安装)python
 ```
 
@@ -240,7 +235,7 @@ class Person:
 	_ _call_ _(self,name)	
 可直接调用>person=Person(“wyj")
 ```
-## torchvision
+### torchvision
 torchvision.datasets 数据集处理
 
 ```py
@@ -259,6 +254,7 @@ test_loader = DataLoader(dataset=test_data, batch_size=64, shuffle=True, num_wor
 <details>
   <summary>例</summary>
 
+```py
     writer = SummaryWriter("dataloader")
     for epoch in range(2):
         step = 0
@@ -268,3 +264,4 @@ test_loader = DataLoader(dataset=test_data, batch_size=64, shuffle=True, num_wor
             step = step + 1
     writer.close()
 </details>
+```

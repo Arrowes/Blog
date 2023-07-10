@@ -92,6 +92,8 @@ make linux_fs_install_sd
 </details>
 
 # [TDA4VM-SK](https://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-edgeai/TDA4VM/08_06_01/exports/docs/devices/TDA4VM/linux/getting_started.html) 配置
+[SK-TDA4VM 用户指南](https://www.ti.com.cn/cn/lit/ug/zhcu912c/zhcu912c.pdf?ts=1688968746311&ref_url=https%253A%252F%252Fwww.bing.com%252F)
+
 通过USB挂载SD卡到Ubuntu
 下载[SDK包](https://www.ti.com/tool/download/PROCESSOR-SDK-LINUX-SK-TDA4VM)
 使用[Balena etcher tool 1.7.0](https://github.com/balena-io/etcher/releases/tag/v1.7.0)把 SD card .wic image flash到SD卡上
@@ -114,7 +116,7 @@ sudo minicom -D /dev/ttyUSB2 -c on
 cd 
 ./.profile  #/dev/video2
 ```
-可以鼠标点击试运行开箱即用的 GUI 应用程序
+连接显示器后（HDMI/DP），可以鼠标点击试运行开箱即用的 GUI 应用程序，
 也使用 Python 和C++参考示例开发边缘 AI 应用程序：
 ```sh
 #配置
@@ -142,6 +144,7 @@ flows:
     flow2: [input1,model0,output0,[160,540,800,450]]
     flow3: [input1,model3,output0,[960,540,800,450]]
 ```
+如果运行过程中突然重启，一般是需要加个风扇增强散热
 
 **Dataflows**
 <img src="https://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-edgeai/TDA4VM/08_06_01/exports/docs/_images/edgeai_object_detection.png" width='90%'>
