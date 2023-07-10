@@ -34,4 +34,10 @@ Each Deep Neural Network has few components:
 
 
 # [EdgeAI-Benchmark](https://github.com/TexasInstruments/edgeai-benchmark/tree/master)
-This repository provides a collection of scripts for various image recognition tasks such as classification, segmentation, detection and keypoint detection. (Uses [edgeai-tidl-tools](https://github.com/TexasInstruments/edgeai-tidl-tools) for model compilation and inference)
+EdgeAI-Benchmark提供了一系列针对不同图像识别任务的脚本，包括分类、分割、检测和关键点检测。（使用[edgeai-tidl-tools](https://github.com/TexasInstruments/edgeai-tidl-tools)用于模型编译和推理）
+
+## 环境搭建
+文档：[setup_instructions](https://github.com/TexasInstruments/edgeai-benchmark/blob/master/docs/setup_instructions.md)，其中`pyenv install 3.6`可能因为网络原因下载极慢，这时可以先从官网或镜像源下载所需要的包到 ~/.pyenv/cache 目录下，再执行安装命令
+
+
+
