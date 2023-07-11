@@ -38,6 +38,8 @@ EdgeAI-Benchmark提供了一系列针对不同图像识别任务的脚本，包�
 
 ## 环境搭建
 文档：[setup_instructions](https://github.com/TexasInstruments/edgeai-benchmark/blob/master/docs/setup_instructions.md)，其中`pyenv install 3.6`可能因为网络原因下载极慢，这时可以先从官网或镜像源下载所需要的包到 ~/.pyenv/cache 目录下，再执行安装命令
+此后每次需要激活环境：`pyenv activate benchmark`
 
+[edgeai-tidl-tools/docs/custom_model_evaluation.md](https://github.com/TexasInstruments/edgeai-tidl-tools/blob/master/docs/custom_model_evaluation.md)
 
 
