@@ -239,16 +239,36 @@ export TIDL_INSTALL_PATH=/home/ywang85/SDK/RTOSSDK/tidl_j721e_08_06_00_10   #设
 2. 将子图卸载到 C7x/MMA 以使用TIDL进行加速执行
 3. 在 ARM 核心上运行优化代码，以支持 TIDL 不支持的层（[支持情况](https://github.com/TexasInstruments/edgeai-tidl-tools/blob/master/docs/supported_ops_rts_versions.md)）
 
+[Setup - TexasInstruments/edgeai-tidl-tools at 08_06_00_05](https://github.com/TexasInstruments/edgeai-tidl-tools/tree/08_06_00_05#setup)
 ```sh
 sudo apt-get install libyaml-cpp-dev
 git clone https://github.com/TexasInstruments/edgeai-tidl-tools.git #failed：手动安装证书 git config --global http.sslVerify false，export GIT_SSL_NO_VERIFY=1
+cd edgeai-tidl-tools
 git checkout 08_06_00_05
 export SOC=am68pa
-source ./setup.sh   #仔细查看setup.sh文件，有些包可能要手动安装，并注释掉
-#gcc-arm的包解压到项目文件夹，
+source ./setup.sh
 #Docker Based X86_PC Setup 跳过，不用docker装
-#make过程中各种依赖库报错 SSLError，暂时放弃，转用studio
+
+#配置变量
+export SOC=am68pa
+export TIDL_TOOLS_PATH=$(pwd)/tidl_tools
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$TIDL_TOOLS_PATH
+export ARM64_GCC_PATH=$(pwd)/gcc-arm-9.2-2019.12-x86_64-aarch64-none-linux-gnu
+
+#Compile and Validate on X86_PC
+mkdir build && cd build
+cmake ../examples && make -j && cd ..
+source ./scripts/run_python_examples.sh #编译运行
+python3 ./scripts/gen_test_report.py    #评估
 ```
+| Image Classification | Object detection | Semantic Segmentation |
+| :-: |  :-: |  :-: |
+| [![](https://github.com/TexasInstruments/edgeai-tidl-tools/raw/08_06_00_05/docs/out_viz_cls.jpg)](https://github.com/TexasInstruments/edgeai-tidl-tools/blob/08_06_00_05/docs/out_viz_cls.jpg) | [![](https://github.com/TexasInstruments/edgeai-tidl-tools/raw/08_06_00_05/docs/out_viz_od.jpg)](https://github.com/TexasInstruments/edgeai-tidl-tools/blob/08_06_00_05/docs/out_viz_od.jpg) | [![](https://github.com/TexasInstruments/edgeai-tidl-tools/raw/08_06_00_05/docs/out_viz_ss.jpg)](https://github.com/TexasInstruments/edgeai-tidl-tools/blob/08_06_00_05/docs/out_viz_ss.jpg)
+
+
+
+
+
 
 ## [EdgeAI-ModelMaker](https://github.com/TexasInstruments/edgeai-modelmaker)
 An end-to-end model development tool that contains dataset handling, model training and compilation，集成了edgeai-modelzoo, edgeai-torchvision, edgeai-mmdetection, edgeai-benchmark, edgeai-modelmaker

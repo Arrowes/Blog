@@ -12,7 +12,8 @@ A(Encoder ) -->B(Feature Fusion)-->c(Detection Heads)-->d(Detection Layer)
 ```
 An important step of compiling an OD model is defining prototxt.
 Prototxt file contains all relevant information of the detection layer.
-[Process This: Efficient object detection using Yolov5 and TDA4x processors | Video | TI.com](https://www.ti.com/video/6286792047001)
+[Efficient object detection using Yolov5 and TDA4x processors | Video | TI.com](https://www.ti.com/video/6286792047001)
+[4. Deep learning models &mdash; Processor SDK Linux for SK-TDA4VM Documentation](https://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-edgeai/TDA4VM/08_06_01/exports/docs/common/inference_models.html)
 
 Each Deep Neural Network has few components:
 1.  **model**: This directory contains the DNN being targeted to infer
@@ -31,6 +32,10 @@ Each Deep Neural Network has few components:
 4. 最后，运行/opt/edge_ai_apps/apps_python/app_edgeai.py。
 
 除了上述的第二步，也可以使用edgeai-tidl-tools。但是需要手动编辑param.yaml文件，以使其与edgeai-benchmark生成的文件相匹配。 
+
+# [EdgeAI-TIDL-Tools](https://github.com/TexasInstruments/edgeai-tidl-tools/blob/08_06_00_05/docs/custom_model_evaluation.md)
+环境搭建见：[TDA4②](https://wangyujie.site/TDA4VM2/#EdgeAI-TIDL-Tools)
+
 
 
 # [EdgeAI-Benchmark](https://github.com/TexasInstruments/edgeai-benchmark/tree/master)
