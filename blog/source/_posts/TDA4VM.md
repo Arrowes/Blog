@@ -243,7 +243,9 @@ TI: Target, Target Kernel, Obj Desc。
 [PyTIOVX](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/08_06_00_12/exports/docs/tiovx/docs/user_guide/PYTIOVX.html): Automated OpenVX “C” Code Generation
 [^5]:[OpenVX视觉加速中间件与TDA4VM平台上的应用](https://zhuanlan.zhihu.com/p/423179832) | [TDA4横扫行泊一体市场与其背后的OpenVX](https://zhuanlan.zhihu.com/p/606584605)
 
-
-
-
-下一篇：[TDA4：环境搭建、模型转换及Demo](https://wangyujie.site/TDA4VM2/)
+---
+> TDA4系列文章：
+[TDA4①：SDK, TIDL, OpenVX](https://wangyujie.site/TDA4VM/)
+[TDA4②：环境搭建、模型转换、Demo及Tools](https://wangyujie.site/TDA4VM2/)
+[TDA4③：YOLOX的模型转换与SK板端运行](https://wangyujie.site/TDA4VM3/)
+[TDA4④：部署自定义模型](https://wangyujie.site/TDA4VM4/)

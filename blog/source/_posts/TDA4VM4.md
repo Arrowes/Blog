@@ -5,6 +5,8 @@ tags:
 - 嵌入式
 - 深度学习
 ---
+接上一篇：[TDA4③：YOLOX的模型转换与SK板端运行](https://wangyujie.site/TDA4VM3/)
+
 OD model
 ```mermaid
 graph LR
@@ -31,11 +33,15 @@ Each Deep Neural Network has few components:
 3. 第三步，通过flash手动将上述.tar.gz文件复制到SD卡中（或者在启动后，可以直接使用scp或其他工具进行复制）;
 4. 最后，运行/opt/edge_ai_apps/apps_python/app_edgeai.py。
 
-除了上述的第二步，也可以使用edgeai-tidl-tools。但是需要手动编辑param.yaml文件，以使其与edgeai-benchmark生成的文件相匹配。 
+除了上述的第二步，也可以使用edgeai-tidl-tools。但是需要手动编辑param.yaml文件，以使其与edgeai-benchmark生成的文件相匹配。
+
+# 模型转换
+使用 `torch.onnx.export(model,input, "XXX.onnx", verbose=False, export_params=True)` 得到 `.onnx`
+注意要确保加载的模型是一个完整的PyTorch模型对象，而不是一个包含模型权重的字典。
 
 # [EdgeAI-TIDL-Tools](https://github.com/TexasInstruments/edgeai-tidl-tools/blob/08_06_00_05/docs/custom_model_evaluation.md)
 环境搭建见：[TDA4②](https://wangyujie.site/TDA4VM2/#EdgeAI-TIDL-Tools)
-
+sh
 
 
 # [EdgeAI-Benchmark](https://github.com/TexasInstruments/edgeai-benchmark/tree/master)
@@ -48,3 +54,49 @@ EdgeAI-Benchmark提供了一系列针对不同图像识别任务的脚本，包�
 [edgeai-tidl-tools/docs/custom_model_evaluation.md](https://github.com/TexasInstruments/edgeai-tidl-tools/blob/master/docs/custom_model_evaluation.md)
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+---
+> TDA4系列文章：
+[TDA4①：SDK, TIDL, OpenVX](https://wangyujie.site/TDA4VM/)
+[TDA4②：环境搭建、模型转换、Demo及Tools](https://wangyujie.site/TDA4VM2/)
+[TDA4③：YOLOX的模型转换与SK板端运行](https://wangyujie.site/TDA4VM3/)
+[TDA4④：部署自定义模型](https://wangyujie.site/TDA4VM4/)

@@ -5,6 +5,8 @@ tags:
 - 嵌入式
 - 深度学习
 ---
+接上一篇：[TDA4②：环境搭建、模型转换、Demo及Tools](https://wangyujie.site/TDA4VM2/)
+
 # YOLOX部署TDA4VM-SK流程
 TI官方在[ ModelZOO ](https://github.com/TexasInstruments/edgeai-modelzoo)中提供了一系列预训练模型可以直接拿来转换，也提供了[ edgeai-YOLOv5 ](https://github.com/TexasInstruments/edgeai-yolov5)与[ edgeai-YOLOX ](https://github.com/TexasInstruments/edgeai-yolox)等优化的开源项目，可以直接下载提供的yolov7_s的[ onnx文件 ](http://software-dl.ti.com/jacinto7/esd/modelzoo/latest/models/vision/detection/coco/edgeai-yolox/yolox-s-ti-lite_39p1_57p9.onnx
 )和[ prototxt文件 ](http://software-dl.ti.com/jacinto7/esd/modelzoo/latest/models/vision/detection/coco/edgeai-yolox/yolox_s_ti_lite_metaarch.prototxt
@@ -535,3 +537,12 @@ WKUP  |   49.52 Celsius
 C7X   |   51.86 Celsius
 GPU   |   51.63 Celsius
 R5F   |   50.93 Celsius
+
+
+
+---
+> TDA4系列文章：
+[TDA4①：SDK, TIDL, OpenVX](https://wangyujie.site/TDA4VM/)
+[TDA4②：环境搭建、模型转换、Demo及Tools](https://wangyujie.site/TDA4VM2/)
+[TDA4③：YOLOX的模型转换与SK板端运行](https://wangyujie.site/TDA4VM3/)
+[TDA4④：部署自定义模型](https://wangyujie.site/TDA4VM4/)

@@ -6,7 +6,7 @@ tags:
 - 深度学习
 ---
 
-相关前置知识见上一篇：[[TDA4：SDK, TIDL, OpenVX]](https://wangyujie.site/TDA4VM/)
+相关前置知识见上一篇：[TDA4①：SDK, TIDL, OpenVX](https://wangyujie.site/TDA4VM/)
 环境搭建需要下载：[PROCESSOR-SDK-J721E](https://www.ti.com.cn/tool/cn/PROCESSOR-SDK-J721E)
 
 # [Linux SDK](https://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-rt-jacinto7/08_06_00_11/exports/docs/devices/J7/linux/index.html) 环境搭建
@@ -254,6 +254,7 @@ export SOC=am68pa
 export TIDL_TOOLS_PATH=$(pwd)/tidl_tools
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$TIDL_TOOLS_PATH
 export ARM64_GCC_PATH=$(pwd)/gcc-arm-9.2-2019.12-x86_64-aarch64-none-linux-gnu
+#配置永久环境变量更方便，sudo gedit /etc/profile，末尾加入如上代码，然后source /etc/profile加载立即生效
 
 #Compile and Validate on X86_PC
 mkdir build && cd build
@@ -341,3 +342,12 @@ Then using Onnx with the libtidl_onnxrt_EP inference library we run the model an
 
 [edgeai-tidl-tools:Python Examples](https://github.com/TexasInstruments/edgeai-tidl-tools/blob/master/examples/osrt_python/README.md)
 [适用于嵌入式应用的深度学习推理参考设计](https://www.ti.com.cn/cn/lit/ug/zhcu546/zhcu546.pdf)
+
+
+
+---
+> TDA4系列文章：
+[TDA4①：SDK, TIDL, OpenVX](https://wangyujie.site/TDA4VM/)
+[TDA4②：环境搭建、模型转换、Demo及Tools](https://wangyujie.site/TDA4VM2/)
+[TDA4③：YOLOX的模型转换与SK板端运行](https://wangyujie.site/TDA4VM3/)
+[TDA4④：部署自定义模型](https://wangyujie.site/TDA4VM4/)
