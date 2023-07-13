@@ -6,6 +6,7 @@ tags:
 - 技术
 - 摄影
 ---
+[索尼APP使用教程](https://kdocs.cn/l/cq3CTsJgxvNv?f=201)
 # 摄影笔记
 四要素：``取景，曝光，虚实，构图``
 ## 取景
