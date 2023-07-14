@@ -35,13 +35,73 @@ Each Deep Neural Network has few components:
 
 除了上述的第二步，也可以使用edgeai-tidl-tools。但是需要手动编辑param.yaml文件，以使其与edgeai-benchmark生成的文件相匹配。
 
-# 模型转换
-使用 `torch.onnx.export(model,input, "XXX.onnx", verbose=False, export_params=True)` 得到 `.onnx`
-注意要确保加载的模型是一个完整的PyTorch模型对象，而不是一个包含模型权重的字典。
+# ONNX模型转换
+使用 `torch.onnx.export(model,input, "XXX.onnx", verbose=False, export_params=True)` 得到 `.onnx`；
+> 注意要确保加载的模型是一个完整的PyTorch模型对象，而不是一个包含模型权重的字典, 否则会报错`'dict' object has no attribute 'modules'`；
+因此需要在项目保存`.pth`模型文件时设置同时*保存网络结构*，或者在项目代码中导入完整模型后使用`torch.onnx.export`
+
+使用ONNX Runtime 运行推理，验证模型转换的正确性
+```py
+import numpy as np    
+import onnxruntime    
+from PIL import Image
+import onnx
+import cv2
+import matplotlib.pyplot as plt
+import torch
+
+#导入模型和推理图片
+model_path = "./XXX.onnx"
+input_file="1.jpg"
+session = onnxruntime.InferenceSession(model_path, None)
+
+# get the name of the first input of the model
+input_name = session.get_inputs()[0].name  
+input_details  = session.get_inputs()
+print("Model input details:")
+for i in input_details:
+    print(i)
+output_details = session.get_outputs()
+print("Model output details:", )
+for i in output_details:
+    print(i)
+
+input_shape = input_details[0].shape
+input_height, input_width = input_shape[2:]
+
+# Pre-Process input
+img_bgr = cv2.imread(input_file)
+print("image size:", img_bgr.shape)
+img_bgr2 = cv2.resize(img_bgr, ( input_width,input_height))
+print("image resize:", img_bgr2.shape)
+img_rgb = img_bgr2[:,:,::-1]
+device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+# 预处理-归一化
+input_tensor = img_rgb / 255    # 预处理-构造输入 Tensor
+input_tensor = np.expand_dims(input_tensor, axis=0) # 加 batch 维度
+input_tensor = input_tensor.transpose((0, 3, 1, 2)) # N, C, H, W
+input_tensor = np.ascontiguousarray(input_tensor)   # 将内存不连续存储的数组，转换为内存连续存储的数组，使得内存访问速度更快
+input_tensor = torch.from_numpy(input_tensor).to(device).float() # 转 Pytorch Tensor
+input_tensor = input_tensor[:, :1, :, :]    #[1, "1", 384, 128]
+print(input_tensor.shape)
+
+#Run inference session
+raw_result = session.run([], {input_name: input_tensor.numpy()})
+for result in raw_result:
+    print("result shape:", result.shape)
+```
+`print(result)` :如果数值全都一样(-4.59512)，可能是没有检测到有效的目标或者模型效果太差
 
 # [EdgeAI-TIDL-Tools](https://github.com/TexasInstruments/edgeai-tidl-tools/blob/08_06_00_05/docs/custom_model_evaluation.md)
 环境搭建见：[TDA4②](https://wangyujie.site/TDA4VM2/#EdgeAI-TIDL-Tools)
-sh
+
+下面研读 [edgeai-tidl-tools/examples/osrt_python/ort/onnxrt_ep.py](https://github.com/TexasInstruments/edgeai-tidl-tools/blob/08_06_00_05/examples/osrt_python/ort/onnxrt_ep.py):
+运行：`./scripts/run_python_examples.sh`
+
+**Debug:**
+有些模型可能要到model_configs中找到链接手动下载放入models/public
+'TIDLCompilationProvider' is not in available:环境问题，没有进入配置好的环境，正常应该是: `Available execution providers :  ['TIDLExecutionProvider', 'TIDLCompilationProvider', 'CPUExecutionProvider']`
+
 
 
 # [EdgeAI-Benchmark](https://github.com/TexasInstruments/edgeai-benchmark/tree/master)
