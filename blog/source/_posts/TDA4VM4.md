@@ -17,12 +17,13 @@ Prototxt file contains all relevant information of the detection layer.
 [Efficient object detection using Yolov5 and TDA4x processors | Video | TI.com](https://www.ti.com/video/6286792047001)
 [4. Deep learning models &mdash; Processor SDK Linux for SK-TDA4VM Documentation](https://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-edgeai/TDA4VM/08_06_01/exports/docs/common/inference_models.html)
 
-Each Deep Neural Network has few components:
-1.  **model**: This directory contains the DNN being targeted to infer
-2.  **artifacts**: This directory contains the artifacts generated after the compilation of DNN for SDK. These artifacts can be generated and validated with simple file based examples provided in Edge AI TIDL Tools
-3.  **param.yaml**: A configuration file in yaml format to provide basic information about DNN, and associated pre and post processing parameters
-4.  ***dataset.yaml :** This configuration file in yaml format illustrate the details of dataset used for model training.
-5.  ***run.log :** This is run log of model.
+
+深度学习模型基于TI板端运行要有几个组件：
+1.  **model**：这个目录包含了要进行推理的模型（.onnx, *.prototxt）
+2.  **artifacts**：这个目录包含了模型编译后生成的文件。这些文件可以用Edge AI TIDL Tools来生成和验证
+3.  **param.yaml**：配置文件，提供了模型的基本信息，以及相关的预处理和后处理参数
+4.  \***dataset.yaml**：配置文件，说明了用于模型训练的数据集的细节
+5.  \***run.log**：这是模型的运行日志
 
 [edgeai-benchmark](https://github.com/TexasInstruments/edgeai-benchmark): Custom model benchmark can also be easily done (please refer to the documentation and example). Uses [edgeai-tidl-tools](https://github.com/TexasInstruments/edgeai-tidl-tools) for model compilation and inference
 
@@ -38,7 +39,7 @@ Each Deep Neural Network has few components:
 # ONNX模型转换
 使用 `torch.onnx.export(model,input, "XXX.onnx", verbose=False, export_params=True)` 得到 `.onnx`；
 > 注意要确保加载的模型是一个完整的PyTorch模型对象，而不是一个包含模型权重的字典, 否则会报错`'dict' object has no attribute 'modules'`；
-因此需要在项目保存`.pth`模型文件时设置同时*保存网络结构*，或者在项目代码中导入完整模型后使用`torch.onnx.export`
+因此需要在项目保存`.pth`模型文件时设置同时*保存网络结构*，或者在项目代码中*导入完整模型*后使用`torch.onnx.export`
 
 使用ONNX Runtime 运行推理，验证模型转换的正确性
 ```py

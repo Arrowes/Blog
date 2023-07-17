@@ -179,7 +179,7 @@ Zotero能管理个人文献库、插入引文、论文阅读和记笔记、pdf�
 ## Note
 IEICE期刊论文投稿的LaTeX模板中提供了EUC、SJIS和UTF三种不同的模板。这些模板的区别在于它们所使用的字符编码方式，其中UTF-8是其中最为常用的一种编码方式。
 ``Ctrl + S 编译``
-```
+```sh
 %分点
 \begin{itemize}
   \item [1.]
@@ -189,6 +189,7 @@ IEICE期刊论文投稿的LaTeX模板中提供了EUC、SJIS和UTF三种不同的
 
 空行：\\  下划线：\_{}  百分号:\%  加粗：\textbf{}
 斜体：\textit{} 或 $x$  或公式斜体：\mathit{}  
+高亮：\usepackage {soul}  \hl {xxx}
 
 %文章结构
 章：\section{}   节：\subsection{}   条：\subsubsection{}
