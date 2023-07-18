@@ -37,9 +37,10 @@ Prototxt file contains all relevant information of the detection layer.
 除了上述的第二步，也可以使用edgeai-tidl-tools。但是需要手动编辑param.yaml文件，以使其与edgeai-benchmark生成的文件相匹配。
 
 # ONNX模型转换
-使用 `torch.onnx.export(model,input, "XXX.onnx", verbose=False, export_params=True)` 得到 `.onnx`；
+使用`torch.onnx.export(model, input, "XXX.onnx", verbose=False, export_params=True, opset_version=13)`得到 `.onnx`；
 > 注意要确保加载的模型是一个完整的PyTorch模型对象，而不是一个包含模型权重的字典, 否则会报错`'dict' object has no attribute 'modules'`；
 因此需要在项目保存`.pth`模型文件时设置同时*保存网络结构*，或者在项目代码中*导入完整模型*后使用`torch.onnx.export`
+opset_version只支持到13，导出默认14会报错
 
 使用ONNX Runtime 运行推理，验证模型转换的正确性
 ```py
@@ -97,6 +98,7 @@ for result in raw_result:
 环境搭建见：[TDA4②](https://wangyujie.site/TDA4VM2/#EdgeAI-TIDL-Tools)
 
 下面研读 [edgeai-tidl-tools/examples/osrt_python/ort/onnxrt_ep.py](https://github.com/TexasInstruments/edgeai-tidl-tools/blob/08_06_00_05/examples/osrt_python/ort/onnxrt_ep.py):
+进入搭建好的环境：（例）`pyenv activate benchmark`
 运行：`./scripts/run_python_examples.sh`
 
 **Debug:**
