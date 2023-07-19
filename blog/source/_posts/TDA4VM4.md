@@ -7,16 +7,7 @@ tags:
 ---
 接上一篇：[TDA4③：YOLOX的模型转换与SK板端运行](https://wangyujie.site/TDA4VM3/)
 
-OD model
-```mermaid
-graph LR
-A(Encoder ) -->B(Feature Fusion)-->c(Detection Heads)-->d(Detection Layer)
-```
-An important step of compiling an OD model is defining prototxt.
-Prototxt file contains all relevant information of the detection layer.
-[Efficient object detection using Yolov5 and TDA4x processors | Video | TI.com](https://www.ti.com/video/6286792047001)
-[4. Deep learning models &mdash; Processor SDK Linux for SK-TDA4VM Documentation](https://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-edgeai/TDA4VM/08_06_01/exports/docs/common/inference_models.html)
-
+TI文档中对yolo、mobilenet、resnet等主流深度学习模型支持十分完善，相关开箱即用的文件在 [Modelzoo](https://github.com/TexasInstruments/edgeai-modelzoo) 中，但有关自定义模型的编译和部署内容很少，只能利用例程和提供的工具进行尝试。
 
 深度学习模型基于TI板端运行要有几个组件：
 1.  **model**：这个目录包含了要进行推理的模型（.onnx, *.prototxt）
@@ -28,7 +19,7 @@ Prototxt file contains all relevant information of the detection layer.
 [edgeai-benchmark](https://github.com/TexasInstruments/edgeai-benchmark): Custom model benchmark can also be easily done (please refer to the documentation and example). Uses [edgeai-tidl-tools](https://github.com/TexasInstruments/edgeai-tidl-tools) for model compilation and inference
 
 
-1. 首先，使用PyTorch训练模型并导出.onnx和prototxt文件;
+1. 首先，使用PyTorch训练模型并导出.onnx (& prototxt) 文件;
 2. 其次，使用edgeai-benchmark来对.onnx和prototxt文件进行基准测试，以获取param.yaml文件。可以使用脚本[edgeai-benchmark/run_custom_pc.sh](https://github.com/TexasInstruments/edgeai-benchmark/blob/master/run\_custom\_pc.sh)来调用[edgeai-benchmark/custom.py](https://github.com/TexasInstruments/edgeai-benchmark/blob/master/scripts/benchmark\_custom.py)。如果模型不在该文件列出的类型之中，可以参考[edgeai-benchmark/configs](https://github.com/TexasInstruments/edgeai-benchmark/tree/master/configs)目录中的示例,
 这一步将创建一个编译后的模型文件包（tar.gz文件）;
 3. 第三步，通过flash手动将上述.tar.gz文件复制到SD卡中（或者在启动后，可以直接使用scp或其他工具进行复制）;
@@ -94,16 +85,82 @@ for result in raw_result:
 ```
 `print(result)` :如果数值全都一样(-4.59512)，可能是没有检测到有效的目标或者模型效果太差
 
-# [EdgeAI-TIDL-Tools](https://github.com/TexasInstruments/edgeai-tidl-tools/blob/08_06_00_05/docs/custom_model_evaluation.md)
+# TIDL编译
+得到onnx相关文件后，使用ti提供的工具进行编译和推理，这里依然采用两种方法：[Edge AI Studio](https://dev.ti.com/edgeaistudio/) 和 [edgeai-tidl-tools](https://github.com/TexasInstruments/edgeai-tidl-tools/tree/08_06_00_05)
+
+## Edge AI Studio
+参考yolox的编译过程：[YOLOX的模型转换与SK板端运行](https://wangyujie.site/TDA4VM3/#b-%E4%BD%BF%E7%94%A8TIDL-Tools%EF%BC%88by-Edge-AI-Studio%EF%BC%89)
+
+> **Debug:**
+`[ONNXRuntimeError] : 6 ... `: compile_options中设置deny_list，剔除不支持的层，如`'Slice, Resize'`
+
+打包下载编译生成的工件：
+```py
+#Pack.ipynb
+import zipfile
+import os
+
+def zip_folder(folder_path, zip_path):
+    with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+        for root, dirs, files in os.walk(folder_path):
+            for file in files:
+                file_path = os.path.join(root, file)
+                zipf.write(file_path, os.path.relpath(file_path, folder_path))
+
+folder_path = './output' # 指定要下载的文件夹路径
+zip_path = './output.zip' # 指定要保存的zip文件路径
+zip_folder(folder_path, zip_path)
+
+from IPython.display import FileLink
+FileLink(zip_path) # 生成下载链接
+```
+
+## [EdgeAI-TIDL-Tools](https://github.com/TexasInstruments/edgeai-tidl-tools/blob/08_06_00_05/docs/custom_model_evaluation.md)
 环境搭建见：[TDA4②](https://wangyujie.site/TDA4VM2/#EdgeAI-TIDL-Tools)
 
-下面研读 [edgeai-tidl-tools/examples/osrt_python/ort/onnxrt_ep.py](https://github.com/TexasInstruments/edgeai-tidl-tools/blob/08_06_00_05/examples/osrt_python/ort/onnxrt_ep.py):
+研读 [edgeai-tidl-tools/examples/osrt_python/ort/onnxrt_ep.py](https://github.com/TexasInstruments/edgeai-tidl-tools/blob/08_06_00_05/examples/osrt_python/ort/onnxrt_ep.py):
 进入搭建好的环境：（例）`pyenv activate benchmark`
 运行：`./scripts/run_python_examples.sh`
+下面基于例程修改以编译运行自定义模型：
+```sh
+#新建运行脚本./script/run.sh
+CURDIR=`pwd`
+export SOC=am68pa
+export TIDL_TOOLS_PATH=$(pwd)/tidl_tools
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$TIDL_TOOLS_PATH
+export ARM64_GCC_PATH=$(pwd)/gcc-arm-9.2-2019.12-x86_64-aarch64-none-linux-gnu
+    cd $CURDIR/examples/osrt_python/ort
+    #python3 onnxrt_ep.py -c
+    python3 onnxrt_ep.py
+    #python3 onnxrt_ep.py -d
 
-**Debug:**
+#修改examples/osrt_python/ort/onnxrt_ep.py
+def infer_image(sess, image_files, config): #此处修改模型输入数据格式
+models = ['custom_model_name']  #修改对应的模型名称
+
+#修改examples/osrt_python/model_configs.py 导入并配置模型
+    'custom_model_name' : {
+        'model_path' : os.path.join(models_base_path, 'custom_model_name.onnx'),
+        'source' : {'model_url': 'https.../.onnx', 'opt': True,  'infer_shape' : True},
+        'mean': [123.675, 116.28, 103.53],
+        'scale' : [0.017125, 0.017507, 0.017429],
+        'num_images' : numImages,
+        'num_classes': 1000,
+        'session_name' : 'onnxrt' ,
+        'model_type': 'classification'
+    },
+
+#examples/osrt_python/model_configs.py 配置编译选项
+"deny_list":"Slice, Resize", #"MaxPool"
+
+#运行编译
+./scripts/run_seed.sh
+```
+
+
+> **Debug:**
 有些模型可能要到model_configs中找到链接手动下载放入models/public
-'TIDLCompilationProvider' is not in available:环境问题，没有进入配置好的环境，正常应该是: `Available execution providers :  ['TIDLExecutionProvider', 'TIDLCompilationProvider', 'CPUExecutionProvider']`
+`'TIDLCompilationProvider' is not in available:`环境问题，没有进入配置好的环境，正常应该是: `Available execution providers :  ['TIDLExecutionProvider', 'TIDLCompilationProvider', 'CPUExecutionProvider']`
 
 
 
@@ -158,6 +215,8 @@ EdgeAI-Benchmark提供了一系列针对不同图像识别任务的脚本，包�
 
 
 ---
+[Efficient object detection using Yolov5 and TDA4x processors | Video | TI.com](https://www.ti.com/video/6286792047001)
+[4. Deep learning models &mdash; Processor SDK Linux for SK-TDA4VM Documentation](https://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-edgeai/TDA4VM/08_06_01/exports/docs/common/inference_models.html)
 > TDA4系列文章：
 [TDA4①：SDK, TIDL, OpenVX](https://wangyujie.site/TDA4VM/)
 [TDA4②：环境搭建、模型转换、Demo及Tools](https://wangyujie.site/TDA4VM2/)

@@ -305,6 +305,7 @@ print(f' Inference Time Per Image : {tt :7.2f} ms  \n DDR BW Per Image        : 
 + prebuilt-models中的预训练模型每次重启EVM都要先重新解压:
 `cd notebooks/prebuilt-models/8bits/`
 `find . -name "*.tar.gz" -exec tar --one-top-level -zxvf "{}" \;`
++ 内核频繁挂掉：重启EVM
 
 
 ## 3. 板端运行(TDA4VM-SK)

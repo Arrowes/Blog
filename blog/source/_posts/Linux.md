@@ -22,7 +22,7 @@ sudo apt update	    #更新索引(源)
 
 #文件
 mkdir []            #新建文件夹  
-rmdir []            #删除文件夹  
+rmdir []            #删除文件夹( rm -r XXX  
 sudo nautilus       #以root进入文件夹     
 touch [] []         #创建文件
 rm []               #删除文件
@@ -58,6 +58,30 @@ echo []             #输出指定的字符串或变量的值,用于调试程序�
 Host 键:右ctrl，方向键上：获取上次的命令，Tab：自动补全
 ``Ctrl + alt + T``	Terminal
 ``Ctrl + H``	显示隐藏文件   
+
+## 上网
+[Clash.for.Windows-0.20.29-x64-linux.tar.gz ](https://github.com/Fndroid/clash_for_windows_pkg/releases/download/0.20.29/Clash.for.Windows-0.20.29-x64-linux.tar.gz)可用于Ubuntu，
+解压缩，进入文件夹终端，运行`.cfw`,即可打开软件
+Ubuntu设置-网络代理设为手动，将http/https代理指向clash默认端口7890：`HTTP代理：127.0.0.1 7890` `HTTPS代理：127.0.0.1 7890`
+
+创建软件快捷方式(Optional)
+```sh
+wget https://cdn.jsdelivr.net/gh/Dreamacro/clash@master/docs/logo.png    # 下载clash icon做为桌面图标
+vim clash.desktop
+# 输入下面的内容
+[Desktop Entry]
+ Name=clash
+ Comment=Clash
+ Exec=/home/.../clash/cfw
+ Icon=/home/.../clash/logo.png
+ Type=Application
+ Categories=Development;
+ StartupNotify=true
+ NoDisplay=false
+
+sudo mv clash.desktop /usr/share/applications/
+```
+最终就能实现通过图标打开
 
 ## VScode
 vscode远程访问：1.安装remote插件 2.连接服务器``ssh ywang85@she1-w50502`` 3.connect，打开terminal
