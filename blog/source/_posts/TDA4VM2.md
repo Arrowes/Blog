@@ -51,7 +51,7 @@ cp ${PSDKL_PATH}/filesystem/tisdk-default-image-j7-evm.tar.xz ${PSDKR_PATH}/
 ```
 
 
-# [Vision Apps Demo](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/08_06_00_12/exports/docs/vision_apps/docs/user_guide/ENVIRONMENT_SETUP.html) 编译
+## [Vision Apps Demo](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/08_06_00_12/exports/docs/vision_apps/docs/user_guide/ENVIRONMENT_SETUP.html) 编译
 ```sh
 #修改文件 tiovx/build_flags.mak（没修改过则是默认）
 BUILD_EMULATION_MODE=no #非模拟器模式
@@ -59,6 +59,7 @@ BUILD_TARGET_MODE=yes
 BUILD_LINUX_A72=yes
 PROFILE=release
 #Optional:配置tiovx/build_flags.mak, vision_apps/vision_apps_build_flags.mak
+
 #开始编译vision apps
 cd vision_apps
 make vision_apps -j8    #若缺少core-secdev-k3包，手动导入(https://git.ti.com/cgit/security-development-tools/core-secdev-k3/snapshot/core-secdev-k3-08.06.00.006.tar.gz)
@@ -265,19 +266,6 @@ python3 ./scripts/gen_test_report.py    #评估
 | Image Classification | Object detection | Semantic Segmentation |
 | :-: |  :-: |  :-: |
 | [![](https://github.com/TexasInstruments/edgeai-tidl-tools/raw/08_06_00_05/docs/out_viz_cls.jpg)](https://github.com/TexasInstruments/edgeai-tidl-tools/blob/08_06_00_05/docs/out_viz_cls.jpg) | [![](https://github.com/TexasInstruments/edgeai-tidl-tools/raw/08_06_00_05/docs/out_viz_od.jpg)](https://github.com/TexasInstruments/edgeai-tidl-tools/blob/08_06_00_05/docs/out_viz_od.jpg) | [![](https://github.com/TexasInstruments/edgeai-tidl-tools/raw/08_06_00_05/docs/out_viz_ss.jpg)](https://github.com/TexasInstruments/edgeai-tidl-tools/blob/08_06_00_05/docs/out_viz_ss.jpg)
-
-
-
-
-
-
-## [EdgeAI-ModelMaker](https://github.com/TexasInstruments/edgeai-modelmaker)
-An end-to-end model development tool that contains dataset handling, model training and compilation，集成了edgeai-modelzoo, edgeai-torchvision, edgeai-mmdetection, edgeai-benchmark, edgeai-modelmaker
-```sh
-#Git clone 项目，按照文档在bash下配置环境，curl -L ... 运行失败改为-L -k忽略SSL检查
-.setup_all.sh #安装失败：torch1.10.0, dlr, tvm, onnuruntime-tidl, tflite-runtime
-#SSLError 暂时放弃
-```
 
 
 ## [Edge AI Studio](https://dev.ti.com/edgeaistudio/)
