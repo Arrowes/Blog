@@ -7,8 +7,9 @@ tags:
 ---
 
 相关前置知识见上一篇：[TDA4①：SDK, TIDL, OpenVX](https://wangyujie.site/TDA4VM/)
-环境搭建需要下载：[PROCESSOR-SDK-J721E](https://www.ti.com.cn/tool/cn/PROCESSOR-SDK-J721E)
+环境搭建需要下载SDK：[PROCESSOR-SDK-J721E](https://www.ti.com.cn/tool/cn/PROCESSOR-SDK-J721E)
 
+以下两节是EVM板的PSDK RTOS与PSDK Linux的环境搭建，因为暂时没有EVM板所以*没有上板测试*，只有SK板可以跳到第三节 TDA4VM-SK 配置。
 # [Linux SDK](https://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-rt-jacinto7/08_06_00_11/exports/docs/devices/J7/linux/index.html) 环境搭建
 
 ```shell
@@ -92,6 +93,9 @@ make linux_fs_install_sd
 然后即可插在EVM端运行，这里没有，跳过。
 </details>
 
+---
+上面都是EVM板的相关环境配置，后面只拿到了SK板，因此转为SK板的相关配置。
+
 # [TDA4VM-SK](https://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-edgeai/TDA4VM/08_06_01/exports/docs/devices/TDA4VM/linux/getting_started.html) 配置
 [SK-TDA4VM 用户指南](https://www.ti.com.cn/cn/lit/ug/zhcu912c/zhcu912c.pdf?ts=1688968746311&ref_url=https%253A%252F%252Fwww.bing.com%252F)
 
@@ -145,7 +149,7 @@ flows:
     flow2: [input1,model0,output0,[160,540,800,450]]
     flow3: [input1,model3,output0,[960,540,800,450]]
 ```
-如果运行过程中突然重启，一般是需要加个风扇增强散热
+如果运行过程中突然重启，一般是需要加个*风扇*增强散热
 
 **Dataflows**
 <img src="https://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-edgeai/TDA4VM/08_06_01/exports/docs/_images/edgeai_object_detection.png" width='90%'>
@@ -171,7 +175,7 @@ sink_0::startx="<320>"  sink_0::starty="<180>"  sink_0::widths="<1280>"   sink_0
 <img src="https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/06_01_01_12/exports/docs/tidl_j7_01_00_01_00/ti_dl/docs/user_guide_html/TIDL_import_process.png" >
 
 ## Demo:使用TIDL实现多种模型的导入、运行
-[MobileNetV2 Tensorflow model，PeleeNet Caffe model，JSegNet21V2 Caffe model](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/06_01_01_12/exports/docs/tidl_j7_01_00_01_00/ti_dl/docs/user_guide_html/md_tidl_user_model_deployment.html#importing-mobilenetv2-model-for-image-classification)
+文档教程：[MobileNetV2 Tensorflow，PeleeNet Caffe，JSegNet21V2 Caffe model](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/06_01_01_12/exports/docs/tidl_j7_01_00_01_00/ti_dl/docs/user_guide_html/md_tidl_user_model_deployment.html#importing-mobilenetv2-model-for-image-classification)，下面以PeleeNet为例
 
 **Config** TIDL
 ```sh
@@ -233,6 +237,8 @@ export TIDL_INSTALL_PATH=/home/ywang85/SDK/RTOSSDK/tidl_j721e_08_06_00_10   #设
 
 
 ## [EdgeAI TIDL Tools](https://github.com/TexasInstruments/edgeai-tidl-tools)
+EdgeAI TIDL Tools是TI提供的深度学习开发工具，后续会多次用到。
+
 要求：OS——Ubuntu 18.04，Python Version——3.6
 <img alt="图 9" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/TDA4VM2onnxruntimeflow.png" width="60%"/>  
 
