@@ -174,7 +174,7 @@ sink_0::startx="<320>"  sink_0::starty="<180>"  sink_0::widths="<1280>"   sink_0
 
 <img src="https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/06_01_01_12/exports/docs/tidl_j7_01_00_01_00/ti_dl/docs/user_guide_html/TIDL_import_process.png" >
 
-## Demo:使用TIDL实现多种模型的导入、运行
+## Demo:使用TIDL实现多种模型的导入、运行(form RTOS SDK)
 文档教程：[MobileNetV2 Tensorflow，PeleeNet Caffe，JSegNet21V2 Caffe model](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/06_01_01_12/exports/docs/tidl_j7_01_00_01_00/ti_dl/docs/user_guide_html/md_tidl_user_model_deployment.html#importing-mobilenetv2-model-for-image-classification)，下面以PeleeNet为例
 
 **Config** TIDL
@@ -339,6 +339,14 @@ Then using Onnx with the libtidl_onnxrt_EP inference library we run the model an
 
 
 
+# [EdgeAI-Benchmark](https://github.com/TexasInstruments/edgeai-benchmark/tree/master)
+EdgeAI-Benchmark提供了一系列针对不同图像识别任务的脚本，包括分类、分割、检测和关键点检测。（使用[edgeai-tidl-tools](https://github.com/TexasInstruments/edgeai-tidl-tools)用于模型编译和推理）
+
+## 环境搭建
+文档：[setup_instructions](https://github.com/TexasInstruments/edgeai-benchmark/blob/master/docs/setup_instructions.md)，其中`pyenv install 3.6`可能因为网络原因下载极慢，这时可以先从官网或镜像源下载所需要的包到 ~/.pyenv/cache 目录下，再执行安装命令
+此后每次需要激活环境：`pyenv activate benchmark`
+
+[edgeai-tidl-tools/docs/custom_model_evaluation.md](https://github.com/TexasInstruments/edgeai-tidl-tools/blob/master/docs/custom_model_evaluation.md)
 ---
 > TDA4系列文章：
 [TDA4①：SDK, TIDL, OpenVX](https://wangyujie.site/TDA4VM/)
