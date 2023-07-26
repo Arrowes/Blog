@@ -27,7 +27,7 @@ TI文档中对yolo、mobilenet、resnet等主流深度学习模型支持十分�
 
 除了上述的第二步，也可以使用edgeai-tidl-tools。但是需要手动编辑param.yaml文件，以使其与edgeai-benchmark生成的文件相匹配。
 
-# ONNX模型转换
+# ONNX模型转换及推理
 使用`torch.onnx.export(model, input, "XXX.onnx", verbose=False, export_params=True, opset_version=13)`得到 `.onnx`；
 > 注意要确保加载的模型是一个完整的PyTorch模型对象，而不是一个包含模型权重的字典, 否则会报错`'dict' object has no attribute 'modules'`；
 因此需要在项目保存`.pth`模型文件时设置同时*保存网络结构*，或者在项目代码中*导入完整模型*后使用`torch.onnx.export`
@@ -83,7 +83,7 @@ raw_result = session.run([], {input_name: input_tensor.numpy()})
 for result in raw_result:
     print("result shape:", result.shape)
 ```
-`print(result)` :如果数值全都一样(-4.59512)，可能是没有检测到有效的目标或者模型效果太差
+`print(result)` :正常应该输出正确的推理结果，如果数值全都一样(-4.59512)，可能是没有检测到有效的目标或者模型效果太差
 
 # TIDL编译
 得到onnx相关文件后，使用ti提供的工具进行编译和推理，这里依然采用两种方法：[Edge AI Studio](https://dev.ti.com/edgeaistudio/) 和 [edgeai-tidl-tools](https://github.com/TexasInstruments/edgeai-tidl-tools/tree/08_06_00_05)
@@ -141,7 +141,7 @@ models = ['custom_model_name']  #修改对应的模型名称
 #修改examples/osrt_python/model_configs.py 导入并配置模型
     'custom_model_name' : {
         'model_path' : os.path.join(models_base_path, 'custom_model_name.onnx'),
-        'source' : {'model_url': 'https.../.onnx', 'opt': True,  'infer_shape' : True},
+        'source' : {'model_url': 'https..XXX./.onnx', 'opt': True,  'infer_shape' : True},
         'mean': [123.675, 116.28, 103.53],
         'scale' : [0.017125, 0.017507, 0.017429],
         'num_images' : numImages,
@@ -150,13 +150,13 @@ models = ['custom_model_name']  #修改对应的模型名称
         'model_type': 'classification'
     },
 
-#examples/osrt_python/model_configs.py 配置编译选项
+#examples/osrt_python/common_utils.py 配置编译选项
 "deny_list":"Slice, Resize", #"MaxPool"
 
 #运行编译
 ./scripts/run_seed.sh
 ```
-
+配置编译选项文档：[edgeai-tidl-tools/examples/osrt_python/README.md](https://github.com/TexasInstruments/edgeai-tidl-tools/blob/master/examples/osrt_python/README.md#optional-options)
 
 > **Debug:**
 有些模型可能要到model_configs中找到链接手动下载放入models/public
