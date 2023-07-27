@@ -419,9 +419,14 @@ else : #如果只有一个CPU：使用一个循环顺序地处理每个模型。
         │   └── perfSimInfo.bin #性能模拟信息的二进制文件。可能包含模型在性能模拟时的一些统计数据。
         ├── 1102_tidl_net.bin
         ├── 1102_tidl_net.bin.layer_info.txt    #包含模型各个层信息的文本文件。可能包含模型结构、层名称、输入输出维度等信息。
-        ├── 1102_tidl_net.bin_netLog.txt    #模型编译日志的文本文件
-        ├── 1102_tidl_net.bin_paramDebug.csv    #包含模型参数的调试信息的CSV文件。可能包含模型参数的量化和转换等信息。
-        ├── 1102_tidl_net.bin.svg       #该部分模型结构的可视化图像文件
+        ├── 1102_tidl_net.bin_netLog.txt        #模型编译日志的文本文件
+        ├── 1102_tidl_net.bin_paramDebug.csv    #包含模型参数的调试信息的CSV文件。记录了每个层量化前后的参数差异，模型通常以浮点数形式进行训练，量化通常将浮点参数转换为固定位数的整数参数。
+            └── #meanDifference: 参数的平均差异，maxDifference: 参数的最大差异，
+            └── #meanOrigFloat: 原始浮点参数的平均值，meanRelDifference: 参数的相对平均差异，
+            └── #orgmax: 原始浮点参数的最大值，quantizedMax: 量化后参数的最大值
+            └── #orgAtmaxDiff: 原始浮点参数在最大值处的差异，quantizedAtMaxDiff: 量化后参数在最大值处的差异，maxRelDifference: 参数的最大相对差异
+            └── #Scale: 参数的缩放比例，在量化中，使用缩放因子将浮点参数映射到整数参数；
+        ├── 1102_tidl_net.bin.svg   #该部分模型结构的可视化图像文件
         ├── ......  #其他三块网络结构组成相同，省略
         ├── _backbone_backbone_dark5_dark5.1_conv1_act_Relu_output_0_...
         ├── _backbone_lateral_conv0_act_Relu_output_0_...
