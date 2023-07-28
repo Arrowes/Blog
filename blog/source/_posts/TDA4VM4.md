@@ -447,7 +447,7 @@ else : #如果只有一个CPU：使用一个循环顺序地处理每个模型。
     起始于Conv_1275前的Concat，输出为Conv_1306下的Relu, **中断于Resize层**，因为不支持
 + _backbone_reduce_conv1_act_Relu_output_0_   
     起始于Conv_1308前的Concat，输出为Conv_1336下的Relu，**中断于Resize层**，因为不支持
-+ 1102    
++ _1102_   
     起始于Conv_1338前的Concat，输出为最终的output
 
 由此看出，四组网络结构文件拼接成一个完整的网络，但由于不支持的层被deny, 需要offload到arm端运行，因此在相应的位置被拆分，前期结构设计时需要尽量避免出现该情况。
