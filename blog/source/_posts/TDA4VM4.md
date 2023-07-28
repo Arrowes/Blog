@@ -392,9 +392,9 @@ else : #如果只有一个CPU：使用一个循环顺序地处理每个模型。
 
 ## model-artifacts
 分析编译深度学习模型后生成的文件：
-```sh
+```py
 └── model-artifacts         #文件都是以最后的输出层命名，分为四块网络结构
-    ├── 1102_tidl_io_1.bin  #输入数据的二进制文件
+    ├── 1102_tidl_io_1.bin  #io配置文件
     ├── 1102_tidl_net.bin   #网络模型的二进制文件
     ├── _backbone_backbone_dark5_dark5.1_conv1_act_Relu_output_0_tidl_io_1.bin
     ├── _backbone_backbone_dark5_dark5.1_conv1_act_Relu_output_0_tidl_net.bin
@@ -412,27 +412,30 @@ else : #如果只有一个CPU：使用一个循环顺序地处理每个模型。
         ├── 1102_tidl_io__LayerPerChannelMean.bin   #存储每个通道的平均值的二进制文件。对于量化和归一化操作，需要存储每个通道的平均值。
         ├── 1102_tidl_io_.perf_sim_config.txt   #性能模拟的配置文件
         ├── 1102_tidl_io_.qunat_stats_config.txt    #量化统计的配置文件
-        ├── 1102_tidl_io__stats_tool_out.bin    #统计工具的输出二进制文件。用于存储进行量化统计时的一些中间结果。
+        ├── 1102_tidl_io__stats_tool_out.bin    #输出二进制文件。用于存储进行量化统计时的一些中间结果。
         ├── 1102_tidl_net       #编译后的深度学习模型相关文件
         │   ├── bufinfolog.csv  #缓冲区信息的CSV文件，可能包含模型各个层的输入和输出缓冲区的大小和信息。
         │   ├── bufinfolog.txt  #缓冲区信息的文本文件
         │   └── perfSimInfo.bin #性能模拟信息的二进制文件。可能包含模型在性能模拟时的一些统计数据。
         ├── 1102_tidl_net.bin
-        ├── 1102_tidl_net.bin.layer_info.txt    #包含模型各个层信息的文本文件。可能包含模型结构、层名称、输入输出维度等信息。
         ├── 1102_tidl_net.bin_netLog.txt        #模型编译日志的文本文件
+        │   ├── #TIDL Layer Name, Out Data Name, Group, #Ins, #Outs
+        │   ├── #Inbuf Ids, Outbuf Id: 输入输出缓冲区的标识符， In NCHW, Out NCHW: 输入输出数据的格式和维度信息
+        │   └── #MACS: 模型在推理过程中进行的乘加运算，用于衡量模型的计算量和复杂度。
         ├── 1102_tidl_net.bin_paramDebug.csv    #包含模型参数的调试信息的CSV文件。记录了每个层量化前后的参数差异，模型通常以浮点数形式进行训练，量化通常将浮点参数转换为固定位数的整数参数。
-            └── #meanDifference: 参数的平均差异，maxDifference: 参数的最大差异，
-            └── #meanOrigFloat: 原始浮点参数的平均值，meanRelDifference: 参数的相对平均差异，
-            └── #orgmax: 原始浮点参数的最大值，quantizedMax: 量化后参数的最大值
-            └── #orgAtmaxDiff: 原始浮点参数在最大值处的差异，quantizedAtMaxDiff: 量化后参数在最大值处的差异，maxRelDifference: 参数的最大相对差异
-            └── #Scale: 参数的缩放比例，在量化中，使用缩放因子将浮点参数映射到整数参数；
+        │   ├── #meanDifference: 参数的平均差异，maxDifference: 参数的最大差异，
+        │   ├── #meanOrigFloat: 原始浮点参数的平均值，meanRelDifference: 参数的相对平均差异，
+        │   ├── #orgmax: 原始浮点参数的最大值，quantizedMax: 量化后参数的最大值
+        │   ├── #orgAtmaxDiff: 原始浮点参数在最大值处的差异，quantizedAtMaxDiff: 量化后参数在最大值处的差异，maxRelDifference: 参数的最大相对差异
+        │   └── #Scale: 参数的缩放比例，在量化中，使用缩放因子将浮点参数映射到整数参数；
+        ├── 1102_tidl_net.bin.layer_info.txt    #包含模型各个层信息的文本文件
         ├── 1102_tidl_net.bin.svg   #该部分模型结构的可视化图像文件
         ├── ......  #其他三块网络结构组成相同，省略
         ├── _backbone_backbone_dark5_dark5.1_conv1_act_Relu_output_0_...
         ├── _backbone_lateral_conv0_act_Relu_output_0_...
         ├── _backbone_reduce_conv1_act_Relu_output_0_...
         ├── ...... 
-        ├── graphvizInfo.txt    #可能是与模型结构相关的图形化信息
+        ├── graphvizInfo.txt    #模型结构的图形化文本信息
         └── runtimes_visualization.svg  #整个网络结构可视化文件
 ```
 
