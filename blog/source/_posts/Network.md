@@ -146,12 +146,12 @@ for input, target in dataset:
     optimizer.step()
 ```
 ## 网络模型
-添加
+1. 添加
 ``vgg16_true.classifier.add_module('add_linear', nn.Linear(1000, 10)) #在vgg16网络中的classifier 模块中加入一个linear层``
-修改
+2. 修改
 ``vgg16_false.classifier[6] = nn.Linear(4096, 10) #修改vgg16网络中的classifier 第6层``
 
-保存
+3. 保存
 ```py
 vgg16 = torchvision.models.vgg16(pretrained=False)
 
@@ -161,7 +161,7 @@ torch.save(vgg16, "vgg16_method1.pth")
 # 保存方式2，模型参数（官方推荐）
 torch.save(vgg16.state_dict(), "vgg16_method2.pth")
 ```
-加载
+4. 加载
 ```py
 # 方式1
 model = torch.load("vgg16_method1.pth")
