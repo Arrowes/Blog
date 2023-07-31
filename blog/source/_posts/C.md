@@ -8,13 +8,43 @@ tags:
 # C
 [C Primer Plus(第六版)中文版](https://img.anfulai.cn/bbs/94810/C%20Primer%20Plus(%E7%AC%AC%E5%85%AD%E7%89%88)%E4%B8%AD%E6%96%87%E7%89%88.pdf)
 
-
 # C++
+[21天学通C++第8版](https://github.com/Arrowes/C-coding/blob/main/C%2B%2B/21%E5%A4%A9%E5%AD%A6%E9%80%9AC%2B%2B%E7%AC%AC8%E7%89%88%20%E9%AB%98%E6%B8%85%E5%AE%8C%E6%95%B4PDF.pdf)
+## 1.绪论
+C++最初由 Bjarne Stroustroup 于 1979 年在贝尔实验室开发，旨在作为 C 语言的继任者。但不同于C 语言，C++是一种面向对象的语言，实现了继承、抽象、多态和封装等概念。
+C++是一种中级编程语言，这意味着使用它既可以高级编程方式编写应用程序，又可以低级编程方式编写与硬件紧密协作的库。
 
-## 基于VScode用cmake搭建C++编译调试环境
-1. 安装VScode插件：C/C++，cmake，cmake tools
-2. 按F1，选择cmake:Quick Start,创建一个cmake工程
-3. 点击左侧栏的CMake工具按钮,右键可执行文件，选择Debug,进入调试界面
+构建可执行文件：编写代码(.cpp) > 编译器(.o / .obj) > 链接器(.exe)
+
+```c++
+#include <iostream>  //标准头文件，引入std::cout
+int main()
+{
+    std::cout << "Hello World!!" << std::endl; // <<：流插入运算符
+    return 0;  //cout 是在名称空间 std 中定义的一个流, 用来显示
+}
+```
+
+**开发环境**：Visual studio code + GCC compiler/MinGW, 按F5 Choose `C/C++: g++.exe build and debug active file`, 将编译、链接并执行应用程序
+
+## 2.C++程序的组成部分
++ 预处理器编译指令 `#include`
+   `#include "...relative path to .\FileB"`包含自定义头文件，`<>`用来包含自定义头文件 
++ 程序主体 `main()`
+程序的起点，前面的int是一种标准化约定，表示返回类型为整数
++ 返回值
+在 C++中，除非明确声明了不返回值，否则函数必须返回一个值，根据约定，程序员在程序运行成功时返回 0，并在出现错误时返回−1
+
+**namespace名称空间**：是给代码指定的名称，有助于降低命名冲突的风险，如`std::cout`:调用名称空间 std 中独一无二的 cout, 若要省略std::, 先加入`using namespace std`
+
+注释：
+```c
+//单行注释
+/* 跨行
+   注释
+*/
+```
+cin 可用于从用户那里获取文本输入和数字输入`std::cin >> Variable1 >> Variable2; `
 
 # Cmake
 [CMake](www.cmake.org) 是一个跨平台的开源构建管理系统，用于自动化应用程序的构建、测试和打包过程。它使用类似于Makefile的文本文件来描述构建过程中所需的所有组件和依赖项，并将其转换为适合各种不同编译器和操作系统的本地构建系统的配置文件。总之，CMake就是一个将多个cpp,hpp文件组合构建为一个大工程的语言。
@@ -207,6 +237,13 @@ make  #生成可执行文件
 ./EDGE   #运行边缘提取执行文件
 ```
 <img src="https://raw.sevencdn.com/Arrowes/Arrowes-Blogbackup/main/images/Cedge.png" width="50%">
+
+
+## 基于VScode用cmake搭建C++编译调试环境
+1. 安装VScode插件：C/C++，cmake，cmake tools
+2. 按F1，选择cmake:Quick Start,创建一个cmake工程
+3. 点击左侧栏的CMake工具按钮,右键可执行文件，选择Debug,进入调试界面
+
 
 ## gcc/g++,MinGW/MSVC与make/CMake/qmake
 **GNU**/Linux：简称Linux，包括Ubuntu，Debian，CentOS，自带gcc； 

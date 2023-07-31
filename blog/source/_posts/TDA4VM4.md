@@ -439,7 +439,7 @@ else : #如果只有一个CPU：使用一个循环顺序地处理每个模型。
         └── runtimes_visualization.svg  #整个网络结构可视化文件
 ```
 
-**为什么网络结构编译后被拆分成了4组不同的二进制文件？**
+**为什么网络结构编译后被拆分成了4组不同的二进制文件？**（*4 subgraph output nodes*）
 
 + _backbone_backbone_dark5_dark5.1_conv1_act_Relu_output_0_   
     起始于最初的Input，输出为Conv_1273下的Relu, **中断于Maxpool层**，Why？
