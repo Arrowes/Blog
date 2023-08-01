@@ -8,6 +8,8 @@ tags:
 # C
 [C Primer Plus(第六版)中文版](https://img.anfulai.cn/bbs/94810/C%20Primer%20Plus(%E7%AC%AC%E5%85%AD%E7%89%88)%E4%B8%AD%E6%96%87%E7%89%88.pdf)
 
+--------------------------------------------------------------
+
 # C++
 [21天学通C++第8版](https://github.com/Arrowes/C-coding/blob/main/C%2B%2B/21%E5%A4%A9%E5%AD%A6%E9%80%9AC%2B%2B%E7%AC%AC8%E7%89%88%20%E9%AB%98%E6%B8%85%E5%AE%8C%E6%95%B4PDF.pdf)
 ## 1.绪论
@@ -60,7 +62,7 @@ cin 可用于从用户那里获取文本输入和数字输入`std::cin >> Variab
 | bool              | true/false               |布尔变量
 | char              | 256个字符值               |存储单字符,如'A'
 | unsigned short int | 0～65535                 |占16位内存=$2^{16}$=65536
-| short int         | –32768～32767             |最高有效位做符号位
+| short int         | –32768～32767             |最高有效位（MSB）做符号位
 | unsigned long int | 0～4294967295             |$2^{32}$
 | long int          | –2147483648～2147483647   |
 | int (16位)         | –32768～32767            |
@@ -71,7 +73,45 @@ cin 可用于从用户那里获取文本输入和数字输入`std::cin >> Variab
 | double            | 2.2e–308～1.8e308         |双精度浮点数
 
 sizeof 确定变量长度（字节）：`sizeof (int)`
+使用列表初始化避免缩窄转换错误：`int anotherNum{ largeNum };`
 关键字 auto 自动推断类型：`auto coinFlippedHeads = true`
+typedef 替换变量类型: `typedef unsigned int MYINT; `
+
+### 常量
+在 C++中，常量类似于变量，只是不能修改。
++ 字面常量：可以是任何类型：布尔型、整型、字符串等
++ 使用关键字 const 将变量声明为常量(最实用): `const double pi = 22.0 / 7;`
++ 使用 constexpr 定义常量表达式: `constexpr double GetPi() {return 22.0 / 7;} `
++ 使用关键字 enum 声明枚举: 指定一组特定的取值，枚举量起始值默认为0
++ ~~使用#define 定义常量：`#define pi 3.14286`, 已被摒弃~~
+
+务必确保变量名阐述了变量的用途。
+务必对变量进行初始化，确保变量包含非随机的确定值；并使用列表初始化来避免缩窄转换错误。
+不要将保留的 C++关键字用作变量名，因为这将导致程序无法通过编译。
+
+## 4.管理数组和字符串
+### 数组
+在 C++中，数组让您能够按顺序将一系列相同类型的数据存储到内存中。
+
+**静态数组：**
+```c
+int myNumbers [5] = {}; //声明一个包含 5 个 int 元素的数组，并将每个元素都初始化为零
+char myCharacters [5];  //定义一个包含 5 个字符的数组
+Num = myNumbers [0];    //取出第一个元素 
+myNumbers [3] = 2023;   //重新赋值
+//Bytes consumed by an array = sizeof(element-type) * Number of Elements 
+//务必初始化数组，否则其元素将包含未知值。使用数组时，务必确保在其边界内。
+
+//在 C++中，可在内存中模拟多维数组(但存储数组的内存是一维的)
+int array [2][3] = {{0, 1, 2}, {3, 4, 5}};  //or {0, 1, 2, 3, 4, 5}
+Num1 = array [0][1]  //取出元素1
+```
+**动态数组 `std::vector`**：
+```c
+#include <vector>
+vector<int> dynArray (3); // dynamic array of int 
+```
+### 字符串
 
 
 
@@ -79,6 +119,7 @@ sizeof 确定变量长度（字节）：`sizeof (int)`
 
 
 
+------------------------------------------------------------------
 
 # Cmake
 [CMake](www.cmake.org) 是一个跨平台的开源构建管理系统，用于自动化应用程序的构建、测试和打包过程。它使用类似于Makefile的文本文件来描述构建过程中所需的所有组件和依赖项，并将其转换为适合各种不同编译器和操作系统的本地构建系统的配置文件。总之，CMake就是一个将多个cpp,hpp文件组合构建为一个大工程的语言。
