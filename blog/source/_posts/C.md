@@ -109,13 +109,24 @@ Num1 = array [0][1]  //取出元素1
 **动态数组 `std::vector`**：
 ```c
 #include <vector>
-vector<int> dynArray (3); // dynamic array of int 
+vector<int> dynArray (3); //这个矢量能动态地调整其长度，以存储更多数据，且无需初始化
 ```
 ### 字符串
-
-
-
-
+C 风格字符串（危险）：
+```c
+std::cout << "Hello World"; 
+//等同于：
+char sayHello[] = {'H', 'e', 'l', 'l', 'o', ' ', 'W', 'o', 'r', 'l', 'd', '\0'};
+std::cout << sayHello
+//空字符‘\0’,也被称为字符串结束字符，告诉编译器字符串到此结束。不算长度
+//如果没有在字符数组末尾添加空字符，可能跨越字符数组的边界,被称为缓冲区溢出
+```
+**C++字符串**：使用 `std::string`:
+使用 C++标准字符串是更高效、更安全的方式。不同于字符数组（C 风格字符串实现），std::string 是动态的
+```c
+#include <string> 
+string greetString ("Hello std::string!");
+```
 
 
 
