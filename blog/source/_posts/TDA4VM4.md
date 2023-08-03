@@ -85,7 +85,7 @@ for result in raw_result:
 ```
 `print(result)` :正常应该输出正确的推理结果，如果数值全都一样(-4.59512)，可能是没有检测到有效的目标或者模型效果太差
 
-# TIDL编译
+# TIDL python编译推理
 得到onnx相关文件后，使用ti提供的工具进行编译和推理，这里依然采用两种方法：[Edge AI Studio](https://dev.ti.com/edgeaistudio/) 和 [edgeai-tidl-tools](https://github.com/TexasInstruments/edgeai-tidl-tools/tree/08_06_00_05)
 
 ## Edge AI Studio
@@ -452,6 +452,14 @@ else : #如果只有一个CPU：使用一个循环顺序地处理每个模型。
 
 由此看出，四组网络结构文件拼接成一个完整的网络，但由于不支持的层被deny, 需要offload到arm端运行，因此在相应的位置被拆分，前期结构设计时需要尽量避免出现该情况。
 
+# TIDL tools c++推理
+TIDL runtime 提供的CPP api解决方案仅支持模型推理，因此仍需在PC上运行Python示例以生成模型工件。
+[edgeai-tidl-tools/examples/osrt_cpp](https://github.com/TexasInstruments/edgeai-tidl-tools/tree/master/examples/osrt_cpp)
+```sh
+export SOC=am68pa
+mkdir build2 && cd build2
+
+```
 
 
 
@@ -495,4 +503,4 @@ else : #如果只有一个CPU：使用一个循环顺序地处理每个模型。
 [TDA4①：SDK, TIDL, OpenVX](https://wangyujie.site/TDA4VM/)
 [TDA4②：环境搭建、模型转换、Demo及Tools](https://wangyujie.site/TDA4VM2/)
 [TDA4③：YOLOX的模型转换与SK板端运行](https://wangyujie.site/TDA4VM3/)
-[TDA4④：部署自定义模型](https://wangyujie.site/TDA4VM4/)
+[TDA4④：部署自定义深度学习模型](https://wangyujie.site/TDA4VM4/)

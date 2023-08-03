@@ -163,12 +163,70 @@ string greetString ("Hello std::string!");
 
 
 ## 6.控制程序流程
+### 条件执行
+`if...else`  条件不为0就被视为true
+`if...else if...else`   
+`switch-case`  条件处理,相比if-else-if结构化程度更高
+```c
+switch(expression)   
+{ //计算 expression 的值，并将其与每个 case 标签进行比较
+case LabelA:   //务必将枚举量用作 case 标签，以提高代码的可读性。
+ DoSomething; 
+ break;  //退出当前代码块
+// And so on... 
+default: 
+ DoStuffWhenExpressionIsNotHandledAbove; 
+ break; 
+}
+```
+`?:` 条件运算符/三目运算符, 相当于紧凑的 if-else 结构
+`(conditional expression evaluated to bool) ? expression1 if true : expression2 
+if false; `
 
-
-
-
-
-
+### 循环执行 
+`goto`
+```c
+SomeFunction() 
+{  //不推荐使用 goto 语句来编写循环
+Start: // Called a label 
+ CodeThatRepeats; 
+ goto Start; 
+} 
+```
+`while` 只要条件为 true，就将反复执行该语句块
+```c
+while(expression) 
+{ 
+ // Expression evaluates to true 
+ StatementBlock; 
+}
+```
+`do...while`
+```c
+do 
+{ 
+ StatementBlock; // executed at least once 
+} while(condition); // ends loop if condition evaluates to false 
+```
+`for`
+```c
+for (初始化语句 executed only once;  //迭代器
+ 条件表达式 executed at the beginning of every loop; 
+ 修改变量 executed at the end of every loop) 
+{ //以上三项都是可选的
+ DoSomething; 
+}
+```
+C++11引入了*基于范围的 for 循环*，让对一系列值（如数组包含的值）进行操作的代码更容易编写和理解。
+```c
+char charArray[] = { 'h', 'e', 'l', 'l', 'o' }; 
+for (auto aChar : charArray) 
+   cout << aChar << ' '; 
+cout << endl;  //h e l l o 
+```
+`continue` 能够跳转到循环开头，跳过循环块中后面的代码;
+`break` 退出循环块，即结束当前循环。
+控制无限循环
 
 ------------------------------------------------------------------
 
