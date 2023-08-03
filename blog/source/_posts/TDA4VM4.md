@@ -461,8 +461,23 @@ mkdir build2 && cd build2
 
 ```
 
+# SK板运行自定义深度学习模型
+通过SD卡配置编译生成的模型：
+> 配置模型文件夹 custom_model 放入/opt/modelzoo文件夹
+>> artifacts：存放编译生成的工件，model-artifacts
+model：原onnx模型，.onnx
+param.yaml：配置文件, 其中需要修改model_path等参数
+dataset.yaml：数据集类别对应文件
 
-
+通过SD卡配置/opt/edgeai-gst-apps/configs/custom_model.yaml，在model参数中索引上面建立的模型文件夹 custom_model
+```sh
+#通过minicom连接串口
+sudo minicom -D /dev/ttyUSB2 -c on
+root #登录
+#运行yolox_s实例
+cd /opt/edgeai-gst-apps/apps_cpp
+./bin/Release/app_edgeai ../configs/custom_model.yaml
+```
 
 
 

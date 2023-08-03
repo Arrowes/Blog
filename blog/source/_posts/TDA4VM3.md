@@ -317,8 +317,8 @@ print(f' Inference Time Per Image : {tt :7.2f} ms  \n DDR BW Per Image        : 
 通过SD卡配置编译生成的模型：
 > 配置模型文件夹yolox_s_studio放入modelzoo文件夹
 >> artifacts：存放编译生成的工件，.bin, .txt
-model：原onnx模型，.onnx, .prototxt
-param.yaml：配置文件
+model：原onnx模型，.onnx, (.prototxt)
+param.yaml：配置文件, 其中需要修改model_path等参数
 dataset.yaml：数据集类别对应文件
 
 通过SD卡配置object_detection.yaml，在model参数中索引上面建立的模型文件夹
