@@ -184,7 +184,7 @@ default:
 if false; `
 
 ### 循环执行 
-`goto`
+`goto`   (避免使用 goto，可防止代码不直观且难以维护。)
 ```c
 SomeFunction() 
 {  //不推荐使用 goto 语句来编写循环
@@ -201,7 +201,7 @@ while(expression)
  StatementBlock; 
 }
 ```
-`do...while`
+`do...while` 循环逻辑至少执行一次时
 ```c
 do 
 { 
@@ -226,7 +226,32 @@ cout << endl;  //h e l l o
 ```
 `continue` 能够跳转到循环开头，跳过循环块中后面的代码;
 `break` 退出循环块，即结束当前循环。
+
 控制无限循环
+```c
+for (;;) // no condition supplied = unending for 
+{ 
+ DoSomethingRepeatedly; 
+ if(expression) 
+ break; // 使用 break 退出无限 for 循环
+} 
+```
+
+## 7.使用函数组织代码
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ------------------------------------------------------------------
 
