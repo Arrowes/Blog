@@ -459,13 +459,14 @@ TIDL runtime 提供的CPP api解决方案仅支持模型推理，因此仍需在
 export SOC=am68pa
 mkdir build2 && cd build2
 
+ongoing....
 ```
 
 # SK板运行自定义深度学习模型
 通过SD卡配置编译生成的模型：
 > 配置模型文件夹 custom_model 放入/opt/modelzoo文件夹
 >> artifacts：存放编译生成的工件，model-artifacts
-model：原onnx模型，.onnx
+model：原onnx模型，.onnx (.prototxt)
 param.yaml：配置文件, 其中需要修改model_path等参数
 dataset.yaml：数据集类别对应文件
 
@@ -476,9 +477,13 @@ sudo minicom -D /dev/ttyUSB2 -c on
 root #登录
 #运行yolox_s实例
 cd /opt/edgeai-gst-apps/apps_cpp
-./bin/Release/app_edgeai ../configs/custom_model.yaml
+./bin/Release/app_edgeai ../configs/seed.yaml
 ```
 
+如果不是常规的OD、SEG等任务，需要高度自定义的话，需要修改SK板 `/opt/edgeai-gst-apps` DEMO相关的源码，主要阅读源码并参考两大文档：
+[Edge AI sample apps &mdash; Processor SDK Linux for SK-TDA4VM Documentation](https://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-edgeai/TDA4VM/08_06_01/exports/docs/common/sample_apps.html)
+[Running Simple demos &mdash; Processor SDK Linux for Edge AI Documentation](https://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-sk-tda4vm/latest/exports/docs/running_simple_demos.html)
+下面对demo源码进行研读：
 
 
 

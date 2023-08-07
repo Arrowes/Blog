@@ -282,7 +282,7 @@ int main()：...
 **lambda 函数**: `[optional parameters](parameter list){ statements; } `
 lambda函数是 C++11 引入的，有助于使用 STL 算法对数据进行排序或处理，可以在需要函数对象的地方使用，用于简化代码和提高可读性。
 
-
+## 8.阐述指针和引用
 
 
 
