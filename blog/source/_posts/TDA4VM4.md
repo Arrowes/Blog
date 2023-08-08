@@ -468,16 +468,17 @@ ongoing....
 >> artifacts：存放编译生成的工件，model-artifacts
 model：原onnx模型，.onnx (.prototxt)
 param.yaml：配置文件, 其中需要修改model_path等参数
-dataset.yaml：数据集类别对应文件
+(dataset.yaml：数据集类别对应文件)
 
-通过SD卡配置/opt/edgeai-gst-apps/configs/custom_model.yaml，在model参数中索引上面建立的模型文件夹 custom_model
+通过SD卡配置/opt/edgeai-gst-apps/configs/custom_model.yaml，在model参数中索引上面建立的模型文件夹 custom_model, 并根据size修改输入输出，分辨率size一定要改好，否则很容易报错
 ```sh
 #通过minicom连接串口
 sudo minicom -D /dev/ttyUSB2 -c on
 root #登录
-#运行yolox_s实例
+#运行自定义实例
 cd /opt/edgeai-gst-apps/apps_cpp
 ./bin/Release/app_edgeai ../configs/seed.yaml
+#Ctrl+C 安全退出
 ```
 
 如果不是常规的OD、SEG等任务，需要高度自定义的话，需要修改SK板 `/opt/edgeai-gst-apps` DEMO相关的源码，主要阅读源码并参考两大文档：
@@ -485,7 +486,9 @@ cd /opt/edgeai-gst-apps/apps_cpp
 [Running Simple demos &mdash; Processor SDK Linux for Edge AI Documentation](https://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-sk-tda4vm/latest/exports/docs/running_simple_demos.html)
 下面对demo源码进行研读：
 
-
+---
+也许可以将tidl-tools放到板子里然后运行? 然后选择正确的平台
+/opt/vision_apps/vx_app_arm_remote_log.out 查arm log的脚本
 
 
 
