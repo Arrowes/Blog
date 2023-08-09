@@ -283,6 +283,36 @@ int main()：...
 lambda函数是 C++11 引入的，有助于使用 STL 算法对数据进行排序或处理，可以在需要函数对象的地方使用，用于简化代码和提高可读性。
 
 ## 8.阐述指针和引用
+C++最大的优点之一是，既可使用它来编写不依赖于机器的高级应用程序，又可使用它来编写与硬件紧密协作的应用程序。能够在字节和比特级调整应用程序的性能。要编写高效地利用系统资源的程序，理解*指针和引用*是必不可少的一步。
+### 指针
+**指针是存储内存地址的变量**，是一种指向内存单元的特殊变量。
+（内存单元地址通常使用十六进制表示法）
+```c
+int* pointsToInt = NULL;   //声明指针并初始化
+//例如int在内存中的地址为0x002EFB34，则占用 0x002EFB34～0x002EFB37
+&pointsToInt      //引用运算符（&）, 也叫地址运算符，用来获取变量的地址。
+
+int* pointsToInt = &age;   //使用指针存储地址(age是int变量)
+int dogsAge = 9; 
+pointsToInt = &dogsAge;    //同一个 int 指针可指向任何 int 变量
+
+++pointsToInt     //将指向下一个int, Address + sizeof(int)
+
+ *pointsToInt              //解除引用运算符（*）,也叫间接运算符, 访问指向的数据
+ cin >> *pointsToInt;      //使用 * 操纵数据
+```
+### 动态内存分配
+使用 new 和 delete 动态地分配和释放内存
+```c
+int* pointToAnInt = new int;  //给整型分配内存（int* Pointer = new int[10]; 为一系列元素分配内存
+delete pointToAnInt;          //释放内存（delete[] Pointer; 
+//如果不释放，会造成内存泄露
+```
+运算符 new 和 delete 分配和释放自由存储区中的内存。自由存储区是一种内存抽象，表现为一个内存池，应用程序可分配（预留）和释放其中的内存。
+
+
+
+
 
 
 
