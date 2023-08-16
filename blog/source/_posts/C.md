@@ -258,7 +258,7 @@ double Area(double radius, double height); // for cylinder
 ```
 数组传递给函数: `void DisplayIntegers(int[] numbers, int Length); `
 
-`&` 按引用传递参数, 让函数修改的变量在其外部（如调用函数）中也可用：
+`&` 按引用传递参数, 让函数修改的变量在其外部（如调用函数）中也可用(详见第八章引用)：
 ```c
 void Area(double radius, double &result) 
 //此时，result是指向调用函数中相应变量的引用，而不是其拷贝
@@ -284,11 +284,12 @@ lambda函数是 C++11 引入的，有助于使用 STL 算法对数据进行排�
 
 ## 8.阐述指针和引用
 C++最大的优点之一是，既可使用它来编写不依赖于机器的高级应用程序，又可使用它来编写与硬件紧密协作的应用程序。能够在字节和比特级调整应用程序的性能。要编写高效地利用系统资源的程序，理解*指针和引用*是必不可少的一步。
-### 指针
+
+### 指针 *
 **指针是存储内存地址的变量**，是一种指向内存单元的特殊变量。
 （内存单元地址通常使用十六进制表示法）
 ```c
-int* pointsToInt = NULL;   //声明指针并初始化
+int* pointsToInt = NULL;   //声明指针并初始化，务必初始化指针变量，否则它将包含垃圾值。
 //例如int在内存中的地址为0x002EFB34，则占用 0x002EFB34～0x002EFB37
 &pointsToInt      //引用运算符（&）, 也叫地址运算符，用来获取变量的地址。
 
@@ -298,11 +299,11 @@ pointsToInt = &dogsAge;    //同一个 int 指针可指向任何 int 变量
 
 ++pointsToInt     //将指向下一个int, Address + sizeof(int)
 
- *pointsToInt              //解除引用运算符（*）,也叫间接运算符, 访问指向的数据
- cin >> *pointsToInt;      //使用 * 操纵数据
+*pointsToInt              //解除引用运算符（*）,也叫间接运算符, 访问指向的数据
+cin >> *pointsToInt;      //使用 * 操纵数据
 ```
-### 动态内存分配
-使用 new 和 delete 动态地分配和释放内存
+**动态内存分配 new delete**
+静态数组的长度是固定的，不能根据应用程序的需求增大或缩小, 因此使用 new 和 delete 动态地分配和释放内存
 ```c
 int* pointToAnInt = new int;  //给整型分配内存（int* Pointer = new int[10]; 为一系列元素分配内存
 delete pointToAnInt;          //释放内存（delete[] Pointer; 
@@ -310,6 +311,42 @@ delete pointToAnInt;          //释放内存（delete[] Pointer;
 ```
 运算符 new 和 delete 分配和释放自由存储区中的内存。自由存储区是一种内存抽象，表现为一个内存池，应用程序可分配（预留）和释放其中的内存。
 
+**将关键字 const 用于指针**
+```c
+int Age=23;
+int* const point = &Age;         //指针包含的地址是常量，不能修改，但可修改指针指向的数据
+const int* point = &Age;         //指针指向的数据为常量，不能修改，但可以修改指针包含的地址，即指针可以指向其他地方
+const int* const point = &Age;   //指针包含的地址以及它指向的值都是常量，不能修改（这种组合最严格）
+//函数参数应声明为最严格的 const 指针
+//**将指针传递给函数**: 指针是一种将内存空间传递给函数的有效方式，其中可包含函数完成其工作所需的数据，也可包含操作结果。
+```
+数组变量是指向第一个元素的指针, 类似于在固定内存范围内发挥作用的指针，因此也可将用于指针的解除引用运算符（*）用于数组
+
+**使用指针相关错误**
++ 内存泄漏：new动态分配的内存没有用delete释放
++ 无效指针：务必确保指针指向了有效的内存单元, 否则使用 * 和 delete 时会崩溃
++ 悬浮指针：使用 delete 释放后，任何有效指针都将无效，很多程序员在初始化指针或释放指针后将其设置为 NULL，并在使用运算符 * 对指针解除引用前检查它是否有效（将其与 NULL 比较）
++ new内存分配失败：大块内存分配请求不一定能成功，失败会引发 `std::bad_alloc` 异常并中断执行
+（`try-catch` 异常处理结构让程序能够向用户指出这一点，再正常退出；或可使用 new 变种 `new(nothrow)`，在内存分配失败时不引发异常，而返回 NULL，让您能够在使用指针前检查其有效性）
+
+### 引用 &
+引用运算符（&）, 也叫地址运算符，用来获取变量的地址。
+引用是变量的别名，只是另一种访问相应变量存储的数据的方式。直接调用，避免将形参复制给形参，减少复制步骤的开销，极大地提高性能
+```c
+int original = 20;
+int& ref = original; //指向相应变量所在的内存单元
+
+//可避免复制步骤的函数
+ReturnType DoSomething(Type& parameter);     //Parameter 不再是 argument 的拷贝，而是它的别名
+ReturnType Result = DoSomething(argument);   //argument 是按引用传递的
+//函数直接使用调用者栈中的数据
+
+const int& constRef = original;  //使禁止通过引用修改它指向的变量的值
+void GetSquare(const int& number, int& result)  //const 引用将参数标识为输入参数
+void GetSquare(const int* const number, int* const result)  //效果同上，但指针不同于引用，可能为 NULL 或无效，因此使用前必须核实它们是有效的
+```
+
+## 9.类和对象
 
 
 
