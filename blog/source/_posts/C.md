@@ -8,6 +8,12 @@ tags:
 # C
 [C Primer Plus(第六版)中文版](https://img.anfulai.cn/bbs/94810/C%20Primer%20Plus(%E7%AC%AC%E5%85%AD%E7%89%88)%E4%B8%AD%E6%96%87%E7%89%88.pdf)
 
+
+
+
+
+
+--------------------------------------------------------------
 --------------------------------------------------------------
 
 # C++
@@ -255,6 +261,7 @@ for (;;) // no condition supplied = unending for
 ```c
 double Area(double radius); // for circle 
 double Area(double radius, double height); // for cylinder
+//根据不同的输入使用不同的函数，实现不同的功能
 ```
 数组传递给函数: `void DisplayIntegers(int[] numbers, int Length); `
 
@@ -347,10 +354,238 @@ void GetSquare(const int* const number, int* const result)  //效果同上，但
 ```
 
 ## 9.类和对象
+<u>现在开始面向对象</u>
 
+### 类和对象 
+将一系列数据和函数整合在一起的结构就是**类**,让您能够创建自己的数据类型，并在其中封装属性和使用它们的函数。
+(*封装指的是将数据以及使用它们的函数进行逻辑编组，这是面向对象编程的重要特征*)
 
+```c
+//声明类, 使用关键字class
+class Human
+{
+   string name;
+   string age;
+   void Talk()
+   ...
+}；         // ;结尾
+```
 
+在程序执行阶段，**对象**是类的化身。要使用类的功能，通常需要创建其实例—对象，并通过对象访问成员方法和属性。
 
+```c
+//创建 Human 的对象
+Human Man;  //Man是Human类的对象，是运行阶段的化身
+
+//可使用 new 为 Human 对象动态地分配内存
+Human* Woman = new Human(); // dynamically allocated Human 
+delete Woman; // de-allocating memory 
+```
+
++ 句点运算符 (.) 用于访问对象的属性
+   ```c
+   Man.age= "23";
+   Man.Talk();
+
+   Human* Woman = new Human(); 
+   (*Woman).Talk();
+   ```
+
++ 指针运算符（->）访问成员
+   ```c
+   Human* Woman = new Human(); 
+   Woman->age = "22";
+   Woman->Talk();
+   delete Woman;
+   ```
+例：
+```c
+#include <iostream>
+#include <string>
+using namespace std;
+
+class Human
+{
+public:
+   string name;
+   int age;
+   void Talk()
+   { cout << "I am " + name <<", " << age <<   " years old" << endl;
+   }
+};
+
+int main()
+{
+   Human Man;
+   Man.name = "wyj";
+   Man.age = 23;
+
+   Human Woman;
+   Woman.name = "girl";
+   Woman.age = 22;
+
+   Man.Talk();
+   Woman.Talk();
+}
+
+//output:
+I am wyj, 23 years old
+I am girl, 22 years old
+```
+
+### 关键字 public 和 private
+在面向对象编程语言中，抽象是一个非常重要的概念, 作为类的设计者，使用 C++关键字 public 和 private 来指定哪些部分可从外部（如 main( )）访问，哪些部分不能。
+private私有属性和方法，访问和修改的唯一的途径就是通过类的public公有方法，这个以编写类的程序员认为的合适方式暴露。
+```c
+class Human 
+{ 
+private:
+   int age; 
+
+public: 
+   void SetAge(int humansAge) 
+   { 
+      if (humansAge > 0) 
+      age = humansAge; 
+   } 
+
+   int GetAge()
+   {
+      if(age > 30)
+         return(age - 2)   //隐藏实际数据
+      else
+         return age;
+   }
+}; 
+```
+
+### 构造函数
+构造函数是一种特殊的函数，它与类同名且不返回任何值，在实例化对象时被调用。
+
+**声明和实现**
+```c
+//在类声明中实现
+class Human 
+{ 
+public: 
+   Human()  
+   { 
+   // constructor code here 
+   } 
+}；
+
+//在类声明外实现
+class Human 
+{ 
+public: 
+ Human(); // constructor declaration 
+}; 
+// constructor implementation (definition) 
+Human::Human() //::被称为作用域解析运算符。例如，Human::dateOfBirth 指的是在 Human 类中声明的变量 dateOfBirth，而::dateOfBirth 表示全局作用域中的变量 dateOfBirth
+{ 
+ // constructor code here 
+}
+```
+
+**构造函数总是在创建对象时被调用**，这让构造函数是将类成员变量（int、指针等）**初始化为选定值**的理想场所。
+与函数一样，构造函数也可重载，创建对象时提供不同的参数会调用不同的构造函数，（*可在不提供参数的情况下调用的构造函数被称为默认构造函数*）
+```c
+class Human 
+{ 
+private: 
+ string name; 
+ int age; 
+
+public: 
+ Human(string humansName, int humansAge = 25) 
+ { 
+ name = humansName; 
+ age = humansAge; 
+ cout << "Overloaded constructor creates " << name; 
+ cout << " of age " << age << endl; 
+ } 
+ // ... other members 
+}; 
+
+//实例化这个类时，可使用下面的语法：
+Human adam("Adam"); // adam.age is assigned a default value 25 
+Human eve("Eve", 18); // eve.age is assigned 18 as specified
+```
+另一种初始化成员的方式是使用**初始化列表**, 冒号后面列出了各个成员变量及其初始值, 可以将上下代码对比着看：
+```c
+class Human 
+{ 
+private: 
+ string name; 
+ int age; 
+
+public: 
+ // two parameters to initialize members age and name 
+ Human(string humansName, int humansAge) 
+ :name(humansName), age(humansAge) 
+ { 
+ cout << "Constructed a human called " << name; 
+ cout << ", " << age << " years old" << endl; 
+ } 
+// ... other class members 
+};
+```
+
+### 析构函数
+也是一种特殊的函数，与类同名，但前面有一个腭化符号（～）
+构造函数在实例化对象时被调用，而析构函数在**对象销毁时**自动被调用。
+
+**声明和实现**
+```c
+//在类声明中实现（定义）
+class Human 
+{ 
+public: 
+ ~Human() 
+ { 
+ // destructor code here 
+ } 
+}; 
+
+//在类声明外定义
+class Human 
+{ 
+public: 
+ ~Human(); // destructor declaration 
+}; 
+
+Human::~Human() 
+{ 
+ // destructor code here 
+} 
+```
+每当对象不再在作用域内或通过 delete 被删除进而被销毁时，都将调用析构函数。这使得析构函数成为*重置*变量以及*释放*动态分配的内存和其他资源的理想场所
+如：某个类中，在构造函数中new, 在析构函数中delete, 使该类不仅对程序员隐藏了内存管理实现，还正确地释放了分配的内存。
+（*析构函数不能重载*）
+
+### 复制构造函数
+浅复制的问题：*复制类的对象时*，将复制其指针成员，但不复制指针指向的缓冲区，其结果是两个对象指向同一块动态分配的内存。销毁其中一个对象时，delete[]释放这个内存块，导致另一个对象存储的指针拷贝无效。这种复制被称为浅复制，会威胁程序的稳定性
+
+因此使用复制构造函数确保*深复制*，这是一个重载的构造函数，每当**对象被复制时**，编译器都将调用复制构造函数。
+```c
+class MyString 
+{ 
+   private:...
+   public:
+   MyString(const char* initString)
+   ...
+   MyString(const MyString& copySource) // copy constructor 
+   {  //使用 const，可确保复制构造函数不会修改指向的源对象
+   // Copy constructor implementation code 
+   }
+}; 
+
+//以确保在main中函数调用时进行深复制
+MyString sayHello("Hello world！");
+UseMyString(sayHello);  //自动调用复制构造函数
+```
+(*类包含原始指针成员（char\* 等）时，务必编写复制构造函数和复制赋值运算符。
+务必将类成员声明为 std::string 和智能指针类（而不是原始指针），因为它们实现了复制构造函数，可减少工作量。*)
 
 
 
@@ -362,6 +597,7 @@ void GetSquare(const int* const number, int* const result)  //效果同上，但
 
 
 ------------------------------------------------------------------
+------------------------------------------------------------------
 
 # Cmake
 [CMake](www.cmake.org) 是一个跨平台的开源构建管理系统，用于自动化应用程序的构建、测试和打包过程。它使用类似于Makefile的文本文件来描述构建过程中所需的所有组件和依赖项，并将其转换为适合各种不同编译器和操作系统的本地构建系统的配置文件。总之，CMake就是一个将多个cpp,hpp文件组合构建为一个大工程的语言。
@@ -370,6 +606,7 @@ void GetSquare(const int* const number, int* const result)  //效果同上，但
 [cmake-examples-Chinese](https://github.com/SFUMECJF/cmake-examples-Chinese) 例程
 
 ## [Cmake 实践](https://gavinliu6.github.io/CMake-Practice-zh-CN/#/)
+
 ### t1 [创建Hello world](https://github.com/gavinliu6/CMake-Practice-zh-CN/blob/master/hello-world.md)
 建立main.c与CMakeLists.txt并编译（需要为每一个子目录建立一个CMakeLists.txt）
 ```sh

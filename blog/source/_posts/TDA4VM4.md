@@ -520,8 +520,9 @@ cd /opt/edgeai-gst-apps/apps_cpp
 
 
 ---
-[Efficient object detection using Yolov5 and TDA4x processors | Video | TI.com](https://www.ti.com/video/6286792047001)
-[4. Deep learning models &mdash; Processor SDK Linux for SK-TDA4VM Documentation](https://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-edgeai/TDA4VM/08_06_01/exports/docs/common/inference_models.html)
+YOLO-pose实例：[Practicing Yoga with AI: Human Pose Estimation on the TDA4VM](https://www.hackster.io/whitney-knitter/practicing-yoga-with-ai-human-pose-estimation-on-the-tda4vm-fe2549?auth_token=68e0af8f809985238fdb2b7554c48a46)
+官方视频：[Efficient object detection using Yolov5 and TDA4x processors | Video | TI.com](https://www.ti.com/video/6286792047001)
+官方文档：[4. Deep learning models &mdash; Processor SDK Linux for SK-TDA4VM Documentation](https://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-edgeai/TDA4VM/08_06_01/exports/docs/common/inference_models.html)
 > TDA4系列文章：
 [TDA4①：SDK, TIDL, OpenVX](https://wangyujie.site/TDA4VM/)
 [TDA4②：环境搭建、模型转换、Demo及Tools](https://wangyujie.site/TDA4VM2/)
