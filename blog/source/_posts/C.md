@@ -488,7 +488,7 @@ Human::Human() //::被称为作用域解析运算符。例如，Human::dateOfBir
 ```
 
 **构造函数总是在创建对象时被调用**，这让构造函数是将类成员变量（int、指针等）**初始化为选定值**的理想场所。
-与函数一样，构造函数也可重载，创建对象时提供不同的参数会调用不同的构造函数，（*可在不提供参数的情况下调用的构造函数被称为默认构造函数*）
+与函数一样，构造函数也可重载，创建对象时提供不同的参数会调用不同的构造函数，（*可在不提供参数的情况下调用的构造函数被称为**默认构造函数***）
 ```c
 class Human 
 { 
@@ -586,6 +586,99 @@ UseMyString(sayHello);  //自动调用复制构造函数
 ```
 (*类包含原始指针成员（char\* 等）时，务必编写复制构造函数和复制赋值运算符。
 务必将类成员声明为 std::string 和智能指针类（而不是原始指针），因为它们实现了复制构造函数，可减少工作量。*)
+
+移动构造函数 `MyString(MyString&& moveSource) `：编译器将自动使用它来“移动”临时资源，从而避免深复制
+### 构造函数和析构函数的其他用途
+禁止类对象被复制：声明一个私有的复制构造函数 `private: President(const President&);`
+
+只能有一个实例的单例类：使用关键字 `static`
+```c
+class President
+{
+    private:
+        President() {};  // 私有的默认构造函数，防止外部创建实例
+        President(const President&);  // 私有的拷贝构造函数，防止对象拷贝
+        const President& operator=(const President);  // 私有的赋值运算符重载，防止对象赋值
+
+        string name;  // 私有成员变量，用于存储总统的名字
+
+    public:
+        static President& GetInstance()  // 静态方法，用于获取唯一的实例
+        {
+            static President onlyInstance;  // 在首次调用时创建唯一实例
+            return onlyInstance;
+        }
+
+        string GetName()  // 公有方法，用于获取总统的名字
+        { return name; }
+
+        void SetName(string InputName)  // 公有方法，用于设置总统的名字
+        { name = InputName; }
+};
+
+int main()
+{
+    President& onlyPresident = President::GetInstance();  // 获取 President 实例的引用
+    onlyPresident.SetName("Abraham Lincoln");  // 设置总统名字
+    cout << "President is: " << President::GetInstance().GetName() << endl;  // 输出总统名字
+    return 0;
+}
+```
+禁止在栈中实例化的类(栈空间通常有限): 将析构函数声明为私有的
+```c
+class MonsterDB 
+{ 
+private: 
+ ~MonsterDB(); // private destructor 
+ //... members that consume a huge amount of data 
+}; 
+通过声明私有的析构函数，可禁止像下面这样创建实例：
+int main() 
+{ 
+ MonsterDB myDatabase; // compile error 
+ // … more code 
+ return 0; 
+} 
+```
+使用构造函数进行类型转换：
+```c
+class Human 
+{ 
+ int age;  // 私有成员变量 age，表示人的年龄
+public: 
+ Human(int humansAge): age(humansAge) {}  // 构造函数，接受人的年龄作为参数并初始化成员变量 age
+}; 
+
+// Function that takes a Human as a parameter 
+void DoSomething(Human person) 
+{ 
+ cout << "Human sent did something" << endl;  // 输出信息
+ return;  // 返回
+}
+
+int main()
+{
+ Human kid(10);  //利用构造函数显式转换：将整数 10 转换为 Human 类型对象
+ //在这里，通过构造函数 Human(int humansAge) 创建了一个名为 kid 的 Human 类型对象，传递整数值 10 作为构造函数的参数。
+ //这个构造函数被用来创建 Human 类型对象，并将整数 10 转换为 kid 的一个属性，即年龄
+ DoSomething(kid);  // 调用 DoSomething 函数，将 kid 作为参数传递
+ return 0;
+
+ //隐式转换:
+ Human anotherKid = 11; // int converted to Human 
+ DoSomething(10); // 10 converted to Human! 
+}
+ //使用关键字 explicit 可禁止隐式转换，使上面两行编译失败:
+ explicit Human(int humansAge): age(humansAge) {}
+```
+
+
+
+
+
+
+
+
 
 
 

@@ -164,6 +164,7 @@ models = ['custom_model_name']  #修改对应的模型名称
 
 ### onnxrt_ep.py详解
 [edgeai-tidl-tools/examples/osrt_python/ort/onnxrt_ep.py](https://github.com/TexasInstruments/edgeai-tidl-tools/blob/08_06_00_05/examples/osrt_python/ort/onnxrt_ep.py) 是主要运行文件，也是修改的最多的部分，因此梳理此处代码有助于理解*tidl编译和运行的全流程*。
+其中容易出问题的是预处理部分，image size不对很容易出问题。
 ```py
 import *
 

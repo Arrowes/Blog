@@ -8,7 +8,7 @@ tags:
 视频：[PyTorch深度学习快速入门教程](https://www.bilibili.com/video/BV1hE411t7RN/)
 
 # Anaconda
-```
+```sh
 conda create -n pytorch python=3.8  #Anaconda创建环境
 conda update python, pip install --upgrade pip #更新
 conda activate pytorch  #激活环境
@@ -148,10 +148,9 @@ drive.mount('/content/drive')
 
 **查GPU**
 ```py
-import torch
-torch.cuda.is_available() #返回True说明GPU可以被使用
-torch.__version__ #查pytorch
+python -c "import torch;print(torch.cuda.is_available())"   #返回True说明GPU可以被使用
 
+torch.__version__ #查pytorch版本
 nvidia-smi #查GPU CUDA
 python –-version #查python版本
 conda install python=3.8  #升级(覆盖安装)python
