@@ -67,6 +67,9 @@ Ctrl + / 批量注释
 调试时使用Console的python调试台，print指令
 ![图 1](https://raw.sevencdn.com/Arrowes/Arrowes-Blogbackup/main/images/Pytorch1.png) ![图 2](https://raw.sevencdn.com/Arrowes/Arrowes-Blogbackup/main/images/Pytorch2.png)  
 
+
+
+
 ## Jupyter notebook
 激活pytorch环境后: ``conda install nb_conda``
 打开 jupyter notebook: ``New > 选择环境：Python [conda env:pytorch]``
