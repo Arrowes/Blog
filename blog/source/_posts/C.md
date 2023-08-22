@@ -672,11 +672,46 @@ int main()
  explicit Human(int humansAge): age(humansAge) {}
 ```
 
+**this 指针** :  在类中，关键字 this 包含当前对象的地址,当您在类成员方法中调用其他成员方法时，编译器将隐式地传递 this 指针—函数调用中不可见的参数 
+`Talk("Bla bla"); // same as Talk(this, "Bla Bla") `
 
+**sizeof( )** ： 指出类声明中所有数据属性占用的总内存量，单位为字节 （结果受字填充word padding和其他因素的影响）
 
+关键字 struct 来自 C 语言，在 C++编译器看来，它与类及其相似，差别在于程序员未指定时，默认的访问限定符（public 和 private）不同
+```c
+//C++ Class
+class Human
+{
+private:
+   int age;
+   bool gender;
+   MyString name;
 
+public:
+   Human(const MyString& InputName, int InputAge, bool InputGender)
+      : name(InputName), age (InputAge), gender(InputGender) {}
 
+   int GetAge ()
+   { return age; }
+};
 
+//C struct, 除非指定了，否则结构中的成员默认为公有的, 另外，除非指定了，否则结构以公有方式继承基结构
+struct Human 
+{ 
+ Human(const MyString& humansName, int humansAge, bool humansGender) 
+ : name(humansName), age (humansAge), Gender(humansGender) {} 
+
+ int GetAge () 
+ { 
+ return age; 
+ } 
+
+private: 
+ int age; 
+ bool gender; 
+ MyString name; 
+};
+```
 
 
 

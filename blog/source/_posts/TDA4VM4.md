@@ -31,7 +31,7 @@ TI文档中对yolo、mobilenet、resnet等主流深度学习模型支持十分�
 使用`torch.onnx.export(model, input, "XXX.onnx", verbose=False, export_params=True, opset_version=13)`得到 `.onnx`；
 > 注意要确保加载的模型是一个完整的PyTorch模型对象，而不是一个包含模型权重的字典, 否则会报错`'dict' object has no attribute 'modules'`；
 因此需要在项目保存`.pth`模型文件时设置同时*保存网络结构*，或者在项目代码中*导入完整模型*后使用`torch.onnx.export`
-opset_version只支持到13，导出默认14会报错
+**opset_version只支持到13**，导出默认14会报错
 
 使用ONNX Runtime 运行推理，验证模型转换的正确性
 ```py
@@ -93,7 +93,7 @@ for result in raw_result:
 
 > **Debug:**
 `[ONNXRuntimeError] : 6 ... `: compile_options中设置deny_list，剔除不支持的层，如`'Slice, Resize'`，TIDL支持的算子见：[supported_ops_rts_versions](https://github.com/TexasInstruments/edgeai-tidl-tools/blob/master/docs/supported_ops_rts_versions.md)
-
+resize支持2*操作
 打包下载编译生成的工件：
 ```py
 #Pack.ipynb
@@ -119,7 +119,7 @@ FileLink(zip_path) # 生成下载链接
 环境搭建见：[TDA4②](https://wangyujie.site/TDA4VM2/#EdgeAI-TIDL-Tools)
 
 研读 [edgeai-tidl-tools/examples/osrt_python/ort/onnxrt_ep.py](https://github.com/TexasInstruments/edgeai-tidl-tools/blob/08_06_00_05/examples/osrt_python/ort/onnxrt_ep.py):
-进入搭建好的环境：（例）`pyenv activate benchmark`
+进入搭建好的环境：（例）`pyenv activate benchmark` 或 `conda activate tidl`
 运行：`./scripts/run_python_examples.sh`
 下面基于例程进行基本的修改以编译运行自定义模型, 至少需要修改四个文件：
 ```sh
@@ -165,6 +165,10 @@ models = ['custom_model_name']  #修改对应的模型名称
 ### onnxrt_ep.py详解
 [edgeai-tidl-tools/examples/osrt_python/ort/onnxrt_ep.py](https://github.com/TexasInstruments/edgeai-tidl-tools/blob/08_06_00_05/examples/osrt_python/ort/onnxrt_ep.py) 是主要运行文件，也是修改的最多的部分，因此梳理此处代码有助于理解*tidl编译和运行的全流程*。
 其中容易出问题的是预处理部分，image size不对很容易出问题。
+
+<details>
+<summary>onnxrt_ep.py code</summary>
+
 ```py
 import *
 
@@ -371,7 +375,7 @@ def join_one(nthreads): # 定义一个函数来加入一个线程
     return nthreads - 1 # 返回线程数减1
 
 def spawn_one(models, idx, nthreads):   # 定义一个函数来创建并启动一个线程
-     # 创建一个新的进程，目标函数是 run_model，参数是 models 和 idx
+    # 创建一个新的进程，目标函数是 run_model，参数是 models 和 idx
     p = multiprocessing.Process(target=run_model, args=(models,idx,))
     p.start()   # 启动进程
     return idx + 1, nthreads + 1    # 返回新的 idx 和 nthreads
@@ -390,6 +394,7 @@ else : #如果只有一个CPU：使用一个循环顺序地处理每个模型。
     for mIdx, model in enumerate(models):
         run_model(model, mIdx)
 ```
+</details>
 
 ## model-artifacts
 分析编译深度学习模型后生成的文件：
@@ -459,6 +464,8 @@ TIDL runtime 提供的CPP api解决方案仅支持模型推理，因此仍需在
 ```sh
 export SOC=am68pa
 mkdir build2 && cd build2
+cmake -DFLAG1=val -DFLAG2=val ../../../examples
+
 
 ongoing....
 ```

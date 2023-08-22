@@ -41,7 +41,7 @@ tar -xf []          #解压
 vi []               #命令行进入文件，按i进入插入模式，按Esc返回命令模式并输入:wq 保存退出, :q! 不保存退出
 gedit []            #图形界面进入文件直接编辑
 whereis []          #查找
-find / -name "[]"   #查找
+find / -name "[]"   #查找 find *XXX*
 
 export 变量名=值     #设置或更新环境变量的值
 #配置永久环境变量更方便，sudo gedit /etc/profile，末尾加入如上代码，然后source /etc/profile加载立即生效
@@ -88,6 +88,9 @@ vim clash.desktop
 sudo mv clash.desktop /usr/share/applications/
 ```
 最终就能实现通过图标打开
+
+**使用手机或其他USB设备提供网络**
+VirtualBox设置 > USB设备 > 添加对应的USB口 > 重新启动虚拟机 > 右上角网络 > 连接USB以太网
 
 ## VScode
 vscode远程访问：1.安装remote插件 2.连接服务器``ssh ywang85@she1-w50502`` 3.connect，打开terminal
