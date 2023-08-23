@@ -92,8 +92,9 @@ for result in raw_result:
 参考yolox的编译过程：[YOLOX的模型转换与SK板端运行](https://wangyujie.site/TDA4VM3/#b-%E4%BD%BF%E7%94%A8TIDL-Tools%EF%BC%88by-Edge-AI-Studio%EF%BC%89)，修改数据预处理与compile_options部分，最后重写画框部分（optional）
 
 > **Debug:**
-`[ONNXRuntimeError] : 6 ... `: compile_options中设置deny_list，剔除不支持的层，如`'Slice, Resize'`，TIDL支持的算子见：[supported_ops_rts_versions](https://github.com/TexasInstruments/edgeai-tidl-tools/blob/master/docs/supported_ops_rts_versions.md)
-resize支持2*操作
+`[ONNXRuntimeError] : 6 ... `: compile_options中设置deny_list，剔除不支持的层，如`'Slice, Resize'`，TIDL支持的算子见：[supported_ops_rts_versions](https://github.com/TexasInstruments/edgeai-tidl-tools/blob/master/docs/supported_ops_rts_versions.md)    (resize支持2*操作)
+compile_options中要注释掉object_detection的配置
+
 打包下载编译生成的工件：
 ```py
 #Pack.ipynb
@@ -164,13 +165,29 @@ models = ['custom_model_name']  #修改对应的模型名称
 
 ### onnxrt_ep.py详解
 [edgeai-tidl-tools/examples/osrt_python/ort/onnxrt_ep.py](https://github.com/TexasInstruments/edgeai-tidl-tools/blob/08_06_00_05/examples/osrt_python/ort/onnxrt_ep.py) 是主要运行文件，也是修改的最多的部分，因此梳理此处代码有助于理解*tidl编译和运行的全流程*。
+> **Debug**:
 其中容易出问题的是预处理部分，image size不对很容易出问题。
+替换的某些测试图片读不进去导致报错，~~原理未知~~ 权限问题，sudo nautilus 右键属性更改读写权限
 
 <details>
 <summary>onnxrt_ep.py code</summary>
 
 ```py
-import *
+import onnxruntime as rt
+import time
+import os
+import sys
+import numpy as np
+import PIL
+from PIL import Image, ImageFont, ImageDraw, ImageEnhance
+import argparse
+import re
+import multiprocessing
+import platform
+
+import cv2
+import torchvision
+from postprogress import *
 
 # directory reach, 获取当前目录和父目录
 current = os.path.dirname(os.path.realpath(__file__))
@@ -395,6 +412,7 @@ else : #如果只有一个CPU：使用一个循环顺序地处理每个模型。
         run_model(model, mIdx)
 ```
 </details>
+
 
 ## model-artifacts
 分析编译深度学习模型后生成的文件：

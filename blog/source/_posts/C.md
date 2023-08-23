@@ -711,7 +711,43 @@ private:
  bool gender; 
  MyString name; 
 };
+
+//结构 Human 与类 Human 很像；结构的实例化与类的实例化也很像：
+Human firstMan("Adam", 25, true); // an instance of struct Human
 ```
+
+**声明友元**： 使用关键字 friend ，从外部访问类的私有数据成员和方法
+```c
+private: 
+   friend void DisplayAge(const Human& person); //指出DisplayAge( )是 Human 类的友元，能够访问Human类的私有数据成员
+   //friend class Utility; //指出 Utility 类是 Human 类的友元
+   ...
+
+void DisplayAge(const Human& person) 
+   { 
+   cout << person.age << endl; 
+   } 
+```
+
+**共用体**：使用关键字 union声明，是一种特殊的类，每次只有一个非静态数据成员处于活动状态。在结构中，常使用共用体来模拟复杂的数据类型
+```c
+union UnionName 
+{ 
+ Type1 member1; 
+ Type2 member2; 
+…
+};
+//实例化并使用共用体：
+UnionName unionObject; 
+unionObject.member2 = value; // choose member2 as the active member
+```
+
+
+
+
+
+
+
 
 
 
