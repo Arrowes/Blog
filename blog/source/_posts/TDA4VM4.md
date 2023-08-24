@@ -85,8 +85,86 @@ for result in raw_result:
 ```
 `print(result)` :正常应该输出正确的推理结果，如果数值全都一样(-4.59512)，可能是没有检测到有效的目标或者模型效果太差
 
-# TIDL python编译推理
-得到onnx相关文件后，使用ti提供的工具进行编译和推理，这里依然采用两种方法：[Edge AI Studio](https://dev.ti.com/edgeaistudio/) 和 [edgeai-tidl-tools](https://github.com/TexasInstruments/edgeai-tidl-tools/tree/08_06_00_05)
+# TIDL 编译转换
+得到onnx相关文件后，使用ti提供的工具进行编译和推理，这里采用三种方法：[TIDL Importer](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/06_01_01_12/exports/docs/tidl_j7_01_00_01_00/ti_dl/docs/user_guide_html/md_tidl_model_import.html),  [Edge AI Studio](https://dev.ti.com/edgeaistudio/) 和 [edgeai-tidl-tools](https://github.com/TexasInstruments/edgeai-tidl-tools/tree/08_06_00_05)
+
+## TIDL Importer（failed 进行中）
+TIDL Importer 是RTOS SDK中提供的导入工具，提供了很多例程
+1. 模型文件配置：拷贝 .onnx, .prototxt 文件至/ti_dl/test/testvecs/models/public/onnx/，.prototxt中改in_width&height，根据情况改nms_threshold: 0.4，confidence_threshold: 0.4
+2. 编写转换配置文件：在/testvecs/config/import/public/onnx下新建（或复制参考目录下yolov3例程）**tidl_import_XXX.txt**，参数配置见[文档](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/06_01_01_12/exports/docs/tidl_j7_01_00_01_00/ti_dl/docs/user_guide_html/md_tidl_model_import.html), 元架构类型见 [Object detection meta architectures](https://github.com/TexasInstruments/edgeai-tidl-tools/blob/master/docs/tidl_fsg_od_meta_arch.md)
+
+> 问题：1.自定义的模型，没有模板可以参考，如何生成prototxt?
+2.转换配置文件中，非OD任务，mateArchType如何选择？
+3.TIDL importer 貌似只能转换完全支持的网络结构，不像tidl tools能将 slice 和 resize 配置为 deny
+
+
+*转换配置文件tidl_import_yolox_s.txt*
+```sh
+modelType       = 2     #模型类型，0: Caffe, 1: TensorFlow, 2: ONNX, 3: tfLite
+numParamBits    = 8     #模型参数的位数，Bit depth for model parameters like Kernel, Bias etc.
+numFeatureBits  = 8     #Bit depth for Layer activation
+quantizationStyle = 3   #量化方法，Quantization method. 2: Linear Mode. 3: Power of 2 scales（2的幂次）
+inputNetFile    = "../../test/testvecs/models/public/onnx/yolox-s-ti-lite.onnx" #Net definition from Training frames work
+outputNetFile   = "../../test/testvecs/config/tidl_models/onnx/yolo/tidl_net_yolox_s.bin"   #Output TIDL model with Net and Parameters
+outputParamsFile = "../../test/testvecs/config/tidl_models/onnx/yolo/tidl_io_yolox_s_"  #Input and output buffer descriptor file for TIDL ivision interface
+inDataNorm      = 1     #1 Enable / 0 Disable Normalization on input tensor.
+inMean          = 0 0 0 #Mean value needs to be subtracted for each channel of all input tensors
+inScale         = 1.0 1.0 1.0   #Scale value needs to be multiplied after means subtract for each channel of all input tensors，yolov3是0.003921568627 0.003921568627 0.003921568627
+inDataFormat    = 1     #Input tensor color format. 0: BGR planar, 1: RGB planar
+inWidth         = 1024  #each input tensors Width (可以在.prototxt文件中查找到)
+inHeight        = 512   #each input tensors Height
+inNumChannels   = 3     #each input tensors Number of channels
+numFrames       = 1     #Number of input tensors to be processed from the input file
+inData          =   "../../test/testvecs/config/detection_list.txt" #Input tensors File for Reading
+perfSimConfig   = ../../test/testvecs/config/import/device_config.cfg   #Network Compiler Configuration file
+inElementType   = 0     #Format for each input feature, 0 : 8bit Unsigned, 1 : 8bit Signed
+metaArchType    = 6     #网络使用的元架构类型，Meta Architecture used by the network，ssd mobilenetv2 = 3, yolov3 = 4, efficientdet tflite = 5, yolov5 yolox = 6
+metaLayersNamesList =  "../../test/models/pubilc/onnx/yolox_s_ti_lite.prototxt" #架构配置文件，Configuration files describing the details of Meta Arch
+postProcType    = 2     #后处理，Post processing on output tensor. 0 : Disable, 1- Classification top 1 and 5 accuracy, 2 – Draw bounding box for OD, 3 - Pixel level color blending
+```
+
+3. 模型导入
+使用TIDL import tool，得到可执行文件 ``.bin``
+```sh
+cd ${TIDL_INSTALL_PATH}/ti_dl/utils/tidlModelImport
+./out/tidl_model_import.out ${TIDL_INSTALL_PATH}/ti_dl/test/testvecs/config/import/public/onnx/tidl_import_yolox_s.txt
+#successful Memory allocation
+#../../test/testvecs/config/tidl_models/onnx/生成的文件分析：
+tidl_net_yolox_s.bin        #Compiled network file 网络模型数据
+tidl_io_yolox_s_1.bin       #Compiled I/O file 网络输入配置文件
+tidl_net_yolox_s.bin.svg    #tidlModelGraphviz tool生成的网络图
+tidl_out.png, tidl_out.txt  #执行的目标检测测试结果，与第三步TIDL运行效果一致 txt:[class, source, confidence, Lower left point(x,y), upper right point(x,y) ]
+
+#Debug，本来使用官方的yolox_s.pth转成onnx后导入，发现报错：
+Step != 1 is NOT supported for Slice Operator -- /backbone/backbone/stem/Slice_3 
+#因为"the slice operations in Focus layer are not embedded friendly"，因此ti提供yolox-s-ti-lite，优化后的才能直接导入
+```
+
+4. TIDL运行
+```sh
+#在文件ti_dl/test/testvecs/config/config_list.txt顶部加入:
+1 testvecs/config/infer/public/onnx/tidl_infer_yolox.txt
+0
+
+#新建tidl_infer_yolox.txt:
+inFileFormat    = 2
+numFrames       = 1
+netBinFile      = "testvecs/config/tidl_models/onnx/yolo/tidl_net_yolox_s.bin"
+ioConfigFile    = "testvecs/config/tidl_models/onnx/yolo/tidl_io_yolox_s_1.bin"
+inData  =   testvecs/config/detection_list.txt
+outData =   testvecs/output/tidl_yolox_od.bin
+inResizeMode    = 0
+debugTraceLevel = 0
+writeTraceLevel = 0
+postProcType    = 2
+
+#运行，结果在ti_dl/test/testvecs/output/
+cd ${TIDL_INSTALL_PATH}/ti_dl/test
+./PC_dsp_test_dl_algo.out
+```
+
+
+
 
 ## Edge AI Studio
 参考yolox的编译过程：[YOLOX的模型转换与SK板端运行](https://wangyujie.site/TDA4VM3/#b-%E4%BD%BF%E7%94%A8TIDL-Tools%EF%BC%88by-Edge-AI-Studio%EF%BC%89)，修改数据预处理与compile_options部分，最后重写画框部分（optional）
