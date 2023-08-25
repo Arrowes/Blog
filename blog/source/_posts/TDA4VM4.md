@@ -28,10 +28,12 @@ TI文档中对yolo、mobilenet、resnet等主流深度学习模型支持十分�
 除了上述的第二步，也可以使用edgeai-tidl-tools。但是需要手动编辑param.yaml文件，以使其与edgeai-benchmark生成的文件相匹配。
 
 # ONNX模型转换及推理
-使用`torch.onnx.export(model, input, "XXX.onnx", verbose=False, export_params=True, opset_version=13)`得到 `.onnx`；
+~~使用`torch.onnx.export(model, input, "XXX.onnx", verbose=False, export_params=True, opset_version=13)`得到 `.onnx`；~~
+使用`torch.onnx.export(model, input, "XXX.onnx", verbose=False, export_params=True, opset_version=11)`得到 `.onnx`；
 > 注意要确保加载的模型是一个完整的PyTorch模型对象，而不是一个包含模型权重的字典, 否则会报错`'dict' object has no attribute 'modules'`；
 因此需要在项目保存`.pth`模型文件时设置同时*保存网络结构*，或者在项目代码中*导入完整模型*后使用`torch.onnx.export`
 **opset_version只支持到13**，导出默认14会报错
+opset_version为13时不支持resize, 现改为**11**
 
 使用ONNX Runtime 运行推理，验证模型转换的正确性
 ```py
@@ -86,10 +88,39 @@ for result in raw_result:
 `print(result)` :正常应该输出正确的推理结果，如果数值全都一样(-4.59512)，可能是没有检测到有效的目标或者模型效果太差
 
 # TIDL 编译转换
-得到onnx相关文件后，使用ti提供的工具进行编译和推理，这里采用三种方法：[TIDL Importer](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/06_01_01_12/exports/docs/tidl_j7_01_00_01_00/ti_dl/docs/user_guide_html/md_tidl_model_import.html),  [Edge AI Studio](https://dev.ti.com/edgeaistudio/) 和 [edgeai-tidl-tools](https://github.com/TexasInstruments/edgeai-tidl-tools/tree/08_06_00_05)
+得到onnx相关文件后，使用ti提供的工具进行编译和推理，这里采用三种方法：[Edge AI Studio](https://dev.ti.com/edgeaistudio/),    [edgeai-tidl-tools](https://github.com/TexasInstruments/edgeai-tidl-tools/tree/08_06_00_05) 和 [TIDL Importer](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/06_01_01_12/exports/docs/tidl_j7_01_00_01_00/ti_dl/docs/user_guide_html/md_tidl_model_import.html)
 
-## TIDL Importer（failed 进行中）
-TIDL Importer 是RTOS SDK中提供的导入工具，提供了很多例程
+## TIDL Importer（failed, ongoing）
+TIDL Importer 是RTOS SDK中提供的导入工具，需要网络结构完全支持tidl，以使模型都通过tidl加速（即转换只生成net,io 2个bin文件）
+
+edgeai-tidl-tools可以结合onnx模型在arm上运行，但Importer只能转换完全支持TIDL的网络结构，不能将不支持的层配置为 deny，因此需要将网络中不支持的层替换：slice, ~~Resize_206, Resize_229~~(resize在version13不支持，11支持), MaxPool(在11只支持kernel sizes: 3x3,2x2,1x1)
+
+TIDL支持的算子见：[supported_ops_rts_versions](https://github.com/TexasInstruments/edgeai-tidl-tools/blob/master/docs/supported_ops_rts_versions.md)
+ONNX算子版本见：[onnx/docs/Operators](https://github.com/onnx/onnx/blob/main/docs/Operators.md)
+
+| TIDL Layer Type| ONNX Ops| TFLite Ops| Notes |
+|:--------|:--------|:----------|:------|
+TIDL_SliceLayer	|Split|	NA	|Only channel wise slice is supported
+TIDL_ResizeLayer	|UpSample|	RESIZE_NEAREST_NEIGHBOR|RESIZE_BILINEAR	Only power of 2 and symmetric resize is supported
+TIDL_PoolingLayer	|MaxPool, AveragePool, GlobalAveragePool|MAX_POOL_2D, AVERAGE_POOL_2D, MEAN	|Pooling has been validated for the following kernel sizes: 3x3,2x2,1x1, with a maximum stride of 2
+
+修改网络中三处不支持的层以支持TIDL：
+```py
+(1,1,256,128) --> Slice + Concat --> (1,4,128,64)
+#Slice+Concat参照TI_YOLOX, 替换为Conv + Relu
+
+(1,64,8,4)  --> Resize_206 --> (1,64,16,8)
+(1,32,16,8) --> Resize_229 --> (1,32,32,16)
+#resize理论上支持，此处原因待排查
+#原因是onnx转换时opset=13，应为opset=11，网络无需修改
+
+#opset vertion改为11后 MaxPool 需要拆分为 kernel=3的组合
+```
+
+参考TI官方对YOLOx的更改 [edgeai-yolox/README_2d_od](https://github.com/TexasInstruments/edgeai-yolox/blob/main/README_2d_od.md)，将Slice替换为一个卷积层，再对MaxPool拆分，最后激活函数Silu替换为Relu，再重新训练，得到新模型，设为opset_version=11重新导出onnx编译后，即可只生成2个bin文件（net+io）
+
+----
+**导入步骤**：
 1. 模型文件配置：拷贝 .onnx, .prototxt 文件至/ti_dl/test/testvecs/models/public/onnx/，.prototxt中改in_width&height，根据情况改nms_threshold: 0.4，confidence_threshold: 0.4
 2. 编写转换配置文件：在/testvecs/config/import/public/onnx下新建（或复制参考目录下yolov3例程）**tidl_import_XXX.txt**，参数配置见[文档](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/06_01_01_12/exports/docs/tidl_j7_01_00_01_00/ti_dl/docs/user_guide_html/md_tidl_model_import.html), 元架构类型见 [Object detection meta architectures](https://github.com/TexasInstruments/edgeai-tidl-tools/blob/master/docs/tidl_fsg_od_meta_arch.md)
 
@@ -164,13 +195,11 @@ cd ${TIDL_INSTALL_PATH}/ti_dl/test
 ```
 
 
-
-
 ## Edge AI Studio
 参考yolox的编译过程：[YOLOX的模型转换与SK板端运行](https://wangyujie.site/TDA4VM3/#b-%E4%BD%BF%E7%94%A8TIDL-Tools%EF%BC%88by-Edge-AI-Studio%EF%BC%89)，修改数据预处理与compile_options部分，最后重写画框部分（optional）
 
 > **Debug:**
-`[ONNXRuntimeError] : 6 ... `: compile_options中设置deny_list，剔除不支持的层，如`'Slice, Resize'`，TIDL支持的算子见：[supported_ops_rts_versions](https://github.com/TexasInstruments/edgeai-tidl-tools/blob/master/docs/supported_ops_rts_versions.md)    (resize支持2*操作)
+`[ONNXRuntimeError] : 6 ... `: compile_options中设置deny_list，剔除不支持的层，如`'Slice'`，TIDL支持的算子见：[supported_ops_rts_versions](https://github.com/TexasInstruments/edgeai-tidl-tools/blob/master/docs/supported_ops_rts_versions.md)    (resize支持2*操作)
 compile_options中要注释掉object_detection的配置
 
 打包下载编译生成的工件：
@@ -230,7 +259,7 @@ models = ['custom_model_name']  #修改对应的模型名称
     },
 
 #examples/osrt_python/common_utils.py 配置编译选项
-"deny_list":"Slice, Resize", #"MaxPool"
+"deny_list":"Slice", #"MaxPool"
 
 #运行编译
 ./scripts/run_seed.sh
@@ -546,15 +575,17 @@ else : #如果只有一个CPU：使用一个循环顺序地处理每个模型。
 + _backbone_backbone_dark5_dark5.1_conv1_act_Relu_output_0_   
     起始于最初的Input，输出为Conv_1273下的Relu, **中断于Maxpool层**，Why？
 + _backbone_lateral_conv0_act_Relu_output_    
-    起始于Conv_1275前的Concat，输出为Conv_1306下的Relu, **中断于Resize层**，因为不支持
+    起始于Conv_1275前的Concat，输出为Conv_1306下的Relu, **中断于Resize层**，因为不支持 (opset_version=11时支持)
 + _backbone_reduce_conv1_act_Relu_output_0_   
-    起始于Conv_1308前的Concat，输出为Conv_1336下的Relu，**中断于Resize层**，因为不支持
+    起始于Conv_1308前的Concat，输出为Conv_1336下的Relu，**中断于Resize层**，因为不支持 (opset_version=11时支持)
 + _1102_   
     起始于Conv_1338前的Concat，输出为最终的output
 
-由此看出，四组网络结构文件拼接成一个完整的网络，但由于不支持的层被deny, 需要offload到arm端运行，因此在相应的位置被拆分，前期结构设计时需要尽量避免出现该情况。
+由此看出，四组网络结构文件拼接成一个完整的网络，但由于不支持的层被deny, 需要offload到arm端运行，因此在相应的位置被拆分，前期网络结构设计时需要尽量避免出现该情况。
 
-# TIDL tools c++推理
+
+
+# TIDL tools c++推理(ongoing)
 TIDL runtime 提供的CPP api解决方案仅支持模型推理，因此仍需在PC上运行Python示例以生成模型工件。
 [edgeai-tidl-tools/examples/osrt_cpp](https://github.com/TexasInstruments/edgeai-tidl-tools/tree/master/examples/osrt_cpp)
 ```sh
@@ -566,7 +597,7 @@ cmake -DFLAG1=val -DFLAG2=val ../../../examples
 ongoing....
 ```
 
-# SK板运行自定义深度学习模型
+# SK板运行自定义深度学习模型(ongoing)
 通过SD卡配置编译生成的模型：
 > 配置模型文件夹 custom_model 放入/opt/modelzoo文件夹
 >> artifacts：存放编译生成的工件，model-artifacts

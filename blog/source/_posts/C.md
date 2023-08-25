@@ -677,7 +677,7 @@ int main()
 
 **sizeof( )** ： 指出类声明中所有数据属性占用的总内存量，单位为字节 （结果受字填充word padding和其他因素的影响）
 
-关键字 struct 来自 C 语言，在 C++编译器看来，它与类及其相似，差别在于程序员未指定时，默认的访问限定符（public 和 private）不同
+**关键字 struct** 来自 C 语言，在 C++编译器看来，它与类及其相似，差别在于程序员未指定时，默认的访问限定符（public 和 private）不同，不同于结构，类的成员默认为私有
 ```c
 //C++ Class
 class Human
@@ -740,11 +740,40 @@ union UnionName
 //实例化并使用共用体：
 UnionName unionObject; 
 unionObject.member2 = value; // choose member2 as the active member
+
+//在结构中，常使用共用体来模拟复杂的数据类型
+struct  ComplexType
+{
+    enum DataType //使用枚举来存储信息类型
+    {
+        Int,
+        Char
+    }Type;
+
+    union Value   //使用共用体来存储实际值
+    {
+        int num;
+        char alphabet;
+
+        Value() {}
+        ~Value() {}
+    }value;
+};
 ```
+**聚合初始化**：即满足如下条件的类或结构为聚合类型，可作为一个整体进行初始化：只包含公有和非静态数据成员，而不包含私有或受保护的数据成员；不包含任何虚成员函数；只涉及公有继承（不涉及私有、受保护和虚拟继承）；不包含用户定义的构造函数。
+```c
+struct Aggregate2 
+{ 
+ int num; 
+ char hello[6]; 
+ int impYears[5]; 
+}; 
 
-
-
-
+//对于这个结构，可像下面这样进行初始化：
+Aggregate2 a2 {42, {'h', 'e', 'l', 'l', 'o'}, {1998, 2003, 2011, 2014, 2017}};
+```
+定义常量表达式的关键字 **constexpr** 也可用于类和结果为常量的对象
+`constexpr Human(int humansAge) :age(humansAge) {}`
 
 
 
