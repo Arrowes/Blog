@@ -775,11 +775,43 @@ Aggregate2 a2 {42, {'h', 'e', 'l', 'l', 'o'}, {1998, 2003, 2011, 2014, 2017}};
 定义常量表达式的关键字 **constexpr** 也可用于类和结果为常量的对象
 `constexpr Human(int humansAge) :age(humansAge) {}`
 
+## 10.实现继承
+面向对象编程基于 4 个重要方面：封装、抽象、继承和多态。继承是一种强大的属性重用方式，是通向多态的跳板.
 
+### 继承和派生
+继承: 从一个包含通用属性且实现了通用功能的基类（超类）派生出类似的类，并在派生类（子类）中覆盖基本功能，以实现让每个类都独一无二的行为。
+```c
+class Base 
+{ 
+ // ... base class members 
+}; 
+class Derived: public Base    //public, private, protected
+{ 
+ // ... derived class members 
+}; 
+```
+**访问限定符 protected**: 对需要继承的基类属性进行保护,让基类的某些属性能在派生类中访问，但不能在继承层次结构外部访问
 
+基类初始化—向基类传递参数: 如果基类包含重载的构造函数，需要在实例化时给它提供实参,就使用初始化列表，并通过派生类的构造函数调用合适的基类构造函数
+```c
+class Base 
+{ 
+public: 
+ Base(int someNumber) // overloaded constructor 
+ { 
+ // Use someNumber 
+ } 
+}; 
 
-
-
+class Derived: public Base 
+{
+public: 
+ Derived(): Base(25) // instantiate Base with argument 25 
+ { 
+ // derived class constructor code 
+ } 
+};    
+```
 
 
 

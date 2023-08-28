@@ -27,12 +27,44 @@ TI文档中对yolo、mobilenet、resnet等主流深度学习模型支持十分�
 
 除了上述的第二步，也可以使用edgeai-tidl-tools。但是需要手动编辑param.yaml文件，以使其与edgeai-benchmark生成的文件相匹配。
 
+# 网络结构的修改与适配
+edgeai-tidl-tools与edge ai studio的编译结果可以结合onnx模型在arm上运行，因此可以有不支持的网络层（有性能损失），但若使用TIDL Importer编译，则只能转换完全支持TIDL的网络结构，因此前期将网络中不支持的层替换是最好的，
+
+此处以YOLOX的Backbone为例，修改不支持的层：slice, ~~Resize_206, Resize_229~~(resize在version13不支持，11支持), MaxPool(在11只支持kernel sizes: 3x3,2x2,1x1)
+
+TIDL支持的算子见：[supported_ops_rts_versions](https://github.com/TexasInstruments/edgeai-tidl-tools/blob/master/docs/supported_ops_rts_versions.md)
+ONNX算子版本见：[onnx/docs/Operators](https://github.com/onnx/onnx/blob/main/docs/Operators.md)
+
+| TIDL Layer Type| ONNX Ops| TFLite Ops| Notes |
+|:--------|:--------|:----------|:------|
+TIDL_SliceLayer	|Split|	NA	|Only channel wise slice is supported
+TIDL_ResizeLayer	|UpSample|	RESIZE_NEAREST_NEIGHBOR|RESIZE_BILINEAR	Only power of 2 and symmetric resize is supported
+TIDL_PoolingLayer	|MaxPool, AveragePool, GlobalAveragePool|MAX_POOL_2D, AVERAGE_POOL_2D, MEAN	|Pooling has been validated for the following kernel sizes: 3x3,2x2,1x1, with a maximum stride of 2
+
+修改网络中三处不支持的层以支持TIDL：
+```py
+(1,1,256,128) --> Slice + Concat --> (1,4,128,64)
+#Slice+Concat参照TI_YOLOX, 替换为Conv + Relu
+
+(1,64,8,4)  --> Resize_206 --> (1,64,16,8)
+(1,32,16,8) --> Resize_229 --> (1,32,32,16)
+#resize理论上支持，此处原因待排查
+#原因是onnx转换时opset=13，应为opset=11，网络无需修改
+
+#opset vertion改为11后 MaxPool 需要拆分为 kernel=3的组合
+maxpool(k=5, s=1) -> replaced with two maxpool(k=3,s=1)
+maxpool(k=9, s=1) -> replaced with four maxpool(k=3,s=1)
+maxpool(k=13, s=1)-> replaced with six maxpool(k=3,s=1)
+```
+
+参考TI官方对YOLOx的更改 [edgeai-yolox/README_2d_od](https://github.com/TexasInstruments/edgeai-yolox/blob/main/README_2d_od.md)，将Slice替换为一个卷积层，再对MaxPool拆分，最后激活函数Silu替换为Relu，再重新训练，得到新模型，设为opset_version=11重新导出onnx编译后，即可只生成2个bin文件（net+io），完全的支持tidl运行加速；
+
 # ONNX模型转换及推理
 ~~使用`torch.onnx.export(model, input, "XXX.onnx", verbose=False, export_params=True, opset_version=13)`得到 `.onnx`；~~
 使用`torch.onnx.export(model, input, "XXX.onnx", verbose=False, export_params=True, opset_version=11)`得到 `.onnx`；
 > 注意要确保加载的模型是一个完整的PyTorch模型对象，而不是一个包含模型权重的字典, 否则会报错`'dict' object has no attribute 'modules'`；
 因此需要在项目保存`.pth`模型文件时设置同时*保存网络结构*，或者在项目代码中*导入完整模型*后使用`torch.onnx.export`
-**opset_version只支持到13**，导出默认14会报错
+**opset_version只支持到13**，导出默认是14，会报错
 opset_version为13时不支持resize, 现改为**11**
 
 使用ONNX Runtime 运行推理，验证模型转换的正确性
@@ -90,110 +122,29 @@ for result in raw_result:
 # TIDL 编译转换
 得到onnx相关文件后，使用ti提供的工具进行编译和推理，这里采用三种方法：[Edge AI Studio](https://dev.ti.com/edgeaistudio/),    [edgeai-tidl-tools](https://github.com/TexasInstruments/edgeai-tidl-tools/tree/08_06_00_05) 和 [TIDL Importer](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/06_01_01_12/exports/docs/tidl_j7_01_00_01_00/ti_dl/docs/user_guide_html/md_tidl_model_import.html)
 
-## TIDL Importer（failed, ongoing）
-TIDL Importer 是RTOS SDK中提供的导入工具，需要网络结构完全支持tidl，以使模型都通过tidl加速（即转换只生成net,io 2个bin文件）
+## TIDL Importer
+TIDL Importer 是RTOS SDK中提供的导入工具，需要网络结构完全支持tidl，以使模型都通过tidl加速（即转换只生成net,io 2个bin文件）,参考上一篇 [TDA4③_使用TIDL Importer](https://wangyujie.site/TDA4VM3/#a-%E4%BD%BF%E7%94%A8TIDL-Importer-by-RTOS-SDK)
 
-edgeai-tidl-tools可以结合onnx模型在arm上运行，但Importer只能转换完全支持TIDL的网络结构，不能将不支持的层配置为 deny，因此需要将网络中不支持的层替换：slice, ~~Resize_206, Resize_229~~(resize在version13不支持，11支持), MaxPool(在11只支持kernel sizes: 3x3,2x2,1x1)
-
-TIDL支持的算子见：[supported_ops_rts_versions](https://github.com/TexasInstruments/edgeai-tidl-tools/blob/master/docs/supported_ops_rts_versions.md)
-ONNX算子版本见：[onnx/docs/Operators](https://github.com/onnx/onnx/blob/main/docs/Operators.md)
-
-| TIDL Layer Type| ONNX Ops| TFLite Ops| Notes |
-|:--------|:--------|:----------|:------|
-TIDL_SliceLayer	|Split|	NA	|Only channel wise slice is supported
-TIDL_ResizeLayer	|UpSample|	RESIZE_NEAREST_NEIGHBOR|RESIZE_BILINEAR	Only power of 2 and symmetric resize is supported
-TIDL_PoolingLayer	|MaxPool, AveragePool, GlobalAveragePool|MAX_POOL_2D, AVERAGE_POOL_2D, MEAN	|Pooling has been validated for the following kernel sizes: 3x3,2x2,1x1, with a maximum stride of 2
-
-修改网络中三处不支持的层以支持TIDL：
-```py
-(1,1,256,128) --> Slice + Concat --> (1,4,128,64)
-#Slice+Concat参照TI_YOLOX, 替换为Conv + Relu
-
-(1,64,8,4)  --> Resize_206 --> (1,64,16,8)
-(1,32,16,8) --> Resize_229 --> (1,32,32,16)
-#resize理论上支持，此处原因待排查
-#原因是onnx转换时opset=13，应为opset=11，网络无需修改
-
-#opset vertion改为11后 MaxPool 需要拆分为 kernel=3的组合
-```
-
-参考TI官方对YOLOx的更改 [edgeai-yolox/README_2d_od](https://github.com/TexasInstruments/edgeai-yolox/blob/main/README_2d_od.md)，将Slice替换为一个卷积层，再对MaxPool拆分，最后激活函数Silu替换为Relu，再重新训练，得到新模型，设为opset_version=11重新导出onnx编译后，即可只生成2个bin文件（net+io）
-
-----
 **导入步骤**：
-1. 模型文件配置：拷贝 .onnx, .prototxt 文件至/ti_dl/test/testvecs/models/public/onnx/，.prototxt中改in_width&height，根据情况改nms_threshold: 0.4，confidence_threshold: 0.4
-2. 编写转换配置文件：在/testvecs/config/import/public/onnx下新建（或复制参考目录下yolov3例程）**tidl_import_XXX.txt**，参数配置见[文档](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/06_01_01_12/exports/docs/tidl_j7_01_00_01_00/ti_dl/docs/user_guide_html/md_tidl_model_import.html), 元架构类型见 [Object detection meta architectures](https://github.com/TexasInstruments/edgeai-tidl-tools/blob/master/docs/tidl_fsg_od_meta_arch.md)
-
-> 问题：1.自定义的模型，没有模板可以参考，如何生成prototxt?
-2.转换配置文件中，非OD任务，mateArchType如何选择？
-3.TIDL importer 貌似只能转换完全支持的网络结构，不像tidl tools能将 slice 和 resize 配置为 deny
-
-
-*转换配置文件tidl_import_yolox_s.txt*
-```sh
-modelType       = 2     #模型类型，0: Caffe, 1: TensorFlow, 2: ONNX, 3: tfLite
-numParamBits    = 8     #模型参数的位数，Bit depth for model parameters like Kernel, Bias etc.
-numFeatureBits  = 8     #Bit depth for Layer activation
-quantizationStyle = 3   #量化方法，Quantization method. 2: Linear Mode. 3: Power of 2 scales（2的幂次）
-inputNetFile    = "../../test/testvecs/models/public/onnx/yolox-s-ti-lite.onnx" #Net definition from Training frames work
-outputNetFile   = "../../test/testvecs/config/tidl_models/onnx/yolo/tidl_net_yolox_s.bin"   #Output TIDL model with Net and Parameters
-outputParamsFile = "../../test/testvecs/config/tidl_models/onnx/yolo/tidl_io_yolox_s_"  #Input and output buffer descriptor file for TIDL ivision interface
-inDataNorm      = 1     #1 Enable / 0 Disable Normalization on input tensor.
-inMean          = 0 0 0 #Mean value needs to be subtracted for each channel of all input tensors
-inScale         = 1.0 1.0 1.0   #Scale value needs to be multiplied after means subtract for each channel of all input tensors，yolov3是0.003921568627 0.003921568627 0.003921568627
-inDataFormat    = 1     #Input tensor color format. 0: BGR planar, 1: RGB planar
-inWidth         = 1024  #each input tensors Width (可以在.prototxt文件中查找到)
-inHeight        = 512   #each input tensors Height
-inNumChannels   = 3     #each input tensors Number of channels
-numFrames       = 1     #Number of input tensors to be processed from the input file
-inData          =   "../../test/testvecs/config/detection_list.txt" #Input tensors File for Reading
-perfSimConfig   = ../../test/testvecs/config/import/device_config.cfg   #Network Compiler Configuration file
-inElementType   = 0     #Format for each input feature, 0 : 8bit Unsigned, 1 : 8bit Signed
-metaArchType    = 6     #网络使用的元架构类型，Meta Architecture used by the network，ssd mobilenetv2 = 3, yolov3 = 4, efficientdet tflite = 5, yolov5 yolox = 6
-metaLayersNamesList =  "../../test/models/pubilc/onnx/yolox_s_ti_lite.prototxt" #架构配置文件，Configuration files describing the details of Meta Arch
-postProcType    = 2     #后处理，Post processing on output tensor. 0 : Disable, 1- Classification top 1 and 5 accuracy, 2 – Draw bounding box for OD, 3 - Pixel level color blending
-```
+1. 模型文件配置：拷贝 .onnx, ~~.prototxt~~ 文件至/`ti_dl/test/testvecs/models/public/onnx/`，~~.prototxt中改in_width&height，根据情况改nms_threshold: 0.4，confidence_threshold: 0.4,~~  
+(*此处因为是自定义模型，并非常规的目标检测任务，不使用prototxt, 经测试可以正常编译*)
+2. 编写转换配置文件：在`/testvecs/config/import/public/onnx`下新建**tidl_import_XXX.txt**，可参考同目录下其他例程，详细参数配置见[文档](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/06_01_01_12/exports/docs/tidl_j7_01_00_01_00/ti_dl/docs/user_guide_html/md_tidl_model_import.html)，注释掉 `metaLayersNamesList`，`inData`处修改自定义的数据输入
 
 3. 模型导入
 使用TIDL import tool，得到可执行文件 ``.bin``
 ```sh
 cd ${TIDL_INSTALL_PATH}/ti_dl/utils/tidlModelImport
-./out/tidl_model_import.out ${TIDL_INSTALL_PATH}/ti_dl/test/testvecs/config/import/public/onnx/tidl_import_yolox_s.txt
+./out/tidl_model_import.out ${TIDL_INSTALL_PATH}/ti_dl/test/testvecs/config/import/public/onnx/tidl_import_XXX.txt
 #successful Memory allocation
+
 #../../test/testvecs/config/tidl_models/onnx/生成的文件分析：
-tidl_net_yolox_s.bin        #Compiled network file 网络模型数据
-tidl_io_yolox_s_1.bin       #Compiled I/O file 网络输入配置文件
-tidl_net_yolox_s.bin.svg    #tidlModelGraphviz tool生成的网络图
-tidl_out.png, tidl_out.txt  #执行的目标检测测试结果，与第三步TIDL运行效果一致 txt:[class, source, confidence, Lower left point(x,y), upper right point(x,y) ]
-
-#Debug，本来使用官方的yolox_s.pth转成onnx后导入，发现报错：
-Step != 1 is NOT supported for Slice Operator -- /backbone/backbone/stem/Slice_3 
-#因为"the slice operations in Focus layer are not embedded friendly"，因此ti提供yolox-s-ti-lite，优化后的才能直接导入
+tidl_net_XXX.bin        #Compiled network file 网络模型数据
+tidl_io_XXX.bin       #Compiled I/O file 网络输入配置文件
+tidl_net_XXX.bin.svg    #tidlModelGraphviz tool生成的网络图
+tidl_out.png, tidl_out.txt  #执行的目标检测测试结果
 ```
 
-4. TIDL运行
-```sh
-#在文件ti_dl/test/testvecs/config/config_list.txt顶部加入:
-1 testvecs/config/infer/public/onnx/tidl_infer_yolox.txt
-0
-
-#新建tidl_infer_yolox.txt:
-inFileFormat    = 2
-numFrames       = 1
-netBinFile      = "testvecs/config/tidl_models/onnx/yolo/tidl_net_yolox_s.bin"
-ioConfigFile    = "testvecs/config/tidl_models/onnx/yolo/tidl_io_yolox_s_1.bin"
-inData  =   testvecs/config/detection_list.txt
-outData =   testvecs/output/tidl_yolox_od.bin
-inResizeMode    = 0
-debugTraceLevel = 0
-writeTraceLevel = 0
-postProcType    = 2
-
-#运行，结果在ti_dl/test/testvecs/output/
-cd ${TIDL_INSTALL_PATH}/ti_dl/test
-./PC_dsp_test_dl_algo.out
-```
-
+4. TIDL运行(暂略)
 
 ## Edge AI Studio
 参考yolox的编译过程：[YOLOX的模型转换与SK板端运行](https://wangyujie.site/TDA4VM3/#b-%E4%BD%BF%E7%94%A8TIDL-Tools%EF%BC%88by-Edge-AI-Studio%EF%BC%89)，修改数据预处理与compile_options部分，最后重写画框部分（optional）
