@@ -478,12 +478,6 @@ else : #如果只有一个CPU：使用一个循环顺序地处理每个模型。
 └── model-artifacts         #文件都是以最后的输出层命名，分为四块网络结构
     ├── 1102_tidl_io_1.bin  #io配置文件
     ├── 1102_tidl_net.bin   #网络模型的二进制文件
-    ├── _backbone_backbone_dark5_dark5.1_conv1_act_Relu_output_0_tidl_io_1.bin
-    ├── _backbone_backbone_dark5_dark5.1_conv1_act_Relu_output_0_tidl_net.bin
-    ├── _backbone_lateral_conv0_act_Relu_output_0_tidl_io_1.bin
-    ├── _backbone_lateral_conv0_act_Relu_output_0_tidl_net.bin
-    ├── _backbone_reduce_conv1_act_Relu_output_0_tidl_io_1.bin
-    ├── _backbone_reduce_conv1_act_Relu_output_0_tidl_net.bin
     ├── allowedNode.txt     #允许的节点列表文件
     ├── onnxrtMetaData.txt  #ONNX运行时的元数据文件
     ├── param.yaml          #参数配置文件
@@ -512,27 +506,11 @@ else : #如果只有一个CPU：使用一个循环顺序地处理每个模型。
         │   └── #Scale: 参数的缩放比例，在量化中，使用缩放因子将浮点参数映射到整数参数；
         ├── 1102_tidl_net.bin.layer_info.txt    #包含模型各个层信息的文本文件
         ├── 1102_tidl_net.bin.svg   #该部分模型结构的可视化图像文件
-        ├── ......  #其他三块网络结构组成相同，省略
-        ├── _backbone_backbone_dark5_dark5.1_conv1_act_Relu_output_0_...
-        ├── _backbone_lateral_conv0_act_Relu_output_0_...
-        ├── _backbone_reduce_conv1_act_Relu_output_0_...
-        ├── ...... 
         ├── graphvizInfo.txt    #模型结构的图形化文本信息
         └── runtimes_visualization.svg  #整个网络结构可视化文件
 ```
 
-**为什么网络结构编译后被拆分成了4组不同的二进制文件？**（*4 subgraph output nodes*）
-
-+ _backbone_backbone_dark5_dark5.1_conv1_act_Relu_output_0_   
-    起始于最初的Input，输出为Conv_1273下的Relu, **中断于Maxpool层**，Why？
-+ _backbone_lateral_conv0_act_Relu_output_    
-    起始于Conv_1275前的Concat，输出为Conv_1306下的Relu, **中断于Resize层**，因为不支持 (opset_version=11时支持)
-+ _backbone_reduce_conv1_act_Relu_output_0_   
-    起始于Conv_1308前的Concat，输出为Conv_1336下的Relu，**中断于Resize层**，因为不支持 (opset_version=11时支持)
-+ _1102_   
-    起始于Conv_1338前的Concat，输出为最终的output
-
-由此看出，四组网络结构文件拼接成一个完整的网络，但由于不支持的层被deny, 需要offload到arm端运行，因此在相应的位置被拆分，前期网络结构设计时需要尽量避免出现该情况。
+**为什么有些网络结构编译后被拆分成了多组不同的二进制文件？**（*4 subgraph output nodes*）: 多网络结构文件拼接成一个完整的网络，但由于不支持的层被offload到arm端运行，因此在相应的位置被拆分，前期网络结构设计时需要尽量避免出现该情况。
 
 
 
@@ -553,10 +531,10 @@ ongoing....
 > 配置模型文件夹 custom_model 放入/opt/modelzoo文件夹
 >> artifacts：存放编译生成的工件，model-artifacts
 model：原onnx模型，.onnx (.prototxt)
-param.yaml：配置文件, 其中需要修改model_path等参数
+param.yaml：配置文件, 其中需要修改model_path等参数 (以modelzoo中例程的param为基准，参照model-artifacts中生成的param修改参数)
 (dataset.yaml：数据集类别对应文件)
 
-通过SD卡配置/opt/edgeai-gst-apps/configs/custom_model.yaml，在model参数中索引上面建立的模型文件夹 custom_model, 并根据size修改输入输出，分辨率size一定要改好，否则很容易报错
+通过SD卡配置`/opt/edgeai-gst-apps/configs/XXX.yaml`，在model参数中索引上面建立的模型文件夹 custom_model, 并根据size修改输入输出，分辨率size一定要改好，否则很容易报错
 ```sh
 #通过minicom连接串口
 sudo minicom -D /dev/ttyUSB2 -c on
