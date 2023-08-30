@@ -780,19 +780,22 @@ Aggregate2 a2 {42, {'h', 'e', 'l', 'l', 'o'}, {1998, 2003, 2011, 2014, 2017}};
 
 ### 继承和派生
 继承: 从一个包含通用属性且实现了通用功能的基类（超类）派生出类似的类，并在派生类（子类）中覆盖基本功能，以实现让每个类都独一无二的行为。
+
+**公有继承 public**：
 ```c
 class Base 
 { 
  // ... base class members 
 }; 
-class Derived: public Base    //public, private, protected
+class Derived: public Base    //public：公有继承，is-a关系，可通过派生类的对象来访问基类的公有成员
 { 
  // ... derived class members 
 }; 
-```
-**访问限定符 protected**: 对需要继承的基类属性进行保护,让基类的某些属性能在派生类中访问，但不能在继承层次结构外部访问
 
-基类初始化—向基类传递参数: 如果基类包含重载的构造函数，需要在实例化时给它提供实参,就使用初始化列表，并通过派生类的构造函数调用合适的基类构造函数
+```
+
+
+**基类初始化** 向基类传递参数: 如果基类包含重载的构造函数，需要在实例化时给它提供实参,就使用初始化列表，并通过派生类的构造函数调用合适的基类构造函数
 ```c
 class Base 
 { 
@@ -812,6 +815,94 @@ public:
  } 
 };    
 ```
+
+**覆盖基类**: 派生类实现从基类继承的函数，且返回值和特征标相同的情况
+```c
+class Base 
+{ 
+public: 
+ void DoSomething() 
+ { 
+ // implementation code… Does something 
+ } 
+}; 
+
+class Derived:public Base 
+{ 
+public: 
+ void DoSomething() 
+ { 
+ // implementation code… Does something else 
+ //也可以用作用域解析运算符（::）在派生类中调用基类方法
+   Base::DoSomething   
+ } 
+}; 
+
+//调用基类中被覆盖的方法
+int main()
+{
+   Derived test;
+   test.DoSomething();     //被覆盖
+   test.Base::DoSomething; //未覆盖，调用基类中的方法
+}
+
+//隐藏问题：覆盖可能导致派生类隐藏基类的所有重载版本，使调用重载产生编译错误（被隐藏）
+//可使用关键字 using 避免隐藏基类方法
+```
+构造顺序：基类对象在派生类对象之前被实例化，实例化时，先实例化成员属性，再调用构造函数；析构顺序正好相反。
+
+**私有继承 private**
+私有继承使得只有子类才能使用基类的属性和方法，继承派生类的类不能访问基类的成员, 因此也被称为 *has-a* 关系, 指定派生类的基类时使用关键字 private：
+```c
+class Base 
+{ 
+ // ... base class members and methods 
+}; 
+class Derived: private Base // private inheritance  类的继承关系默认为私有
+{ 
+ // ... derived class members and methods 
+}; 
+```
+
+**保护继承 protected**
+继承派生类的类能够访问基类的公有和保护方法，但不能通过派生类的对象来访问基类的公有成员；
+使用访问限定符 protected: 对需要继承的基类属性进行保护,让基类的某些属性能在派生类中访问，但不能在继承层次结构外部访问
+```c
+class Derived: protected Base
+//...
+//子类的子类能够访问 Base 类的公有和保护成员:
+class Derived2: protected Derived 
+{ 
+ // can access public & protected members of Base 
+}; 
+```
+
+切除（slicing）问题: 复制对象时不要按值传递参数，而应以指向基类的指针或 const 引用的方式传递
+
+多继承: 
+```c
+class Derived: public Base1, publice Base2 
+{ 
+ // class members 
+};
+```
+使用 final 禁止继承: `class Derived final: public Base1, publice Base2 `
+
+> 要建立 is-a 关系，务必创建公有继承层次结构。
+要建立 has-a 关系，务必创建私有或保护继承层次结构。(仅当必要时才使用私有或保护继承)
+无论继承关系是什么，派生类都不能访问基类的私有成员。一个例外是类的友元函数和友元类
+
+## 11.多态
+
+
+
+
+
+
+
+
+
+
 
 
 
