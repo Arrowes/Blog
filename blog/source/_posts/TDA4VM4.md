@@ -122,13 +122,34 @@ for result in raw_result:
 # TIDL 编译转换
 得到onnx相关文件后，使用ti提供的工具进行编译和推理，这里采用三种方法：[Edge AI Studio](https://dev.ti.com/edgeaistudio/),    [edgeai-tidl-tools](https://github.com/TexasInstruments/edgeai-tidl-tools/tree/08_06_00_05) 和 [TIDL Importer](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/06_01_01_12/exports/docs/tidl_j7_01_00_01_00/ti_dl/docs/user_guide_html/md_tidl_model_import.html)
 
-## TIDL Importer
+## TIDL Importer(failed)
 TIDL Importer 是RTOS SDK中提供的导入工具，需要网络结构完全支持tidl，以使模型都通过tidl加速（即转换只生成net,io 2个bin文件）,参考上一篇 [TDA4③_使用TIDL Importer](https://wangyujie.site/TDA4VM3/#a-%E4%BD%BF%E7%94%A8TIDL-Importer-by-RTOS-SDK)
 
 **导入步骤**：
-1. 模型文件配置：拷贝 .onnx, ~~.prototxt~~ 文件至/`ti_dl/test/testvecs/models/public/onnx/`，~~.prototxt中改in_width&height，根据情况改nms_threshold: 0.4，confidence_threshold: 0.4,~~  
+1. 模型文件配置：拷贝 .onnx, ~~.prototxt~~ 文件至`/ti_dl/test/testvecs/models/public/onnx/`，~~.prototxt中改in_width&height，根据情况改nms_threshold: 0.4，confidence_threshold: 0.4,~~  
 (*此处因为是自定义模型，并非常规的目标检测任务，不使用prototxt, 经测试可以正常编译*)
 2. 编写转换配置文件：在`/testvecs/config/import/public/onnx`下新建**tidl_import_XXX.txt**，可参考同目录下其他例程，详细参数配置见[文档](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/06_01_01_12/exports/docs/tidl_j7_01_00_01_00/ti_dl/docs/user_guide_html/md_tidl_model_import.html)，注释掉 `metaLayersNamesList`，`inData`处修改自定义的数据输入
+    ```sh
+    modelType          = 2
+    numParamBits       = 8
+    numFeatureBits     = 8
+    quantizationStyle  = 3
+    inputNetFile       = "../../test/testvecs/models/public/onnx/XXX.onnx"
+    outputNetFile      = "../../test/testvecs/config/tidl_models/onnx/seed/tidl_net_XXX.bin"
+    outputParamsFile   = "../../test/testvecs/config/tidl_models/onnx/seed/tidl_io_XXX_"
+    inDataNorm  = 0
+    inMean = 0 0 0
+    inScale = 0.003921568627 0.003921568627 0.003921568627
+    inDataFormat = 1
+    inWidth  = 128
+    inHeight = 256 
+    inNumChannels = 3
+    numFrames = 5
+    inData  =   "../../test/testvecs/config/detection_list.txt"
+    perfSimConfig = ../../test/testvecs/config/import/device_config.cfg
+    inElementType = 0
+    postProcType = 2
+    ```
 
 3. 模型导入
 使用TIDL import tool，得到可执行文件 ``.bin``
