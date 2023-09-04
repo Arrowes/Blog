@@ -129,6 +129,7 @@ TIDL Importer 是RTOS SDK中提供的导入工具，需要网络结构完全支�
 1. 模型文件配置：拷贝 .onnx, ~~.prototxt~~ 文件至`/ti_dl/test/testvecs/models/public/onnx/`，~~.prototxt中改in_width&height，根据情况改nms_threshold: 0.4，confidence_threshold: 0.4,~~  
 (*此处因为是自定义模型，并非常规的目标检测任务，不使用prototxt, 经测试可以正常编译*)
 2. 编写转换配置文件：在`/testvecs/config/import/public/onnx`下新建**tidl_import_XXX.txt**，可参考同目录下其他例程，详细参数配置见[文档](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/06_01_01_12/exports/docs/tidl_j7_01_00_01_00/ti_dl/docs/user_guide_html/md_tidl_model_import.html)，注释掉 `metaLayersNamesList`，`inData`处修改自定义的数据输入
+`device config`选择对应设备的配置文件
     ```sh
     modelType          = 2
     numParamBits       = 8
