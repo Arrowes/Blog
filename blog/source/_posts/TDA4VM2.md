@@ -262,12 +262,13 @@ export TIDL_TOOLS_PATH=$(pwd)/tidl_tools
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$TIDL_TOOLS_PATH
 export ARM64_GCC_PATH=$(pwd)/gcc-arm-9.2-2019.12-x86_64-aarch64-none-linux-gnu
 #配置永久环境变量更方便，sudo gedit /etc/profile，末尾加入如上代码，然后source /etc/profile加载立即生效
-
-#Compile and Validate on X86_PC
-mkdir build && cd build
-cmake ../examples && make -j && cd ..
 source ./scripts/run_python_examples.sh #编译运行
 python3 ./scripts/gen_test_report.py    #评估
+
+#Compile and Validate on X86_PC for cpp_example
+mkdir build && cd build
+cmake ../examples && make -j && cd ..
+
 ```
 | Image Classification | Object detection | Semantic Segmentation |
 | :-: |  :-: |  :-: |

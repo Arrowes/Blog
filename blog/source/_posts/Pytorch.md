@@ -76,34 +76,36 @@ Ctrl + / 批量注释
 IDLE Ctrl+N 编辑多行代码
 输入一半按tab可以补全
 
+在jupyter notebook中解压：
+```py
+import zipfile
+
+zip_ref = zipfile.ZipFile('WYJ.zip', 'r')
+zip_ref.extractall('.')
+zip_ref.close()
+```
+
 <details>
   <summary>打包下载：点击查看代码块</summary>
 
-    import os
-    import tarfile
-    def recursive_files(dir_name='.', ignore=None):
-        for dir_name,subdirs,files in os.walk(dir_name):
-            if ignore and os.path.basename(dir_name) in ignore: 
-                continue
+```py
+import zipfile
+import os
 
-            for file_name in files:
-                if ignore and file_name in ignore:
-                    continue
+def zip_folder(folder_path, zip_path):
+    with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+        for root, dirs, files in os.walk(folder_path):
+            for file in files:
+                file_path = os.path.join(root, file)
+                zipf.write(file_path, os.path.relpath(file_path, folder_path))
 
-                yield os.path.join(dir_name, file_name)
+folder_path = './output' # 指定要下载的文件夹路径
+zip_path = './output.zip' # 指定要保存的zip文件路径
+zip_folder(folder_path, zip_path)
 
-    def make_tar_file(dir_name='.', tar_file_name='tarfile.tar', ignore=None):
-        tar = tarfile.open(tar_file_name, 'w')
-
-        for file_name in recursive_files(dir_name, ignore):
-            tar.add(file_name)
-
-        tar.close()
-
-    dir_name = '.'
-    tar_file_name = 'archive.tar'
-    ignore = {'.ipynb_checkpoints', '__pycache__', tar_file_name}
-    make_tar_file(dir_name, tar_file_name, ignore)
+from IPython.display import FileLink
+FileLink(zip_path) # 生成下载链接
+```
 </details>
 
 

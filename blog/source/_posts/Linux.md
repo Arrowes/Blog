@@ -133,6 +133,19 @@ vscode插件离线安装：如装python插件，直接进[ marketplace ](https:/
 
 [十分钟学会正确的github工作流，和开源作者们使用同一套流程](https://www.bilibili.com/video/BV19e4y1q7JJ)
 
+---
+branch 与 tag：
+```sh
+git tag/branch  #查仓库所有的tag或branch
+git clone --branch [tag] [git地址]  #github clone 指定的tag
+git checkout [tag/branch]  #已有仓库切换 tag/branch
+
+#tag 对应某次 commit, 是一个点，是不可移动的。
+#branch 对应一系列 commit，是很多点连成的一根线，有一个HEAD 指针，是可以依靠 HEAD 指针移动的。
+#两者的区别决定了使用方式，改动代码用 branch ,不改动只查看用 tag
+```
+
+
 # Docker
 `Docker`是一种开源的容器化平台，可以帮助开发者更高效地打包、部署和运行应用程序。它基于 `Linux` 容器（LXC）技术，通过将应用程序及其所有依赖项打包到一个容器中，从而消除了应用程序在不同环境之间迁移所面临的问题。使用Docker，开发者可以快速构建、测试和部署应用程序，减少了与操作系统和基础设施相关的问题，从而提高了开发、测试和发布的速度。
 
