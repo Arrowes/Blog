@@ -84,7 +84,7 @@ python3 demo/ONNXRuntime/onnx_inference.py -m yolox_s_ti_lite.onnx -i assets/dog
 ## 2. 使用TIDL编译ONNX并运行
 本节使用了两种不同的方法完成PC端TIDL的编译运行：
 1. TIDL Importer: 使用RTOS SDK中提供的导入工具，提供了很多例程（8.6中没有，copy 8.5的），方便快捷；
-2. TIDL Tools：TI提供的工具，灵活度高，不支持的算子分配到ARM核，支持的会使用TIDL加速运行，增加了深度学习模型开发和运行的效率。
+2. TIDL Tools：TI提供的工具，见github [edgeai-tidl-tools](https://github.com/TexasInstruments/edgeai-tidl-tools)，或在RTOS SDK也内置了，灵活度高，不支持的算子分配到ARM核，支持的会使用TIDL加速运行，增加了深度学习模型开发和运行的效率。但要求平台有onnx运行环境
 ### a. 使用[TIDL Importer](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/06_01_01_12/exports/docs/tidl_j7_01_00_01_00/ti_dl/docs/user_guide_html/md_tidl_model_import.html) (by RTOS SDK)
 1. 模型文件配置：拷贝 .onnx, .prototxt 文件至/ti_dl/test/testvecs/models/public/onnx/，**yolox_s_ti_lite.prototxt**中改in_width&height，根据情况改nms_threshold: 0.4，confidence_threshold: 0.4
 2. 编写转换配置文件：在/testvecs/config/import/public/onnx下新建（或复制参考目录下yolov3例程）**tidl_import_yolox_s.txt**，参数配置见[文档](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/06_01_01_12/exports/docs/tidl_j7_01_00_01_00/ti_dl/docs/user_guide_html/md_tidl_model_import.html), 元架构类型见 [Object detection meta architectures](https://github.com/TexasInstruments/edgeai-tidl-tools/blob/master/docs/tidl_fsg_od_meta_arch.md)，`inData`处修改自定义的数据输入
@@ -100,7 +100,7 @@ outputNetFile   = "../../test/testvecs/config/tidl_models/onnx/yolo/tidl_net_yol
 outputParamsFile = "../../test/testvecs/config/tidl_models/onnx/yolo/tidl_io_yolox_s_"  #Input and output buffer descriptor file for TIDL ivision interface
 inDataNorm      = 1     #1 Enable / 0 Disable Normalization on input tensor.
 inMean          = 0 0 0 #Mean value needs to be subtracted for each channel of all input tensors
-inScale         = 1.0 1.0 1.0   #Scale value needs to be multiplied after means subtract for each channel of all input tensors，yolov3是0.003921568627 0.003921568627 0.003921568627
+inScale         = 1.0 1.0 1.0   #Scale value needs to be multiplied after means subtract for each channel of all input tensors，yolov3例程是0.003921568627 0.003921568627 0.003921568627
 inDataFormat    = 1     #Input tensor color format. 0: BGR planar, 1: RGB planar
 inWidth         = 1024  #each input tensors Width (可以在.prototxt文件中查找到)
 inHeight        = 512   #each input tensors Height

@@ -46,6 +46,7 @@ find / -name "[]"   #查找 find *XXX*
 export 变量名=值     #设置或更新环境变量的值
 #配置永久环境变量更方便，sudo gedit /etc/profile，末尾加入如上代码，然后source /etc/profile加载立即生效
 echo []             #输出指定的字符串或变量的值,用于调试程序、输出信息
+script -f log.txt    #输出terminal内容到文件
 ```
 # Ubuntu
 ```sh
