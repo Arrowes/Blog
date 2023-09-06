@@ -120,51 +120,74 @@ for result in raw_result:
 `print(result)` :正常应该输出正确的推理结果，如果数值全都一样(-4.59512)，可能是没有检测到有效的目标或者模型效果太差
 
 # TIDL 编译转换
-得到onnx相关文件后，使用ti提供的工具进行编译和推理，这里采用三种方法：[Edge AI Studio](https://dev.ti.com/edgeaistudio/),    [edgeai-tidl-tools](https://github.com/TexasInstruments/edgeai-tidl-tools/tree/08_06_00_05) 和 [TIDL Importer](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/06_01_01_12/exports/docs/tidl_j7_01_00_01_00/ti_dl/docs/user_guide_html/md_tidl_model_import.html)
+得到onnx相关文件后，使用ti提供的工具进行编译和推理，这里采用三种方法：  [TIDL Importer](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/06_01_01_12/exports/docs/tidl_j7_01_00_01_00/ti_dl/docs/user_guide_html/md_tidl_model_import.html), [Edge AI Studio](https://dev.ti.com/edgeaistudio/) 和 [edgeai-tidl-tools](https://github.com/TexasInstruments/edgeai-tidl-tools/tree/08_06_00_05)
 
-## TIDL Importer(failed)
-TIDL Importer 是RTOS SDK中提供的导入工具，需要网络结构完全支持tidl，以使模型都通过tidl加速（即转换只生成net,io 2个bin文件）,参考上一篇 [TDA4③_使用TIDL Importer](https://wangyujie.site/TDA4VM3/#a-%E4%BD%BF%E7%94%A8TIDL-Importer-by-RTOS-SDK)
+## TIDL Importer
+TIDL Importer 是RTOS SDK中提供的导入工具，需要网络结构完全支持tidl，以使模型都通过tidl加速（即转换只生成net,io 2个bin文件）
 
-**导入步骤**：
-1. 模型文件配置：拷贝 .onnx, ~~.prototxt~~ 文件至`/ti_dl/test/testvecs/models/public/onnx/`，~~.prototxt中改in_width&height，根据情况改nms_threshold: 0.4，confidence_threshold: 0.4,~~  
-(*此处因为是自定义模型，并非常规的目标检测任务，不使用prototxt, 经测试可以正常编译*)
-2. 编写转换配置文件：在`/testvecs/config/import/public/onnx`下新建**tidl_import_XXX.txt**，可参考同目录下其他例程，详细参数配置见[文档](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/06_01_01_12/exports/docs/tidl_j7_01_00_01_00/ti_dl/docs/user_guide_html/md_tidl_model_import.html)，注释掉 `metaLayersNamesList`，`inData`处修改自定义的数据输入
-`device config`选择对应设备的配置文件
+下面的流程重构了文件夹架构，原文件跳来跳去改起来很麻烦，就合并到了XXX文件夹，原文件路径可参考上一篇官方例程： [TDA4③_使用TIDL Importer导入YOLOX](https://wangyujie.site/TDA4VM3/#a-%E4%BD%BF%E7%94%A8TIDL-Importer-by-RTOS-SDK)
+
+1. 配置文件：新建文件夹：`SDK/${TIDL_INSTALL_PATH}/ti_dl/test/testvecs/XXX`
+    拷贝 onnx 文件至 XXX 文件夹 (*此处是自定义模型，不使用prototxt, 经测试可以正常编译*)
     ```sh
-    modelType          = 2
-    numParamBits       = 8
-    numFeatureBits     = 8
-    quantizationStyle  = 3
-    inputNetFile       = "../../test/testvecs/models/public/onnx/XXX.onnx"
-    outputNetFile      = "../../test/testvecs/config/tidl_models/onnx/seed/tidl_net_XXX.bin"
-    outputParamsFile   = "../../test/testvecs/config/tidl_models/onnx/seed/tidl_io_XXX_"
-    inDataNorm  = 0
-    inMean = 0 0 0
-    inScale = 0.003921568627 0.003921568627 0.003921568627
-    inDataFormat = 1
-    inWidth  = 128
-    inHeight = 256 
-    inNumChannels = 3
-    numFrames = 5
-    inData  =   "../../test/testvecs/config/detection_list.txt"
-    perfSimConfig = ../../test/testvecs/config/import/device_config.cfg
-    inElementType = 0
-    postProcType = 2
+    #XXX文件夹结构
+    ├── detection_list.txt
+    ├── device_configs
+    │   ├── am62a_config.cfg
+    │   ├── j721e_config.cfg
+    │   ├── j721s2_config.cfg
+    │   └── j784s4_config.cfg
+    ├── output
+    ├── indata
+    │   └── 1.jpg
+    ├── XXX.onnx
+    └── tidl_import_XXX.txt
     ```
 
-3. 模型导入
-使用TIDL import tool，得到可执行文件 ``.bin``
+2. 编写转换配置文件：新建**tidl_import_XXX.txt**，可参考同目录下其他例程，详细参数配置见[文档](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/06_01_01_12/exports/docs/tidl_j7_01_00_01_00/ti_dl/docs/user_guide_html/md_tidl_model_import.html)
 ```sh
-cd ${TIDL_INSTALL_PATH}/ti_dl/utils/tidlModelImport
-./out/tidl_model_import.out ${TIDL_INSTALL_PATH}/ti_dl/test/testvecs/config/import/public/onnx/tidl_import_XXX.txt
-#successful Memory allocation
-
-#../../test/testvecs/config/tidl_models/onnx/生成的文件分析：
-tidl_net_XXX.bin        #Compiled network file 网络模型数据
-tidl_io_XXX.bin       #Compiled I/O file 网络输入配置文件
-tidl_net_XXX.bin.svg    #tidlModelGraphviz tool生成的网络图
-tidl_out.png, tidl_out.txt  #执行的目标检测测试结果
+#tidl_import_XXX.txt:
+modelType          = 2  #模型类型，0: Caffe, 1: TensorFlow, 2: ONNX, 3: tfLite
+numParamBits       = 8  #模型参数的位数，Bit depth for model parameters like Kernel, Bias etc.
+numFeatureBits     = 8  #Bit depth for Layer activation
+quantizationStyle  = 3  #量化方法，Quantization method. 2: Linear Mode. 3: Power of 2 scales（2的幂次）
+inputNetFile       = "../../test/testvecs/XXX/XXX.onnx" #Net definition from Training frames work
+outputNetFile      = "../../test/testvecs/XXX/output/825_tidl_net.bin"  ##Output TIDL model with Net and Parameters
+outputParamsFile   = "../../test/testvecs/XXX/output/825_tidl_io_"  # #Input and output buffer descriptor file for TIDL ivision interface
+inDataNorm  = 0     #1 Enable / 0 Disable Normalization on input tensor.
+inMean = 0 0 0      #Mean value needs to be subtracted for each channel of all input tensors
+inScale = 0.003921568627 0.003921568627 0.003921568627  #Scale value needs to be multiplied after means subtract for each channel of all input tensors
+inDataFormat = 1    #Input tensor color format. 0: BGR planar, 1: RGB planar
+inWidth  = 128
+inHeight = 256 
+inNumChannels = 3
+numFrames = 5       #Number of input tensors to be processed from the input file
+inData  =   "../../test/testvecs/XXX/detection_list.txt"  #配置输入图片，回车分隔；如：testvecs/XXX/indata/1.jpg
+perfSimConfig = ../../test/testvecs/XXX/device_configs/j721s2_config.cfg    #Network Compiler Configuration file
+inElementType = 0   #Format for each input feature, 0 : 8bit Unsigned, 1 : 8bit Signed
+postProcType = 2    #后处理，Post processing on output tensor. 0 : Disable, 1- Classification top 1 and 5 accuracy, 2 – Draw bounding box for OD, 3 - Pixel level color blending
 ```
+>Debug:
+`inData`配置数据输入，数量与`numFrames`要匹配；
+`perfSimConfig`选择对应设备的配置文件；
+`inScale`配置太大可能导致tensor不匹配
+`metaLayersNamesList`注释掉, 除非与TI提供的元架构相同；
+
+3. 执行编译，得到可执行文件 `.bin`
+    ```sh
+    export TIDL_INSTALL_PATH=/home/wyj/sda2/TAD4VL_SKD_8_5/ti-processor-sdk-rtos-j721s2-evm-08_05_00_11/tidl_j721s2_08_05_00_16
+    
+    cd ${TIDL_INSTALL_PATH}/ti_dl/utils/tidlModelImport
+
+    ./out/tidl_model_import.out ${TIDL_INSTALL_PATH}/ti_dl/test/testvecs/XXX/tidl_import_XXX.txt
+
+    #successful Memory allocation
+    #../../test/testvecs/XXX/output/生成的文件分析：
+    tidl_net_XXX.bin        #Compiled network file 网络模型数据
+    tidl_io_XXX.bin       #Compiled I/O file 网络输入配置文件
+    tidl_net_XXX.bin.svg    #tidlModelGraphviz tool生成的网络图
+    tidl_out.png, tidl_out.txt  #执行的目标检测测试结果
+    ```
 
 4. TIDL运行(暂略)
 
@@ -235,7 +258,7 @@ models = ['custom_model_name']  #修改对应的模型名称
 "deny_list":"Slice", #"MaxPool"
 
 #运行编译
-./scripts/run_seed.sh
+./scripts/run.sh
 ```
 配置编译选项文档：[edgeai-tidl-tools/examples/osrt_python/README.md](https://github.com/TexasInstruments/edgeai-tidl-tools/blob/master/examples/osrt_python/README.md#optional-options)
 
@@ -447,7 +470,7 @@ def run_model(model, mIdx):
             eval_results['pred_points'] = pred_points
             img = cv2.imread(input_images)  #导入图片用来画线
             img_plot = plot_slots(img, eval_results)    #画线
-            cv2.imshow('seed', img_plot)    #显示结果
+            cv2.imshow('XXX', img_plot)    #显示结果
             key = cv2.waitKey(1000) & 0xFF
             cv2.destroyAllWindows()
             save_path = os.path.join('../../../output_images','test_image'+str(i+1)+'.jpg') #保存路径
@@ -460,7 +483,7 @@ def run_model(model, mIdx):
         if ncpus > 1:   # 如果使用了多个CPU，则释放信号量
             sem.release()
 
-models = ['seed_yolox']
+models = ['XXX_yolox']
 log = f'\nRunning {len(models)} Models - {models}\n'
 print(log)
 
@@ -563,7 +586,7 @@ sudo minicom -D /dev/ttyUSB2 -c on
 root #登录
 #运行自定义实例
 cd /opt/edgeai-gst-apps/apps_cpp
-./bin/Release/app_edgeai ../configs/seed.yaml
+./bin/Release/app_edgeai ../configs/XXX.yaml
 #Ctrl+C 安全退出
 ```
 
