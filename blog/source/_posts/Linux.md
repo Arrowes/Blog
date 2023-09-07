@@ -65,7 +65,8 @@ df -hl              #查看磁盘剩余空间
 Host 键:右ctrl，方向键上：获取上次的命令，Tab：自动补全
 ``Ctrl + alt + T``	Terminal
 ``Ctrl + H``	显示隐藏文件   
-
+> Debug:
+VirtualBox安装 64位的Ubuntu系统，在安装时没有显示64位的Linux安装项: 1.CPU要是64位, 2.CPU开启了虚拟化 > `进入BOIS > Security> Virtualization > Enable` 还是不行则要查看Win10系统安装了自带的Hyper-V虚拟机是否占用了CPU虚拟化技术，将其卸载
 ## 上网
 [Clash.for.Windows-0.20.29-x64-linux.tar.gz ](https://github.com/Fndroid/clash_for_windows_pkg/releases/download/0.20.29/Clash.for.Windows-0.20.29-x64-linux.tar.gz)可用于Ubuntu，
 解压缩，进入文件夹终端，运行`.cfw`,即可打开软件
@@ -140,6 +141,7 @@ branch 与 tag：
 git tag/branch  #查仓库所有的tag或branch
 git clone --branch [tag] [git地址]  #github clone 指定的tag
 git checkout [tag/branch]  #已有仓库切换 tag/branch
+git describe --tag      #查当前tag
 
 #tag 对应某次 commit, 是一个点，是不可移动的。
 #branch 对应一系列 commit，是很多点连成的一根线，有一个HEAD 指针，是可以依靠 HEAD 指针移动的。

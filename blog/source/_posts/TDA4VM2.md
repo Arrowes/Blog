@@ -97,34 +97,28 @@ make linux_fs_install_sd
 上面都是EVM板的相关环境配置，后面只拿到了SK板，因此转为SK板的相关配置。
 
 # [TDA4VM-SK](https://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-edgeai/TDA4VM/08_06_01/exports/docs/devices/TDA4VM/linux/getting_started.html) 配置
-[SK-TDA4VM 用户指南](https://www.ti.com.cn/cn/lit/ug/zhcu912c/zhcu912c.pdf?ts=1688968746311&ref_url=https%253A%252F%252Fwww.bing.com%252F)
+硬件信息：[SK-TDA4VM 用户指南](https://www.ti.com.cn/cn/lit/ug/zhcu912c/zhcu912c.pdf)
+[Processor SDK Linux for Edge AI Documentation](https://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-sk-tda4vm/latest/exports/docs/running_simple_demos.html)
+配置文档：[Processor SDK Linux for SK-TDA4VM Documentation - getting_started](https://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-edgeai/TDA4VM/08_06_01/exports/docs/devices/TDA4VM/linux/getting_started.html)，详细说明了如何配置，下面是简要步骤：
 
-> TI 的 TDA4VM SoC 包含双核 A72、高性能视觉加速器、视频编解码器加速器、最新的 C71x 和 C66x DSP、 用于捕获和显示的高带宽实时 IP、GPU、专用安全岛和安全加速器。 SoC 经过功率优化，可为机器人、工业 和汽车应用中的感知、传感器融合、定位和路径规划任务提供一流的性能。TDA4VM Edge AI Starter Kit (SK) 是一款低成本、小尺寸板，功耗大约20W，能提供8TOPS深度学习算力，支持Tensorflow Lite,ONNX,TVM,GStreamer接口
+> 物料准备：
+SK板，microUSB串口线，USB camera，HDMI/DP显示器，≥16GB的内存卡，网线和局域网*，串口电源（5-20V DC ≥20w），散热风扇
 
 通过USB挂载SD卡到Ubuntu
-下载[SDK包](https://www.ti.com/tool/download/PROCESSOR-SDK-LINUX-SK-TDA4VM)
-使用[Balena etcher tool 1.7.0](https://github.com/balena-io/etcher/releases/tag/v1.7.0)把 SD card .wic image flash到SD卡上
+下载[SD card .wic image](https://www.ti.com/tool/download/PROCESSOR-SDK-LINUX-SK-TDA4VM)
+使用[Balena etcher tool 1.7.0](https://github.com/balena-io/etcher/releases/tag/v1.7.0) 把 SD card .wic image `flash`到SD卡上
 然后插入SD卡到SK板，SK板连接显示器，上电，进入界面。
-```sh
-#安装SDK Linux-SK
-chmod +x ./xxx.bin
-./xxx.bin
-```
-连接串口线，在虚拟机设置中挂载USB串口，使用[minicom](https://help.ubuntu.com/community/Minicom)串口通讯：
+
+连接串口线，在虚拟机设置中挂载USB串口，使用 [minicom](https://help.ubuntu.com/community/Minicom) 串口通讯：
 (在minicom中自动换行：Ctrl+A Z W)
 ```sh
 sudo apt-get install minicom  #安装minicom
 sudo minicom -D /dev/ttyUSB2 -c on
-#输入用户名：root，登录tda4vm-sk，若连接了USB摄像头此时会显示相关信息
+#输入用户名：root，登录tda4vm-sk
+#若连接了USB摄像头此时会显示端口信息，也可以cd , ./.profile 查摄像头：/dev/video2
 ```
-插入USB摄像头，配置：
-```sh
-#查摄像头参数
-cd 
-./.profile  #/dev/video2
-```
-连接显示器后（HDMI/DP），可以鼠标点击试运行开箱即用的 GUI 应用程序，
-也使用 Python 和C++参考示例开发边缘 AI 应用程序：
+
+连接显示器后（HDMI/DP），可以鼠标点击试运行开箱即用的 GUI 应用程序，也可使用 Python 和C++参考示例开发边缘 AI 应用程序：
 ```sh
 #配置
 cd /opt/edgeai-gst-apps/configs/  #app_config_template.yaml中有参数介绍
@@ -153,6 +147,12 @@ flows:
 ```
 如果运行过程中突然重启，一般是需要加个*风扇*增强散热
 
+可选操作：
++ 连接网线，ifconfig查询板子ip地址，后面即可使用ssh登陆，可以使用vscode的remote插件来直接ssh登陆到板子，然后可以很方便地修改配置文件
++ 安装tensorflow，onnx，python和c++依赖库 `/opt/edge_ai_apps#./setup_script.sh
+`
+
+
 **Dataflows**
 <img src="https://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-edgeai/TDA4VM/08_06_01/exports/docs/_images/edgeai_object_detection.png" width='90%'>
 GStreamer input pipeline:
@@ -176,7 +176,7 @@ sink_0::startx="<320>"  sink_0::starty="<180>"  sink_0::widths="<1280>"   sink_0
 
 <img src="https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/06_01_01_12/exports/docs/tidl_j7_01_00_01_00/ti_dl/docs/user_guide_html/TIDL_import_process.png" >
 
-## Demo:使用TIDL实现多种模型的导入、运行(form RTOS SDK)
+## Demo:使用TIDL实现多种模型的导入、运行 (from RTOS SDK)
 文档教程：[MobileNetV2 Tensorflow，PeleeNet Caffe，JSegNet21V2 Caffe model](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/06_01_01_12/exports/docs/tidl_j7_01_00_01_00/ti_dl/docs/user_guide_html/md_tidl_user_model_deployment.html#importing-mobilenetv2-model-for-image-classification)，下面以PeleeNet为例
 
 **Config** TIDL

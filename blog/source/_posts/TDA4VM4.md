@@ -243,6 +243,7 @@ def infer_image(sess, image_files, config): #此处修改模型输入数据格�
 models = ['custom_model_name']  #修改对应的模型名称
 
 #修改examples/osrt_python/model_configs.py 导入并配置模型
+#onnx文件移入model/public文件夹
     'custom_model_name' : {
         'model_path' : os.path.join(models_base_path, 'custom_model_name.onnx'),
         'source' : {'model_url': 'https..XXX./.onnx', 'opt': True,  'infer_shape' : True},

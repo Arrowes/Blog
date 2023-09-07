@@ -137,7 +137,7 @@ drive.mount('/content/drive')
 
 # Pytorch
 要调用GPU进行训练的话，需要安装显卡驱动对应的CUDA
-1. ``nvidia-smi`` 查询支持CUDA版本
+1. ``nvidia-smi`` 查询支持CUDA版本, 显卡驱动程序显示的cuda版本为电脑最高可适配的cuda版本
 ![图 3](https://raw.sevencdn.com/Arrowes/Arrowes-Blogbackup/main/images/Pytorch3.png)  
 2. 到 [Pytorch官网](https://pytorch.org/get-started/locally/) 复制对应code进行安装
 ![图 4](https://raw.sevencdn.com/Arrowes/Arrowes-Blogbackup/main/images/Pytorch4.png)  

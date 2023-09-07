@@ -107,6 +107,27 @@ Linux SDK最主要是用于A72核心上的启动引导、操作系统、文件�
 <img alt="图 compare" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/TDA4VMcompare.png" />  
 <img alt="图 compare" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/TDA4VMcompare2.png" /> 
 
+# TDA4VM-SK开发板
+TDA4VM processor starter kit for edge AI vision systems
+
+<img alt="图 TDA4VM-SK" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/TDA4VM-SK.png" /> 
+
+[SK-TDA4VM Evaluation board | TI.com](https://www.ti.com/tool/SK-TDA4VM)
+[SK-TDA4VM 用户指南](https://www.ti.com.cn/cn/lit/ug/zhcu912c/zhcu912c.pdf?ts=1688968746311), 提供了 SK-TDA4VM 的功能和接口详细信息
+[Processor SDK Linux for Edge AI Documentation](https://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-sk-tda4vm/latest/exports/docs/running_simple_demos.html)
+[Processor SDK Linux for SK-TDA4VM Documentation](https://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-edgeai/TDA4VM/08_06_01/exports/docs/common/inference_models.html)
+
+
+TI 的 TDA4VM SoC 包含双核 A72、高性能视觉加速器、视频编解码器加速器、最新的 C71x 和 C66x DSP、 用于捕获和显示的高带宽实时 IP、GPU、专用安全岛和安全加速器。 SoC 经过功率优化，可为机器人、工业 和汽车应用中的感知、传感器融合、定位和路径规划任务提供一流的性能。
+
+TDA4VM Edge AI Starter Kit (SK) 是一款低成本、小尺寸板，功耗大约20W，能提供8TOPS深度学习算力，支持Tensorflow Lite,ONNX,TVM,GStreamer接口
+
+**Features**
++ **性能** - TDA4VM处理器提供8 TOPS的深度学习性能，并以低功耗实现硬件加速的边缘人工智能。
++ **摄像头接口** - 两个与树莓派兼容的CSI-2端口，以及一个高速40针Semtec相机连接器，可连接最多八个相机（需要TIDA-01413传感器融合附加卡）。
++ **连接性** - 三个USB 3.0 Type A端口，一个USB 3.0 Type C端口，一个以太网口，一个M.2 Key E连接器和一个M.2 Key M连接器，四个CAN-FD接口，通过一个USB桥接器支持四个UART终端。
++ **内存** - DRAM，LPDDR4-4266，总计4GB内存，支持行内ECC(Error Checking and Correcting”)。
++ **显示** - DisplayPort支持最高4K分辨率和MST功能，以及1080p HDMI。
 
 # TIDL
 [TIDL](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/06_01_01_12/exports/docs/tidl_j7_01_00_01_00/ti_dl/docs/user_guide_html/index.html)（TI Deep Learning Library）是TI平台基于深度学习算法的*软件生态系统*，其特性和支持[^2]可以将一些常见的深度学习算法模型快速的部署到TI嵌入式平台。
@@ -131,7 +152,7 @@ TIDL当前支持的训练框架有Tensorflow、Pytorch、Caffe等，用户可以
 
 
 ## TIDL Importer
-TIDL提供了 [TIDL Importer](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/06_01_01_12/exports/docs/tidl_j7_01_00_01_00/ti_dl/docs/user_guide_html/md_tidl_model_import.html) 模型导入工具，模型可视化工具等，非常便捷地可以对训练好的模型进行导入。
+RTOS SDK 中的 ti_dl 提供了 [TIDL Importer](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/06_01_01_12/exports/docs/tidl_j7_01_00_01_00/ti_dl/docs/user_guide_html/md_tidl_model_import.html) 模型导入工具，模型可视化工具等，非常便捷地可以对训练好的模型进行导入。
 
 <img alt="图 3" src="https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/06_01_01_12/exports/docs/tidl_j7_01_00_01_00/ti_dl/docs/user_guide_html/TIDL_blockDiagram.png" />  
 <img alt="图 4" src="https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/06_01_01_12/exports/docs/tidl_j7_01_00_01_00/ti_dl/docs/user_guide_html/tidl_import_design.jpg" />  
