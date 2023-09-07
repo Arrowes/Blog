@@ -99,6 +99,8 @@ make linux_fs_install_sd
 # [TDA4VM-SK](https://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-edgeai/TDA4VM/08_06_01/exports/docs/devices/TDA4VM/linux/getting_started.html) 配置
 [SK-TDA4VM 用户指南](https://www.ti.com.cn/cn/lit/ug/zhcu912c/zhcu912c.pdf?ts=1688968746311&ref_url=https%253A%252F%252Fwww.bing.com%252F)
 
+> TI 的 TDA4VM SoC 包含双核 A72、高性能视觉加速器、视频编解码器加速器、最新的 C71x 和 C66x DSP、 用于捕获和显示的高带宽实时 IP、GPU、专用安全岛和安全加速器。 SoC 经过功率优化，可为机器人、工业 和汽车应用中的感知、传感器融合、定位和路径规划任务提供一流的性能。TDA4VM Edge AI Starter Kit (SK) 是一款低成本、小尺寸板，功耗大约20W，能提供8TOPS深度学习算力，支持Tensorflow Lite,ONNX,TVM,GStreamer接口
+
 通过USB挂载SD卡到Ubuntu
 下载[SDK包](https://www.ti.com/tool/download/PROCESSOR-SDK-LINUX-SK-TDA4VM)
 使用[Balena etcher tool 1.7.0](https://github.com/balena-io/etcher/releases/tag/v1.7.0)把 SD card .wic image flash到SD卡上
