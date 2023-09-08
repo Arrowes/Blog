@@ -896,6 +896,70 @@ class Derived: public Base1, publice Base2
 面向对象编程的核心——多态
 多态：将派生类对象视为基类对象，并执行派生类的实现
 
+**虚函数**
+使用虚函数实现多态行为
+```c
+class Base 
+{ 
+ virtual ReturnType FunctionName (Parameter List); 
+}; 
+class Derived 
+{ 
+ ReturnType FunctionName (Parameter List); 
+}; 
+```
+使用关键字 virtual, Swim( )被声明为虚函数，确保编译器调用覆盖版本
+
+作用：对于使用 new 在自由存储区中实例化的派生类对象，如果将其赋给基类指针，并通过该指针调用 delete，将不会调用派生类的析构函数。这可能导致资源未释放、内存泄露等问题，因此可将**析构函数声明为虚函数**
+```c
+class Base 
+{ 
+public: 
+ virtual ~Base() {}; // virtual destructor 
+}; 
+```
+
+**抽象基类和纯虚函数**
+不能实例化的基类被称为抽象基类，这样的基类只有一个用途，那就是从它派生出其他类。在 C++中，要创建抽象基类，可声明纯虚函数。
+```c
+class AbstractBase 
+{ 
+public: 
+ virtual void DoSomething() = 0; // pure virtual method 
+}; 
+//该声明告诉编译器，AbstractBase 的派生类必须实现方法 DoSomething( )
+```
+
+使用**虚继承**解决菱形问题：在继承层次结构中，继承多个从同一个类派生而来的基类时，如果这些基类没有采用虚继承，将导致二义性，因此，如果派生类可能被用作基类，派生时最好使用*虚继承*：
+```c
+class Derived1: public virtual Base 
+{ 
+ // ... members and functions 
+}; 
+```
+
+表明覆盖意图的限定符 **override** , 来核实被覆盖的函数在基类中是否被声明为虚的
+```c
+class Tuna:public Fish 
+{ 
+public: 
+ void Swim() const override // Error: no virtual fn with this sig in Fish 
+ { 
+ cout << "Tuna swims!" << endl; 
+ } 
+}; 
+```
+使用 **final** 来禁止覆盖函数, 被声明为 final 的虚函数，不能在派生类中进行覆盖
+```c
+class Tuna:public Fish 
+{ 
+public: 
+ void Swim() override final  // override Fish::Swim and make this final 
+ { 
+ cout << "Tuna swims!" << endl; 
+ } 
+};//可继承这个版本的 Tuna 类，但不能进一步覆盖函数 Swim()
+```
 
 
 

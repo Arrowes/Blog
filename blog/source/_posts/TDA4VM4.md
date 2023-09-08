@@ -60,7 +60,6 @@ maxpool(k=13, s=1)-> replaced with six maxpool(k=3,s=1)
 参考TI官方对YOLOx的更改 [edgeai-yolox/README_2d_od](https://github.com/TexasInstruments/edgeai-yolox/blob/main/README_2d_od.md)，将Slice替换为一个卷积层，再对MaxPool拆分，最后激活函数Silu替换为Relu，再重新训练，得到新模型，设为opset_version=11重新导出onnx编译后，即可只生成2个bin文件（net+io），完全的支持tidl运行加速；
 
 # ONNX模型转换及推理
-~~使用`torch.onnx.export(model, input, "XXX.onnx", verbose=False, export_params=True, opset_version=13)`得到 `.onnx`；~~
 使用`torch.onnx.export(model, input, "XXX.onnx", verbose=False, export_params=True, opset_version=11)`得到 `.onnx`；
 > 注意要确保加载的模型是一个完整的PyTorch模型对象，而不是一个包含模型权重的字典, 否则会报错`'dict' object has no attribute 'modules'`；
 因此需要在项目保存`.pth`模型文件时设置同时*保存网络结构*，或者在项目代码中*导入完整模型*后使用`torch.onnx.export`

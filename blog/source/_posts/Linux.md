@@ -115,7 +115,7 @@ vscode插件离线安装：如装python插件，直接进[ marketplace ](https:/
 2. ``git checkout -b xxx`` 切换至新分支xxx，相当于复制了remote的仓库到本地的xxx分支上
 3. 修改或者添加本地代码（部署在硬盘的源文件上）
 4. ``git diff`` 查看自己对代码做出的改变
-5. ``git add`` 上传更新后的代码至暂存区
+5. ``git add .`` 上传所有代码至暂存区 也可把 . 换成指定文件
 6. ``git commit`` 可以将暂存区里更新后的代码更新到本地git
 7. ``git push origin xxx`` 将本地的xxx git分支上传至github上的git
 
@@ -134,21 +134,39 @@ vscode插件离线安装：如装python插件，直接进[ marketplace ](https:/
 
 [十分钟学会正确的github工作流，和开源作者们使用同一套流程](https://www.bilibili.com/video/BV19e4y1q7JJ)
 
----
-branch 与 tag：
+<img src="https://www.ruanyifeng.com/blogimg/asset/2015/bg2015120901.png" width="100%">
+
+
 ```sh
-git tag/branch  #查仓库所有的tag或branch
-git clone --branch [tag] [git地址]  #github clone 指定的tag
+#branch 与 tag：
+git tag/branch  #查本地仓库所有的tag或branch -r:远程分支 -a:所有分支
 git checkout [tag/branch]   #已有仓库切换 tag/branch
-git describe --tag      #查当前tag
 git checkout -b [branch]    #新建一个分支，并切换到该分支
+git merge [branch]  #合并指定分支到当前分支
 git tag [tag]       #新建一个 tag 在当前 commit
+git describe --tag  #查当前tag
+git show [tag]      #查看tag信息
 
 #tag 对应某次 commit, 是一个点，是不可移动的。
 #branch 对应一系列 commit，是很多点连成的一根线，有一个HEAD 指针，是可以依靠 HEAD 指针移动的。
 #两者的区别决定了使用方式，改动代码用 branch ,不改动只查看用 tag
 ```
 
+
+```sh
+#常用指令：
+git init [project-name] #新建一个目录，将其初始化为Git代码库
+git status  #显示有变更的文件
+git log     #显示当前分支的版本历史 commit id
+git diff    #显示暂存区和工作区的差异
+git reset --hard [commitId]  # 进行回溯
+
+git config --list   #检查当前配置
+# 配置全局信息 无global则是在项目中配置
+git config --global user.name "[name]"
+git config --global user.email "[email address]"
+
+```
 
 # Docker
 `Docker`是一种开源的容器化平台，可以帮助开发者更高效地打包、部署和运行应用程序。它基于 `Linux` 容器（LXC）技术，通过将应用程序及其所有依赖项打包到一个容器中，从而消除了应用程序在不同环境之间迁移所面临的问题。使用Docker，开发者可以快速构建、测试和部署应用程序，减少了与操作系统和基础设施相关的问题，从而提高了开发、测试和发布的速度。
