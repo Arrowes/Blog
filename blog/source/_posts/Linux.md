@@ -110,14 +110,14 @@ vscode插件离线安装：如装python插件，直接进[ marketplace ](https:/
  
 # Git
 下载 [Git](https://git-scm.com/downloads)，与 [TortoiseGit](https://tortoisegit.org/download/) 小乌龟配合使用可以少记很多指令，在目标文件夹右键可执行push、clone、commit等操作
-## 主要指令
+## 主要流程
 1. ``git clone <X>`` // 到本地
 2. ``git checkout -b xxx`` 切换至新分支xxx，相当于复制了remote的仓库到本地的xxx分支上
 3. 修改或者添加本地代码（部署在硬盘的源文件上）
 4. ``git diff`` 查看自己对代码做出的改变
 5. ``git add`` 上传更新后的代码至暂存区
 6. ``git commit`` 可以将暂存区里更新后的代码更新到本地git
-7. ``git push origin xxx`` 将本地的xxxgit分支上传至github上的git
+7. ``git push origin xxx`` 将本地的xxx git分支上传至github上的git
 
 如果在写自己的代码过程中发现远端GitHub上代码出现改变
 1. ``git checkout main`` 切换回main分支
@@ -125,8 +125,7 @@ vscode插件离线安装：如装python插件，直接进[ marketplace ](https:/
 3. ``git checkout xxx`` 回到xxx分支
 4. ``git rebase main`` 我在xxx分支上，先把main移过来，然后根据我的commit来修改成新的内容
 （中途可能会出现，rebase conflict --> 手动选择保留哪段代码）
-5. ``git push -f origin xxx`` 把rebase后并且更新过的代码再push到远端github上
-（-f --> 强行）
+5. ``git push -f origin xxx`` 把rebase后并且更新过的代码再push到远端github上（-f --> 强行）
 6. 原项目主人采用pull request 中的 squash and merge 合并所有不同的commit
 
 远端完成更新后
@@ -140,8 +139,10 @@ branch 与 tag：
 ```sh
 git tag/branch  #查仓库所有的tag或branch
 git clone --branch [tag] [git地址]  #github clone 指定的tag
-git checkout [tag/branch]  #已有仓库切换 tag/branch
+git checkout [tag/branch]   #已有仓库切换 tag/branch
 git describe --tag      #查当前tag
+git checkout -b [branch]    #新建一个分支，并切换到该分支
+git tag [tag]       #新建一个 tag 在当前 commit
 
 #tag 对应某次 commit, 是一个点，是不可移动的。
 #branch 对应一系列 commit，是很多点连成的一根线，有一个HEAD 指针，是可以依靠 HEAD 指针移动的。
