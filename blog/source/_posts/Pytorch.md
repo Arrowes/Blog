@@ -146,8 +146,8 @@ drive.mount('/content/drive')
 ```py
 python -c "import torch;print(torch.cuda.is_available())"   #返回True说明GPU可以被使用
 torch.__version__ #查pytorch版本
-nvidia-smi #查GPU CUDA
-python –-version #查python版本
+nvidia-smi        #查GPU CUDA
+python –-version  #查python版本
 conda install python=3.8  #升级(覆盖安装)python
 ```
 

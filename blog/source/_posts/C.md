@@ -674,6 +674,7 @@ int main()
 
 **this 指针** :  在类中，关键字 this 包含当前对象的地址,当您在类成员方法中调用其他成员方法时，编译器将隐式地传递 this 指针—函数调用中不可见的参数 
 `Talk("Bla bla"); // same as Talk(this, "Bla Bla") `
+*this表示当前对象的指针。它是一个特殊的指针，指向类的实例或对象自身
 
 **sizeof( )** ： 指出类声明中所有数据属性占用的总内存量，单位为字节 （结果受字填充word padding和其他因素的影响）
 
@@ -896,7 +897,7 @@ class Derived: public Base1, publice Base2
 面向对象编程的核心——多态
 多态：将派生类对象视为基类对象，并执行派生类的实现
 
-**虚函数**
+**虚函数 virtual**
 使用虚函数实现多态行为
 ```c
 class Base 
@@ -909,6 +910,7 @@ class Derived
 }; 
 ```
 使用关键字 virtual, Swim( )被声明为虚函数，确保编译器调用覆盖版本
+对于将被派生类覆盖的基类方法，务必将其声明为虚函数。
 
 作用：对于使用 new 在自由存储区中实例化的派生类对象，如果将其赋给基类指针，并通过该指针调用 delete，将不会调用派生类的析构函数。这可能导致资源未释放、内存泄露等问题，因此可将**析构函数声明为虚函数**
 ```c
@@ -920,16 +922,26 @@ public:
 ```
 
 **抽象基类和纯虚函数**
-不能实例化的基类被称为抽象基类，这样的基类只有一个用途，那就是从它派生出其他类。在 C++中，要创建抽象基类，可声明纯虚函数。
+不能实例化的基类被称为抽象基类，这样的基类只有一个用途，那就是从它派生出其他类（充当接口）。在 C++中，要创建抽象基类，可声明纯虚函数。
 ```c
 class AbstractBase 
 { 
 public: 
  virtual void DoSomething() = 0; // pure virtual method 
 }; 
-//该声明告诉编译器，AbstractBase 的派生类必须实现方法 DoSomething( )
+//该声明告诉编译器，AbstractBase 的派生类必须实现方法 DoSomething()：
+class Derived: public AbstractBase 
+{ 
+public: 
+ void DoSomething() // pure virtual fn. must be implemented 
+ { 
+ cout << "Implemented virtual function" << endl; 
+ } 
+}; 
 ```
+抽象基类提供了一种非常好的机制，能够声明所有派生类都必须实现的函数。如果 Trout 类从Fish 类派生而来，但没有实现 Trout::Swim( )，将无法通过编译
 
+**虚继承 virtual**
 使用**虚继承**解决菱形问题：在继承层次结构中，继承多个从同一个类派生而来的基类时，如果这些基类没有采用虚继承，将导致二义性，因此，如果派生类可能被用作基类，派生时最好使用*虚继承*：
 ```c
 class Derived1: public virtual Base 
@@ -937,6 +949,9 @@ class Derived1: public virtual Base
  // ... members and functions 
 }; 
 ```
+> 用于创建继承层次结构和声明基类函数时，关键字 virtual 的作用不同:
+在函数声明中，virtual 意味着当基类指针指向派生对象时，通过它可调用派生类的相应函数。
+从 Base 类派生出 Derived1 和 Derived2 类时，如果使用了关键字 virtual，则意味着再从Derived1 和 Derived2 派生出 Derived3 时，每个 Derived3 实例只包含一个 Base 实例。
 
 表明覆盖意图的限定符 **override** , 来核实被覆盖的函数在基类中是否被声明为虚的
 ```c
@@ -949,6 +964,8 @@ public:
  } 
 }; 
 ```
+在派生类中声明要覆盖基类函数的函数时，务必使用关键字 override。
+
 使用 **final** 来禁止覆盖函数, 被声明为 final 的虚函数，不能在派生类中进行覆盖
 ```c
 class Tuna:public Fish 
@@ -961,7 +978,79 @@ public:
 };//可继承这个版本的 Tuna 类，但不能进一步覆盖函数 Swim()
 ```
 
+虚函数 Clone 模拟虚复制构造函数：
+```c
+#include <iostream>        //头文件
+using namespace std;     //名称空间
 
+class Fish     //定义Fish类作为基类
+{
+   public:
+      virtual Fish* Clone()=0;   //声明一个纯虚函数Clone 用于克隆对象
+      virtual void Swim()=0;     //声明一个纯虚函数Swim
+      virtual ~Fish() {};     //声明虚析构函数
+};
+
+class Tuna: public Fish    //定义Tuna类，继承自Fish
+{
+   public:
+      Fish* Clone() override  //实现Clone函数，返回一个克隆对象指针
+      {
+         return new Tuna (*this);   //*this表示当前对象的指针
+      }
+
+   void Swim() override final //final使它的派生类无法覆盖swim
+   {
+      cout << "Tuna swims fast in the sea" << endl;
+   }
+};
+
+class BluefinTuna final:public Tuna // 定义BluefinTuna类，继承自Tuna
+{
+   public:
+      Fish* Clone() override  //无法覆盖Tuna类中的Swim函数
+      {//调用 Swim()时执行 Tuna::Swim()
+         return new BluefinTuna(*this);
+      }
+};
+
+class Carp final: public Fish // 定义Carp类，继承自Fish
+{
+   Fish* Clone() override{
+      return new Carp(*this);
+   }
+   void Swim() override final  // 实现Carp的Swim函数
+   {
+      cout << "Carp swims slow in the lake" << endl;
+   }
+} ;
+
+int main()
+{
+   const int ARRAY_SIZE =4;
+
+   Fish* myFishes[ARRAY_SIZE]={NULL};  //声明静态基类指针（Fish *）数组，创建对象
+   myFishes[0]=new Tuna();
+   myFishes[1]=new Carp();
+   myFishes[2]=new BluefinTuna();
+   myFishes[3]=new Carp();
+
+   Fish* myNewFishes[ARRAY_SIZE];
+   for (int index=0; index < ARRAY_SIZE; ++index)
+      myNewFishes[index]=myFishes[index]->Clone(); // 使用Clone函数克隆原对象到另一个数组
+
+   for (int index=0; index<ARRAY_SIZE; ++index)
+      myNewFishes[index]->Swim();   // 调用克隆对象的Swim函数，以验证 Clone( )复制了整个派生类对象
+
+   for (int index=0; index<ARRAY_SIZE; ++index)
+      {  // 释放内存
+         delete myFishes[index];
+         delete myNewFishes[index];
+      }
+
+      return 0;
+}
+```
 
 
 
