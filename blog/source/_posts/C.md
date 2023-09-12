@@ -1074,6 +1074,8 @@ int main()
 [Cmake 实践](https://github.com/gavinliu6/CMake-Practice-zh-CN) 在实践中上手的教程
 [cmake-examples-Chinese](https://github.com/SFUMECJF/cmake-examples-Chinese) 例程
 
+[C-coding/Cmake at main · Arrowes/C-coding](https://github.com/Arrowes/C-coding/tree/main/Cmake)
+
 ## [Cmake 实践](https://gavinliu6.github.io/CMake-Practice-zh-CN/#/)
 
 ### t1 [创建Hello world](https://github.com/gavinliu6/CMake-Practice-zh-CN/blob/master/hello-world.md)
@@ -1149,7 +1151,7 @@ CMAKE_CURRENT_SOURCE_DIR    #当前处理的 CMakeLists.txt 所在的路径
 CMAKE_CURRRENT_BINARY_DIR   #若是 in-source 编译，同上一致，对out-ofsource 编译，他指的是 target 编译目录。
 CMAKE_CURRENT_LIST_FILE #输出调用这个变量的 CMakeLists.txt 的完整路径
 CMAKE_CURRENT_LIST_LINE #输出这个变量所在的行
-CMAKE_MODULE_PATH   #定义自己的 cmake 模块所在的路径
+CMAKE_MODULE_PATH       #定义自己的 cmake 模块所在的路径
 EXECUTABLE_OUTPUT_PATH，LIBRARY_OUTPUT_PATH #分别用来重新定义最终结果的存放目录，如SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
 PROJECT_NAME    #返回通过 PROJECT 指令定义的项目名称
 
@@ -1210,35 +1212,38 @@ export PKG_CONFIG_PATH=/home/ywang85/opencv/lib/cmake/opencv4/:$PKG_CONFIG_PATH 
 <details>
   <summary>边缘提取程序</summary>
 
-      #include <opencv2/core/core.hpp>
-      #include <opencv2/imgproc/imgproc.hpp>
-      #include <opencv2/highgui/highgui.hpp>
-      #include <math.h>
-      #include <iostream>
-      using namespace cv;
-      using namespace std;
-      
-      int threshold_value = 100, threshold_max = 255;
-      int threshold_type = 0, threshold_type_max = 4;
-      string outwindow = "threshold img";
-      Mat src, dst;
-      int main(){
-         Mat src1;
-         src1 = imread("1.jpg");
-         resize(src1, src, Size(src1.cols, src1.rows)); 
-         //resize(src1, src, Size(src1.cols/2, src1.rows/2)); //缩小一半
-         if (!src.data){
-            printf("cannot load image ...");
-            return -1;
-         }
-         Mat src_gray;
-         cvtColor(src, src_gray, COLOR_BGR2GRAY);
-         Canny(src_gray, dst, 100, 200);//canny边缘检测算子
-         imwrite("canny.jpg", dst);
-         imwrite("canny2.jpg", ~dst); //dst按照像素值取反
-         return 0;
-      }
+```c
+#include <opencv2/core/core.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <math.h>
+#include <iostream>
+using namespace cv;
+using namespace std;
+
+int threshold_value = 100, threshold_max = 255;
+int threshold_type = 0, threshold_type_max = 4;
+string outwindow = "threshold img";
+Mat src, dst;
+int main(){
+   Mat src1;
+   src1 = imread("1.jpg");
+   resize(src1, src, Size(src1.cols, src1.rows)); 
+   //resize(src1, src, Size(src1.cols/2, src1.rows/2)); //缩小一半
+   if (!src.data){
+      printf("cannot load image ...");
+      return -1;
+   }
+   Mat src_gray;
+   cvtColor(src, src_gray, COLOR_BGR2GRAY);
+   Canny(src_gray, dst, 100, 200);//canny边缘检测算子
+   imwrite("canny.jpg", dst);
+   imwrite("canny2.jpg", ~dst); //dst按照像素值取反
+   return 0;
+}
+```
 </details>
+
 使用OpenCV的canny算子检测边缘
 
 **3.写CMake**
