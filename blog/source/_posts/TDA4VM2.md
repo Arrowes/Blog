@@ -107,7 +107,8 @@ SK板，microUSB串口线，USB camera，HDMI/DP显示器，≥16GB的内存卡�
 通过USB挂载SD卡到Ubuntu
 下载[SD card .wic image](https://www.ti.com/tool/download/PROCESSOR-SDK-LINUX-SK-TDA4VM)
 使用[Balena etcher tool 1.7.0](https://github.com/balena-io/etcher/releases/tag/v1.7.0) 把 SD card .wic image `flash`到SD卡上
-然后插入SD卡到SK板，SK板连接显示器，上电，进入界面。
+然后插入SD卡到SK板，拨码开关拨到数字端，系统从SD卡启动
+SK板连接显示器，上电，进入界面。
 
 连接串口线，在虚拟机设置中挂载USB串口，使用 [minicom](https://help.ubuntu.com/community/Minicom) 串口通讯：
 (在minicom中自动换行：Ctrl+A Z W)
