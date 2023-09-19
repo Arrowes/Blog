@@ -131,7 +131,7 @@ Step != 1 is NOT supported for Slice Operator -- /backbone/backbone/stem/Slice_3
 #因为"the slice operations in Focus layer are not embedded friendly"，因此ti提供yolox-s-ti-lite，优化后的才能直接导入
 ```
 
-4. TIDL运行
+4. TIDL运行(PC inference)
 ```sh
 #在文件ti_dl/test/testvecs/config/config_list.txt顶部加入:
 1 testvecs/config/infer/public/onnx/tidl_infer_yolox.txt

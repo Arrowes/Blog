@@ -54,7 +54,10 @@ cat /proc/version   #查版本信息
 lsb_release -a      #查ubuntu版本
 free -m             #查内存使用情况
 df -hl              #查看磁盘剩余空间
+
 ```
+截图：1.screen截图应用程序   2.设置-设备-键盘-截图快捷键
+
 ## 虚拟机
 [Virtual Box](https://www.virtualbox.org/wiki/Downloads) + [Ubuntu 20.04](http://releases.ubuntu.com/20.04/), 或[18.04](https://releases.ubuntu.com/bionic/)（速度慢则换[镜像源](https://mirrors.tuna.tsinghua.edu.cn/ubuntu-releases/20.04/)）
 > 新建 > 导入.iso镜像 > 配置（分4G内存,100G硬盘）

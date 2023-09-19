@@ -146,28 +146,27 @@ TIDL Importer 是RTOS SDK中提供的导入工具，需要网络结构完全支�
 2. 编写转换配置文件：新建**tidl_import_XXX.txt**，可参考同目录下其他例程，详细参数配置见[文档](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/06_01_01_12/exports/docs/tidl_j7_01_00_01_00/ti_dl/docs/user_guide_html/md_tidl_model_import.html)
 ```sh
 #tidl_import_XXX.txt:
-modelType          = 2  #模型类型，0: Caffe, 1: TensorFlow, 2: ONNX, 3: tfLite
-numParamBits       = 8  #模型参数的位数，Bit depth for model parameters like Kernel, Bias etc.
-numFeatureBits     = 8  #Bit depth for Layer activation
-quantizationStyle  = 3  #量化方法，Quantization method. 2: Linear Mode. 3: Power of 2 scales（2的幂次）
-inputNetFile       = "../../test/testvecs/XXX/XXX.onnx" #Net definition from Training frames work
-outputNetFile      = "../../test/testvecs/XXX/output/825_tidl_net.bin"  ##Output TIDL model with Net and Parameters
-outputParamsFile   = "../../test/testvecs/XXX/output/825_tidl_io_"  # #Input and output buffer descriptor file for TIDL ivision interface
-inDataNorm  = 0     #1 Enable / 0 Disable Normalization on input tensor.
-inMean = 0 0 0      #Mean value needs to be subtracted for each channel of all input tensors
-inScale = 0.003921568627 0.003921568627 0.003921568627  #Scale value needs to be multiplied after means subtract for each channel of all input tensors
-inDataFormat = 1    #Input tensor color format. 0: BGR planar, 1: RGB planar
+modelType          = 2
+numParamBits       = 8
+numFeatureBits     = 8
+quantizationStyle  = 3
+inputNetFile       = "../../test/testvecs/seed_importer/XXX_yolox_221_sig_11.onnx"
+outputNetFile      = "../../test/testvecs/seed_importer/output/825_tidl_net_sig_SDK8_6.bin"
+outputParamsFile   = "../../test/testvecs/seed_importer/output/825_tidl_io__sig_SDK8_6"
+inDataNorm  = 1
+inMean = 0 0 0
+inScale = 0.003921568627 0.003921568627 0.003921568627
+inDataFormat = 1
 inWidth  = 128
 inHeight = 256 
 inNumChannels = 3
-numFrames = 5       #Number of input tensors to be processed from the input file
-inData  =   "../../test/testvecs/XXX/detection_list.txt"  #配置输入图片，回车分隔；如：testvecs/XXX/indata/1.jpg
-perfSimConfig = ../../test/testvecs/XXX/device_configs/j721s2_config.cfg    #Network Compiler Configuration file
-inElementType = 0   #Format for each input feature, 0 : 8bit Unsigned, 1 : 8bit Signed
-postProcType = 2    #后处理，Post processing on output tensor. 0 : Disable, 1- Classification top 1 and 5 accuracy, 2 – Draw bounding box for OD, 3 - Pixel level color blending
+numFrames = 50
+inData  =   "../../test/testvecs/seed_importer/detection_list.txt"
+perfSimConfig = ../../test/testvecs/seed_importer/device_configs/j721s2_config.cfg
+debugTraceLevel=1
 ```
 >Debug:
-`inData`配置数据输入，数量与`numFrames`要匹配；
+`inData`配置数据输入(回车分隔)，数量与`numFrames`要匹配；
 `perfSimConfig`选择对应设备的配置文件；
 `inScale`配置太大可能导致tensor不匹配
 `metaLayersNamesList`注释掉, 除非与TI提供的元架构相同；
@@ -183,12 +182,35 @@ postProcType = 2    #后处理，Post processing on output tensor. 0 : Disable, 
     #successful Memory allocation
     #../../test/testvecs/XXX/output/生成的文件分析：
     tidl_net_XXX.bin        #Compiled network file 网络模型数据
-    tidl_io_XXX.bin       #Compiled I/O file 网络输入配置文件
+    tidl_io_XXX.bin         #Compiled I/O file 网络输入配置文件
     tidl_net_XXX.bin.svg    #tidlModelGraphviz tool生成的网络图
     tidl_out.png, tidl_out.txt  #执行的目标检测测试结果
     ```
 
-4. TIDL运行(暂略)
+4. TIDL运行(inference)
+[TI Deep Learning Library User Guide: TIDL Inference](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/06_01_01_12/exports/docs/tidl_j7_01_00_01_00/ti_dl/docs/user_guide_html/md_tidl_sample_test.html)
+    ```sh
+    #在文件ti_dl/test/testvecs/config/config_list.txt顶部加入:
+    1 testvecs/XXX/tidl_infer_XXX.txt
+    0
+
+    #新建tidl_infer_yolox.txt:
+    inFileFormat    = 2
+    numFrames   = 10
+    netBinFile      = "testvecs/seed_importer/output/825_tidl_net_sig_SDK8_6.bin"
+    ioConfigFile   = "testvecs/seed_importer/output/825_tidl_io_sig_SDK8_61.bin"
+    inData  =   testvecs/seed_importer/detection_list.txt
+    outData =   testvecs/seed_importer/infer_out/inference.bin
+    inResizeMode = 0
+    #0 : Disable, 1- Classification top 1 and 5 accuracy, 2 – Draw bounding box for OD, 3 - Pixel level color blending
+    postProcType = 2
+    debugTraceLevel = 1
+    writeTraceLevel = 0
+    writeOutput = 1
+
+    #运行，结果在ti_dl/test/testvecs/output/
+    cd ${TIDL_INSTALL_PATH}/ti_dl/test && ./PC_dsp_test_dl_algo.out
+    ```
 
 ## Edge AI Studio
 参考yolox的编译过程：[YOLOX的模型转换与SK板端运行](https://wangyujie.site/TDA4VM3/#b-%E4%BD%BF%E7%94%A8TIDL-Tools%EF%BC%88by-Edge-AI-Studio%EF%BC%89)，修改数据预处理与compile_options部分，最后重写画框部分（optional）
