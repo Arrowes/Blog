@@ -8,7 +8,13 @@ tags:
 # C
 [C Primer Plus(第六版)中文版](https://img.anfulai.cn/bbs/94810/C%20Primer%20Plus(%E7%AC%AC%E5%85%AD%E7%89%88)%E4%B8%AD%E6%96%87%E7%89%88.pdf)
 
+```c
+system("read -p 'Press Enter to continue...' var");//linux按任意键继续命令
+system("clear");//linux清屏操作
 
+system("pause"); //windows请按任意键继续
+system("cls");//windows清屏操作
+```
 
 
 
