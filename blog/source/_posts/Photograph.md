@@ -7,7 +7,9 @@ tags:
 - 摄影
 ---
 [索尼APP使用教程](https://kdocs.cn/l/cq3CTsJgxvNv?f=201)
-# 笔记
+# 调色笔记
+<img alt="图 7" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/Photograph-rrl.png" width=50%/>  
+右右左，适当降低饱和度
 
 # 摄影笔记
 四要素：``取景，曝光，虚实，构图``
