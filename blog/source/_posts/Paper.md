@@ -6,14 +6,14 @@ tags: 总结
 # 论文工具
 ## 1.找论文
 参考目标期刊相似论文的架构，搭框架，填内容
-订阅论文：[文献鸟](https://www.storkapp.me/?ref=1003)，设置关键字订阅相关论文
-下载论文：[SCI-Hub论文下载](https://tool.yovisun.com/scihub/), [中国专利下载](https://www.drugfuture.com/cnpat/cn_patent.asp)
-查期刊：[LetPub](https://www.letpub.com.cn/index.php?page=journalapp)，有期刊的介绍及投稿人的讨论
-下载书籍：[Z-library](https://lib-xg7r2un3uz6rivi4ibrvtfls.resist.tel/)
-快速总结论文：Newbing，[ChatPaper](https://chatpaper.org/)
++ 订阅论文：[文献鸟](https://www.storkapp.me/?ref=1003)，设置关键字订阅相关论文，每周会自动收集好论文发你邮箱
++ 下载论文：[SCI-Hub论文下载](https://tool.yovisun.com/scihub/), [中国专利下载](https://www.drugfuture.com/cnpat/cn_patent.asp)，以及学校的webvpn
++ 查期刊：[LetPub](https://www.letpub.com.cn/index.php?page=journalapp)，有期刊的介绍及投稿人的讨论
++ 下载书籍：[Z-library](https://lib-xg7r2un3uz6rivi4ibrvtfls.resist.tel/)
++ 快速总结论文：Newbing，[ChatPaper](https://chatpaper.org/)
 
 ## 2.中译英
-[DeepL翻译器](https://www.deepl.com/translator)
+[DeepL翻译器](https://www.deepl.com/translator)，在翻译结果中可以选中单词修改为其他近义词或不同的句式
 ![图 1](https://raw.sevencdn.com/Arrowes/Arrowes-Blogbackup/main/images/Paper1.png)  
 
 ## 3.润色
@@ -26,20 +26,21 @@ Please [proofreading] the [paragraph] from an academic angle based on the writin
 <img src="https://raw.sevencdn.com/Arrowes/Arrowes-Blogbackup/main/images/Paper2.png" width = "90%" />
 
 ## 4.语法
-[Grammarly](https://www.grammarly.com/office-addin)，安装Word插件修正语法
+[Grammarly](https://www.grammarly.com/office-addin)，安装Word插件，快速修正语法
 ![图 3](https://raw.sevencdn.com/Arrowes/Arrowes-Blogbackup/main/images/Paper3.png)  
 
 # 文献管理神器：Zotero
 Zotero能管理个人文献库、插入引文、论文阅读和记笔记、pdf下载和翻译、查看论文分区、影响因子等信息
 ## 安装
-[Zotero官网](https://www.zotero.org/)，安装软件后再装浏览器插件，可以很方便的在浏览器随时导入文献；
+[Zotero官网](https://www.zotero.org/)，安装软件后再装浏览器插件，可以很方便的在浏览器随时导入文献到Zotero；
 顺便在官网注册一个账号，用于同步,且可登陆官网在线查看自己的论文库； 
 <img src="https://raw.sevencdn.com/Arrowes/Arrowes-Blogbackup/main/images/Paper4.png" width = "100%" />
 
 ## 配置
-### 常规设置
-``编辑 > 首选项 > 同步 > 登陆``
-``编辑 > 首选项 > 高级 > 文件和文件夹 > 更改数据储存路径  #自选合适的位置存储本地文件``
+```sh
+编辑 > 首选项 > 同步 > 登陆
+编辑 > 首选项 > 高级 > 文件和文件夹 > 更改数据储存路径  #自选合适的位置存储本地文件
+```
 
 ### SCI-Hub抓取pdf 
 1. 打开Zotero 首选项->高级->设置编辑器
@@ -112,7 +113,7 @@ Zotero能管理个人文献库、插入引文、论文阅读和记笔记、pdf�
     return ids.length + " item(s) updated";
 </details>
 
-# LaTex
+# LaTex，论文通用排版系统
 在线编辑器：[Overleaf](https://www.overleaf.com/)，可以多人在线共同编辑、批注；
 将期刊提供的LaTex模板导入编辑器，直接在模板里写；
 查询文档：[LaTeXdoc](https://github.com/sailist/LaTeXdoc), [Latex简明速查手册(8页)](https://zhuanlan.zhihu.com/p/508559139)
@@ -126,17 +127,16 @@ Zotero能管理个人文献库、插入引文、论文阅读和记笔记、pdf�
 1. 使用zotero，将文章所需参考文献导入至一个新文件夹中，选择导出分类，选择文件夹导出``ref.bib``格式的文件；
 2. 打开overleaf，将刚刚的``ref.bib``文件导入
 3. 接下来就是在文章中导入参考文献:
+    + 首先导入如下命令，注意是在文章最后，``\end{document}``之前：
+        ```
+        \bibliographystyle{ieicetr} %引文期刊格式
+        \bibliography{ref} %.bib文件名
+        ```
+    + 编译后还不能显示你的参考文献列表，只有在文章中添加了``\cite{}``之后才可以正常显示
+        ![图 6](https://raw.sevencdn.com/Arrowes/Arrowes-Blogbackup/main/images/Paper6.png)  
+        ``\cite{liu_ceam-yolov7_2022}``
 
-（1）首先导入如下命令，注意是在文章最后，``\end{document}``之前：
-```
-\bibliographystyle{ieicetr} %引文期刊格式
-\bibliography{ref} %.bib文件名
-```
-(2)编译后还不能显示你的参考文献列表，只有在文章中添加了``\cite{}``之后才可以正常显示
-![图 6](https://raw.sevencdn.com/Arrowes/Arrowes-Blogbackup/main/images/Paper6.png)  
-``\cite{liu_ceam-yolov7_2022}``
-
-## 公式图表
+## 公式图表代码
 ### 公式
 ```
 \begin{equation}
@@ -194,6 +194,7 @@ IEICE期刊论文投稿的LaTeX模板中提供了EUC、SJIS和UTF三种不同的
 %文章结构
 章：\section{}   节：\subsection{}   条：\subsubsection{}
 ```
+
 # 论文规范
 ## 缩写
 1. 一个词或词组在文中出现三次或以上才可以用缩写，否则需要写出全称。也就是说如果只出现一次或两次，每次都要写出全称，而缩略语就不需要给出了。
