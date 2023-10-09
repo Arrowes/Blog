@@ -71,6 +71,17 @@ Host 键:右ctrl，方向键上：获取上次的命令，Tab：自动补全
 > Debug:
 VirtualBox安装 64位的Ubuntu系统，在安装时没有显示64位的Linux安装项: 1.CPU要是64位, 2.CPU开启了虚拟化 > `进入BOIS > Security> Virtualization > Enable` 还是不行则要查看Win10系统安装了自带的Hyper-V虚拟机是否占用了CPU虚拟化技术，将其卸载
 ## 上网
+### Windows
+1. 找一个合适的梯子，建议直接买付费的，稳定快速，推荐 [SockBoom](sockboom.link), 购买后会得到一个订阅地址，类似于`https://sub.sockboom.pro/.../.ini`，之后把这个地址填进软件，即可成功挂上梯子
+2. 下载软件：[Clash.for.Windows](https://github.com/Fndroid/clash_for_windows_pkg/releases)，解压后双击`Clash for Windows.exe`打开软件
+3. 点击左侧的 `配置`，在顶部的输入栏中粘贴你复制的Clash订阅地址后点击 `下载`, 显示绿色的成功之后，点击名字为 `Sockboom` 的地方
+4. 点击左侧的`代理`，点击上方的`Rule`，一般选择`手动选择`内的节点即可，不同的节点名称代表不同地区的服务器，可以点右上方的WiFi图标进行测速，哪个延迟低选哪个节点（用ChatGPT不能选香港），节点有失效可能，注意切换
+5. 点击左侧的`主页`，打开下面`系统代理`的开关，即**成功挂上梯子**，左上角会显示实时流量，建议在`设置>快捷键`中将系统代理设为`Ctrl+W`, 按需随时开关，节约流量
+（注意：在`系统代理`的开关打开的情况下关闭软件，将会*出现电脑连不上网的情况*，此时重新打开Clash即可解决，因此，建议也打开`开机自启动`的开关，保持Clash后台常驻）
+
+至此，即可流畅登录Github上传或下载代码，以及在终端中安装各种工具包，避免了换源等繁琐操作
+
+### Linux
 [Clash.for.Windows-0.20.29-x64-linux.tar.gz ](https://github.com/Fndroid/clash_for_windows_pkg/releases/download/0.20.29/Clash.for.Windows-0.20.29-x64-linux.tar.gz)可用于Ubuntu，
 解压缩，进入文件夹终端，运行`.cfw`,即可打开软件
 Ubuntu设置-网络代理设为手动，将http/https代理指向clash默认端口7890：`HTTP代理：127.0.0.1 7890` `HTTPS代理：127.0.0.1 7890`
