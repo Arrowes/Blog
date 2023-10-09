@@ -105,6 +105,18 @@ vscode远程访问：1.安装remote插件 2.连接服务器``ssh ywang85@she1-w5
 
 vscode插件离线安装：如装python插件，直接进[ marketplace ](https://marketplace.visualstudio.com/vscode)下好拖到扩展位置
 
+**快捷键**
+打开vscode左下角键盘快捷键设置，找到copy line down，即可查看当前默认快捷键为`shift + Alt + ↓`，双击快捷键，输入自己想要的快捷组合，如Ctrl+D，然后回车即可设置自己的组合了
+```sh
+Ctrl + /    #注释
+alt + ↑/↓   #移动行
+alt + ←/→   #光标跳到上/下一个单词
+Ctrl + L    #选择整行
+Ctrl + X    #删除整行
+Ctrl + ~    #控制台终端显示与隐藏：
+```
+
+
 ## Debug
 + Could not get lock /var/lib/dpkg/lock – open > 执行 ``sudo rm -rf /var/lib/dpkg/lock``
 + 共享文件夹ubuntu中不显示 > 重新安装VMware tools

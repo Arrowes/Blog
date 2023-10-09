@@ -116,7 +116,7 @@ SK板连接显示器，上电，进入界面。
 sudo apt-get install minicom  #安装minicom
 sudo minicom -D /dev/ttyUSB2 -c on
 #输入用户名：root，登录tda4vm-sk
-#若连接了USB摄像头此时会显示端口信息，也可以cd , ./.profile 查摄像头：/dev/video2
+#若连接了USB摄像头此时会显示端口信息，也可以运行 ./init_script.sh 查摄像头端口号：/dev/video2
 ```
 
 连接显示器后（HDMI/DP），可以鼠标点击试运行开箱即用的 GUI 应用程序，也可使用 Python 和C++参考示例开发边缘 AI 应用程序：

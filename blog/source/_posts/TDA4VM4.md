@@ -150,9 +150,9 @@ modelType          = 2
 numParamBits       = 8
 numFeatureBits     = 8
 quantizationStyle  = 3
-inputNetFile       = "../../test/testvecs/seed_importer/XXX_yolox_221_sig_11.onnx"
-outputNetFile      = "../../test/testvecs/seed_importer/output/825_tidl_net_sig_SDK8_6.bin"
-outputParamsFile   = "../../test/testvecs/seed_importer/output/825_tidl_io__sig_SDK8_6"
+inputNetFile       = "../../test/testvecs/XXX/XXX_yolox_221_sig_11.onnx"
+outputNetFile      = "../../test/testvecs/XXX/output/825_tidl_net_sig_SDK8_6.bin"
+outputParamsFile   = "../../test/testvecs/XXX/output/825_tidl_io__sig_SDK8_6"
 inDataNorm  = 1
 inMean = 0 0 0
 inScale = 0.003921568627 0.003921568627 0.003921568627
@@ -161,8 +161,8 @@ inWidth  = 128
 inHeight = 256 
 inNumChannels = 3
 numFrames = 50
-inData  =   "../../test/testvecs/seed_importer/detection_list.txt"
-perfSimConfig = ../../test/testvecs/seed_importer/device_configs/j721s2_config.cfg
+inData  =   "../../test/testvecs/XXX/detection_list.txt"
+perfSimConfig = ../../test/testvecs/XXX/device_configs/j721s2_config.cfg
 debugTraceLevel=1
 ```
 >Debug:
@@ -197,10 +197,10 @@ debugTraceLevel=1
     #新建tidl_infer_yolox.txt:
     inFileFormat    = 2
     numFrames   = 10
-    netBinFile      = "testvecs/seed_importer/output/825_tidl_net_sig_SDK8_6.bin"
-    ioConfigFile   = "testvecs/seed_importer/output/825_tidl_io_sig_SDK8_61.bin"
-    inData  =   testvecs/seed_importer/detection_list.txt
-    outData =   testvecs/seed_importer/infer_out/inference.bin
+    netBinFile      = "testvecs/XXX/output/825_tidl_net_sig_SDK8_6.bin"
+    ioConfigFile   = "testvecs/XXX/output/825_tidl_io_sig_SDK8_61.bin"
+    inData  =   testvecs/XXX/detection_list.txt
+    outData =   testvecs/XXX/infer_out/inference.bin
     inResizeMode = 0
     #0 : Disable, 1- Classification top 1 and 5 accuracy, 2 – Draw bounding box for OD, 3 - Pixel level color blending
     postProcType = 2
