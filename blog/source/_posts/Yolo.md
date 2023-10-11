@@ -35,7 +35,7 @@ tags:
     bash Miniconda3-latest-Linux-x86_64.sh
     #一路Enter + Yes，最后使修改的PATH环境变量生效：
     source ~/.bashrc
-    canda   #验证是否成功
+    conda   #验证是否成功
     conda create -n pytorch python=3.6  #创建一个名为pytorch的环境
     conda activate pytorch  #激活环境
     ```
