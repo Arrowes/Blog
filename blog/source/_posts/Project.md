@@ -6,7 +6,7 @@ tags:
 - 技术
 ---
 # FEY-YOLOv7：基于面部小目标动态追踪的驾驶员疲劳检测算法
-+ [A Driver Fatigue Detection Algorithm Based on Dynamic Tracking of Small Facial Targets Using YOLOv7](https://search.ieice.org/bin/summary_advpub.php?id=2023EDP7093&category=D&lang=E&abst=)
++ SCI四区论文：[A Driver Fatigue Detection Algorithm Based on Dynamic Tracking of Small Facial Targets Using YOLOv7](https://search.ieice.org/bin/summary_advpub.php?id=2023EDP7093&category=D&lang=E&abst=)
 + Github: [FEY-YOLOv7](https://github.com/Arrowes/FEY-YOLOv7)
 
 ## 项目简介
@@ -25,7 +25,7 @@ $PERYAWN = E/(N - w · M)$
 其中，E是闭眼帧数，N是单位时间内总帧数，M代表“张嘴”的帧数，w是加权因子。为了量化四个驾驶员特征（睁眼、闭眼、张嘴和闭嘴）的检测结果，我们采用公式4和5，并将权重w设置为0.15。基于本研究中数据集标签的实际情况，我们确定当单位时间内的PERYAWN值超过0.20时，驾驶员处于疲劳状态。
 
 为了更直观地评估该算法在检测驾驶员状态方面的有效性，我们使用提出的PERYAWN参数作为定量指标来评估多个10秒的测试视频（每秒24帧）。如下图所示，如果PERYAWN值超过0.2，则将驾驶员分类为疲劳状态。如果该值超过0.5，则认为驾驶员处于严重疲劳状态。我们将检测到的状态与驾驶员的实际状态进行比较，并计算准确性。除了一些视频检测结果出现偏差外，所有结果都能够准确检测到三种状态：'正常'，'疲劳'和'严重疲劳'。
-<img alt="图 44" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/Project-PERYAWN.png" width='80%'/>  
+<img alt="图 44" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/Project-PERYAWN.png" width='60%'/>  
 
 ### 数据增强
 + 引导滤波算法
