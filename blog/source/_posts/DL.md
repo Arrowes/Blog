@@ -33,6 +33,10 @@ $   n_{output.features}=[\frac{n_{input.features}+2p_{adding.size}-k_{ernel.size
 <img src="https://raw.sevencdn.com/Arrowes/Arrowes-Blogbackup/main/images/DL2.png" width = "50%" />
 <img src="https://pic1.zhimg.com/50/v2-d552433faa8363df84c53b905443a556_720w.webp?source=1940ef5c" width = "50%" />
 
+## 卷积
+<img alt="图 37" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/DL-Conv.jpg" />  
+
+
 ## 反向传播
 待续
 
