@@ -144,7 +144,10 @@ $$mAP=\frac1n\sum_{i = 1}^{n}AP_i$$
 **置信度 Confidence**：置信度设定越大，Prediction约接近1，Recall越接近0，要寻找最优的F1分数，需要遍历置信度。
 ![图 9](https://raw.sevencdn.com/Arrowes/Arrowes-Blogbackup/main/images/DL9.png)  
 
-**交并比 IoU**（Intersection over Union）：是目标检测中使用的一个概念，IoU计算的是“预测的边框”和“真实的边框”的交叠率，即它们的交集和并集的比值。最理想情况是完全重叠，即比值为1。map@0.5即IoU=0.5，预测框和标注框的交集与非交集占比相同，都为50%。 
+**交并比 IoU**（Intersection over Union）：是目标检测中使用的一个概念，IoU计算的是“预测的边框”和“真实的边框”的交叠率，即它们的交集和并集的比值。最理想情况是完全重叠，即比值为1。
+
+*map@0.5*即IoU=0.5，预测框和标注框的交集与非交集占比相同，都为50%；
+*mAP@.5:.95*表示在不同IoU阈值（从0.5到0.95，步长0.05）（0.5、0.55、0.6、0.65、0.7、0.75、0.8、0.85、0.9、0.95）上的平均mAP。
 <img src="https://raw.sevencdn.com/Arrowes/Arrowes-Blogbackup/main/images/DL10.png" width = "60%" />
 
 **ROC曲线**(Receiver Operating Characteristic 受试者工作特征)

@@ -6,8 +6,8 @@ tags:
 - 深度学习
 ---
 # Yolo
-## 配置
-详细配置见 [Anaconda，Pycharm，Jupyter，Pytorch](https://wangyujie.site/Pytorch/)
+## 环境配置
+详细使用见 [Anaconda，Pycharm，Jupyter，Pytorch](https://wangyujie.site/Pytorch/)
 
 **Windows环境配置**
 1. 安装[**Anaconda**](https://www.anaconda.com/)，
@@ -53,20 +53,31 @@ tags:
 
 如果requirements中有包实在安不上，手动装包：进[网站](https://pypi.org/)搜索包，下载.whl，在包所在位置激活环境运行``pip install [].whl``(包名中cp38代表python3.8版本)
 
-## 资料 & Paper & Code
+## 资料与代码
+官方论文+代码:
+| Model   | Paper                                                 | Code                                                |
+|---------|-------------------------------------------------------|-----------------------------------------------------|
+| YOLOv1  | [You Only Look Once:Unified, Real-Time Object Detection](https://arxiv.org/pdf/1506.02640.pdf)        | [Code](https://pjreddie.com/darknet/yolov1/)        |
+| YOLOv2  | [YOLO9000:Better, Faster, Stronger](https://arxiv.org/pdf/1612.08242.pdf)        | [Code](https://pjreddie.com/darknet/yolo/)          |
+| YOLOv3  | [YOLOv3: An Incremental Improvement](https://arxiv.org/pdf/1804.02767.pdf)        | [Code](https://github.com/ultralytics/yolov3)       |
+| YOLOv4  | /                                                     | [Code](https://github.com/Tianxiaomo/pytorch-YOLOv4)|
+| YOLOv5  | /                                                     | [Code](https://github.com/search?q=yolov5)          |
+| YOLOv6  | [YOLOv6: A Single-Stage Object Detection Framework for Industrial Applications](https://arxiv.org/pdf/2209.02976.pdf)        | [Code](https://github.com/meituan/YOLOv6)           |
+| YOLOv7  | [YOLOv7: Trainable bag-of-freebies sets new state-of-the-art for real-time object detectors](https://arxiv.org/abs/2207.02696)            | [Code](https://github.com/WongKinYiu/yolov7)        |
+| YOLOv8  | /                                                     | [Code](https://github.com/ultralytics/ultralytics)  |
+
 YOLOv1 - v5历程：[从yolov1至yolov5的进阶之路](https://blog.csdn.net/wjinjie/article/details/107509243)
 YOLOv3论文精读视频：[同济子豪兄YOLOV3目标检测](https://www.bilibili.com/video/BV1Vg411V7bJ/?)
 YOLOv5知识精讲：[Yolov5核心基础知识完整讲解](https://zhuanlan.zhihu.com/p/172121380)
 YOLOv7网络结构：[理解yolov7网络结构](https://blog.csdn.net/athrunsunny/article/details/125951001) ,[Yolov7 基础网络结构详解](https://blog.csdn.net/u010899190/article/details/125883770)
 全流程指导视频：[目标检测 YOLOv5 开源代码项目调试与讲解实战](https://www.bilibili.com/video/BV1tf4y1t7ru/)
 
-[YOLOv1](https://arxiv.org/pdf/1506.02640.pdf) & [Code](https://pjreddie.com/darknet/yolov1/); [YOLOv2](https://arxiv.org/pdf/1612.08242.pdf) & [Code](https://pjreddie.com/darknet/yolo/); [YOLOv3](https://arxiv.org/pdf/1804.02767.pdf) & [Code](https://github.com/ultralytics/yolov3); YOLOv4 & [Code](https://github.com/Tianxiaomo/pytorch-YOLOv4); YOLOv5 & [Code](https://github.com/search?q=yolov5); [YOLOv6](https://arxiv.org/pdf/2209.02976.pdf) & [Code](https://github.com/meituan/YOLOv6); [YOLOv7](https://arxiv.org/abs/2207.02696) & [Code](https://github.com/WongKinYiu/yolov7); YOLOv8 & [Code](https://github.com/ultralytics/ultralytics)
 
 算法复现精品仓库：[Bubbliiiing](https://github.com/bubbliiiing)
 
-论文：[CEAM-YOLOv7:Improved YOLOv7 Based on Channel Expansion Attention Mechanism for Driver behavior detection](https://ieeexplore.ieee.org/document/9980374/metrics)，代码：[Github](https://github.com/Arrowes/CEAM-YOLOv7)
+发表论文：[CEAM-YOLOv7:Improved YOLOv7 Based on Channel Expansion Attention Mechanism for Driver behavior detection](https://ieeexplore.ieee.org/document/9980374/metrics)，Github代码：[CEAM-YOLOv7](https://github.com/Arrowes/CEAM-YOLOv7)
 
-### 代码
+## 参数配置（YOLOv5）
 **Detect参数**
 调用电脑摄像头: 
 右上角py配置 > Edit Configurations > Parameters
