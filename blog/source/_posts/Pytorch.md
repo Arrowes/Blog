@@ -1,5 +1,5 @@
 ---
-title: Python：Anaconda，Pycharm，Pytorch
+title: Py：Anaconda，Pycharm，Pytorch
 date: 2022-11-24 21:26:44
 tags: 
 - python
@@ -146,7 +146,7 @@ drive.mount('/content/drive')
 ```py
 python -c "import torch;print(torch.cuda.is_available())"   #返回True说明GPU可以被使用
 torch.__version__ #查pytorch版本
-nvidia-smi        #查GPU CUDA
+nvidia-smi -l 2   #查GPU CUDA, '-l 2':每2s更新一次
 python –-version  #查python版本
 conda install python=3.8  #升级(覆盖安装)python
 ```

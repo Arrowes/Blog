@@ -190,8 +190,8 @@ data.yaml数据只能用绝对地址
 
 此外，也可以增加一个小目标检测层：[增加小目标检测层-CSDN博客](https://blog.csdn.net/m0_70388905/article/details/125392908)
 
-![图 3](https://raw.sevencdn.com/Arrowes/Arrowes-Blogbackup/main/images/Yolo3.png)  
-
+使用云服务器快速训练（收费）：[AutoDL算力云 | 弹性、好用、省钱](https://www.autodl.com/home)
+[AutoDL帮助文档-GPU选型](https://www.autodl.com/docs/gpu/)
 
 # 其他未实现的想法
 剪枝：[模型剪枝、蒸馏、压缩-CSDN博客](https://blog.csdn.net/m0_70388905/article/details/128222629)
