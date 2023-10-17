@@ -56,12 +56,29 @@ a:not(.btn){
 	text-decoration: none;
 	}
   }
-  ```
+```
 配置博客链接：_config中``permalink: :title/``
 
 #### 搜索功能
 1. 在项目根目录下运行 ``npm install hexo-generator-searchdb --save``
 2. 更改主题配置文件 /next/_config 将local_search下的enable改为true
+
+#### 评论功能
+创建一个 Github Application 用来授权登录，如果没有 [点击这里申请](https://github.com/settings/applications/new), url都填`https://github.com/Arrowes/Arrowes.github.io`
+```css
+# Gitalk
+# For more information: https://gitalk.github.io
+gitalk:
+  enable: true
+  github_id: Arrowes # GitHub repo owner
+  repo: Arrowes.github.io # Repository name to store issues
+  client_id: 0cf14e51c1582cf64289 # GitHub Application Client ID
+  client_secret: 5e8273d27714e40495267c73e607c******** # GitHub Application Client Secret
+  admin_user: Arrowes # GitHub repo owner and collaborators, only these guys can initialize gitHub issues
+  distraction_free_mode: true # Facebook-like distraction free mode
+  proxy: https://cors-anywhere.azm.workers.dev/https://github.com/login/oauth/access_token # This is official proxy address
+  language: zh-CN
+```
 
 #### 首页展示文章数
 ```css
