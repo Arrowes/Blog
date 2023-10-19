@@ -1270,7 +1270,7 @@ cmake ..
 make  #生成可执行文件
 ./EDGE   #运行边缘提取执行文件
 ```
-<img src="https://raw.sevencdn.com/Arrowes/Arrowes-Blogbackup/main/images/Cedge.png" width="50%">
+<img src="https://raw.sevencdn.com/Arrowes/Blog/main/images/Cedge.png" width="50%">
 
 
 ## 基于VScode用cmake搭建C++编译调试环境

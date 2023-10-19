@@ -98,14 +98,14 @@ YOLOv7网络结构：[理解yolov7网络结构](https://blog.csdn.net/athrunsunn
 
 ## Anchor
 设计——anchor的计算函数Autoanchor
-![图 1](https://raw.sevencdn.com/Arrowes/Arrowes-Blogbackup/main/images/Yolo1.png)  
+![图 1](https://raw.sevencdn.com/Arrowes/Blog/main/images/Yolo1.png)  
 
 
 ## 网络结构
 1. 在 `models/common.py` 加入新的结构代码
 2. 在`models/yolo.py` 的parse_model函数中引入上面新写的结构名称
 3. `.yaml` 修改网络结构
-![图 2](https://raw.sevencdn.com/Arrowes/Arrowes-Blogbackup/main/images/Yolo2.png)  
+![图 2](https://raw.sevencdn.com/Arrowes/Blog/main/images/Yolo2.png)  
 
 ## 注意力模块
 [CV中即插即用的注意力模块](https://zhuanlan.zhihu.com/p/330535757)

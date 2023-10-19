@@ -20,7 +20,7 @@ C-->5.模型保存
 A-->E[C.定义]
 ```
 
-<img src="https://raw.sevencdn.com/Arrowes/Arrowes-Blogbackup/main/images/DL1.png" width = "80%" />
+<img src="https://raw.sevencdn.com/Arrowes/Blog/main/images/DL1.png" width = "80%" />
 
 GPU 网络和数据要同时送进GPU
 
@@ -30,7 +30,7 @@ GPU 网络和数据要同时送进GPU
 
 $   n_{output.features}=[\frac{n_{input.features}+2p_{adding.size}-k_{ernel.size}}{s_{tride.size}}+1]   $
 较小的感受野通常用于捕获局部特征，而较大的感受野则有助于捕获全局信息。
-<img src="https://raw.sevencdn.com/Arrowes/Arrowes-Blogbackup/main/images/DL2.png" width = "50%" />
+<img src="https://raw.sevencdn.com/Arrowes/Blog/main/images/DL2.png" width = "50%" />
 <img src="https://pic1.zhimg.com/50/v2-d552433faa8363df84c53b905443a556_720w.webp?source=1940ef5c" width = "50%" />
 
 ## 卷积
@@ -41,10 +41,10 @@ $   n_{output.features}=[\frac{n_{input.features}+2p_{adding.size}-k_{ernel.size
 待续
 
 ## Optimizer
-<img src="https://raw.sevencdn.com/Arrowes/Arrowes-Blogbackup/main/images/DL3.gif" width = "60%" />
+<img src="https://raw.sevencdn.com/Arrowes/Blog/main/images/DL3.gif" width = "60%" />
 
 $$SGD → SGDM → NAG → AdaGrad → AdaDelta → Adam → Nadam$$
-![图 4](https://raw.sevencdn.com/Arrowes/Arrowes-Blogbackup/main/images/DL4.png)  
+![图 4](https://raw.sevencdn.com/Arrowes/Blog/main/images/DL4.png)  
 
 
 ## Batch size
@@ -96,14 +96,14 @@ one-hot独热编码：将类别变量转换为机器学习算法易于利用的�
 空间域将原始图片中的空间信息变换到另一个空间中并保留了关键信息。
 普通的卷积神经网络中的池化层（pooling layer）直接用一些max pooling 或者average pooling 的方法，将图片信息压缩，减少运算量提升准确率。
 发明者认为之前pooling的方法太过于暴力，直接将信息合并会导致关键信息无法识别出来，所以提出了一个叫 **空间转换器（spatial transformer）** 的模块，将图片中的的空间域信息做对应的空间变换，从而能将关键的信息提取出来。
-<img src="https://raw.sevencdn.com/Arrowes/Arrowes-Blogbackup/main/images/DL5.png" width = "50%" />
+<img src="https://raw.sevencdn.com/Arrowes/Blog/main/images/DL5.png" width = "50%" />
 
 ### 通道域（Channel Domain）
 通道注意力机制在计算机视觉中，更关注特征图中channel之间的关系，而普通的卷积会对通道做通道融合，这个开山鼻祖是SENet,后面有GSoP-Net，FcaNet 对SENet中的squeeze部分改进，EACNet对SENet中的excitation部分改进，SRM,GCT等对SENet中的scale部分改进。
 
 [SENet](https://arxiv.org/abs/1709.01507),[pytorch](https://github.com/moskomule/senet.pytorch)
 SENet《Squeeze-and-Excitation Networks》是CVPR17年的一篇文章，提出SE module。在卷积神经网络中，卷积操作更多的是关注感受野，在通道上默认为是所有通道的融合（深度可分离卷积不对通道进行融合，但是没有学习通道之间的关系，其主要目的是为了减少计算量），SENet提出SE模块，将注意力放到通道之间，希望模型可以学习到不同通道之间的权重：
-![图 6](https://raw.sevencdn.com/Arrowes/Arrowes-Blogbackup/main/images/DL6.png)  
+![图 6](https://raw.sevencdn.com/Arrowes/Blog/main/images/DL6.png)  
 
 ### 时域注意力机制
 时域注意力机制在cv领域主要考虑有时序信息的领域，如视频领域中的动作识别方向，其注意力机制主要是在时序列中，关注某一时序即某一帧的信息。
@@ -113,12 +113,12 @@ SENet《Squeeze-and-Excitation Networks》是CVPR17年的一篇文章，提出SE
 
 [CBAM](https://arxiv.org/abs/1807.06521),[github](https://github.com/luuuyi/CBAM.PyTorch) 
 CBAM (Convolutional Block Attention Module)是SENet的一种拓展，SENet主要基于通道注意力，CBAM是通道注意力和空间注意力融合的注意力机制。
-![图 7](https://raw.sevencdn.com/Arrowes/Arrowes-Blogbackup/main/images/DL7.png)  
+![图 7](https://raw.sevencdn.com/Arrowes/Blog/main/images/DL7.png)  
 如上图所示，输入一个h*w*c的特征图，通过channel Attention Module 生成通道注意力权重对输入特征图在通道层添加权重，再通过spatial Attention Module 生成空间注意力权重，对特征图在空间层添加权重，输出特征图。
 
 # Metrics 评估
 ## 混淆矩阵
-<img src="https://raw.sevencdn.com/Arrowes/Arrowes-Blogbackup/main/images/DL8.png" width = "70%" />
+<img src="https://raw.sevencdn.com/Arrowes/Blog/main/images/DL8.png" width = "70%" />
 
 X横坐标为正确的分类（即你用标签所标注的真实分类）
 Y纵坐标为模型所预测的分类（即图片经过模型推理后模型将其辨别为的分类）
@@ -142,21 +142,21 @@ $$AP_i=\int_0^1P_i(R_i)dR_i$$
 将recall设置为横坐标，precision设置为纵坐标。PR曲线下围成的面积即AP，所有类别AP平均值即mAP.
 $$mAP=\frac1n\sum_{i = 1}^{n}AP_i$$
 **置信度 Confidence**：置信度设定越大，Prediction约接近1，Recall越接近0，要寻找最优的F1分数，需要遍历置信度。
-![图 9](https://raw.sevencdn.com/Arrowes/Arrowes-Blogbackup/main/images/DL9.png)  
+![图 9](https://raw.sevencdn.com/Arrowes/Blog/main/images/DL9.png)  
 
 **交并比 IoU**（Intersection over Union）：是目标检测中使用的一个概念，IoU计算的是“预测的边框”和“真实的边框”的交叠率，即它们的交集和并集的比值。最理想情况是完全重叠，即比值为1。
 
 *map@0.5*即IoU=0.5，预测框和标注框的交集与非交集占比相同，都为50%；
 *mAP@.5:.95*表示在不同IoU阈值（从0.5到0.95，步长0.05）（0.5、0.55、0.6、0.65、0.7、0.75、0.8、0.85、0.9、0.95）上的平均mAP。
-<img src="https://raw.sevencdn.com/Arrowes/Arrowes-Blogbackup/main/images/DL10.png" width = "60%" />
+<img src="https://raw.sevencdn.com/Arrowes/Blog/main/images/DL10.png" width = "60%" />
 
 **ROC曲线**(Receiver Operating Characteristic 受试者工作特征)
 $$TPR=\frac{TP}{TP+FN},FPR=\frac{FP}{FP+TN}$$可以理解为分类器对正样本的覆盖敏感性和对负样本的敏感性的权衡。
 在ROC曲线图中，每个点以对应的FPR值为横坐标，以TPR值为纵坐标 
-<img src="https://raw.sevencdn.com/Arrowes/Arrowes-Blogbackup/main/images/DL11ROC.jpg" width = "40%" />
+<img src="https://raw.sevencdn.com/Arrowes/Blog/main/images/DL11ROC.jpg" width = "40%" />
 
 **AUC值**：PR曲线下方的面积
-<img src="https://raw.sevencdn.com/Arrowes/Arrowes-Blogbackup/main/images/DL12AUC.png" width = "70%" />
+<img src="https://raw.sevencdn.com/Arrowes/Blog/main/images/DL12AUC.png" width = "70%" />
 
 > 1.AUC = 1，是完美分类器，采用这个预测模型时，存在至少一个阈值能得出完美预测。绝大多数预测的场合，不存在完美分类器。
 2.0.5 < AUC < 1，优于随机猜测。这个分类器（模型）妥善设定阈值的话，能有预测价值。
@@ -194,6 +194,6 @@ map*map是下个featuremap的大小，也就是上个weight*weight到底做了�
 **换算计算量**,一般一个参数是指一个float，也就是４个字节,1kb=1024字节
 
 # Transformer
-![图 13](https://raw.sevencdn.com/Arrowes/Arrowes-Blogbackup/main/images/DL13.png)  
-![图 14](https://raw.sevencdn.com/Arrowes/Arrowes-Blogbackup/main/images/DL14.png)  
-![图 15](https://raw.sevencdn.com/Arrowes/Arrowes-Blogbackup/main/images/DL15.png)  
+![图 13](https://raw.sevencdn.com/Arrowes/Blog/main/images/DL13.png)  
+![图 14](https://raw.sevencdn.com/Arrowes/Blog/main/images/DL14.png)  
+![图 15](https://raw.sevencdn.com/Arrowes/Blog/main/images/DL15.png)  

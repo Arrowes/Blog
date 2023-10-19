@@ -198,8 +198,8 @@ git config --global user.email "[email address]"
 `Docker`是一种开源的容器化平台，可以帮助开发者更高效地打包、部署和运行应用程序。它基于 `Linux` 容器（LXC）技术，通过将应用程序及其所有依赖项打包到一个容器中，从而消除了应用程序在不同环境之间迁移所面临的问题。使用Docker，开发者可以快速构建、测试和部署应用程序，减少了与操作系统和基础设施相关的问题，从而提高了开发、测试和发布的速度。
 
 [🐳Docker概念，工作流和实践](https://www.bilibili.com/video/BV1MR4y1Q738/)
-<img src="https://raw.sevencdn.com/Arrowes/Arrowes-Blogbackup/main/images/Linux1.png" width="80%">
-<img src="https://raw.sevencdn.com/Arrowes/Arrowes-Blogbackup/main/images/Linux2.png" width="80%">
+<img src="https://raw.sevencdn.com/Arrowes/Blog/main/images/Linux1.png" width="80%">
+<img src="https://raw.sevencdn.com/Arrowes/Blog/main/images/Linux2.png" width="80%">
 
 ## 配置
 ```shell
