@@ -119,6 +119,7 @@ backbone结尾使用一个注意力机制？
 transformer自注意力模块 CBAM注意力模块 CA注意力模块 SE注意力模块
 
 ## 激活函数 activations.py
+[改进激活函数为ReLU、RReLU、Hardtanh、ReLU6、Sigmoid、Tanh、Mish、Hardswish、ELU、CELU等](https://blog.csdn.net/m0_70388905/article/details/128753641)
 > activations.py：激活函数代码写在了activations.py文件里，可引入新的激活函数
 common.py：替换激活函数，很多卷积组都涉及到了激活函数（Conv，BottleneckCSP），所以改的时候要全面
 

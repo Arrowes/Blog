@@ -70,7 +70,7 @@ Host 键:右ctrl，方向键上：获取上次的命令，Tab：自动补全
 ``Ctrl + H``	显示隐藏文件   
 > Debug:
 VirtualBox安装 64位的Ubuntu系统，在安装时没有显示64位的Linux安装项: 1.CPU要是64位, 2.CPU开启了虚拟化 > `进入BOIS > Security> Virtualization > Enable` 还是不行则要查看Win10系统安装了自带的Hyper-V虚拟机是否占用了CPU虚拟化技术，将其卸载
-## 上网
+## 学术加速
 ### Windows
 1. 找一个合适的梯子，建议直接买付费的，稳定快速，推荐 [SockBoom](sockboom.link), 购买后会得到一个订阅地址，类似于`https://sub.sockboom.pro/.../.ini`，之后把这个地址填进软件，即可成功挂上梯子
 2. 下载软件：[Clash.for.Windows](https://github.com/Fndroid/clash_for_windows_pkg/releases)，解压后双击`Clash for Windows.exe`打开软件 (备用下载链接：[Clash](https://sockboomdownload.com/ssr-download/ClashforWindows.zip))
