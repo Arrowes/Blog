@@ -17,7 +17,7 @@ CA模块在空间维度上自适应地对不同位置的特征进行加权，从
 具体来说，Coordinate Attention引入了一个全局自注意力模块，该模块可以对输入特征图的每个位置进行自适应的加权。该加权由两个步骤完成：Coordinate信息嵌入和Coordinate Attention生成。
 1.	通过两个全局平均池化操作，分别计算输入特征图在通道维度上和空间维度上的均值。这两个均值分别表示了输入特征图在每个通道和每个空间位置的重要性。
 2.	将通道维度上的均值与空间维度上的均值进行相乘，得到一个权重矩阵，该权重矩阵表示了每个位置在通道和空间维度上的重要性，并将其应用于输入特征图中。最终，每个位置的特征将与其在通道和空间维度上的重要性相关联，从而使得模型更加关注重要的空间位置。
-<img alt="图 43" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/Project-CA.png" width='38%'/>  
+<img alt="图 43" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/Project-CA.png" width='38%'/>  
 
 ### PERYAWN疲劳评估算法
 $PERYAWN = E/(N - w · M)$
@@ -25,23 +25,23 @@ $PERYAWN = E/(N - w · M)$
 其中，E是闭眼帧数，N是单位时间内总帧数，M代表“张嘴”的帧数，w是加权因子。为了量化四个驾驶员特征（睁眼、闭眼、张嘴和闭嘴）的检测结果，我们采用公式4和5，并将权重w设置为0.15。基于本研究中数据集标签的实际情况，我们确定当单位时间内的PERYAWN值超过0.20时，驾驶员处于疲劳状态。
 
 为了更直观地评估该算法在检测驾驶员状态方面的有效性，我们使用提出的PERYAWN参数作为定量指标来评估多个10秒的测试视频（每秒24帧）。如下图所示，如果PERYAWN值超过0.2，则将驾驶员分类为疲劳状态。如果该值超过0.5，则认为驾驶员处于严重疲劳状态。我们将检测到的状态与驾驶员的实际状态进行比较，并计算准确性。除了一些视频检测结果出现偏差外，所有结果都能够准确检测到三种状态：'正常'，'疲劳'和'严重疲劳'。
-<img alt="图 44" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/Project-PERYAWN.png" width='60%'/>  
+<img alt="图 44" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/Project-PERYAWN.png" width='60%'/>  
 
 ### 数据增强
 + 引导滤波算法
 引导滤波就是基于局部线性回归，用引导图像的信息来指导输入图像的滤波过程，通常用于图像处理中的去噪、平滑、增强等任务。
 引导滤波器的基本思想是，对于输入图像p中的每个像素，使用引导图像I中与该像素相关的信息来进行滤波, 引导滤波器将输入图像p的每个像素表示为一个线性组合, 利用线性岭回归模型对线性系数ak,bk进行求解；本文利用原图的灰度图实现了图像的细节增强，优化了对眼睛、嘴巴的目标检测效果，实现过程如下图：
-<img alt="图 45" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/Project-GuidedImageFilter.png" width='80%'/>  
+<img alt="图 45" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/Project-GuidedImageFilter.png" width='80%'/>  
 
 + Static Crop+Mosaic预处理
 对图像进行35-59% Horizontal Region, 25-75% Vertical Region的拆分，并进行4合1的Mosaic拼接，间接实现了面部特征的放大，将数据集重点偏向眼睛、嘴巴这类小目标，优化了算法对小目标的检测性能和鲁棒性。
-<img alt="图 46" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/Project-Mosaic.png" width='80%'/>  
+<img alt="图 46" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/Project-Mosaic.png" width='80%'/>  
 
 
 ## 实现效果
-<img alt="图 48" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/Project-FEYdetectResult.png" width='80%'/>  
+<img alt="图 48" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/Project-FEYdetectResult.png" width='80%'/>  
 
-<img alt="图 47" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/Project-FEYresult.png" width='80%'/>  
+<img alt="图 47" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/Project-FEYresult.png" width='80%'/>  
 
 
 # CEAM-YOLOv7：基于通道扩展注意机制的改进YOLOv7驾驶员行为检测算法
@@ -51,22 +51,22 @@ $PERYAWN = E/(N - w · M)$
 驾驶员的不规范行为易引发交通事故，因此，为规范驾驶员行为，减少交通事故的发生，对驾驶员行为进行检测至关重要。本文提出了一种改进的目标检测模型CEAM-YOLOv7，该模型利用GAM注意力模块和通道扩展数据增强算法来减少特征图生成过程中的信息丢失，提高检测精度。将YOLOv7架构的Backbone和Head部分加入GAM注意力模块，减少信息损失的同时放大全局维度交互特征，同时，使用剪枝算法，在保证实时检测的前提下，提高了YOLOv7网络的检测性能。此外，使用更适合于实际驾驶场景的红外图像数据集进行训练，结合inversion和CLAHE图像增强方法，提出了一种基于通道扩展的红外图像数据增强算法，改善针对红外图像的目标检测效果。经大量实验结果表明，与YOLOv7相比，CEAM-YOLOv7的map提升了20.26%，FPS达到了156，本文方法的有效性和优越性得到了验证。 
 ## 技术点
 ### 通道扩展算法
-![图 1](https://raw.sevencdn.com/Arrowes/Blog/main/images/Project1.png)  
+![图 1](https://raw.gitmirror.com/Arrowes/Blog/main/images/Project1.png)  
 
 ```
 inversion:通过域迁移的思想使得网络能够更加适应处理后的红外图像。一般用于目标检测所用的 RGB 图像都是白天所摄，通常情况是背景较亮，目标较暗。但驾驶员环境通常较暗，且红外图像成像为辐射特性，背景辐射较弱而目标辐射较强，因此选用 inversion 操作；
 CLAHE:由于红外图像的对比度比较低，其灰度分布通常都是分布在较窄的区域，采用自适应直方图均衡化能够使红外图像的灰度分布更均匀，增强对比度的同时抑制噪声，从而达到增加图像细节信息的作用。
 ```
 ### GAM注意力机制
-![图 2](https://raw.sevencdn.com/Arrowes/Blog/main/images/Project2.png) 
+![图 2](https://raw.gitmirror.com/Arrowes/Blog/main/images/Project2.png) 
 GAM是一种能够捕捉所有三个维度的显著特征的注意机制，采用了CBAM中的顺序通道-空间注意机制，对通道-空间注意力子模块进行了重新设计，通道注意力子模块使用3D置换来跨三维保持信息，使用用两层感知器MLP（Multi-Layer Perceptron）放大跨维信道-空间相关性；空间注意力子模块采用了两个卷积层进行空间信息融合。由此，通过减少信息丢失和放大全局交互特征来提高深度神经网络的性能，提高了对于红外图像目标的识别能力，在识别速度和精度之间进行了有效的权衡，也与数据增强处理中的通道扩展算法相对应。
 ### 网络架构
-![图 3](https://raw.sevencdn.com/Arrowes/Blog/main/images/Project3.png)  
+![图 3](https://raw.gitmirror.com/Arrowes/Blog/main/images/Project3.png)  
 
 ## 实现效果
- ![图 4](https://raw.sevencdn.com/Arrowes/Blog/main/images/Project4.png)  
+ ![图 4](https://raw.gitmirror.com/Arrowes/Blog/main/images/Project4.png)  
 
-![图 5](https://raw.sevencdn.com/Arrowes/Blog/main/images/Project5.png)  
+![图 5](https://raw.gitmirror.com/Arrowes/Blog/main/images/Project5.png)  
 
 # [基于 STM32 的智能空压机状态监测系统](https://oshwhub.com/Arrows/esp-kong-zhi-ji-dian-qi)
 2020-2021
@@ -76,13 +76,13 @@ GAM是一种能够捕捉所有三个维度的显著特征的注意机制，采�
 ## 技术点
 本文所设计的监控系统以STM32F103C8T6单片机为主控芯片，利用BMP280温压传感器及ADXL335 三轴加速度传感器分别测得温度、气压以及XYZ三轴方向上的振动信号，实现了空压机工作数据的采集，并通过OLED显示屏显示，以便现场工作人员监测并及时检修；同时，用ESP8266 WiFi模块，将数据上传至阿里云，通过因特网传送至手机端及PC端，实现了运行状态的实时监测，为避免空压机状态异常进而运行失控造成严重后果，本设计增加了状态异常报警、停机功能，同时工作人员在手机app及PC端网页上可进行开、关机操作。本设计可基本实现对空气压缩机的实时状态监控功能。
 ## 系统设计
-![图 6](https://raw.sevencdn.com/Arrowes/Blog/main/images/Project6.png)  
+![图 6](https://raw.gitmirror.com/Arrowes/Blog/main/images/Project6.png)  
 ### 电路设计
-![图 7](https://raw.sevencdn.com/Arrowes/Blog/main/images/Project7.png)  
+![图 7](https://raw.gitmirror.com/Arrowes/Blog/main/images/Project7.png)  
 ### 程序设计
-![图 8](https://raw.sevencdn.com/Arrowes/Blog/main/images/Project8.png)  
+![图 8](https://raw.gitmirror.com/Arrowes/Blog/main/images/Project8.png)  
 ## 实物制作
-![图 9](https://raw.sevencdn.com/Arrowes/Blog/main/images/Project9.png)  
+![图 9](https://raw.gitmirror.com/Arrowes/Blog/main/images/Project9.png)  
 
 # SE智厨：一种新型循环节能与安全防控的厨房智能仪器
 2019-2020
@@ -103,13 +103,13 @@ GAM是一种能够捕捉所有三个维度的显著特征的注意机制，采�
 ```
 ## 系统设计
 系统由K60主控模块、温差发电系统、太阳能发电系统、烟雾检测模块、温度检测模块、红外检测模块、电流检测模块、升压降压稳压模块、语音模块、驱动模块、电压检测模块、GSM模块组成。
-![图 10](https://raw.sevencdn.com/Arrowes/Blog/main/images/Project10.png)  
+![图 10](https://raw.gitmirror.com/Arrowes/Blog/main/images/Project10.png)  
 
 ### 电路设计
-![图 11](https://raw.sevencdn.com/Arrowes/Blog/main/images/Project11.png)  
+![图 11](https://raw.gitmirror.com/Arrowes/Blog/main/images/Project11.png)  
 
 ### 实物制作
-![图 12](https://raw.sevencdn.com/Arrowes/Blog/main/images/Project12.png)  
+![图 12](https://raw.gitmirror.com/Arrowes/Blog/main/images/Project12.png)  
 
 # 地球仓
 2019-2020
@@ -119,9 +119,9 @@ GAM是一种能够捕捉所有三个维度的显著特征的注意机制，采�
 ## 技术点
 根据温度传感器和光敏传感器实时采集的数据，STC89C52 芯片根据温度传感器DS18B20和灵敏型光敏电阻传感器的信号来做出反应。当光线过于强烈，LED灯就会亮起并输入一个脉冲信号给STC89C52让步进电机转动带动底盘旋转 180 度；而温度达到一定值时，也会给STC89C52输入脉冲信号，使步进电机转动带动底盘旋转 90 度，同时数码管也会显示温度值。就是经过这样的底盘旋转控制，让地球仓适应更复杂的自然环境。
 ### 电路设计
- ![图 13](https://raw.sevencdn.com/Arrowes/Blog/main/images/Project13.png)  
+ ![图 13](https://raw.gitmirror.com/Arrowes/Blog/main/images/Project13.png)  
 ### 实物制作
-![图 14](https://raw.sevencdn.com/Arrowes/Blog/main/images/Project14.png)  
+![图 14](https://raw.gitmirror.com/Arrowes/Blog/main/images/Project14.png)  
 
 # 风功率密度便携式测量仪
 2018-2019
@@ -155,12 +155,12 @@ GAM是一种能够捕捉所有三个维度的显著特征的注意机制，采�
 ③模-数转换电路：单片机所能处理的是数字量，而风速传感器输出为模拟电压量。因此，设置一个模-数转换电路，将对应的模拟量转换成数字量并输入至单片机中，对其进行处理及显示。
 ```
 ### 信号处理
-![图 15](https://raw.sevencdn.com/Arrowes/Blog/main/images/Project15.png)  
+![图 15](https://raw.gitmirror.com/Arrowes/Blog/main/images/Project15.png)  
 
 ## 电路设计
-![图 16](https://raw.sevencdn.com/Arrowes/Blog/main/images/Project16.png)  
-![图 17](https://raw.sevencdn.com/Arrowes/Blog/main/images/Project17.png)  
+![图 16](https://raw.gitmirror.com/Arrowes/Blog/main/images/Project16.png)  
+![图 17](https://raw.gitmirror.com/Arrowes/Blog/main/images/Project17.png)  
  
 ## 实物制作
-![图 18](https://raw.sevencdn.com/Arrowes/Blog/main/images/Project18.png)  
-![图 19](https://raw.sevencdn.com/Arrowes/Blog/main/images/Project19.png)  
+![图 18](https://raw.gitmirror.com/Arrowes/Blog/main/images/Project18.png)  
+![图 19](https://raw.gitmirror.com/Arrowes/Blog/main/images/Project19.png)  

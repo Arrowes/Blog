@@ -14,7 +14,7 @@ tags: 总结
 
 ## 2.中译英
 [DeepL翻译器](https://www.deepl.com/translator)，在翻译结果中可以选中单词修改为其他近义词或不同的句式
-![图 1](https://raw.sevencdn.com/Arrowes/Blog/main/images/Paper1.png)  
+![图 1](https://raw.gitmirror.com/Arrowes/Blog/main/images/Paper1.png)  
 
 ## 3.润色
 [ChatGPT](https://chat.openai.com/chat)，按照期刊风格润色，[ChatGPT提示词参考](https://ai.newzone.top/)
@@ -23,18 +23,18 @@ I want you to act as an academic journal editor.
 Please [proofreading] the [paragraph] from an academic angle based on the writing style of the [CVPR]: 
 [text]
 ```
-<img src="https://raw.sevencdn.com/Arrowes/Blog/main/images/Paper2.png" width = "90%" />
+<img src="https://raw.gitmirror.com/Arrowes/Blog/main/images/Paper2.png" width = "90%" />
 
 ## 4.语法
 [Grammarly](https://www.grammarly.com/office-addin)，安装Word插件，快速修正语法
-![图 3](https://raw.sevencdn.com/Arrowes/Blog/main/images/Paper3.png)  
+![图 3](https://raw.gitmirror.com/Arrowes/Blog/main/images/Paper3.png)  
 
 # 文献管理神器：Zotero
 Zotero能管理个人文献库、插入引文、论文阅读和记笔记、pdf下载和翻译、查看论文分区、影响因子等信息
 ## 安装
 [Zotero官网](https://www.zotero.org/)，安装软件后再装浏览器插件，可以很方便的在浏览器随时导入文献到Zotero；
 顺便在官网注册一个账号，用于同步,且可登陆官网在线查看自己的论文库； 
-<img src="https://raw.sevencdn.com/Arrowes/Blog/main/images/Paper4.png" width = "100%" />
+<img src="https://raw.gitmirror.com/Arrowes/Blog/main/images/Paper4.png" width = "100%" />
 
 ## 配置
 ```sh
@@ -66,7 +66,7 @@ Zotero能管理个人文献库、插入引文、论文阅读和记笔记、pdf�
 ### 安装Word插件
 安装word插件，实现高效插入引文，并且可以根据期刊选择参考文献样式
 ``编辑 > 首选项 > 引用 > 文字处理软件 > 安装word插件`` 
-<img src="https://raw.sevencdn.com/Arrowes/Blog/main/images/Paper5.png" width = "80%" />
+<img src="https://raw.gitmirror.com/Arrowes/Blog/main/images/Paper5.png" width = "80%" />
 
 ### 插件，让Zotero真正好用
 [官方插件下载地址](https://www.zotero.org/support/plugins)
@@ -133,7 +133,7 @@ Zotero能管理个人文献库、插入引文、论文阅读和记笔记、pdf�
         \bibliography{ref} %.bib文件名
         ```
     + 编译后还不能显示你的参考文献列表，只有在文章中添加了``\cite{}``之后才可以正常显示
-        ![图 6](https://raw.sevencdn.com/Arrowes/Blog/main/images/Paper6.png)  
+        ![图 6](https://raw.gitmirror.com/Arrowes/Blog/main/images/Paper6.png)  
         ``\cite{liu_ceam-yolov7_2022}``
 
 ## 公式图表代码

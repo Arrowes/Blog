@@ -243,7 +243,7 @@ export TIDL_INSTALL_PATH=/home/ywang85/SDK/RTOSSDK/tidl_j721e_08_06_00_10   #设
 EdgeAI TIDL Tools是TI提供的深度学习开发工具，后续会多次用到。
 
 要求：OS——Ubuntu 18.04，Python Version——3.6
-<img alt="图 9" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/TDA4VM2onnxruntimeflow.png" width="60%"/>  
+<img alt="图 9" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/TDA4VM2onnxruntimeflow.png" width="60%"/>  
 
 1. OSRT(Open Source Runtimes:TFLite,ONNX,TVM) 作为用户应用程序的顶级推理 API
 2. 将子图卸载到 C7x/MMA 以使用TIDL进行加速执行
@@ -279,7 +279,7 @@ cmake ../examples && make -j && cd ..
 
 
 ## [Edge AI Studio](https://dev.ti.com/edgeaistudio/)
-<img src="https://raw.sevencdn.com/Arrowes/Blog/main/images/TDA4VM2studio.png" width="80%"/>  
+<img src="https://raw.gitmirror.com/Arrowes/Blog/main/images/TDA4VM2studio.png" width="80%"/>  
 
 TI官方提供的云端环境，集成了一系列工具,无需本地搭环境，使用需要申请，提供两个工具：
 + [Model Composer](https://dev.ti.com/modelcomposer/)： 为 TI 嵌入式处理器训练、优化和编译 AI 模型。支持数据采集，标注，模型训练，以及上板编译，**一步到位**。目前仅支持分类和检测任务，只能使用modelzoo中的模型进行训练，比如OD任务只有yolox模型，灵活度不高，主打方便快捷。
@@ -289,7 +289,7 @@ TI官方提供的云端环境，集成了一系列工具,无需本地搭环境�
 选TDA4VM设备，能使用3h，文件在顶端My Workspace;
 进入后分两大板块:
 + Find your model: Compare model performance, 能查看不同模型在板端的表现，用来选择适合自己需求的模型；
-<img src="https://raw.sevencdn.com/Arrowes/Blog/main/images/TDA4VM2perform.png" width="70%"/>  
+<img src="https://raw.gitmirror.com/Arrowes/Blog/main/images/TDA4VM2perform.png" width="70%"/>  
 + Get model benchmarks：
     + Model performance 是配置好的jupyter notebook，无需修改一步步运行即可输出结果；
     + 下面重点使用Custom models：
@@ -336,7 +336,7 @@ for num in tqdm.trange(len(calib_images)):
 ```
 
 Then using Onnx with the libtidl_onnxrt_EP inference library we run the model and collect benchmark data.
-<img alt="图 9" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/TDA4VM2benchmark.png" width="88%"/>  
+<img alt="图 9" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/TDA4VM2benchmark.png" width="88%"/>  
 
 [edgeai-tidl-tools:Python Examples](https://github.com/TexasInstruments/edgeai-tidl-tools/blob/master/examples/osrt_python/README.md)
 [适用于嵌入式应用的深度学习推理参考设计](https://www.ti.com.cn/cn/lit/ug/zhcu546/zhcu546.pdf)

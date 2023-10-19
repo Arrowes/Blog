@@ -79,7 +79,7 @@ cd <YOLOX_HOME>
 python3 demo/ONNXRuntime/onnx_inference.py -m yolox_s_ti_lite.onnx -i assets/dog.jpg -o output -s 0.3 --input_shape 640,640
 #成功基于ONNXRuntime输出预测结果
 ```
-<img alt="图 1" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/TDA4VM3onnxinference.jpg" width="50%"/>  
+<img alt="图 1" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/TDA4VM3onnxinference.jpg" width="50%"/>  
 
 ## 2. 使用TIDL编译ONNX并运行
 本节使用了两种不同的方法完成PC端TIDL的编译运行：
@@ -153,7 +153,7 @@ postProcType    = 2
 cd ${TIDL_INSTALL_PATH}/ti_dl/test
 ./PC_dsp_test_dl_algo.out
 ```
-<img alt="图 2" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/TDA4VM3sdktidlyolox.png" width="50%"/>  
+<img alt="图 2" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/TDA4VM3sdktidlyolox.png" width="50%"/>  
 
 ### b. 使用TIDL Tools（by [Edge AI Studio](https://dev.ti.com/edgeaistudio/)）
 使用`Edge AI Studio > Model Analyzer > Custom models > ONNX runtime > custom-model-onnx.ipynb`例程, 并结合 `OD.ipynb` 例程进行修改
@@ -260,7 +260,7 @@ for i in range(int(output[0][0][0].shape[0])):
 img.show()  # 显示画好的图像
 ```
 画框，引入了缩放比例，否则框的位置不对
-<img alt="图 3" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/TDA4VM3studioyolox.png" width="50%"/>  
+<img alt="图 3" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/TDA4VM3studioyolox.png" width="50%"/>  
 
 ```py
 #Subgraphs visualization
@@ -295,7 +295,7 @@ print(f'Statistics : \n Inferences Per Second   : {1000.0/tt :7.2f} fps')
 print(f' Inference Time Per Image : {tt :7.2f} ms  \n DDR BW Per Image        : {rb+ wb : 7.2f} MB')
 ```
 推理，注意`TIDLCompilationProvider`和`TIDLExecutionProvider`的区别
-<img alt="图 2" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/TDA4VM3yoloxs.png" width="90%"/>  
+<img alt="图 2" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/TDA4VM3yoloxs.png" width="90%"/>  
 
 > Statistics : 
   Inferences Per Second   :  104.44 fps

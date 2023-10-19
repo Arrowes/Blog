@@ -10,7 +10,7 @@ tags:
 + Network selection：
 + Optimization：分组卷积、深度可分离卷积、稀疏卷积
 + Deployment：
-<img alt="图 1" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/TDA4VMdeploy.png" width="70%"/>  
+<img alt="图 1" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/TDA4VMdeploy.png" width="70%"/>  
 
 Netron神经网络可视化: [软件下载](https://github.com/lutzroeder/netron/releases/tag/v7.0.0), [在线网站](https://netron.app/)
 
@@ -159,7 +159,7 @@ ort_output = np.clip(ort_output, 0, 255)
 ort_output = np.transpose(ort_output, [1, 2, 0]).astype(np.uint8)
 cv2.imwrite("face_torch2_run.png", ort_output)  # 生成上采样图片，运行成功
 ```
-<img alt="picture 0" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/DLdeploynetron.png" width="80%"/>  
+<img alt="picture 0" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/DLdeploynetron.png" width="80%"/>  
 
 ## torch.onnx.export模型转换接口
 [torch.onnx ‒ PyTorch 1.11.0 documentation](https://link.zhihu.com/?target=https%3A//pytorch.org/docs/stable/onnx.html%23functions)
@@ -231,6 +231,6 @@ $float32=int8/2^3$
 
 乘一个系数把float类型的小数部分转换成整数部分，然后用这个转换出来的整数进行计算，计算结果再还原成float
 
-<img alt="图 3" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/DLdeployquantized.png" width="80%"/>  
+<img alt="图 3" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/DLdeployquantized.png" width="80%"/>  
 
 [A White Paper on Neural Network Quantization](https://arxiv.org/pdf/2106.08295.pdf)

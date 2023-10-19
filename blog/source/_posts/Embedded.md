@@ -9,17 +9,17 @@ tags:
 电容是电路设计中最为普通常用的器件，是无源元件之一，有源器件简单地说就是需能(电)源的器件叫有源器件，无需能(电)源的器件就是无源器件。
 电容的作用和用途一般都有好多种，如：在旁路、去耦、滤波、储能方面的作用；在完成振荡、同步以及时间常数的作用：
 **隔直流**：作用是阻止直流通过而让交流通过。 
-<img src="https://raw.sevencdn.com/Arrowes/Blog/main/images/Embedded23.png" width = "50%" />
+<img src="https://raw.gitmirror.com/Arrowes/Blog/main/images/Embedded23.png" width = "50%" />
 
 **旁路（去耦）**：为交流电路中某些并联的元件提供低阻抗通路。
-<img alt="图 24" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/Embedded24.png" width = "50%"/>  
+<img alt="图 24" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/Embedded24.png" width = "50%"/>  
 
 **旁路电容**：旁路电容，又称为退耦电容，是为某个器件提供能量的储能器件。
 它利用了电容的频率阻抗特性，理想电容的频率特性随频率的升高，阻抗降低，就像一个水塘，它能使输出电压输出均匀，降低负载电压波动。
 旁路电容要尽量靠近负载器件的供电电源管脚和地管脚，这是阻抗要求。
 在画PCB时候特别要注意，只有靠近某个元器件时候才能抑制电压或其他输信号因过大而导致的地电位抬高和噪声。
 说白了就是把直流电源中的交流分量，通过电容耦合到电源地中，起到了净化直流电源的作用。如图为旁路电容，画图时候要尽量靠近IC1。
- <img alt="图 25" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/Embedded25.png" width = "50%"/>  
+ <img alt="图 25" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/Embedded25.png" width = "50%"/>  
 
 **去耦电容**：去耦电容，是把输出信号的干扰作为滤除对象，去耦电容相当于电池，利用其充放电，使得放大后的信号不会因电流的突变而受干扰。
 它的容量根据信号的频率、抑制波纹程度而定，去耦电容就是起到一个“电池”的作用，满足驱动电路电流的变化，避免相互间的耦合干扰。
@@ -28,29 +28,29 @@ tags:
 而去耦合电容的容量一般较大，可能是 10μF 或者更大，依据电路中分布参数、以及驱动电流的变化大小来确定。上图C3为去耦电容
 **区别**：旁路是把输入信号中的干扰作为滤除对象，而去耦是把输出信号的干扰作为滤除对象，防止干扰信号返回电源。
 **耦合**：作为两个电路之间的连接，允许交流信号通过并传输到下一级电路 。
-<img alt="图 26" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/Embedded26.png" width = "50%"/>  
+<img alt="图 26" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/Embedded26.png" width = "50%"/>  
 
 用电容做耦合的元件，是为了将前级信号传递到后一级，并且隔断前一级的直流对后一级的影响，使电路调试简单，性能稳定。
 如果不加电容交流信号放大不会改变，只是各级工作点需重新设计，由于前后级影响，调试工作点非常困难，在多级时几乎无法实现。
 **滤波**：这个对电路而言很重要，CPU背后的电容基本都是这个作用。
 即频率f越大，电容的阻抗Z越小。当低频时，电容C由于阻抗Z比较大，有用信号可以顺利通过；当高频时，电容C由于阻抗Z已经很小了，相当于把高频噪声短路到GND上去了。
-<img alt="图 27" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/Embedded27.png" width = "50%"/>  <img alt="图 39" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/Embedded28.png" width = "50%"/>  
+<img alt="图 27" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/Embedded27.png" width = "50%"/>  <img alt="图 39" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/Embedded28.png" width = "50%"/>  
 
 **滤波作用**：理想电容，电容越大，阻抗越小，通过的频率也越高。
 电解电容一般都是超过 1uF ，其中的电感成份很大，因此频率高后反而阻抗会大。
 我们经常看见有时会看到有一个电容量较大电解电容并联了一个小电容，其实大的电容通低频，小电容通高频，这样才能充分滤除高低频。
 电容频率越高时候则衰减越大，电容像一个水塘，几滴水不足以引起它的很大变化，也就是说电压波动不是你很大时候电压可以缓冲，如图C2：
- <img alt="图 29" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/Embedded29.png" width = "50%"/>  
+ <img alt="图 29" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/Embedded29.png" width = "50%"/>  
 
 **温度补偿**：针对其它元件对温度的适应性不够带来的影响，而进行补偿，改善电路的稳定性。
-  <img alt="图 30" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/Embedded30.png" />  
+  <img alt="图 30" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/Embedded30.png" />  
 
 **分析**：由于定时电容的容量决定了行振荡器的振荡频率，所以要求定时电容的容量非常稳定，不随环境湿度变化而变化，这样才能使行振荡器的振荡频率稳定。
 因此采用正、负温度系数的电容释联，进行温度互补。
 当工作温度升高时，Cl的容量在增大，而C2的容量在减小，两只电容并联后的总容量为两只电容容量之和，由于一个容量在增大而另一个在减小，所以总容量基本不变。
 同理，在温度降低时，一个电容的容量在减小而另一个在增大，总的容量基本不变，稳定了振荡频率，实现温度补偿目的。
 **计时**：电容器与电阻器配合使用，确定电路的时间常数。
- <img alt="图 31" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/Embedded31.png" />  
+ <img alt="图 31" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/Embedded31.png" />  
 
 输入信号由低向高跳变时，经过缓冲1后输入RC电路。
 电容充电的特性使B点的信号并不会跟随输入信号立即跳变，而是有一个逐渐变大的过程。
@@ -58,13 +58,13 @@ tags:
 **时间常数**：以常见的 RC 串联构成积分电路为例，当输入信号电压加在输入端时，电容上的电压逐渐上升。
 而其充电电流则随着电压的上升而减小，电阻R和电容C串联接入输入信号VI，由电容C输出信号V0，当RC (τ)数值与输入方波宽度tW之间满足：τ》》tW，这种电路称为积分电路。
 **调谐**：对与频率相关的电路进行系统调谐，比如手机、收音机、电视机。
-<img alt="图 32" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/Embedded32.png" width = "50%"/>  
+<img alt="图 32" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/Embedded32.png" width = "50%"/>  
 
 因为lc调谐的振荡电路的谐振频率是lc的函数，我们发现振荡电路的最大与最小谐振频率之比随着电容比的平方根变化。
 此处电容比是指反偏电压最小时的电容与反偏电压最大时的电容之比。
 因而，电路的调谐特征曲线（偏压一谐振频率）基本上是一条抛物线。
 **整流**：在预定的时间开或者关半闭导体开关元件。
-<img alt="图 44" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/Embedded33.png" width = "70%"/>  
+<img alt="图 44" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/Embedded33.png" width = "70%"/>  
 
 **储能**：储存电能，用于必须要的时候释放。
 例如相机闪光灯，加热设备等等．（如今某些电容的储能水平己经接近锂电池的水准，一个电容储存的电能可以供一个手机使用一天。
@@ -102,7 +102,7 @@ c. 有阻抗控制要求的网络应尽量按线长线宽要求布线。
 #### 1. 时钟的布线：
 时钟线是对EMC 影响最大的因素之一。在时钟线上应少打过孔，尽量避免和其它信号线并行走线，且应远离一般信号线，避免对信号线的干扰。同时应避开板上的电源部分，以防止电源和时钟互相干扰。
 如果板上有专门的时钟发生芯片，其下方不可走线，应在其下方铺铜，必要时还可以对其专门割地。对于很多芯片都有参考的晶体振荡器，这些晶振下方也不应走线，要铺铜隔离。
-<img alt="图 45" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/Embedded1.png" width = "80%"/>  
+<img alt="图 45" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/Embedded1.png" width = "80%"/>  
 
 #### 2. 直角走线:
 直角走线一般是PCB布线中要求尽量避免的情况，也几乎成为衡量布线好坏的标准之一，那么直角走线究竟会对信号传输产生多大的影响呢？从原理上说，直角走线会使传输线的线宽发生变化，造成阻抗的不连续。其实不光是直角走线，顿角，锐角走线都可能会造成阻抗变化的情况。
@@ -132,59 +132,59 @@ c.时序定位精确，由于差分信号的开关变化是位于两个信号的
 注意点:
 成对出现的差分信号线，一般平行走线，尽量少打过孔，必须打孔时，应两线一同打孔，以做到阻抗匹配。
 相同属性的一组总线，应尽量并排走线，做到尽量等长。从贴片焊盘引出的过孔尽量离焊盘远些。
-<img alt="图 2" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/Embedded2.png" width = "60%"/>  
+<img alt="图 2" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/Embedded2.png" width = "60%"/>  
 
 ### （3）布线常用规则
 1. 走线的方向控制规则： 
 即相邻层的走线方向成正交结构。避免将不同的信号线在相邻层走成同一方向，以减少不必要的层间串扰；
 当由于板结构限制（如某些背板）难以避免出现该情况，特别是信号速率较高时，应考虑用地平面隔离各布线层，用地信号线隔离各信号线。 
-<img alt="图 3" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/Embedded3.png" width = "50%"/>  
+<img alt="图 3" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/Embedded3.png" width = "50%"/>  
 
 2. 走线的开环检查规则：
 一般不允许出现一端浮空的布线（Dangling Line), 主要是为了避免产生"天线效应"，减少不必要的干扰辐射和接受，否则可能带来不可预知的结果。   
-<img alt="图 4" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/Embedded4.png" width = "50%"/>  
+<img alt="图 4" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/Embedded4.png" width = "50%"/>  
 
 3. 阻抗匹配检查规则： 
 同一网络的布线宽度应保持一致，线宽的变化会造成线路特性阻抗的不均匀，当传输的速度较高时会产生反射，在设计中应该尽量避免这种情况。
 在某些条件下，如接插件引出线，BGA封装的引出线类似的结构时，可能无法避免线宽的变化，应该尽量减少中间不一致部分的有效长度。
-<img alt="图 5" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/Embedded5.png" width = "50%"/>  
+<img alt="图 5" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/Embedded5.png" width = "50%"/>  
 
 4. 走线长度控制规则： 
 即短线规则，在设计时应该尽量让布线长度尽量短，以减少由于走线过长带来的干扰问题，特别是一些重要信号线，如时钟线，务必将其振荡器放在离器件很近的地方。对驱动多个器件的情况，应根据具体情况决定采用何种网络拓扑结构。 
-<img alt="图 6" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/Embedded6.png" width = "50%"/>  
+<img alt="图 6" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/Embedded6.png" width = "50%"/>  
  
 5. 倒角规则： 
 PCB设计中应避免产生锐角和直角， 产生不必要的辐射，同时工艺性能也不好。
- <img alt="图 7" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/Embedded7.png" width = "50%"/>  
+ <img alt="图 7" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/Embedded7.png" width = "50%"/>  
 
 6. 器件去耦规则： 
 A. 在印制版上增加必要的去耦电容，滤除电源上的干扰信号，使电源信号稳定。
 在多层板中，对去耦电容的位置一般要求不太高，但对双层板，去耦电容的布局及电源的布线方式将直接影响到整个系统的稳定性，有时甚至关系到设计的成败。 
 B. 在双层板设计中，一般应该使电流先经过滤波电容滤波再供器件使用。 
 C. 在高速电路设计中，能否正确地使用去耦电容，关系到整个板的稳定性。 
-<img alt="图 8" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/Embedded8.png" width = "50%"/>  
+<img alt="图 8" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/Embedded8.png" width = "50%"/>  
 
 7. 器件布局分区/分层规则： 
 A. 主要是为了防止不同工作频率的模块之间的互相干扰，同时尽量缩短高频部分的布线长度。
 B. 对混合电路，也有将模拟与数字电路分别布置在印制板的两面，分别使用不同的层布线，中间用地层隔离的方式。
-<img alt="图 9" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/Embedded9.png" width = "50%"/>  
+<img alt="图 9" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/Embedded9.png" width = "50%"/>  
 
 8. 地线回路规则：
 环路最小规则，即信号线与其回路构成的环面积要尽可能小，环面积越小，对外的辐射越少，接收外界的干扰也越小。 
-<img alt="图 10" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/Embedded10.png" width = "50%"/>  
+<img alt="图 10" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/Embedded10.png" width = "50%"/>  
 
 9. 电源与地线层的完整性规则： 
 对于导通孔密集的区域，要注意避免孔在电源和地层的挖空区域相互连接，形成对平面层的分割，从而破坏平面层的完整性，并进而导致信号线在地层的回路面积增大。
-<img alt="图 11" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/Embedded11.png" width = "50%"/>  
+<img alt="图 11" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/Embedded11.png" width = "50%"/>  
 
 10. 3W规则：
 为了减少线间串扰，应保证线间距足够大，当线中心间距不少于3倍线宽时，则可保持70%的电场不互相干扰，称为3W规则。如要达到98%的电场不互相干扰，可使用10W的间距。
- <img alt="图 12" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/Embedded12.png" width = "50%"/>  
+ <img alt="图 12" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/Embedded12.png" width = "50%"/>  
 
 11. 屏蔽保护：
 对应地线回路规则，实际上也是为了尽量减小信号的回路面积，多见于一些比较重要的信号，如时钟信号，同步信号；
 对一些特别重要，频率特别高的信号，应该考虑采用铜轴电缆屏蔽结构设计，即将所布的线上下左右用地线隔离，而且还要考虑好如何有效的让屏蔽地与实际地平面有效结合。 
- <img alt="图 13" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/Embedded13.png" width = "50%"/>  
+ <img alt="图 13" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/Embedded13.png" width = "50%"/>  
 
 12. 走线终结网络规则：
 在高速数字电路中， 当PCB布线的延迟时间大于信号上升时间（或下降时间） 的1/4时，该布线即可以看成传输线，为了保证信号的输入和输出阻抗与传输线的阻抗正确匹配，可以采用多种形式的匹配方法， 所选择的匹配方法与网络的连接方式和布线的拓朴结构有关。
@@ -192,41 +192,41 @@ A. 对于点对点（一个输出对应一个输入） 连接， 可以选择始
 B. 对于点对多点（一个输出对应多个输出） 连接， 当网络的拓朴结构为菊花链时，应选择终端并联匹配。
 当网络为星型结构时，可以参考点对点结构。星形和菊花链为两种基本的拓扑结构, 其他结构可看成基本结构的变形, 可采取一些灵活措施进行匹配。
 在实际操作中要兼顾成本、 功耗和性能等因素， 一般不追求完全匹配，只要将失配引起的反射等干扰限制在可接受的范围即可。
-<img alt="图 14" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/Embedded14.png" width = "50%"/>  
+<img alt="图 14" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/Embedded14.png" width = "50%"/>  
 
 13. 走线闭环检查规则：
 防止信号线在不同层间形成自环。在多层板设计中容易发生此类问题， 自环将引起辐射干扰。
-<img alt="图 15" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/Embedded15.png" width = "50%"/>  
+<img alt="图 15" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/Embedded15.png" width = "50%"/>  
 
 14. 走线的分枝长度控制规则：
 尽量控制分枝的长度，一般的要求是Tdelay<=Trise/20。
- <img alt="图 16" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/Embedded16.png" width = "50%"/>  
+ <img alt="图 16" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/Embedded16.png" width = "50%"/>  
 
 15. 走线的谐振规则：
 主要针对高频信号设计而言， 即布线长度不得与其波长成整数倍关系， 以免产生谐振现象。
-<img alt="图 17" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/Embedded17.png" width = "50%"/>  
+<img alt="图 17" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/Embedded17.png" width = "50%"/>  
 
 16. 孤立铜区控制规则：
 孤立铜区的出现， 将带来一些不可预知的问题， 因此将孤立铜区与别的信号相接， 有助于改善信号质量，通常是将孤立铜区接地或删除。
 在实际的制作中， PCB厂家将一些板的空置部分增加了一些铜箔，这主要是为了方便印制板加工，同时对防止印制板翘曲也有一定的作用。
-<img alt="图 18" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/Embedded18.png" width = "50%"/>  
+<img alt="图 18" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/Embedded18.png" width = "50%"/>  
 
 17. 重叠电源与地线层规则：
 不同电源层在空间上要避免重叠。主要是为了减少不同电源之间的干扰， 特别是一些电压相差很大的电源之间， 电源平面的重叠问题一定要设法避免， 难以避免时可考虑中间隔地层。
-<img alt="图 19" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/Embedded19.png" width = "50%"/>  
+<img alt="图 19" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/Embedded19.png" width = "50%"/>  
 
 18. 20H规则：
 由于电源层与地层之间的电场是变化的， 在板的边缘会向外辐射电磁干扰。称为边沿效应。
 解决的办法是将电源层内缩， 使得电场只在接地层的范围内传导。以一个H（电源和地之间的介质厚度）为单位，若内缩20H则可以将70%的电场限制在接地层边沿内；内缩100H则可以将98%的电场限制在内。 
-<img alt="图 20" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/Embedded20.png" width = "50%"/>  
+<img alt="图 20" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/Embedded20.png" width = "50%"/>  
 
 ### （4）其他
 对于单双层板电源线应尽量粗而短。电源线和地线的宽度要求可以根据1mm的线宽最大对应1A 的电流来计算，电源和地构成的环路尽量小。
- <img alt="图 21" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/Embedded21.png" width = "60%"/>  
+ <img alt="图 21" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/Embedded21.png" width = "60%"/>  
 
 为了防止电源线较长时，电源线上的耦合杂讯直接进入负载器件，应在进入每个器件之前，先对电源去耦。且为了防止它们彼此间的相互干扰，对每个负载的电源独立去耦，并做到先滤波再进入负载。
 在布线中应保持接地良好。如下图。
-<img alt="图 22" src="https://raw.sevencdn.com/Arrowes/Blog/main/images/Embedded22.png" width = "60%"/>  
+<img alt="图 22" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/Embedded22.png" width = "60%"/>  
 
 
 [立创EDA PCB设计](https://blog.csdn.net/qq_36347513/article/details/121873555)
