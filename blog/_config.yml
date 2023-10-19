@@ -13,7 +13,7 @@ timezone: Asia/Shanghai
 
 # URL
 ## Set your site url here. For example, if you use GitHub Page, set url as 'https://username.github.io/project'
-url: http://example.com
+url: https://wangyujie.site/
 permalink: :title/
 permalink_defaults:
 pretty_urls:
@@ -28,7 +28,7 @@ archive_dir: archives
 category_dir: categories
 code_dir: downloads/code
 i18n_dir: :lang
-skip_render: resume/**,googlebc9677d5efb67f65.html
+#skip_render: resume/**,googlebc9677d5efb67f65.html
 
 # Writing
 new_post_name: :title.md # File name of new posts
@@ -97,7 +97,7 @@ ignore:
 # Extensions
 ## Plugins: https://hexo.io/plugins/
 ## Themes: https://hexo.io/themes/
-theme: next
+theme: hexo-theme-next
 
 # Deployment
 ## Docs: https://hexo.io/docs/one-command-deployment
@@ -114,3 +114,13 @@ excerpt:			# 一定要顶格写，注意格式
   more_excludes: []
   hideWholePostExcerpts: true
 
+# Extensions
+## Plugins: http://hexo.io/plugins/
+#RSS订阅
+plugins:
+  hexo-generator-feed
+#Feed Atom
+feed:
+  type: atom
+  path: atom.xml
+  limit: 20
