@@ -4,7 +4,7 @@ date: 2022-11-22 19:36:45
 tags: 
 - 技术
 ---
-第一篇博客用来记录搭建该网站并成功发表这篇博客的流程，使用Hexo静态博客框架，托管于Github，参考了多篇文章[^1]。
+第一篇博客用来记录搭建该网站并成功发表这篇博客的流程，使用Hexo静态博客框架，托管于Github，参考了多篇文章[^1]，项目地址：[Blog](https://github.com/Arrowes/Blog)
 <!--more-->
 <img alt="图 1" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/Hello-blogBlogPhoto.png" width = "30%"/>  
 
@@ -38,11 +38,8 @@ Github网站项目地址：[Arrowes.github.io](https://github.com/Arrowes/Arrowe
      ```
 
 #### 统计功能
-统计人数、阅读次数：
-/next/_config：找到busuanzi_count进行配置
-统计字数、阅读时间：
-1. npm install hexo-word-counter
-2. /next/_config:设置item_text_total为true
+统计人数、阅读次数：/next/_config：找到busuanzi_count进行配置
+统计字数、阅读时间： /next/_config:设置item_text_total为true
 
 #### 配置网站超链接颜色
 打开 `Blog\themes\next\source\css\_common\components\post` 路径下的post.styl , 并在底部添加如下代码:
@@ -60,8 +57,7 @@ a:not(.btn){
 配置博客链接：_config中``permalink: :title/``
 
 #### 搜索功能
-1. 在项目根目录下运行 ``npm install hexo-generator-searchdb --save``
-2. 更改主题配置文件 /next/_config 将local_search下的enable改为true
+更改主题配置文件 /next/_config 将local_search下的enable改为true
 
 #### 评论功能
 创建一个 Github Application 用来授权登录，如果没有 [点击这里申请](https://github.com/settings/applications/new), url都填`https://github.com/Arrowes/Arrowes.github.io`
@@ -99,21 +95,18 @@ index_generator:
       hideWholePostExcerpts: true
       ```
 
-3. 在主题配置文件/next/_config中 excerpt_description 改为false
+3. 在主题配置文件theme/next/_config中 excerpt_description 改为false
 
 #### 添加标签
-1. 配置 主题配置文件中删掉tags的注释
-2. 文件 新建tags文件 ``hexo new page "tags"``
-3. 文章 ``tags: - XXX``
+1. 配置：主题配置文件中删掉tags的注释
+2. 文件：新建tags文件 ``hexo new page "tags"``
+3. 文章：``tags: - XXX``
 
 #### 公式
 [markdown公式符号大全](https://blog.csdn.net/konglongdanfo1/article/details/85204312)
-主题配置文件：
-```
-math:
+主题配置文件：`math:
   every_page: true
-  mathjax:  enable: true
-```
+  mathjax:  enable: true`
 
 #### hexo 添加自定义单静态页面 跳过hexo渲染，以resume为例:
 1. 将resume文件夹放进Theme主题文件夹下的/source
@@ -124,12 +117,12 @@ math:
 ``npm install hexo-filter-mermaid-diagrams``
 主题配置文件：``mermaid:  enable: true``
 
-#### 插件
+### markdown插件
 ``npm install hexo-reference --save`` 支持Markdown脚注
 ``npm install hexo-wordcount --save`` 字数统计
 
 **Markdown Preview Enhanced** markdown预览插件（vs code）
-Chrome Puppeteer导出PDF > 搜索“chrome”，在相应选项中填入你的浏览器的“chrome.exe”文件的地址即可
+如果无法正常导出：Chrome Puppeteer导出PDF > 搜索“chrome”，在相应选项中填入你的浏览器的“chrome.exe”文件的地址即可
 ``C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe``
 
 **Markdown 粘贴插件**

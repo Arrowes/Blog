@@ -5,6 +5,9 @@ tags:
 - 嵌入式
 - 深度学习
 ---
+以目标检测算法YOLOX为例，记录模型从权重文件转换为ONNX，再使用TIDL(Importer/Tolls)编译为可执行文件，最后于SK板运行及评估的开发流程。
+<!--more-->
+
 接上一篇：[TDA4②：环境搭建、模型转换、Demo及Tools](https://wangyujie.site/TDA4VM2/)
 
 # YOLOX部署TDA4VM-SK流程

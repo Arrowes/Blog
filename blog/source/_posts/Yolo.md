@@ -5,8 +5,10 @@ tags:
 - python
 - 深度学习
 ---
-# Yolo
-## 环境配置
+记录了YOLO的环境配置、资料代码、魔改记录、炼丹经验、论文想法。
+<!--more-->
+
+# 环境配置
 详细使用见 [Anaconda，Pycharm，Jupyter，Pytorch](https://wangyujie.site/Pytorch/)
 
 **Windows环境配置**
@@ -53,7 +55,7 @@ tags:
 
 如果requirements中有包实在安不上，手动装包：进[网站](https://pypi.org/)搜索包，下载.whl，在包所在位置激活环境运行``pip install [].whl``(包名中cp38代表python3.8版本)
 
-## 资料与代码
+# 资料与代码
 
 | Model   |Paper  | Code|
 |---------|-------|-------|
@@ -135,6 +137,18 @@ class Conv(nn.Module):
         self.bn = nn.BatchNorm2d(c2)
         #self.act = nn.SiLU() if act is True else (act if isinstance(act, nn.Module) else nn.Identity())
         self.act = nn.Mish() if act is True else (act if isinstance(act, nn.Module) else nn.Identity())
+
+class ReLU(nn.Module):
+    __constants__ = ['inplace']
+    inplace: bool
+    def __init__(self, inplace: bool = False):
+        super(ReLU, self).__init__()
+        self.inplace = inplace
+    def forward(self, x):
+        return F.relu(x, inplace=self.inplace)
+    def extra_repr(self):
+        inplace_str = 'inplace=True' if self.inplace else ''
+        return inplace_str
 ```
 
 ## Loss Function

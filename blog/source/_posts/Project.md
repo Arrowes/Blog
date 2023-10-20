@@ -5,6 +5,9 @@ tags:
 - 总结
 - 技术
 ---
+FEY-YOLOv7，CEAM-YOLOv7，基于 STM32 的智能空压机状态监测系统，SE智厨，风功率密度便携式测量仪。
+<!--more-->
+
 # FEY-YOLOv7：基于面部小目标动态追踪的驾驶员疲劳检测算法
 + SCI四区论文：[A Driver Fatigue Detection Algorithm Based on Dynamic Tracking of Small Facial Targets Using YOLOv7](https://search.ieice.org/bin/summary_advpub.php?id=2023EDP7093&category=D&lang=E&abst=)
 + Github: [FEY-YOLOv7](https://github.com/Arrowes/FEY-YOLOv7)

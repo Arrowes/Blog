@@ -5,6 +5,9 @@ tags:
 - 嵌入式
 - 深度学习
 ---
+自定义深度学习模型的转换、编译及部署流程，使用了三种不同的编译工具：TIDL Importer，Edge AI Studio，EdgeAI-TIDL-Tools
+<!--more-->
+
 接上一篇：[TDA4③：YOLOX的模型转换与SK板端运行](https://wangyujie.site/TDA4VM3/)
 
 TI文档中对yolo、mobilenet、resnet等主流深度学习模型支持十分完善，相关开箱即用的文件在 [Modelzoo](https://github.com/TexasInstruments/edgeai-modelzoo) 中，但有关自定义模型的编译和部署内容很少，只能利用例程和提供的工具进行尝试。

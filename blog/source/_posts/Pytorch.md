@@ -4,6 +4,8 @@ date: 2022-11-24 21:26:44
 tags: 
 - python
 ---
+深度学习相关工具使用笔记，包括Anaconda, Pycharm, Jupyter notebook, Google Colab，以及Pytorch，项目地址：[DLpractice](https://github.com/Arrowes/DLpractice)
+<!--more-->
 
 视频：[PyTorch深度学习快速入门教程](https://www.bilibili.com/video/BV1hE411t7RN/)
 

@@ -6,6 +6,9 @@ tags:
 - 技术
 - 摄影
 ---
+包括读《摄影笔记》的总结，专题拍摄笔记，摄影名词解释及相机知识，调色笔记更新中。
+<!--more-->
+
 [索尼APP使用教程](https://kdocs.cn/l/cq3CTsJgxvNv?f=201)
 # 调色笔记
 <img alt="图 7" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/Photograph-rrl.png" width=50%/>  

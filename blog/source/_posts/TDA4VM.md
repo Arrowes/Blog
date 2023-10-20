@@ -5,6 +5,9 @@ tags:
 - 嵌入式
 - 深度学习
 ---
+TDA4的基本知识，包括数据手册研读，SDK介绍，TIDL概念。
+<!--more-->
+
 [TDA4VM官网](https://www.ti.com.cn/product/zh-cn/TDA4VM)， [TI e2e论坛](https://e2e.ti.com/support/processors-group/processors/f/processors-forum)
 下一篇：[TDA4：环境搭建、模型转换及Demo](https://wangyujie.site/TDA4VM2/)
 # TDA4VM芯片数据手册研读

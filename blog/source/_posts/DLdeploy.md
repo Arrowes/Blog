@@ -5,6 +5,8 @@ tags:
 - 嵌入式
 - 深度学习
 ---
+深度学习模型部署相关记录，目前仅开了个头，项目地址：[DLpractice](https://github.com/Arrowes/DLpractice)
+<!--more-->
 
 **算法部署**
 + Network selection：

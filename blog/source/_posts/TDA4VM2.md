@@ -5,6 +5,8 @@ tags:
 - 嵌入式
 - 深度学习
 ---
+TDA4的SDK环境搭建，SK开发板配置，TIDL demo运行，TIDL Tools与Edge AI Studio工具的介绍。
+<!--more-->
 
 相关前置知识见上一篇：[TDA4①：SDK, TIDL, OpenVX](https://wangyujie.site/TDA4VM/)
 环境搭建需要下载SDK：[PROCESSOR-SDK-J721E](https://www.ti.com.cn/tool/cn/PROCESSOR-SDK-J721E)

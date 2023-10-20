@@ -4,7 +4,9 @@ date: 2023-05-16 09:43:00
 tags:
 - C/C++
 ---
-项目地址：[C-coding](https://github.com/Arrowes/C-coding)
+C, C++, Cmake的相关入门学习笔记，项目地址：[C-coding](https://github.com/Arrowes/C-coding)
+<!--more-->
+
 # C
 [C Primer Plus(第六版)中文版](https://img.anfulai.cn/bbs/94810/C%20Primer%20Plus(%E7%AC%AC%E5%85%AD%E7%89%88)%E4%B8%AD%E6%96%87%E7%89%88.pdf)
 
