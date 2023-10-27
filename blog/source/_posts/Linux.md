@@ -39,7 +39,7 @@ cd ~    #导航到主目录 /home/user1
 ls                  #检索
 tree []             #查看树状图
 wget [url]          #下载, wget -O myfile.zip [url] 重命名文件
-tar -xf []          #解压
+tar -xf []          #解压 tar -zcvf ./   unzip *.zip -d /path
 vi []               #命令行进入文件，按i进入插入模式，按Esc返回命令模式并输入:wq 保存退出, :q! 不保存退出
 gedit []            #图形界面进入文件直接编辑
 whereis []          #查找

@@ -210,7 +210,7 @@ def export(model, args, f, export_params=True, verbose=False, training=TrainingM
 量化一般是指把模型的单精度参数（Float32）转化为低精度参数(Int8,Int4)，把推理过程中的浮点运算转化为定点运算。
 *（float和int的本质区别在于小数点是否固定）*
 
-浮点数格式 (float32)：$V = (-1)^s×M×2^E$
+浮点数格式 (float32)：$$V = (-1)^s×M×2^E$$
 符号位s|阶码E|尾数M|
 ---|--|--
 1|8|23|
@@ -222,8 +222,8 @@ def export(model, args, f, export_params=True, verbose=False, training=TrainingM
 
 若整数位占4位，小数位占3位，则其最大精度为0.125，最大值为15.875
 若整数位占5位，小数位占2位，则其最大精度为0.250，最大值为31.750
-$int8=float32∗2^3$
-$float32=int8/2^3$
+$$int8=float32∗2^3$$
+$$float32=int8/2^3$$
 
 
 浮点运算在运算过程中，小数点的位置是变动的，而定点运算则是固定不变。如果将浮点数转换成定点数，就可以实现一次读取多个数进行计算（1 float32 = 4 int8），提高了运算效率。
