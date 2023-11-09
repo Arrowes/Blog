@@ -39,7 +39,6 @@ cd ~    #导航到主目录 /home/user1
 ls                  #检索
 tree []             #查看树状图
 wget [url]          #下载, wget -O myfile.zip [url] 重命名文件
-tar -xf []          #解压 tar -zcvf ./   unzip *.zip -d /path
 vi []               #命令行进入文件，按i进入插入模式，按Esc返回命令模式并输入:wq 保存退出, :q! 不保存退出
 gedit []            #图形界面进入文件直接编辑
 whereis []          #查找
@@ -49,6 +48,17 @@ export 变量名=值     #设置或更新环境变量的值
 #配置永久环境变量更方便，sudo gedit /etc/profile，末尾加入如上代码，然后source /etc/profile加载立即生效
 echo []             #输出指定的字符串或变量的值,用于调试程序、输出信息
 script -f log.txt   #输出terminal内容到文件 exit退出记录，或在指令后加入 > log.txt
+
+#tar打包
+tar -cvf XX.tar XX  #将XX文件夹打包为XX.tar文件
+tar -tf XX.tar      #查看tar内容
+tar -xf []          #解包 -C /path 
+#tar压缩
+tar -zcvf XX.tar.gz XX #压缩XX（ 排除：XX前加--exclude=dataset）
+tar -xf XX.tar.gz XX   #解压 -C /path
+#zip
+zip -r XX.zip XX XX.txt #压缩XX以及XX.txt（排除：加-x "./XX/X"）
+unzip *.zip -d /path    #解压
 ```
 # Ubuntu
 ```sh
