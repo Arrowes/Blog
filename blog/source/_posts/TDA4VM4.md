@@ -19,16 +19,8 @@ TI文档中对yolo、mobilenet、resnet等主流深度学习模型支持十分�
 4.  \***dataset.yaml**：配置文件，说明了用于模型训练的数据集的细节
 5.  \***run.log**：这是模型的运行日志
 
-[edgeai-benchmark](https://github.com/TexasInstruments/edgeai-benchmark): Custom model benchmark can also be easily done (please refer to the documentation and example). Uses [edgeai-tidl-tools](https://github.com/TexasInstruments/edgeai-tidl-tools) for model compilation and inference
-
-
-1. 首先，使用PyTorch训练模型并导出.onnx (& prototxt) 文件;
-2. 其次，使用edgeai-benchmark来对.onnx和prototxt文件进行基准测试，以获取param.yaml文件。可以使用脚本[edgeai-benchmark/run_custom_pc.sh](https://github.com/TexasInstruments/edgeai-benchmark/blob/master/run\_custom\_pc.sh)来调用[edgeai-benchmark/custom.py](https://github.com/TexasInstruments/edgeai-benchmark/blob/master/scripts/benchmark\_custom.py)。如果模型不在该文件列出的类型之中，可以参考[edgeai-benchmark/configs](https://github.com/TexasInstruments/edgeai-benchmark/tree/master/configs)目录中的示例,
-这一步将创建一个编译后的模型文件包（tar.gz文件）;
-3. 第三步，通过flash手动将上述.tar.gz文件复制到SD卡中（或者在启动后，可以直接使用scp或其他工具进行复制）;
-4. 最后，运行/opt/edge_ai_apps/apps_python/app_edgeai.py。
-
-除了上述的第二步，也可以使用edgeai-tidl-tools。但是需要手动编辑param.yaml文件，以使其与edgeai-benchmark生成的文件相匹配。
+[edgeai-benchmark](https://github.com/TexasInstruments/edgeai-benchmark): Custom model benchmark can also be easily done (please refer to the documentation and example). 
+Uses [edgeai-tidl-tools](https://github.com/TexasInstruments/edgeai-tidl-tools) for model compilation and inference
 
 # 网络结构的修改与适配
 edgeai-tidl-tools与edge ai studio的编译结果可以结合onnx模型在arm上运行，因此可以有不支持的网络层（有性能损失），但若使用TIDL Importer编译，则只能转换完全支持TIDL的网络结构，因此前期将网络中不支持的层替换是最好的，
@@ -122,7 +114,10 @@ for result in raw_result:
 `print(result)` :正常应该输出正确的推理结果，如果数值全都一样(-4.59512)，可能是没有检测到有效的目标或者模型效果太差
 
 # TIDL 编译转换
-得到onnx相关文件后，使用ti提供的工具进行编译和推理，这里采用三种方法：  [TIDL Importer](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/06_01_01_12/exports/docs/tidl_j7_01_00_01_00/ti_dl/docs/user_guide_html/md_tidl_model_import.html), [Edge AI Studio](https://dev.ti.com/edgeaistudio/) 和 [edgeai-tidl-tools](https://github.com/TexasInstruments/edgeai-tidl-tools/tree/08_06_00_05)
+得到onnx相关文件后，使用ti提供的工具进行编译和推理，这里采用三种不同的模型转换方法： 
++ [TIDL Importer](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/06_01_01_12/exports/docs/tidl_j7_01_00_01_00/ti_dl/docs/user_guide_html/md_tidl_model_import.html) ：部署于EVM板，网络结构需要全部支持TIDL
++ [Edgeai-tidl-tools](https://github.com/TexasInstruments/edgeai-tidl-tools/tree/08_06_00_05)：可部署于SK板，需要onnx运行环境，配置灵活，网络结构要求少
++ [Edge AI Studio](https://dev.ti.com/edgeaistudio/)：TIDL tools的在线版本
 
 ## TIDL Importer
 TIDL Importer 是RTOS SDK中提供的导入工具，需要网络结构完全支持tidl，以使模型都通过tidl加速（即转换只生成net,io 2个bin文件）
