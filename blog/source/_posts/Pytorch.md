@@ -62,7 +62,13 @@ Ctrl + / 批量注释
 ![图 1](https://raw.gitmirror.com/Arrowes/Blog/main/images/Pytorch1.png) ![图 2](https://raw.gitmirror.com/Arrowes/Blog/main/images/Pytorch2.png)  
 
 
-
+```py
+#Debug:
+ModuleNotFoundError: No module named 'xxx'
+#需要导入项目根目录：
+import sys
+sys.path.append('/home/ywang85/edgeai-yolox')
+```
 
 # Jupyter notebook
 激活pytorch环境后: ``conda install nb_conda``

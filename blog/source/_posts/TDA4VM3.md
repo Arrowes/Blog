@@ -20,6 +20,35 @@ TI官方在[ ModelZOO ](https://github.com/TexasInstruments/edgeai-modelzoo)中�
 
 <img alt="picture 1" src="https://github.com/TexasInstruments/edgeai-yolox/raw/main/yolox/utils/figures/Focus.png"/>  
 
+## 1. 使用edgeai-yolox训练自制数据集
+目标检测文档：[edgeai-yolox-2d_od](https://github.com/TexasInstruments/edgeai-yolox/blob/main/README_2d_od.md)
+```sh
+conda create -n pytorch python=3.6
+./setup.sh  #若pytorch环境已建好，就不用全部跑通，后面运行时一个个装
+#运行demo，pth在文档中下载
+python tools/demo.py image -f exps/default/yolox_s_ti_lite.py -c yolox-s-ti.pth --path assets/dog.jpg --conf 0.25 --nms 0.45 --tsize 640 --save_result --device gpu --dataset coco
+#报错，注释掉135行self.cad_models = model.head.cad_models，成功
+
+#自建数据集，COCO格式，放在datasets文件夹
+    COCO 
+    ├── train2017   #训练jpg图片
+    ├── val2017     #验证jpg图片
+    └── annotations #标签json文件
+        ├── instances_train2017.json
+        └── instances_val2017.json
+
+yolox/data/datasets/coco_classes.py #修改类别名称
+yolox/exp/yolox_base.py中的self.num_classes   #类别数量
+yolox/data/datasets/coco.py  #改size
+exps/default/yolox_s_ti_lite.py #模型配置文件，在里面修改参数
+
+#运行训练：
+python -m yolox.tools.train -n yolox-s-ti-lite -d 0 -b 16 --fp16 -o --cache
+#Save weights to ./YOLOX_outputs/yolox_s_ti_lite
+
+
+```
+
 ## 1. 模型文件转ONNX
 ~~pycharm进入edgeai-yolox项目，根据提示额外安装requirements~~
 Window中配置该环境需要安装visual studio build tools，而且很多包报错，因此转ubuntu用vscode搭pytorch环境，非常顺利（vscode插件离线安装：如装python插件，直接进[ marketplace ](https://marketplace.visualstudio.com/vscode)下好拖到扩展位置）拓展设置中把Python Default Path改成创建的环境 `/home/wyj/anaconda3/envs/pytorch/bin/python`，最后用vscode打开项目，F5运行py程序，将.pth转为 ``.onnx, .prototxt`` 文件。
