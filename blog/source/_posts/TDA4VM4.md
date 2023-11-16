@@ -275,6 +275,20 @@ models = ['custom_model_name']  #修改对应的模型名称
     },
 
 #examples/osrt_python/common_utils.py 配置编译选项
+tensor_bits = 8
+debug_level = 0
+max_num_subgraphs =16   #16
+accuracy_level = 1
+calibration_frames = 3  #3
+calibration_iterations = 5  #10
+output_feature_16bit_names_list = ""#"conv1_2, fire9/concat_1"
+params_16bit_names_list = "" #"fire3/squeeze1x1_2"
+mixed_precision_factor = -1
+quantization_scale_type = 0
+high_resolution_optimization = 0
+pre_batchnorm_fold = 1
+ti_internal_nc_flag = 1601
+
 "deny_list":"Slice", #"MaxPool"
 
 #运行编译

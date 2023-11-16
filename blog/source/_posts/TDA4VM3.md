@@ -46,7 +46,12 @@ exps/default/yolox_s_ti_lite.py #模型配置文件，在里面修改参数
 python -m yolox.tools.train -n yolox-s-ti-lite -d 0 -b 16 --fp16 -o --cache
 #Save weights to ./YOLOX_outputs/yolox_s_ti_lite
 
+#导出：
+python3 tools/export_onnx.py --output-name yolox_s_ti_lite0.onnx -f exps/default/yolox_s_ti_lite.py -c YOLOX_outputs/yolox_s_ti_lite/best_ckpt.pth --export-det
+#生成onnx与prototxt
 
+#onnx推理：
+python3 demo/ONNXRuntime/onnx_inference.py -m yolox_s_ti_lite0.onnx -i test.jpg -s 0.3 --input_shape 640,640 --export-det
 ```
 
 ## 1. 模型文件转ONNX
@@ -188,6 +193,7 @@ cd ${TIDL_INSTALL_PATH}/ti_dl/test
 <img alt="图 2" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/TDA4VM3sdktidlyolox.png" width="50%"/>  
 
 ### b. 使用TIDL Tools（by [Edge AI Studio](https://dev.ti.com/edgeaistudio/)）
+参考他人实例：[YOLOX-Yoga](https://www.hackster.io/whitney-knitter/practicing-yoga-with-ai-human-pose-estimation-on-the-tda4vm-fe2549)
 使用`Edge AI Studio > Model Analyzer > Custom models > ONNX runtime > custom-model-onnx.ipynb`例程, 并结合 `OD.ipynb` 例程进行修改
 
 *YOLOX.ipynb*
