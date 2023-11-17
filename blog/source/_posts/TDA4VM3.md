@@ -352,13 +352,20 @@ print(f' Inference Time Per Image : {tt :7.2f} ms  \n DDR BW Per Image        : 
 ## 3. 板端运行(TDA4VM-SK)
 ~~连接SK板进入minicom串口通讯传输模型文件(失败)~~（若能连网线通过jupyternotebook配置更方便，这里网络有限制所以配置都通过SD卡进行）
 
-通过SD卡配置编译生成的模型：
-> 配置模型文件夹yolox_s_studio放入modelzoo文件夹
->> artifacts：存放编译生成的工件，.bin, .txt
-model：原onnx模型，.onnx, (.prototxt)
-param.yaml：配置文件, 其中需要修改model_path等参数
-dataset.yaml：数据集类别对应文件
-
+通过SD卡配置编译生成的模型，配置模型文件夹yolox放入modelzoo文件夹：
+```sh
+model_zoo/yolox/
+├── artifacts #存放编译生成的工件
+│   ├── allowedNode.txt
+│   ├── detslabels_tidl_io_1.bin
+│   ├── detslabels_tidl_net.bin
+│   └── onnxrtMetaData.txt
+├── dataset.yaml  #数据集类别
+├── model
+│   ├── yolox_s_lite_640x640_20220221_model.onnx  #onnx模型
+│   └── yolox_s_lite_640x640_20220221_model.prototxt  #可省略
+└── param.yaml  #配置文件, 需要修改model_path,threshold等，可复制别的模型yaml（如8220）, 否则可能少很多参数
+```
 通过SD卡配置object_detection.yaml，在model参数中索引上面建立的模型文件夹
 ```sh
 #通过minicom连接串口

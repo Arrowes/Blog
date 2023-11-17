@@ -23,10 +23,91 @@ tags: 总结
 训练数据：[exp](https://docs.qq.com/sheet/DWmV1TnhIdlBodW1C?tab=BB08J2&u=d859dabcd86a47b181e758b366a48fdc)
 
 
-
 ---
 以下为开发日志（倒叙）
+> 想法：
+能否用importer转换？
+
 # 202311 部署模型至SK板
+## 20231117 yolox_s_ti_lite部署成功
+再次尝试转换生成的yolox_s_ti_lite0.onnx
+模型配置改为：`'scale' : [1,1,1]`
+成功！！居然是scale配置错误
+```sh
+input_data.shape (1, 3, 640, 640)
+output.shape: (1, 1, 200, 6) [array([[[[ 2.8528796e+02,  1.7602501e+02,  3.3061954e+02,
+           2.0805267e+02,  1.1221656e-01,  0.0000000e+00],
+         [ 3.0201743e+02,  2.8543573e+02,  3.7205356e+02,
+           3.2997461e+02,  8.0858791e-01,  1.0000000e+00],
+         [ 2.8855203e+02,  1.6997089e+02,  3.3278247e+02,
+           2.0731580e+02,  7.2682881e-01,  2.0000000e+00],
+         ...,
+         [-1.0000000e+00, -1.0000000e+00, -1.0000000e+00,
+      dtype=float32)]
+```
+<img alt="图 2" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/PerperLogOutput.jpg" width="50%"/> 
+
+配置板端文件：
+```sh
+#运行配置文件yolo.yaml
+title: "DMS"
+log_level: 1
+inputs:
+    input0:
+        source: /dev/video2
+        format: jpeg
+        width: 1920
+        height: 1080
+        framerate: 30
+models:
+    model0:                                             
+        model_path: /opt/model_zoo/DMS-YOLOv8
+        viz_threshold: 0.2
+outputs:
+    output0:
+        sink: kmssink
+        width: 1920
+        height: 1080
+        overlay-performance: True
+flows:
+    flow0: [input0,model0,output0,[200,120,1280,720]]
+
+#模型文件夹DMS-YOLOv8
+DMS-YOLOv8/
+├── artifacts
+│   ├── allowedNode.txt
+│   ├── detections_tidl_io_1.bin
+│   ├── detections_tidl_net.bin
+│   └── onnxrtMetaData.txt
+├── dataset.yaml    #改
+├── model
+│   └── yolox_s_ti_lite0.onnx
+├── param.yaml  #改
+└── run.log
+
+#dataset.yaml
+categories:
+- supercategory: eye
+  id: 1
+  name: closed
+- supercategory: mouth
+  id: 2
+  name: closed
+- supercategory: eye
+  id: 3
+  name: open
+- supercategory: mouth
+  id: 4
+  name: open
+
+#param.yaml（copy from model_zoo_8220）
+threshold: 0.2
+model_path: model/yolox_s_ti_lite0.onnx
+```
+板端运行：
+```sh
+cd /opt/edgeai-gst-apps/apps_cpp && ./bin/Release/app_edgeai ../configs/yolo.yaml
+```
 ## 20231116 模型转换，yolox失败，yolov8 & FEY-YOLOX成功
 ```sh
 #model_configs.py:
@@ -45,6 +126,7 @@ tags: 总结
     },    
 
 #失败，输出全是-1
+input_data.shape (1, 3, 640, 640)
 output.shape: (1, 1, 200, 6) [array([[[[-1., -1., -1., -1.,  0., -1.],
          [-1., -1., -1., -1.,  0., -1.],
          [-1., -1., -1., -1.,  0., -1.],
@@ -52,29 +134,37 @@ output.shape: (1, 1, 200, 6) [array([[[[-1., -1., -1., -1.,  0., -1.],
          [-1., -1., -1., -1.,  0., -1.],
          [-1., -1., -1., -1.,  0., -1.],
          [-1., -1., -1., -1.,  0., -1.]]]], dtype=float32)]
-input_data.shape (1, 3, 640, 640)
-#是否仍然可以部署？
+#是图片没目标还是模型有问题？是否仍然可以部署？
 
 #如果注释掉prototxt，或以分类模型形式转换，则报错：
 onnxruntime.capi.onnxruntime_pybind11_state.Fail: [ONNXRuntimeError] : 1 : FAIL : This is an invalid model. Error: the graph is not acyclic.
-
 #使用edgeai-yolox中的pretrained yolox-s-ti-lite_39p1_57p9同样报错
+
 #使用modelZoo中的8220 yolox_s_lite_640x640则正常
-#两者模型主干相同，头尾不同
+input_data.shape (1, 3, 640, 640)
+output.shape: (1, 1, 200, 5) [array([[[[ 46.72146  ,  90.91087  , 548.1755   , 592.36487  ,
+            0.8415479],
+         [ -1.       ,  -1.       ,  -1.       ,  -1.       ,
+            0.       ],
+         [ -1.       ,  -1.       ,  -1.       ,  -1.       ,
+            0.       ],
+         ......
+#推理也有结果
+#两者模型主干相同，头尾不同，输出shape最后一位不同
 ```
-目前看来，edgeai-yolox训练得到的模型并不能直接转换（虽然它提供的export_onnx.py能导出prototxt）
+~~目前看来，edgeai-yolox训练得到的模型并不能直接转换（虽然它提供的export_onnx.py能导出prototxt）~~ 可以转换，之前是参数配置问题
 而modelZoo中的yolox经查应该是由**edgeai_benchmark**训练得到的，下次尝试
 
 又回去尝试直接转10月训练的yolov8n_4aug(不使用prototxt)，转换**有输出**（`output.shape: (1, 25200, 9)`）！！
 但是无法直接infer，而且没有prototxtx后期如何部署？可能之后要手搓SK板中的代码
 
-此外FEY-YOLOX也有输出，今天进展不错，明天尝试这两个有输出的部署以及edgeai_benchmark yolox的训练
+此外FEY-YOLOX也有shape相同的输出，今天进展不错，明天尝试这两个有输出的部署以及edgeai_benchmark yolox的训练
 
 ## 20231115 edgeai-yolox训练
 [edgeai-yolox](https://github.com/TexasInstruments/edgeai-yolox/blob/main/README_2d_od.md)
 ```py
 #训练：
-python -m yolox.tools.train -n yolox-s-ti-lite -d 0 -b 16 --fp16 -o --cache
+python -m yolox.tools.train -n yolox-s-ti-lite -d 0 -b 8 --fp16 -o --cache
 #使用疲劳驾驶数据集训练成功，pth=68.5MB
 
 #导出：
@@ -83,7 +173,7 @@ python3 tools/export_onnx.py --output-name yolox_s_ti_lite0.onnx -f exps/default
 
 #onnx推理：
 python3 demo/ONNXRuntime/onnx_inference.py -m yolox_s_ti_lite0.onnx -i test.jpg -s 0.3 --input_shape 640,640 --export-det
-#推理成功，检测出眼睛嘴巴
+#推理成功，检测出眼睛嘴巴，说明到onnx为止是ok的
 ```
 YOLOX模型是ok的，与官方提供的预训练模型结构基本相同
 
@@ -93,16 +183,19 @@ YOLOX模型是ok的，与官方提供的预训练模型结构基本相同
 可能的原因：转换编译配置、SK板部署参数配置、模型结构不支持/输出不匹配
 为排除模型问题，接下来先用yolox尝试
 
-## 20231112 算法降级 FEY-YOLOv7 → FEY-YOLOX
-参考：[用YOLOv5框架YOLOX](https://blog.csdn.net/g944468183/article/details/129559197)
-FEY-YOLOX也许能直接部署
 
 ---
 
-# 202310 算法升级YOLOv7 → v8
-## 20231017 参考YOLOv8原项目
+# 202310 算法变体 YOLOv7 → v8/X
+## 20231031 降级X以便于部署
+FEY-YOLOv7 → FEY-YOLOX
+参考：[用YOLOv5框架YOLOX](https://blog.csdn.net/g944468183/article/details/129559197)
+FEY-YOLOX也许能直接部署
+
+## 20231017 升级v8以跟上时代
+FEY-YOLOv7 → FEY-YOLOv8
 [YOLOv8_modules](https://github.com/ultralytics/ultralytics/ultralytics/nn/modules)
-<img alt="图 1" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/PerperLogYOLOv8Structure.jpeg" width="50%"/> 
+<img alt="图 1" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/PerperLogYOLOv8Structure.jpeg" width="80%"/> 
 参考网络结构，用modules搭积木
 ```yaml
 #YOLOv8.yaml

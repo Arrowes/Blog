@@ -179,7 +179,7 @@ sink_0::startx="<320>"  sink_0::starty="<180>"  sink_0::widths="<1280>"   sink_0
 
 <img src="https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/06_01_01_12/exports/docs/tidl_j7_01_00_01_00/ti_dl/docs/user_guide_html/TIDL_import_process.png" >
 
-## Demo:使用TIDL实现多种模型的导入、运行 (from RTOS SDK)
+## Demo:使用TIDL实现多种模型的导入（by Importer）、运行 (from RTOS SDK)
 文档教程：[MobileNetV2 Tensorflow，PeleeNet Caffe，JSegNet21V2 Caffe model](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/06_01_01_12/exports/docs/tidl_j7_01_00_01_00/ti_dl/docs/user_guide_html/md_tidl_user_model_deployment.html#importing-mobilenetv2-model-for-image-classification)，下面以PeleeNet为例
 
 **Config** TIDL
@@ -273,7 +273,6 @@ python3 ./scripts/gen_test_report.py    #评估
 #Compile and Validate on X86_PC for cpp_example
 mkdir build && cd build
 cmake ../examples && make -j && cd ..
-
 ```
 | Image Classification | Object detection | Semantic Segmentation |
 | :-: |  :-: |  :-: |
