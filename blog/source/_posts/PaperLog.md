@@ -32,7 +32,7 @@ tags: 总结
 ## 20231117 yolox_s_ti_lite部署成功
 再次尝试转换生成的yolox_s_ti_lite0.onnx
 模型配置改为：`'scale' : [1,1,1]`
-成功！！居然是scale配置错误
+成功！居然是scale配置错误
 ```sh
 input_data.shape (1, 3, 640, 640)
 output.shape: (1, 1, 200, 6) [array([[[[ 2.8528796e+02,  1.7602501e+02,  3.3061954e+02,
@@ -45,7 +45,7 @@ output.shape: (1, 1, 200, 6) [array([[[[ 2.8528796e+02,  1.7602501e+02,  3.30619
          [-1.0000000e+00, -1.0000000e+00, -1.0000000e+00,
       dtype=float32)]
 ```
-<img alt="图 3" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/PerperLogOutput.jpg" width="50%"/> 
+<img alt="图 2" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/PerperLogOutput.jpg" width="50%"/> 
 
 配置板端文件：
 ```sh
@@ -108,6 +108,10 @@ model_path: model/yolox_s_ti_lite0.onnx
 ```sh
 cd /opt/edgeai-gst-apps/apps_cpp && ./bin/Release/app_edgeai ../configs/yolo.yaml
 ```
+成功！！
+<img alt="图 0" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/PaperLog-SKoutput.jpg" width="60%"/>  
+
+
 ## 20231116 模型转换，yolox失败，yolov8 & FEY-YOLOX成功
 ```sh
 #model_configs.py:
