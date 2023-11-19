@@ -22,6 +22,7 @@ TI官方在[ ModelZOO ](https://github.com/TexasInstruments/edgeai-modelzoo)中�
 
 ## 1. 使用edgeai-yolox训练自制数据集
 目标检测文档：[edgeai-yolox-2d_od](https://github.com/TexasInstruments/edgeai-yolox/blob/main/README_2d_od.md)
+
 ```sh
 conda create -n pytorch python=3.6
 ./setup.sh  #若pytorch环境已建好，就不用全部跑通，后面运行时一个个装
@@ -54,7 +55,7 @@ python3 tools/export_onnx.py --output-name yolox_s_ti_lite0.onnx -f exps/default
 python3 demo/ONNXRuntime/onnx_inference.py -m yolox_s_ti_lite0.onnx -i test.jpg -s 0.3 --input_shape 640,640 --export-det
 ```
 
-## 1. 模型文件转ONNX
+## 2. 模型文件转ONNX
 ~~pycharm进入edgeai-yolox项目，根据提示额外安装requirements~~
 Window中配置该环境需要安装visual studio build tools，而且很多包报错，因此转ubuntu用vscode搭pytorch环境，非常顺利（vscode插件离线安装：如装python插件，直接进[ marketplace ](https://marketplace.visualstudio.com/vscode)下好拖到扩展位置）拓展设置中把Python Default Path改成创建的环境 `/home/wyj/anaconda3/envs/pytorch/bin/python`，最后用vscode打开项目，F5运行py程序，将.pth转为 ``.onnx, .prototxt`` 文件。
 ```sh
@@ -118,7 +119,7 @@ python3 demo/ONNXRuntime/onnx_inference.py -m yolox_s_ti_lite.onnx -i assets/dog
 ```
 <img alt="图 1" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/TDA4VM3onnxinference.jpg" width="50%"/>  
 
-## 2. 使用TIDL编译ONNX并运行
+## 3. 使用TIDL编译ONNX并运行
 本节使用了两种不同的方法完成PC端TIDL的编译运行：
 1. TIDL Importer: 使用RTOS SDK中提供的导入工具，提供了很多例程（8.6中没有，copy 8.5的），方便快捷；
 2. TIDL Tools：TI提供的工具，见github [edgeai-tidl-tools](https://github.com/TexasInstruments/edgeai-tidl-tools)，或在RTOS SDK也内置了，灵活度高，不支持的算子分配到ARM核，支持的会使用TIDL加速运行，增加了深度学习模型开发和运行的效率。但要求平台有onnx运行环境
@@ -349,7 +350,7 @@ print(f' Inference Time Per Image : {tt :7.2f} ms  \n DDR BW Per Image        : 
 + 内核频繁挂掉：重启EVM
 
 
-## 3. 板端运行(TDA4VM-SK)
+## 4. 板端运行(TDA4VM-SK)
 ~~连接SK板进入minicom串口通讯传输模型文件(失败)~~（若能连网线通过jupyternotebook配置更方便，这里网络有限制所以配置都通过SD卡进行）
 
 通过SD卡配置编译生成的模型，配置模型文件夹yolox放入modelzoo文件夹：
@@ -385,7 +386,7 @@ cmake ..
 make
 ```
 
-## 4. 性能评估
+## 5. 性能评估
 Docs: [Performance Visualization Tool](https://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-sk-tda4vm/latest/exports/docs/performance_visualizer.html#)
 运行实例时，会在运行文件的上一级`../perf_Logs/`中生成 `.md` 格式的**Performance Logs**，最多15个，运行时会不断覆写
 

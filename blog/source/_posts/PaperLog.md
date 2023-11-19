@@ -101,11 +101,12 @@ categories:
   name: open
 
 #param.yaml（copy from model_zoo_8220）
-threshold: 0.2
+threshold: 0.2  #好像没用
 model_path: model/yolox_s_ti_lite0.onnx
 ```
 板端运行：
 ```sh
+sudo minicom -D /dev/ttyUSB2 -c on
 cd /opt/edgeai-gst-apps/apps_cpp && ./bin/Release/app_edgeai ../configs/yolo.yaml
 ```
 成功！！
@@ -129,7 +130,7 @@ cd /opt/edgeai-gst-apps/apps_cpp && ./bin/Release/app_edgeai ../configs/yolo.yam
         'meta_arch_type' : 6
     },    
 
-#失败，输出全是-1
+#模型转换失败，输出全是-1
 input_data.shape (1, 3, 640, 640)
 output.shape: (1, 1, 200, 6) [array([[[[-1., -1., -1., -1.,  0., -1.],
          [-1., -1., -1., -1.,  0., -1.],
@@ -179,7 +180,7 @@ python3 tools/export_onnx.py --output-name Output/yolox_s_ti_lite0.onnx -f exps/
 python3 demo/ONNXRuntime/onnx_inference.py -m demo_output/yolox_s_ti_lite0.onnx -i test.jpg -s 0.3 --input_shape 640,640 --export-det
 #推理成功，检测出眼睛嘴巴，说明到onnx为止是ok的
 ```
-<img alt="图 2" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/PaperLogonnxOutput.png" width="50%"/> 
+<img alt="图 2" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/PaperLogonnxOutput.png" width="80%"/> 
 
 YOLOX模型是ok的，与官方提供的预训练模型结构基本相同
 
