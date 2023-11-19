@@ -45,7 +45,7 @@ output.shape: (1, 1, 200, 6) [array([[[[ 2.8528796e+02,  1.7602501e+02,  3.30619
          [-1.0000000e+00, -1.0000000e+00, -1.0000000e+00,
       dtype=float32)]
 ```
-<img alt="图 2" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/PerperLogOutput.jpg" width="50%"/> 
+<img alt="图 3" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/PerperLogOutput.jpg" width="50%"/> 
 
 配置板端文件：
 ```sh
@@ -168,13 +168,15 @@ python -m yolox.tools.train -n yolox-s-ti-lite -d 0 -b 8 --fp16 -o --cache
 #使用疲劳驾驶数据集训练成功，pth=68.5MB
 
 #导出：
-python3 tools/export_onnx.py --output-name yolox_s_ti_lite0.onnx -f exps/default/yolox_s_ti_lite.py -c YOLOX_outputs/yolox_s_ti_lite/best_ckpt.pth --export-det
+python3 tools/export_onnx.py --output-name Output/yolox_s_ti_lite0.onnx -f exps/default/yolox_s_ti_lite.py -c YOLOX_outputs/yolox_s_ti_lite/best_ckpt.pth --export-det
 #生成onnx（37.04MB）与prototxt
 
 #onnx推理：
-python3 demo/ONNXRuntime/onnx_inference.py -m yolox_s_ti_lite0.onnx -i test.jpg -s 0.3 --input_shape 640,640 --export-det
+python3 demo/ONNXRuntime/onnx_inference.py -m demo_output/yolox_s_ti_lite0.onnx -i test.jpg -s 0.3 --input_shape 640,640 --export-det
 #推理成功，检测出眼睛嘴巴，说明到onnx为止是ok的
 ```
+<img alt="图 2" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/PaperLogonnxOutput.png" width="50%"/> 
+
 YOLOX模型是ok的，与官方提供的预训练模型结构基本相同
 
 
