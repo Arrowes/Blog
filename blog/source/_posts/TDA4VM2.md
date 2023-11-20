@@ -106,16 +106,14 @@ make linux_fs_install_sd
 > 物料准备：
 SK板，microUSB串口线，USB camera，HDMI/DP显示器，≥16GB的内存卡，网线和局域网*，串口电源（5-20V DC ≥20w），散热风扇
 
-通过USB挂载SD卡到Ubuntu
-下载[SD card .wic image](https://www.ti.com/tool/download/PROCESSOR-SDK-LINUX-SK-TDA4VM)
-使用[Balena etcher tool 1.7.0](https://github.com/balena-io/etcher/releases/tag/v1.7.0) 把 SD card .wic image `flash`到SD卡上
+通过USB挂载SD卡到Ubuntu（在虚拟机设置里）
+下载[SD card .wic image](https://www.ti.com/tool/download/PROCESSOR-SDK-LINUX-SK-TDA4VM)，使用[Balena etcher tool 1.7.0](https://github.com/balena-io/etcher/releases/tag/v1.7.0) 把 image `flash`到SD卡上
 然后插入SD卡到SK板，拨码开关拨到数字端，系统从SD卡启动
 SK板连接显示器，上电，进入界面。
-
 连接串口线，在虚拟机设置中挂载USB串口，使用 [minicom](https://help.ubuntu.com/community/Minicom) 串口通讯：
-(在minicom中自动换行：Ctrl+A Z W)
+
 ```sh
-sudo apt-get install minicom  #安装minicom
+sudo apt-get install minicom  #安装minicom(在minicom中自动换行：Ctrl+A Z W)
 sudo minicom -D /dev/ttyUSB2 -c on
 #输入用户名：root，登录tda4vm-sk
 #若连接了USB摄像头此时会显示端口信息，也可以运行 ./init_script.sh 查摄像头端口号：/dev/video2
@@ -127,19 +125,16 @@ sudo minicom -D /dev/ttyUSB2 -c on
 cd /opt/edgeai-gst-apps/configs/  #app_config_template.yaml中有参数介绍
 vi image_classification.yaml  #flow参数配置为摄像头输入input0
 
+#运行实例，替换为configs下其他文件能执行不同任务，如object_detection.yaml
 #Classification (python)
 cd /opt/edgeai-gst-apps/apps_python
 ./app_edgeai.py ../configs/image_classification.yaml  #ctrl+c退出
-#替换为configs下其他文件能执行不同任务如object_detection.yaml
-
 #Classification (c++)
 cd /opt/edgeai-gst-apps/apps_cpp
 ./bin/Release/app_edgeai ../configs/image_classification.yaml
-
 #视频流车辆检测
 cd /opt/edgeai-gst-apps/scripts/optiflow
 `./optiflow.py ../../configs/object_detection.yaml -t`  #如果没有单引号，终端会将 -t 选项解释为一个单独的参数，而不是作为 optiflow.py 命令的选项之一
-
 #多flows
 flows:
     # flowname : [input,mode1,output,[mosaic_pos_x,mosaic_pos_y,width,height]]
@@ -177,15 +172,14 @@ sink_0::startx="<320>"  sink_0::starty="<180>"  sink_0::widths="<1280>"   sink_0
 
 # [TIDL](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/06_01_01_12/exports/docs/tidl_j7_01_00_01_00/ti_dl/docs/user_guide_html/md_tidl_user_model_deployment.html)
 
-<img src="https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/06_01_01_12/exports/docs/tidl_j7_01_00_01_00/ti_dl/docs/user_guide_html/TIDL_import_process.png" >
+## [TIDL_Importer](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/06_01_01_12/exports/docs/tidl_j7_01_00_01_00/ti_dl/docs/user_guide_html/md_tidl_model_import.html)
+RTOS SDK中内置TIDL_Importer，可以直接使用, 实现Demo模型转换和运行
+Demo教程：[MobileNetV2 Tensorflow，PeleeNet Caffe，JSegNet21V2 Caffe model](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/06_01_01_12/exports/docs/tidl_j7_01_00_01_00/ti_dl/docs/user_guide_html/md_tidl_user_model_deployment.html#importing-mobilenetv2-model-for-image-classification)，下面以PeleeNet为例
 
-## Demo:使用TIDL实现多种模型的导入（by Importer）、运行 (from RTOS SDK)
-文档教程：[MobileNetV2 Tensorflow，PeleeNet Caffe，JSegNet21V2 Caffe model](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/06_01_01_12/exports/docs/tidl_j7_01_00_01_00/ti_dl/docs/user_guide_html/md_tidl_user_model_deployment.html#importing-mobilenetv2-model-for-image-classification)，下面以PeleeNet为例
-
-**Config** TIDL
+**Config** TIDL_Importer
 ```sh
 export TIDL_INSTALL_PATH=/home/wyj/SDK/ti-processor-sdk-rtos-j721e-evm-08_06_01_03/tidl_j721e_08_06_00_10
-#配置永久环境变量更方便，sudo gedit /etc/profile，末尾加入如上代码，然后source /etc/profile加载立即生效
+#配置永久环境变量更方便，sudo gedit /etc/profile，末尾加入如上代码，然后source /etc/profile加载立即生效，但是后续有变动要记得改
 
 #optional：tidlModelGraphviz tool 模型可视化工具
 sudo apt install graphviz-dev
@@ -212,6 +206,8 @@ cd ${TIDL_INSTALL_PATH}/ti_dl/utils/tidlModelImport
 #若是tensorflow例程，.pb需要先运行tensorflow的.local/lib/python3.6/site-packages/tensorflow/python/tools/optimize_for_inference.py工具进行模型推理优化，再导入。
 ```
 
+<img src="https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/06_01_01_12/exports/docs/tidl_j7_01_00_01_00/ti_dl/docs/user_guide_html/TIDL_import_process.png" width='80%'>
+
 
 **Run**ning PeleeNet for object detection
 ```sh
@@ -228,16 +224,6 @@ cd ${TIDL_INSTALL_PATH}/ti_dl/test
 
 
 
-
-
-
-
-## [TIDL-RT](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/08_06_00_12/exports/docs/tidl_j721e_08_06_00_10/ti_dl/docs/user_guide_html/md_tidl_dependency_info.html)
-```sh
-export TIDL_INSTALL_PATH=/home/ywang85/SDK/RTOSSDK/tidl_j721e_08_06_00_10   #设置环境变量
-#TARGET_PLATFORM=PC make gv失败：../../inc/itidl_ti.h:91:21: fatal error: ivision.h: No such file or directory
-#跳过，不修改code暂时不要rebuild
-```
 
 
 
@@ -290,7 +276,7 @@ TI官方提供的云端环境，集成了一系列工具,无需本地搭环境�
 选TDA4VM设备，能使用3h，文件在顶端My Workspace;
 进入后分两大板块:
 + Find your model: Compare model performance, 能查看不同模型在板端的表现，用来选择适合自己需求的模型；
-<img src="https://raw.gitmirror.com/Arrowes/Blog/main/images/TDA4VM2perform.png" width="70%"/>  
+<img src="https://raw.gitmirror.com/Arrowes/Blog/main/images/TDA4VM2perform.png" width="60%"/>  
 + Get model benchmarks：
     + Model performance 是配置好的jupyter notebook，无需修改一步步运行即可输出结果；
     + 下面重点使用Custom models：
@@ -342,16 +328,24 @@ Then using Onnx with the libtidl_onnxrt_EP inference library we run the model an
 [edgeai-tidl-tools:Python Examples](https://github.com/TexasInstruments/edgeai-tidl-tools/blob/master/examples/osrt_python/README.md)
 [适用于嵌入式应用的深度学习推理参考设计](https://www.ti.com.cn/cn/lit/ug/zhcu546/zhcu546.pdf)
 
+# Others
+## [TIDL-RT](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/08_06_00_12/exports/docs/tidl_j721e_08_06_00_10/ti_dl/docs/user_guide_html/md_tidl_dependency_info.html)（略）
+```sh
+export TIDL_INSTALL_PATH=/home/ywang85/SDK/RTOSSDK/tidl_j721e_08_06_00_10   #设置环境变量
+#TARGET_PLATFORM=PC make gv失败：../../inc/itidl_ti.h:91:21: fatal error: ivision.h: No such file or directory
+#跳过，不修改code暂时不要rebuild
+```
 
 
-# [EdgeAI-Benchmark](https://github.com/TexasInstruments/edgeai-benchmark/tree/master)
+## [EdgeAI-Benchmark](https://github.com/TexasInstruments/edgeai-benchmark/tree/master)（ongoing）
 EdgeAI-Benchmark提供了一系列针对不同图像识别任务的脚本，包括分类、分割、检测和关键点检测。（使用[edgeai-tidl-tools](https://github.com/TexasInstruments/edgeai-tidl-tools)用于模型编译和推理）
 
-## 环境搭建
+### 环境搭建
 文档：[setup_instructions](https://github.com/TexasInstruments/edgeai-benchmark/blob/master/docs/setup_instructions.md)，其中`pyenv install 3.6`可能因为网络原因下载极慢，这时可以先从官网或镜像源下载所需要的包到 ~/.pyenv/cache 目录下，再执行安装命令
 此后每次需要激活环境：`pyenv activate benchmark`
 
 [edgeai-tidl-tools/docs/custom_model_evaluation.md](https://github.com/TexasInstruments/edgeai-tidl-tools/blob/master/docs/custom_model_evaluation.md)
+
 ---
 > TDA4系列文章：
 [TDA4①：SDK, TIDL, OpenVX](https://wangyujie.site/TDA4VM/)

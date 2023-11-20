@@ -161,7 +161,7 @@ inNumChannels = 3
 numFrames = 50
 inData  =   "../../test/testvecs/XXX/detection_list.txt"
 perfSimConfig = ../../test/testvecs/XXX/device_configs/j721s2_config.cfg
-debugTraceLevel=1
+debugTraceLevel = 1
 ```
 >Debug:
 `inData`配置数据输入(回车分隔)，数量与`numFrames`要匹配；
@@ -172,11 +172,8 @@ debugTraceLevel=1
 3. 执行编译，得到可执行文件 `.bin`
     ```sh
     export TIDL_INSTALL_PATH=/home/wyj/sda2/TAD4VL_SKD_8_5/ti-processor-sdk-rtos-j721s2-evm-08_05_00_11/tidl_j721s2_08_05_00_16
-    
     cd ${TIDL_INSTALL_PATH}/ti_dl/utils/tidlModelImport
-
-    ./out/tidl_model_import.out ${TIDL_INSTALL_PATH}/ti_dl/test/testvecs/XXX/tidl_import_XXX.txt
-
+    ./out/tidl_model_import.out ${TIDL_INSTALL_PATH}/ti_dl/test/testvecs/XXX/tidl_import_yolox.txt
     #successful Memory allocation
     #../../test/testvecs/XXX/output/生成的文件分析：
     tidl_net_XXX.bin        #Compiled network file 网络模型数据
@@ -551,7 +548,7 @@ else : #如果只有一个CPU：使用一个循环顺序地处理每个模型。
 </details>
 
 
-## model-artifacts
+### model-artifacts
 分析编译深度学习模型后生成的文件：
 ```py
 └── model-artifacts         #文件都是以最后的输出层命名，分为四块网络结构

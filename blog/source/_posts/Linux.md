@@ -16,6 +16,7 @@ su                  #切换到root用户，$ 是普通权限， #是管理员权
 su username         #切换到其他用户
 sudo usermod -aG sudo username   #添加用户为root
 ps aux; kill [PID]  #查看进程; 根据进程号杀后台
+free -,             #查内存
 
 #安装 换源
 sudo apt-get install [] #安装 失败则换源

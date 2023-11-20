@@ -29,9 +29,10 @@ tags: 总结
 能否用importer转换？
 
 # 202311 部署模型至SK板
+## 20231120 edgeai-yolox重新训练
+部署的检测效果一般，可能是可见光+红外数据集使用了crop数据增强方法，而yolox又开了mosaic，导致面部特征被拆分的厉害，使用仅旋转+偏移的数据集重新训练并部署试试
 ## 20231117 yolox_s_ti_lite部署成功
-再次尝试转换生成的yolox_s_ti_lite0.onnx
-模型配置改为：`'scale' : [1,1,1]`
+再次尝试转换生成的yolox_s_ti_lite0.onnx，模型配置改为：`'scale' : [1,1,1]`
 成功！居然是scale配置错误
 ```sh
 input_data.shape (1, 3, 640, 640)
@@ -45,7 +46,7 @@ output.shape: (1, 1, 200, 6) [array([[[[ 2.8528796e+02,  1.7602501e+02,  3.30619
          [-1.0000000e+00, -1.0000000e+00, -1.0000000e+00,
       dtype=float32)]
 ```
-<img alt="图 2" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/PerperLogOutput.jpg" width="50%"/> 
+<img alt="图 2" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/PerperLogOutput.jpg" width="30%"/> 
 
 配置板端文件：
 ```sh
@@ -110,7 +111,7 @@ sudo minicom -D /dev/ttyUSB2 -c on
 cd /opt/edgeai-gst-apps/apps_cpp && ./bin/Release/app_edgeai ../configs/yolo.yaml
 ```
 成功！！
-<img alt="图 0" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/PaperLog-SKoutput.jpg" width="60%"/>  
+<img alt="图 0" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/PaperLog-SKoutput.jpg" width="50%"/>  
 
 
 ## 20231116 模型转换，yolox失败，yolov8 & FEY-YOLOX成功
@@ -202,7 +203,7 @@ FEY-YOLOX也许能直接部署
 ## 20231017 升级v8以跟上时代
 FEY-YOLOv7 → FEY-YOLOv8
 [YOLOv8_modules](https://github.com/ultralytics/ultralytics/ultralytics/nn/modules)
-<img alt="图 1" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/PerperLogYOLOv8Structure.jpeg" width="80%"/> 
+<img alt="图 1" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/PerperLogYOLOv8Structure.jpeg" width="88%"/> 
 参考网络结构，用modules搭积木
 ```yaml
 #YOLOv8.yaml

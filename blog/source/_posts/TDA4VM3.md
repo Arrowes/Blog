@@ -20,7 +20,7 @@ TI官方在[ ModelZOO ](https://github.com/TexasInstruments/edgeai-modelzoo)中�
 
 <img alt="picture 1" src="https://github.com/TexasInstruments/edgeai-yolox/raw/main/yolox/utils/figures/Focus.png"/>  
 
-## 1. 使用edgeai-yolox训练自制数据集
+## 1. 使用edgeai-yolox训练模型
 目标检测文档：[edgeai-yolox-2d_od](https://github.com/TexasInstruments/edgeai-yolox/blob/main/README_2d_od.md)
 
 ```sh
@@ -119,7 +119,7 @@ python3 demo/ONNXRuntime/onnx_inference.py -m yolox_s_ti_lite.onnx -i assets/dog
 ```
 <img alt="图 1" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/TDA4VM3onnxinference.jpg" width="50%"/>  
 
-## 3. 使用TIDL编译ONNX并运行
+## 3. 使用TIDL转换模型
 本节使用了两种不同的方法完成PC端TIDL的编译运行：
 1. TIDL Importer: 使用RTOS SDK中提供的导入工具，提供了很多例程（8.6中没有，copy 8.5的），方便快捷；
 2. TIDL Tools：TI提供的工具，见github [edgeai-tidl-tools](https://github.com/TexasInstruments/edgeai-tidl-tools)，或在RTOS SDK也内置了，灵活度高，不支持的算子分配到ARM核，支持的会使用TIDL加速运行，增加了深度学习模型开发和运行的效率。但要求平台有onnx运行环境
@@ -150,13 +150,14 @@ inElementType   = 0     #Format for each input feature, 0 : 8bit Unsigned, 1 : 8
 metaArchType    = 6     #网络使用的元架构类型，Meta Architecture used by the network，ssd mobilenetv2 = 3, yolov3 = 4, efficientdet tflite = 5, yolov5 yolox = 6
 metaLayersNamesList =  "../../test/models/pubilc/onnx/yolox_s_ti_lite.prototxt" #架构配置文件，Configuration files describing the details of Meta Arch
 postProcType    = 2     #后处理，Post processing on output tensor. 0 : Disable, 1- Classification top 1 and 5 accuracy, 2 – Draw bounding box for OD, 3 - Pixel level color blending
+debugTraceLevel = 1     #输出日志
 ```
 
 3. 模型导入
 使用TIDL import tool，得到可执行文件 ``.bin``
 ```sh
 cd ${TIDL_INSTALL_PATH}/ti_dl/utils/tidlModelImport
-./out/tidl_model_import.out ${TIDL_INSTALL_PATH}/ti_dl/test/testvecs/config/import/public/onnx/tidl_import_yolox_s.txt
+./out/tidl_model_import.out ${TIDL_INSTALL_PATH}/ti_dl/test/testvecs/config/import/public/onnx/tidl_import_yolox.txt
 #successful Memory allocation
 #../../test/testvecs/config/tidl_models/onnx/生成的文件分析：
 tidl_net_yolox_s.bin        #Compiled network file 网络模型数据
