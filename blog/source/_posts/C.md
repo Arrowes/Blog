@@ -386,8 +386,8 @@ class Human
 Human Man;  //Man是Human类的对象，是运行阶段的化身
 
 //可使用 new 为 Human 对象动态地分配内存
-Human* Woman = new Human(); // dynamically allocated Human 
-delete Woman; // de-allocating memory 
+Human* Woman = new Human(); // 分配内存并初始化为 Human 类的对象
+delete Woman; // 在不再使用时释放内存
 ```
 
 + 句点运算符 (.) 用于访问对象的属性
@@ -396,14 +396,14 @@ delete Woman; // de-allocating memory
    Man.Talk();
 
    Human* Woman = new Human(); 
-   (*Woman).Talk();
+   (*Woman).Talk();  //使用解引用指针操作符 *，将指针 Woman 指向的地址解引用，获取指向的 Human 对象。
    ```
 
 + 指针运算符（->）访问成员
    ```c
    Human* Woman = new Human(); 
    Woman->age = "22";
-   Woman->Talk();
+   Woman->Talk(); // 更简洁的写法，直接通过指针调用成员函数
    delete Woman;
    ```
 例：
@@ -686,7 +686,7 @@ int main()
 
 **sizeof( )** ： 指出类声明中所有数据属性占用的总内存量，单位为字节 （结果受字填充word padding和其他因素的影响）
 
-**关键字 struct** 来自 C 语言，在 C++编译器看来，它与类及其相似，差别在于程序员未指定时，默认的访问限定符（public 和 private）不同，不同于结构，类的成员默认为私有
+**关键字 struct** 来自 C 语言，在 C++编译器看来，它与类极其相似，差别在于程序员未指定时，默认的访问限定符（public 和 private）不同，不同于结构，类的成员默认为私有
 ```c
 //C++ Class
 class Human
