@@ -95,7 +95,7 @@ VirtualBox安装 64位的Ubuntu系统，在安装时没有显示64位的Linux安
 至此，即可流畅登录Github上传或下载代码，以及在终端中安装各种工具包，避免了换源等繁琐操作
 
 ### Linux
-[Clash.for.Windows-0.20.29-x64-linux.tar.gz ](https://github.com/Fndroid/clash_for_windows_pkg/releases/download/0.20.29/Clash.for.Windows-0.20.29-x64-linux.tar.gz)可用于Ubuntu，
+[Clash.for.Windows-x64-linux.tar.gz ](https://dl.gtk.pw/proxy/linux/)可用于Ubuntu，
 解压缩，进入文件夹终端，运行`.cfw`,即可打开软件
 Ubuntu设置-网络代理设为手动，将http/https代理指向clash默认端口7890：`HTTP代理：127.0.0.1 7890` `HTTPS代理：127.0.0.1 7890`
 
