@@ -101,14 +101,14 @@ Ubuntu设置-网络代理设为手动，将http/https代理指向clash默认端�
 
 创建软件快捷方式(Optional)
 ```sh
-wget https://cdn.jsdelivr.net/gh/Dreamacro/clash@master/docs/logo.png    # 下载clash icon做为桌面图标
+wget https://github.com/Z-Siqi/Clash-for-Windows_Chinese/blob/main/image/image_clash.png    # 下载clash icon做为桌面图标
 vim clash.desktop
 # 输入下面的内容
 [Desktop Entry]
  Name=clash
  Comment=Clash
  Exec=/home/.../clash/cfw
- Icon=/home/.../clash/logo.png
+ Icon=/home/.../clash/image_clash.png
  Type=Application
  Categories=Development;
  StartupNotify=true
