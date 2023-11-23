@@ -9,7 +9,7 @@ TDA4的基本知识，包括数据手册研读，SDK介绍，TIDL概念。
 <!--more-->
 
 [TDA4VM官网](https://www.ti.com.cn/product/zh-cn/TDA4VM)， [TI e2e论坛](https://e2e.ti.com/support/processors-group/processors/f/processors-forum)
-下一篇：[TDA4：环境搭建、模型转换及Demo](https://wangyujie.site/TDA4VM2/)
+下一篇：[TDA4：环境搭建、模型转换及Demo](https://wangyujie.fun/TDA4VM2/)
 # TDA4VM芯片数据手册研读
 [TDA4VM数据手册](https://www.ti.com.cn/cn/lit/ds/symlink/tda4vm.pdf)
 适用于 ADAS 和自动驾驶汽车的TDA4VM Jacinto™ 处理器,具有深度学习、视觉功能和多媒体加速器的双核 Arm® Cortex®-A72 SoC 和 C7x DSP.
@@ -269,7 +269,7 @@ TI: Target, Target Kernel, Obj Desc。
 
 ---
 > TDA4系列文章：
-[TDA4①：SDK, TIDL, OpenVX](https://wangyujie.site/TDA4VM/)
-[TDA4②：环境搭建、模型转换、Demo及Tools](https://wangyujie.site/TDA4VM2/)
-[TDA4③：YOLOX的模型转换与SK板端运行](https://wangyujie.site/TDA4VM3/)
-[TDA4④：部署自定义模型](https://wangyujie.site/TDA4VM4/)
+[TDA4①：SDK, TIDL, OpenVX](https://wangyujie.fun/TDA4VM/)
+[TDA4②：环境搭建、模型转换、Demo及Tools](https://wangyujie.fun/TDA4VM2/)
+[TDA4③：YOLOX的模型转换与SK板端运行](https://wangyujie.fun/TDA4VM3/)
+[TDA4④：部署自定义模型](https://wangyujie.fun/TDA4VM4/)

@@ -11,7 +11,7 @@ tags:
 ### 总体流程
 其中主流程参考[知乎：GitHub+Hexo 搭建个人网站详细教程](https://zhuanlan.zhihu.com/p/26625249)，虽然是老文章，但每一步都非常详细，框架搭建过程存在问题可以看文章的评论区或[Hexo官方文档](https://hexo.io/zh-cn/docs/)进行补充；
 
-域名在[阿里云](https://dc.console.aliyun.com/next/index?spm=5176.12818093.ProductAndResource--ali--widget-product-recent.dre1.265516d0P13nxv&accounttraceid=b4a1b2c1dcab4588a55aa2f5926041aazltv#/overview)购买,买的 *wangyujie.site* 首年6元，这也是唯一的开销，如果愿意使用原网站 *<arrowes.github.io>* ,这一步甚至可以省略；
+域名在[阿里云](https://dc.console.aliyun.com/next/index?spm=5176.12818093.ProductAndResource--ali--widget-product-recent.dre1.265516d0P13nxv&accounttraceid=b4a1b2c1dcab4588a55aa2f5926041aazltv#/overview)购买,买的 *wangyujie.fun* 首年6元，这也是唯一的开销，如果愿意使用原网站 *<arrowes.github.io>* ,这一步甚至可以省略；
 
 选用了Next主题，主题优化参考了[Next主题官方文档](http://theme-next.iissnan.com/getting-started.html)以及[知乎：hexo的next主题个性化教程:打造炫酷网站](https://zhuanlan.zhihu.com/p/28128674)（其中访问量、统计功能教程已过期,很多配置next主题已内置），可以把网站搭建的花里胡哨；
 
@@ -177,4 +177,4 @@ q3mbRZwwnnKUXHcibZg6UN8ulCHE2UDXMjaEB4LKd
 [Next主题官方文档](http://theme-next.iissnan.com/getting-started.html)|
 [知乎：hexo的next主题个性化教程:打造炫酷网站](https://zhuanlan.zhihu.com/p/28128674)|
 [菜鸟教程：Markdown 教程](https://www.runoob.com/markdown/md-tutorial.html)|
-[个人网站：Arrow的笔记本](http://wangyujie.site/)
+[个人网站：Arrow的笔记本](http://wangyujie.fun/)

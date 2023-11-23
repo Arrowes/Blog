@@ -8,7 +8,7 @@ tags:
 自定义深度学习模型的转换、编译及部署流程，使用了三种不同的编译工具：TIDL Importer，Edge AI Studio，EdgeAI-TIDL-Tools
 <!--more-->
 
-接上一篇：[TDA4③：YOLOX的模型转换与SK板端运行](https://wangyujie.site/TDA4VM3/)
+接上一篇：[TDA4③：YOLOX的模型转换与SK板端运行](https://wangyujie.fun/TDA4VM3/)
 
 TI文档中对yolo、mobilenet、resnet等主流深度学习模型支持十分完善，相关开箱即用的文件在 [Modelzoo](https://github.com/TexasInstruments/edgeai-modelzoo) 中，但有关自定义模型的编译和部署内容很少，只能利用例程和提供的工具进行尝试。
 
@@ -122,7 +122,7 @@ for result in raw_result:
 ## TIDL Importer
 TIDL Importer 是RTOS SDK中提供的导入工具，需要网络结构完全支持tidl，以使模型都通过tidl加速（即转换只生成net,io 2个bin文件）
 
-下面的流程重构了文件夹架构，原文件跳来跳去改起来很麻烦，就合并到了XXX文件夹，原文件路径可参考上一篇官方例程： [TDA4③_使用TIDL Importer导入YOLOX](https://wangyujie.site/TDA4VM3/#a-%E4%BD%BF%E7%94%A8TIDL-Importer-by-RTOS-SDK)
+下面的流程重构了文件夹架构，原文件跳来跳去改起来很麻烦，就合并到了XXX文件夹，原文件路径可参考上一篇官方例程： [TDA4③_使用TIDL Importer导入YOLOX](https://wangyujie.fun/TDA4VM3/#a-%E4%BD%BF%E7%94%A8TIDL-Importer-by-RTOS-SDK)
 
 1. 配置文件：新建文件夹：`SDK/${TIDL_INSTALL_PATH}/ti_dl/test/testvecs/XXX`
     拷贝 onnx 文件至 XXX 文件夹 (*此处是自定义模型，不使用prototxt, 经测试可以正常编译*)
@@ -208,7 +208,7 @@ debugTraceLevel = 1
     ```
 
 ## Edge AI Studio
-参考yolox的编译过程：[YOLOX的模型转换与SK板端运行](https://wangyujie.site/TDA4VM3/#b-%E4%BD%BF%E7%94%A8TIDL-Tools%EF%BC%88by-Edge-AI-Studio%EF%BC%89)，修改数据预处理与compile_options部分，最后重写画框部分（optional）
+参考yolox的编译过程：[YOLOX的模型转换与SK板端运行](https://wangyujie.fun/TDA4VM3/#b-%E4%BD%BF%E7%94%A8TIDL-Tools%EF%BC%88by-Edge-AI-Studio%EF%BC%89)，修改数据预处理与compile_options部分，最后重写画框部分（optional）
 
 > **Debug:**
 `[ONNXRuntimeError] : 6 ... `: compile_options中设置deny_list，剔除不支持的层，如`'Slice'`，TIDL支持的算子见：[supported_ops_rts_versions](https://github.com/TexasInstruments/edgeai-tidl-tools/blob/master/docs/supported_ops_rts_versions.md)    (resize支持2*操作)
@@ -236,7 +236,7 @@ FileLink(zip_path) # 生成下载链接
 ```
 
 ## [EdgeAI-TIDL-Tools](https://github.com/TexasInstruments/edgeai-tidl-tools/blob/08_06_00_05/docs/custom_model_evaluation.md)
-环境搭建见：[TDA4②](https://wangyujie.site/TDA4VM2/#EdgeAI-TIDL-Tools)
+环境搭建见：[TDA4②](https://wangyujie.fun/TDA4VM2/#EdgeAI-TIDL-Tools)
 
 研读 [edgeai-tidl-tools/examples/osrt_python/ort/onnxrt_ep.py](https://github.com/TexasInstruments/edgeai-tidl-tools/blob/08_06_00_05/examples/osrt_python/ort/onnxrt_ep.py):
 进入搭建好的环境：（例）`pyenv activate benchmark` 或 `conda activate tidl`
@@ -664,7 +664,7 @@ YOLO-pose实例：[Practicing Yoga with AI: Human Pose Estimation on the TDA4VM]
 官方视频：[Efficient object detection using Yolov5 and TDA4x processors | Video | TI.com](https://www.ti.com/video/6286792047001)
 官方文档：[4. Deep learning models &mdash; Processor SDK Linux for SK-TDA4VM Documentation](https://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-edgeai/TDA4VM/08_06_01/exports/docs/common/inference_models.html)
 > TDA4系列文章：
-[TDA4①：SDK, TIDL, OpenVX](https://wangyujie.site/TDA4VM/)
-[TDA4②：环境搭建、模型转换、Demo及Tools](https://wangyujie.site/TDA4VM2/)
-[TDA4③：YOLOX的模型转换与SK板端运行](https://wangyujie.site/TDA4VM3/)
-[TDA4④：部署自定义深度学习模型](https://wangyujie.site/TDA4VM4/)
+[TDA4①：SDK, TIDL, OpenVX](https://wangyujie.fun/TDA4VM/)
+[TDA4②：环境搭建、模型转换、Demo及Tools](https://wangyujie.fun/TDA4VM2/)
+[TDA4③：YOLOX的模型转换与SK板端运行](https://wangyujie.fun/TDA4VM3/)
+[TDA4④：部署自定义深度学习模型](https://wangyujie.fun/TDA4VM4/)

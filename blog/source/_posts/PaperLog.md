@@ -15,10 +15,10 @@ tags: 总结
 项目地址：[FEY-YOLOv7](https://github.com/Arrowes/FEY-YOLOv7)
 
 此外，加入算法部署实现部分，基于实习期间对TDA4的研究：
-+ [TDA4①：SDK, TIDL, OpenVX](https://wangyujie.site/TDA4VM/)
-+ [TDA4②：环境搭建、模型转换、Demo及Tools](https://wangyujie.site/TDA4VM2/)
-+ [TDA4③：YOLOX的模型转换与SK板端运行](https://wangyujie.site/TDA4VM3/)
-+ [TDA4④：部署自定义模型](https://wangyujie.site/TDA4VM4/)
++ [TDA4①：SDK, TIDL, OpenVX](https://wangyujie.fun/TDA4VM/)
++ [TDA4②：环境搭建、模型转换、Demo及Tools](https://wangyujie.fun/TDA4VM2/)
++ [TDA4③：YOLOX的模型转换与SK板端运行](https://wangyujie.fun/TDA4VM3/)
++ [TDA4④：部署自定义模型](https://wangyujie.fun/TDA4VM4/)
 
 训练数据：[exp](https://docs.qq.com/sheet/DWmV1TnhIdlBodW1C?tab=BB08J2&u=d859dabcd86a47b181e758b366a48fdc)
 

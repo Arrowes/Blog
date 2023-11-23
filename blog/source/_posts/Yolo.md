@@ -9,7 +9,7 @@ tags:
 <!--more-->
 
 # 环境配置
-详细使用见 [Anaconda，Pycharm，Jupyter，Pytorch](https://wangyujie.site/Pytorch/)
+详细使用见 [Anaconda，Pycharm，Jupyter，Pytorch](https://wangyujie.fun/Pytorch/)
 
 **Windows环境配置**
 1. 安装[**Anaconda**](https://www.anaconda.com/)，
