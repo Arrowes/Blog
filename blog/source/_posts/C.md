@@ -393,7 +393,8 @@ int DoSomething(int &a);     //a 不再是 b 的拷贝，而是它的别名
 int Result = DoSomething(b);  //b 是按引用传递的
 //函数直接使用调用者栈中的数据
 
-const int& constRef = original;  //常量引用，使禁止通过引用修改它指向的变量的值，用来修饰形参，避免误操作
+int& ref=10 //错误，引用需要合法的内存空间
+const int& ref = original;  //常量引用，使禁止通过引用修改它指向的变量的值，用来修饰形参，避免误操作
 void GetSquare(const int& number, int& result)  //const 引用将参数标识为输入参数，内部不能更改
 void GetSquare(const int* const number, int* const result)  //效果同上，但指针不同于引用，可能为 NULL 或无效，因此使用前必须核实它们是有效的
 ```
