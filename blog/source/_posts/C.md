@@ -395,7 +395,7 @@ int Result = DoSomething(b);  //b 是按引用传递的
 
 int& ref=10 //错误，引用需要合法的内存空间
 const int& ref = original;  //常量引用，使禁止通过引用修改它指向的变量的值，用来修饰形参，避免误操作
-void GetSquare(const int& number, int& result)  //const 引用将参数标识为输入参数，内部不能更改
+void GetSquare(const int& number, int& result)  //const 引用将参数标识为输入参数，防止函数内部误改
 void GetSquare(const int* const number, int* const result)  //效果同上，但指针不同于引用，可能为 NULL 或无效，因此使用前必须核实它们是有效的
 ```
 引用做函数参数：
