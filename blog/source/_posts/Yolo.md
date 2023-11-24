@@ -68,7 +68,7 @@ tags:
 | YOLOv7  | [YOLOv7: Trainable bag-of-freebies sets new state-of-the-art for real-time object detectors](https://arxiv.org/abs/2207.02696)|   [Code](https://github.com/WongKinYiu/yolov7)|
 | YOLOv8  | /|     [Code](https://github.com/ultralytics/ultralytics)  |
 |CEAM-YOLOv7| [CEAM-YOLOv7:Improved YOLOv7 Based on Channel Expansion Attention Mechanism for Driver behavior detection](https://ieeexplore.ieee.org/document/9980374/metrics) |       [Code](https://github.com/Arrowes/CEAM-YOLOv7)
-|FEY-YOLOv7| [A Driver Fatigue Detection Algorithm Based on Dynamic Tracking of Small Facial Targets Using YOLOv7](https://search.ieice.org/bin/summary_advpub.php?id=2023EDP7093&category=D&lang=E&abst=) | [Code](https://github.com/Arrowes/FEY-YOLOv7)
+|FEY-YOLOv7| [A Driver Fatigue Detection Algorithm Based on Dynamic Tracking of Small Facial Targets Using YOLOv7](https://www.jstage.jst.go.jp/article/transinf/E106.D/11/E106.D_2023EDP7093/_article) | [Code](https://github.com/Arrowes/FEY-YOLOv7)
 
 YOLOv1 - v5历程：[从yolov1至yolov5的进阶之路](https://blog.csdn.net/wjinjie/article/details/107509243)
 YOLOv3论文精读视频：[同济子豪兄YOLOV3目标检测](https://www.bilibili.com/video/BV1Vg411V7bJ/?)

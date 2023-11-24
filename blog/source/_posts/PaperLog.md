@@ -26,9 +26,14 @@ tags: 总结
 ---
 以下为开发日志（倒叙）
 > 想法：
-能否用importer转换？
+合并分心与疲劳检测算法
 
 # 202311 部署模型至SK板
+## 20231122 部署以备中期检查
+<img alt="图 2" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/PaerLogDeploy.gif" width="80%"/> 
+
+疲劳驾驶部署已基本搞定，之后搞分心行为
+
 ## 20231120-21 edgeai-yolox重新训练
 部署的检测效果一般，可能是可见光+红外数据集使用了crop数据增强方法，而yolox又开了mosaic，导致面部特征被拆分的厉害，使用仅旋转+偏移的数据集重新训练并部署试试
 
@@ -41,7 +46,7 @@ tags: 总结
 yolox_s_ti_lite0 |mAP=0.68:0.96 total_loss: 2.3 epoch=300|仅可见光数据训练
 yolox_s_ti_lite1 |mAP=0.61:0.94 total_loss: 2.8 epoch=179|混合数据集，crop，效果一般
 yolox_s_ti_lite2 |mAP=0.554:0.928 total_loss: 9.1 epoch=80|仅旋转偏移，训练时间长占显存大，loss下降慢
-yolox_s_ti_lite3| |关闭混合精度，训300轮
+yolox_s_ti_lite3|mAP=0.559:0.915 total_loss: 7.7 epoch=200 |关闭混合精度，训了两天
 
 ## 20231117 yolox_s_ti_lite部署成功
 再次尝试转换生成的yolox_s_ti_lite0.onnx，模型配置改为：`'scale' : [1,1,1]`
