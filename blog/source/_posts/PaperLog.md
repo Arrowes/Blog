@@ -30,7 +30,7 @@ tags: 总结
 
 # 202311 部署模型至SK板
 ## 20231122 部署以备中期检查
-<img alt="图 2" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/PaerLogDeploy.gif" width="80%"/> 
+<img alt="图 2" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/PaperLogDeploy.gif" width="100%"/> 
 
 疲劳驾驶部署已基本搞定，之后搞分心行为
 
