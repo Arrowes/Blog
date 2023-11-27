@@ -1,5 +1,5 @@
 ---
-title: Py：Anaconda，Pycharm，Pytorch
+title: Py：conda，Pycharm，Pytorch
 date: 2022-11-24 21:26:44
 tags: 
 - python
@@ -10,6 +10,24 @@ tags:
 视频：[PyTorch深度学习快速入门教程](https://www.bilibili.com/video/BV1hE411t7RN/)
 
 # Anaconda
++ Windows环境配置
+  安装[miniconda](https://repo.anaconda.com/miniconda/Miniconda3-latest-Windows-x86_64.exe), [镜像源](https://mirrors.tuna.tsinghua.edu.cn/anaconda/miniconda/?C=M&O=D) （或[**Anaconda**](https://www.anaconda.com/)，更大更全但没必要）
+  防止环境装在C盘占空间：修改user目录下.condarc文件里的默认地址，或执行``conda config --add D:\Anaconda3\envs ``,然后``conda info`` 检查envs directories
+  （若报错 The channel is not accessible or is invalid 运行``conda config --remove-key channels``）
+
++ Linux 环境配置
+  安装miniconda，相较Anaconda更小巧快捷，功能一样
+  ```sh
+  wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+  bash Miniconda3-latest-Linux-x86_64.sh
+  #一路Enter + Yes，最后使修改的PATH环境变量生效：
+  source ~/.bashrc
+  conda   #验证是否成功
+  conda create -n pytorch python=3.6  #创建一个名为pytorch的环境
+  conda activate pytorch  #激活环境
+  ```
+  > （若要安装：[Anaconda](https://www.anaconda.com/)，执行下载的.sh文件，输入``bash XXX.sh``，然后一路enter和yes；激活：``cd ///root/anaconda3/bin``,输入：``source ./activate``，终端前出现``(base)``则激活成功）
+
 ```sh
 conda create -n pytorch python=3.8  #Anaconda创建环境
 conda update python #更新py
@@ -35,12 +53,7 @@ conda config --remove-key channels    #换回默认源
   阿里云：http://mirrors.aliyun.com/pypi/simple
   豆瓣：http://pypi.douban.com/simple
 
-修改conda环境保存路径(windows):
-1.找到用户目录下的.condarc文件（C:\Users\username）。
-2.打开.condarc文件之后，添加或修改.condarc 中的 env_dirs 设置环境路径:``envs_dirs:  - D:\Anaconda3\envs``
-
-
-
+vscode导入conda：当在VScode中打开某py文件时，左下角会出现Python, 点击可切换conda环境
 
 
 # Pycharm

@@ -28,7 +28,17 @@ tags: 总结
 > 想法：
 合并分心与疲劳检测算法
 
+
 # 202311 部署模型至SK板
+## 20231127 分心行为
+<img alt="图 2" src="https://storage.googleapis.com/kaggle-media/competitions/kaggle/5048/media/output_DEb8oT.gif" width="50%"/> 
+
+
+[State Farm Distracted Driver Detection](https://www.kaggle.com/competitions/state-farm-distracted-driver-detection/data) 是否要把这个开源数据集加进来？但是视角有点偏
+有标注好的：[Modified distracted driver dataset](https://universe.roboflow.com/deloitte-ullms/modified-distracted-driver-dataset/browse?queryText=&pageSize=50&startingIndex=50&browseQuery=true)
+[](https://universe.roboflow.com/deloitte-ullms/modified-distracted-driver-dataset/browse?queryText=&pageSize=50&startingIndex=50&browseQuery=true)
+分心行为的标注框要不要调整？
+
 ## 20231122 部署疲劳算法以备中期检查
 <img alt="图 2" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/PaperLogDeploy.gif" width="100%"/> 
 

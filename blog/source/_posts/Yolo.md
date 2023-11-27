@@ -12,7 +12,7 @@ tags:
 详细使用见 [Anaconda，Pycharm，Jupyter，Pytorch](https://wangyujie.fun/Pytorch/)
 
 **Windows环境配置**
-1. 安装[**Anaconda**](https://www.anaconda.com/)，
+1. 安装[miniconda](https://repo.anaconda.com/miniconda/Miniconda3-latest-Windows-x86_64.exe), [镜像源](https://mirrors.tuna.tsinghua.edu.cn/anaconda/miniconda/?C=M&O=D) （或[**Anaconda**](https://www.anaconda.com/)，更大更全但没必要）
 防止环境装在C盘占空间：修改user目录下.condarc文件里的默认地址，或执行``conda config --add D:\Anaconda3\envs ``,然后``conda info`` 检查envs directories
 （若报错 The channel is not accessible or is invalid 运行``conda config --remove-key channels``）
 
@@ -54,6 +54,7 @@ tags:
     tf:``pip install tensorflow-gpu==1.15.0``(注意版本匹配)
 
 如果requirements中有包实在安不上，手动装包：进[网站](https://pypi.org/)搜索包，下载.whl，在包所在位置激活环境运行``pip install [].whl``(包名中cp38代表python3.8版本)
+vscode导入conda：当在VScode中打开某py文件时，左下角会出现Python, 点击可切换conda环境
 
 # 资料与代码
 

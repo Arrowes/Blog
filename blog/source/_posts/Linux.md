@@ -60,6 +60,7 @@ tar -xf XX.tar.gz XX   #解压 -C /path
 #zip
 zip -r XX.zip XX XX.txt #压缩XX以及XX.txt（排除：加-x "./XX/X"）
 unzip *.zip -d /path    #解压
+zip -sf test.zip        #预览压缩包内容
 ```
 # Ubuntu
 ```sh
