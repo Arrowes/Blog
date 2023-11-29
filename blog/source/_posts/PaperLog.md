@@ -36,8 +36,12 @@ tags: 总结
 
 [State Farm Distracted Driver Detection](https://www.kaggle.com/competitions/state-farm-distracted-driver-detection/data) 是否要把这个开源数据集加进来？但是视角有点偏
 有标注好的：[Modified distracted driver dataset](https://universe.roboflow.com/deloitte-ullms/modified-distracted-driver-dataset/browse?queryText=&pageSize=50&startingIndex=50&browseQuery=true)
-[](https://universe.roboflow.com/deloitte-ullms/modified-distracted-driver-dataset/browse?queryText=&pageSize=50&startingIndex=50&browseQuery=true)
+
 分心行为的标注框要不要调整？
+模型|数据|备注
+---|---|---
+yolox_s_ti_lite4 |mAP=0.25:0.35 total_loss: 1.2 epoch=280|分心数据集3k，效果奇差，可能是少数据
+
 
 ## 20231122 部署疲劳算法以备中期检查
 <img alt="图 2" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/PaperLogDeploy.gif" width="100%"/> 
