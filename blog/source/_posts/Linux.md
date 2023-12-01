@@ -159,6 +159,8 @@ Ctrl + ~    #控制台终端显示与隐藏：
 6. ``git commit`` 可以将暂存区里更新后的代码更新到本地git
 7. ``git push origin xxx`` 将本地的xxx git分支上传至github上的git
 
+[Github要求使用基于令牌的身份验证](https://zhuanlan.zhihu.com/p/401978754)
+
 如果在写自己的代码过程中发现远端GitHub上代码出现改变
 1. ``git checkout main`` 切换回main分支
 2. ``git pull origin master(main)`` 将远端修改过的代码再更新到本地

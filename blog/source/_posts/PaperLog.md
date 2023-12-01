@@ -21,7 +21,7 @@ tags: 总结
 + [TDA4④：部署自定义模型](https://wangyujie.fun/TDA4VM4/)
 
 训练数据：[exp](https://docs.qq.com/sheet/DWmV1TnhIdlBodW1C?tab=BB08J2&u=d859dabcd86a47b181e758b366a48fdc)
-
+思维导图：[论文框架](https://www.zhixi.com/drawing/76e1ba59522effb3b63bde7b613518e8?page=owner&current=1)
 
 ---
 以下为开发日志（倒叙）
@@ -29,19 +29,48 @@ tags: 总结
 合并分心与疲劳检测算法
 
 
-# 202311 部署模型至SK板
-## 20231127 分心行为
+# 202311 训练并部署模型至SK板
+## 20231127-30 分心行为算法训练
 <img alt="图 2" src="https://storage.googleapis.com/kaggle-media/competitions/kaggle/5048/media/output_DEb8oT.gif" width="50%"/> 
 
 
 [State Farm Distracted Driver Detection](https://www.kaggle.com/competitions/state-farm-distracted-driver-detection/data) 是否要把这个开源数据集加进来？但是视角有点偏
-有标注好的：[Modified distracted driver dataset](https://universe.roboflow.com/deloitte-ullms/modified-distracted-driver-dataset/browse?queryText=&pageSize=50&startingIndex=50&browseQuery=true)
+
+有标注好的：[Modified distracted driver dataset](https://universe.roboflow.com/deloitte-ullms/modified-distracted-driver-dataset/browse?queryText=&pageSize=50&startingIndex=50&browseQuery=true)（Mdd 5842→1w 12类）
+```py
+COCO_CLASSES = (
+    "Safe Driving",
+    "Texting",
+    "Talking_on_the_phone",
+    "Operating_the_Radio",
+    "Drinking",
+    "Reaching_Behind",
+    "Hair_and_Makeup",
+    "Talking_to_Passenger",
+    "Eyes_Closed",
+    "Yawning",
+    "Nodding_Off",
+    "Eyes_Open",
+)
+```
 
 分心行为的标注框要不要调整？
+
+训练：
+```py
+python -m yolox.tools.train -n yolox-s-ti-lite -d 0 -b 64 --fp16 -o --cache
+
+python3 tools/export_onnx.py --output-name demo_output/yolox_s_ti_lite5.onnx -f exps/default/yolox_s_ti_lite.py -c YOLOX_outputs/yolox_s_ti_lite5/best_ckpt.pth --export-det
+
+python3 demo/ONNXRuntime/onnx_inference.py -m demo_output/yolox_s_ti_lite5.onnx -i test/test5.jpg -s 0.3 --input_shape 640,640 --export-det
+```
+
 模型|数据|备注
 ---|---|---
 yolox_s_ti_lite4 |mAP=0.25:0.35 total_loss: 1.2 epoch=280|分心数据集3k，效果奇差，可能是少数据
+yolox_s_ti_lite5 |mAP=0.686:0.979 total_loss: 1.6 epoch=300|Mdd可见光数据集 10k 数据好看但是检测效果不行
 
+<img alt="图 2" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/PaperLogdata1130.png" width="60%"/> 
 
 ## 20231122 部署疲劳算法以备中期检查
 <img alt="图 2" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/PaperLogDeploy.gif" width="100%"/> 
