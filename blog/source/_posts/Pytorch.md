@@ -163,6 +163,23 @@ drive.mount('/content/drive')
 2. 到 [Pytorch官网](https://pytorch.org/get-started/locally/) 复制对应code进行安装
 ![图 4](https://raw.gitmirror.com/Arrowes/Blog/main/images/Pytorch4.png)  
 
+## 安装
+**windows**
+安装显卡驱动对应的**CUDA**：``nvidia-smi`` 查询支持CUDA版本，
+再到[Pytorch官网](https://pytorch.org/get-started/locally/)复制对应code进行安装, 如：
+``conda install pytorch torchvision torchaudio pytorch-cuda=11.8 -c pytorch -c nvidia``
+（验证torch能否使用GPU：`python -c "import torch;print(torch.cuda.is_available())"`   返回True说明GPU可以被使用）
+
+**Linux**
++ pytorch
+``conda install pytorch torchvision torchaudio pytorch-cuda=11.7 -c pytorch -c nvidia``
+或`pip install torch==1.13.1+cu116 torchvision==0.14.1+cu116 torchaudio==0.13.1 --extra-index-url https://download.pytorch.org/whl/cu116`
+
++ tensorflow
+cuda:``conda install cudatoolkit=10.0``
+cuDNN:``conda install cudnn=7.6``
+tf:``pip install tensorflow-gpu==1.15.0``(注意版本匹配)
+
 **查GPU**
 ```py
 python -c "import torch;print(torch.cuda.is_available())"   #返回True说明GPU可以被使用

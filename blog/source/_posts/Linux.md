@@ -44,6 +44,8 @@ vi []               #命令行进入文件，按i进入插入模式，按Esc返�
 gedit []            #图形界面进入文件直接编辑
 whereis []          #查找
 find / -name "[]"   #查找 find *XXX*
+ls -l | grep "^-" | wc -l   #统计当前目录下文件的个数（不包括目录）
+find -name "*.jpg" | wc -l  #统计当前文件夹下指定类型的文件的数量
 
 export 变量名=值     #设置或更新环境变量的值
 #配置永久环境变量更方便，sudo gedit /etc/profile，末尾加入如上代码，然后source /etc/profile加载立即生效

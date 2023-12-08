@@ -48,6 +48,8 @@ tags:
 3. 安装CUDA
     + **pytorch**
     ``conda install pytorch torchvision torchaudio pytorch-cuda=11.7 -c pytorch -c nvidia``
+    或`pip install torch==1.13.1+cu116 torchvision==0.14.1+cu116 torchaudio==0.13.1 --extra-index-url https://download.pytorch.org/whl/cu116`
+
     + **tensorflow**
     cuda:``conda install cudatoolkit=10.0``
     cuDNN:``conda install cudnn=7.6``
@@ -78,10 +80,9 @@ YOLOv7网络结构：[理解yolov7网络结构](https://blog.csdn.net/athrunsunn
 全流程指导视频：[目标检测 YOLOv5 开源代码项目调试与讲解实战-土堆](https://www.bilibili.com/video/BV1tf4y1t7ru/)
 
 
-算法精品仓库：[Bubbliiiing](https://github.com/bubbliiiing)
-[YOLO Air](https://github.com/iscyy/yoloair)，[YOLO Air2](https://github.com/iscyy/yoloair2)
-[yolov5_research](https://github.com/positive666/yolov5_research)
+算法精品仓库：[Bubbliiiing](https://github.com/bubbliiiing), [YOLO Air](https://github.com/iscyy/yoloair)，[YOLO Air2](https://github.com/iscyy/yoloair2), [yolov5_research](https://github.com/positive666/yolov5_research)
 
+[YOLO_Note](https://github.com/Arrowes/DLpractice/blob/main/DL_note/YOLO_Note.pdf)
 
 # Ideas
 ## 数据集

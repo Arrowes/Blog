@@ -39,8 +39,8 @@ python tools/demo.py image -f exps/default/yolox_s_ti_lite.py -c yolox-s-ti.pth 
         └── instances_val2017.json
 
 yolox/data/datasets/coco_classes.py #修改类别名称
-yolox/exp/yolox_base.py   #类别数量等训练参数
 yolox/data/datasets/coco.py  #改size
+yolox/exp/yolox_base.py   #类别数量等训练参数
 exps/default/yolox_s_ti_lite.py #模型配置文件，在里面修改参数
 
 #运行训练：

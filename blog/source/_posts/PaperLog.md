@@ -27,7 +27,21 @@ tags: 总结
 以下为开发日志（倒叙）
 > 想法：
 合并分心与疲劳检测算法
-
+# 202312 分心行为算法
+## 20231207
+再换数据集试试，[DriverSep](https://universe.roboflow.com/driver-dectection/driver-s-dectection) 5k
+```sh
+COCO_CLASSES = (
+    "cup",
+    "hand",
+    "phone",
+    "wheel",
+)
+```
+模型|数据|备注
+---|---|---
+yolox_s_ti_lite6 |mAP=0.211:0.682 total_loss: 0.2 epoch=300|DriverSep数据集，关了数据增强效果一般
+yolox_s_ti_lite7 |mAP=0.739:0.971 total_loss: 1.8 epoch=300|开了数据增强效果拔群
 
 # 202311 训练并部署模型至SK板
 ## 20231127-30 分心行为算法训练
@@ -36,7 +50,7 @@ tags: 总结
 
 [State Farm Distracted Driver Detection](https://www.kaggle.com/competitions/state-farm-distracted-driver-detection/data) 是否要把这个开源数据集加进来？但是视角有点偏
 
-有标注好的：[Modified distracted driver dataset](https://universe.roboflow.com/deloitte-ullms/modified-distracted-driver-dataset/browse?queryText=&pageSize=50&startingIndex=50&browseQuery=true)（Mdd 5842→1w 12类）
+有标注好的：[Modified distracted driver dataset](https://universe.roboflow.com/deloitte-ullms/modified-distracted-driver-dataset/browse?queryText=&pageSize=50&startingIndex=50&browseQuery=true)（Mdd 5842→1w 12类）（不行，疑似标注方法问题，效果很差）
 ```py
 COCO_CLASSES = (
     "Safe Driving",
@@ -67,29 +81,29 @@ python3 demo/ONNXRuntime/onnx_inference.py -m demo_output/yolox_s_ti_lite5.onnx 
 
 模型|数据|备注
 ---|---|---
-yolox_s_ti_lite4 |mAP=0.25:0.35 total_loss: 1.2 epoch=280|分心数据集3k，效果奇差，可能是少数据
-yolox_s_ti_lite5 |mAP=0.686:0.979 total_loss: 1.6 epoch=300|Mdd可见光数据集 10k 数据好看但是检测效果不行
+yolox_s_ti_lite0 |mAP=0.68:0.96 total_loss: 2.3 epoch=300|仅可见光数据训练
+yolox_s_ti_lite1 |mAP=0.61:0.94 total_loss: 2.8 epoch=179|混合数据集，crop，效果一般
+yolox_s_ti_lite2 |mAP=0.554:0.928 total_loss: 9.1 epoch=80|仅旋转偏移，训练时间长占显存大，loss下降慢
+yolox_s_ti_lite3|mAP=0.559:0.915 total_loss: 7.7 epoch=200 |关闭混合精度，训了两天 用于中期部署展示⭐
+yolox_s_ti_lite4 |mAP=0.25:0.35 total_loss: 1.2 epoch=280|分心数据集3k，效果奇差，可能是少数据 或是yolox自带数据增强
+yolox_s_ti_lite4_2 |mAP=0.376:0.394 total_loss: 0.6 epoch=300|分心数据集3k，去除yolox的数据增强还是不行
+yolox_s_ti_lite5 |mAP=0.686:0.979 total_loss: 1.6 epoch=300|Mdd可见光数据集 10k 数据好看但是检测效果不行 部署效果更差
 
-<img alt="图 2" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/PaperLogdata1130.png" width="60%"/> 
+<img alt="图 3" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/PaperLogdata1130.png" width="90%"/> 
 
 ## 20231122 部署疲劳算法以备中期检查
 <img alt="图 2" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/PaperLogDeploy.gif" width="100%"/> 
 
+yolox_s_ti_lite3
 疲劳检测算法部署已基本搞定，之后搞分心行为
 
 ## 20231120-21 edgeai-yolox重新训练
-部署的检测效果一般，可能是可见光+红外数据集使用了crop数据增强方法，而yolox又开了mosaic，导致面部特征被拆分的厉害，使用仅旋转+偏移的数据集重新训练并部署试试
+yolox_s_ti_lite1部署的检测效果一般，可能是可见光+红外数据集使用了crop数据增强方法，而yolox又开了mosaic，导致面部特征被拆分的厉害，使用仅旋转+偏移的数据集重新训练并部署试试 yolox_s_ti_lite2
 
 显存吃太多，取消混合精度训练 删掉 `--fp16 -o`
 `python -m yolox.tools.train -n yolox-s-ti-lite -d 0 -b 8 --cache`
 但是训练很慢
 
-模型|数据|备注
----|---|---
-yolox_s_ti_lite0 |mAP=0.68:0.96 total_loss: 2.3 epoch=300|仅可见光数据训练
-yolox_s_ti_lite1 |mAP=0.61:0.94 total_loss: 2.8 epoch=179|混合数据集，crop，效果一般
-yolox_s_ti_lite2 |mAP=0.554:0.928 total_loss: 9.1 epoch=80|仅旋转偏移，训练时间长占显存大，loss下降慢
-yolox_s_ti_lite3|mAP=0.559:0.915 total_loss: 7.7 epoch=200 |关闭混合精度，训了两天
 
 ## 20231117 yolox_s_ti_lite部署成功
 再次尝试转换生成的yolox_s_ti_lite0.onnx，模型配置改为：`'scale' : [1,1,1]`
