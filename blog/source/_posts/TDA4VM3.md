@@ -56,6 +56,8 @@ python3 demo/ONNXRuntime/onnx_inference.py -m yolox_s_ti_lite0.onnx -i test.jpg 
 ```
 
 ## 2. 模型文件转ONNX
+ONNX(Open Neural Network Exchange)是用于在各种深度学习训练和推理框架转 换的一个中间表示格式。ONNX 定义了一组和环境，平台均无关的标准格式，来增强各种 AI 模型的可交互性，开放性较强。 TIDL 对 ONNX 模型有很好的支持，因此，将训练得到的pth模型文件转换为onnx文件，并利用tidl importer实现模型的编译与量化，具体步骤如下：
+
 ~~pycharm进入edgeai-yolox项目，根据提示额外安装requirements~~
 Window中配置该环境需要安装visual studio build tools，而且很多包报错，因此转ubuntu用vscode搭pytorch环境，非常顺利（vscode插件离线安装：如装python插件，直接进[ marketplace ](https://marketplace.visualstudio.com/vscode)下好拖到扩展位置）拓展设置中把Python Default Path改成创建的环境 `/home/wyj/anaconda3/envs/pytorch/bin/python`，最后用vscode打开项目，F5运行py程序，将.pth转为 ``.onnx, .prototxt`` 文件。
 ```sh

@@ -30,6 +30,8 @@ tags: 总结
 # 202312 分心行为算法
 ## 20231207
 再换数据集试试，[DriverSep](https://universe.roboflow.com/driver-dectection/driver-s-dectection) 5k
+<img alt="图 4" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/PaperLogdataSep.png" width="50%"/> 
+
 ```sh
 COCO_CLASSES = (
     "cup",
