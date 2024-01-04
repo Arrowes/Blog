@@ -46,6 +46,7 @@ whereis []          #查找
 find / -name "[]"   #查找 find *XXX*
 ls -l | grep "^-" | wc -l   #统计当前目录下文件的个数（不包括目录）
 find -name "*.jpg" | wc -l  #统计当前文件夹下指定类型的文件的数量
+du -h --max-depth=1 #查磁盘占用情况
 
 export 变量名=值     #设置或更新环境变量的值
 #配置永久环境变量更方便，sudo gedit /etc/profile，末尾加入如上代码，然后source /etc/profile加载立即生效
@@ -70,7 +71,6 @@ cat /proc/version   #查版本信息
 lsb_release -a      #查ubuntu版本
 free -m             #查内存使用情况
 df -hl              #查看磁盘剩余空间
-
 ```
 截图：1.screen截图应用程序   2.设置-设备-键盘-截图快捷键
 
