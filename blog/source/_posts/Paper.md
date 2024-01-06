@@ -71,6 +71,8 @@ Zotero能管理个人文献库、插入引文、论文阅读和记笔记、pdf�
 ``编辑 > 首选项 > 引用 > 文字处理软件 > 安装word插件`` 
 <img src="https://raw.gitmirror.com/Arrowes/Blog/main/images/Paper5.png" width = "80%" />
 
+[Zotero设置毕业论文/中文期刊参考文献格式](https://blog.csdn.net/weixin_42642296/article/details/129278237)
+
 ### 插件，让Zotero真正好用
 [官方插件下载地址](https://www.zotero.org/support/plugins)
 安装方法：下载.xpi 文件到你的电脑。然后，在 Zotero，点击“工具→插件（附加组件）”，然后拖动插件的 .xpi 文件到插件窗口打开，或者选择从文件中安装。安装完成后重新启动软件即可。
@@ -115,6 +117,7 @@ Zotero能管理个人文献库、插入引文、论文阅读和记笔记、pdf�
     });
     return ids.length + " item(s) updated";
 </details>
+
 
 # LaTex，论文通用排版系统
 在线编辑器：[Overleaf](https://www.overleaf.com/)，可以多人在线共同编辑、批注；
