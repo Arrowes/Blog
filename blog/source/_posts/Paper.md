@@ -46,7 +46,7 @@ Zotero能管理个人文献库、插入引文、论文阅读和记笔记、pdf�
 ```
 
 ### SCI-Hub抓取pdf 
-1. 打开Zotero 首选项->高级->设置编辑器
+1. 打开Zotero：编辑->首选项->高级->设置编辑器
 2. 搜索 ``extensions.zotero.findPDFs.resolvers`` ，搜到之后双击打开，在对话框中填入：
 ```
 {
@@ -71,13 +71,14 @@ Zotero能管理个人文献库、插入引文、论文阅读和记笔记、pdf�
 ``编辑 > 首选项 > 引用 > 文字处理软件 > 安装word插件`` 
 <img src="https://raw.gitmirror.com/Arrowes/Blog/main/images/Paper5.png" width = "80%" />
 
-[Zotero设置毕业论文/中文期刊参考文献格式](https://blog.csdn.net/weixin_42642296/article/details/129278237)
+自定义引用格式教程：[Zotero设置毕业论文/中文期刊参考文献格式](https://blog.csdn.net/weixin_42642296/article/details/129278237)
 
 ### 插件，让Zotero真正好用
 [官方插件下载地址](https://www.zotero.org/support/plugins)
 安装方法：下载.xpi 文件到你的电脑。然后，在 Zotero，点击“工具→插件（附加组件）”，然后拖动插件的 .xpi 文件到插件窗口打开，或者选择从文件中安装。安装完成后重新启动软件即可。
 
-**下面是强烈推荐的5个必备插件，嫌麻烦可以直接安装我上传的，都是2023年最新的，5个全部拖进去即可，地址：[推荐插件下载](https://www.123pan.com/s/goS7Vv-mIKbd.html)**
+下面是强烈推荐的5个必备插件，嫌麻烦可以直接安装我上传的，都是2023年最新的，5个.xpi文件全部拖进去即可，
+**地址：[5个推荐插件下载](https://www.123pan.com/s/goS7Vv-mIKbd.html)**
 
 **Zotero PDF Translate**
 [zotero-pdf-translate 下载](https://github.com/windingwind/zotero-pdf-translate/releases)，实现划词翻译，但是需要在插件设置里配置翻译引擎（免费,推荐腾讯云），[配置方法文档](https://doc.tern.1c7.me/zh/folder/setting/#%E8%85%BE%E8%AE%AF%E4%BA%91) 
