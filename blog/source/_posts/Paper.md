@@ -69,9 +69,8 @@ Zotero能管理个人文献库、插入引文、论文阅读和记笔记、pdf�
 ### 安装Word插件
 安装word插件，实现高效插入引文，并且可以根据期刊选择参考文献样式
 ``编辑 > 首选项 > 引用 > 文字处理软件 > 安装word插件`` 
-<img src="https://raw.gitmirror.com/Arrowes/Blog/main/images/Paper5.png" width = "80%" />
 
-自定义引用格式教程：[Zotero设置毕业论文/中文期刊参考文献格式](https://blog.csdn.net/weixin_42642296/article/details/129278237)
+
 
 ### 插件，让Zotero真正好用
 [官方插件下载地址](https://www.zotero.org/support/plugins)
@@ -95,8 +94,20 @@ Zotero能管理个人文献库、插入引文、论文阅读和记笔记、pdf�
 **Zotero Citation Counts Manager**
 [Zotero Citation Counts Manager 下载](https://github.com/eschnett/zotero-citationcounts/releases)，抓取引用数，一般选Semantic Scholar citation count
 
+## 使用方法
+在安装了Zotero插件的浏览器中搜索论文（建议谷歌学术或知网），用插件直接将论文导入Zotero，在Zotero中进行论文阅读、标注、翻译
+<img alt="picture 19" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/Paper-zoterouse1.png"  width = "80%" /> 
+
+然后在安装了插件的Word中实现引用文献，
+首先在Document Preferences中选择对应期刊的引文格式，毕业论文可参考自定义引用格式教程：[Zotero设置毕业论文/中文期刊参考文献格式](https://blog.csdn.net/weixin_42642296/article/details/129278237)
+<img src="https://raw.gitmirror.com/Arrowes/Blog/main/images/Paper5.png" width = "80%" />
+
+插入引文与参考文献
+<img alt="picture 20" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/Paper-Zoterouse2.png"  width = "80%" />  
+
+
 <details>
-  <summary>清空其它信息:工具-->开发者-->Run Javascript-->运行以下代码</summary>
+  <summary>清空`其它`信息：工具-->开发者-->Run Javascript-->运行以下代码</summary>
 
     var fieldName = "extra";
     var newValue = "";
@@ -118,7 +129,6 @@ Zotero能管理个人文献库、插入引文、论文阅读和记笔记、pdf�
     });
     return ids.length + " item(s) updated";
 </details>
-
 
 # LaTex，论文通用排版系统
 在线编辑器：[Overleaf](https://www.overleaf.com/)，可以多人在线共同编辑、批注；
