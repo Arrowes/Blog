@@ -9,7 +9,6 @@ tags:
 包括读《摄影笔记》的总结，专题拍摄笔记，摄影名词解释及相机知识，调色笔记更新中。
 <!--more-->
 
-[索尼APP使用教程](https://kdocs.cn/l/cq3CTsJgxvNv?f=201)
 # 调色笔记
 <img alt="图 7" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/Photograph-rrl.png" width=50%/>  
 右右左，适当降低饱和度
@@ -328,9 +327,16 @@ $$镜头转换系数=\frac{135胶片对角线长度}{非全幅的CCD/CMOS对角�
 
 最后记得清洁镜头盖；
 换镜头时要找背风处，动作要快。
+
 ## 拥有相机后快速入门
 1. 读一本好书《美国纽约摄影学院摄影教材（上）》《美国摄影用光教程》
 2. 阅读相机说明书熟悉常用设置和操作
 3. 大量拍摄和学习
 4. 关注几个严肃摄影媒体建立正确的价值观和审美情趣
 5. 提高艺术文化修养，你的照片反映了你是什么样的人
+
+## Sony A6000
+[sony a6000菜单设置指南（2021版）](https://post.smzdm.com/p/ag449pm7/)
+[索尼a6000的入门和使用技巧 - 知乎](https://zhuanlan.zhihu.com/p/87543572)
+
+[索尼APP使用教程](https://kdocs.cn/l/cq3CTsJgxvNv?f=201)
