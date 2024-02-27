@@ -1,6 +1,6 @@
 ---
 title: Computer：电脑及服务器折腾记录
-date: 2023-06-09 11:36:00
+date: 2023-11-09 11:36:00
 tags:
 - 技术
 ---
@@ -57,3 +57,13 @@ BIOS版本: 4KCN45WW
 <img alt="picture 1" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/Computer-r720.jpg" />  
 <img alt="picture 2" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/Computer-r7202.jpg" />  
 
+# 一些偶尔用到的电脑功能
++ win10定时任务
+win+r打开运行框，输入`taskschd.msc`,回车进入任务计划程序
+例如打开特定的网页：
+程序/脚本：`C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe`
+添加参数（可选）：`https://live.douyin.com/473159801229?camera_id=0`
+
++ 开机启动
+win+r 输入`shell:startup`
+例如开机即打开校园网：右键空白处——新建快捷方式，输入`http://login.hnust.cn/`,命名随意
