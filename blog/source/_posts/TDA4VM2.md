@@ -8,7 +8,7 @@ tags:
 TDA4的SDK环境搭建，SK开发板配置，TIDL demo运行，TIDL Tools与Edge AI Studio工具的介绍。
 <!--more-->
 
-相关前置知识见上一篇：[TDA4①：SDK, TIDL, OpenVX](https://wangyujie.fun/TDA4VM/)
+相关前置知识见上一篇：[TDA4①：SDK, TIDL, OpenVX](https://wangyujie.space/TDA4VM/)
 环境搭建需要下载SDK：[PROCESSOR-SDK-J721E](https://www.ti.com.cn/tool/cn/PROCESSOR-SDK-J721E)
 
 以下两节是EVM板的PSDK RTOS与PSDK Linux的环境搭建，因为暂时没有EVM板所以*没有上板测试*，只有SK板可以跳到第三节 TDA4VM-SK 配置。
@@ -348,7 +348,7 @@ EdgeAI-Benchmark提供了一系列针对不同图像识别任务的脚本，包�
 
 ---
 > TDA4系列文章：
-[TDA4①：SDK, TIDL, OpenVX](https://wangyujie.fun/TDA4VM/)
-[TDA4②：环境搭建、模型转换、Demo及Tools](https://wangyujie.fun/TDA4VM2/)
-[TDA4③：YOLOX的模型转换与SK板端运行](https://wangyujie.fun/TDA4VM3/)
-[TDA4④：部署自定义模型](https://wangyujie.fun/TDA4VM4/)
+[TDA4①：SDK, TIDL, OpenVX](https://wangyujie.space/TDA4VM/)
+[TDA4②：环境搭建、模型转换、Demo及Tools](https://wangyujie.space/TDA4VM2/)
+[TDA4③：YOLOX的模型转换与SK板端运行](https://wangyujie.space/TDA4VM3/)
+[TDA4④：部署自定义模型](https://wangyujie.space/TDA4VM4/)
