@@ -75,6 +75,7 @@ df -hl              #查看磁盘剩余空间
 截图：1.screen截图应用程序   2.设置-设备-键盘-截图快捷键
 
 ## 虚拟机
+### Virtual Box
 [Virtual Box](https://www.virtualbox.org/wiki/Downloads) + [Ubuntu 20.04](http://releases.ubuntu.com/20.04/), 或[18.04](https://releases.ubuntu.com/bionic/)（速度慢则换[镜像源](https://mirrors.tuna.tsinghua.edu.cn/ubuntu-releases/20.04/)）
 > 新建 > 导入.iso镜像 > 配置（分4G内存,100G硬盘）
 设置 > 共享文件夹 > 添加（自动挂载，固定分配）
@@ -83,15 +84,30 @@ df -hl              #查看磁盘剩余空间
 
 Host 键:右ctrl，方向键上：获取上次的命令，Tab：自动补全
 ``Ctrl + alt + T``	Terminal
-``Ctrl + H``	显示隐藏文件   
+``Ctrl + H``	显示隐藏文件
+
 > Debug:
 VirtualBox安装 64位的Ubuntu系统，在安装时没有显示64位的Linux安装项: 1.CPU要是64位, 2.CPU开启了虚拟化 > `进入BOIS > Security> Virtualization > Enable` 还是不行则要查看Win10系统安装了自带的Hyper-V虚拟机是否占用了CPU虚拟化技术，将其卸载
+
+### VMware Workstation
+共享文件夹：将你本地的那个共享的文件夹 右击>属性>共享>高级共享 (需要安装VMware Tools)
+
+> Debug:
+Could not get lock /var/lib/dpkg/lock – open > 执行 ``sudo rm -rf /var/lib/dpkg/lock``
+共享文件夹ubuntu中不显示 > 重新安装VMware tools ([VMware Tools的介绍及安装方法](https://blog.csdn.net/williamcsj/article/details/121019391))
+共享剪切板失效：`sudo apt-get install open-vm-tools-desktop`,然后重启
+安装VMware Tools选项显示灰色 > 关闭虚拟机 > 在虚拟机设置分别设置CD/DVD、CD/DVD2和软盘为自动检测
+``sudo apt-get install`` failed > 换源
+若打不开终端：系统设置修改语言后重新登陆
+网络：虚拟机 > 设置 > 网络适配器 > NAT模式； 设置 > 虚拟网络编辑器 > 还原默认设置
+
+
 ## 学术加速
 ### Windows
-1. 找一个合适的梯子，建议直接买付费的，稳定快速，推荐 [SockBoom](sockboom.link), 购买后会得到一个订阅地址，类似于`https://sub.sockboom.pro/.../.ini`，之后把这个地址填进软件，即可成功挂上梯子
+1. 找一个合适的梯子，建议直接买付费的，稳定快速，推荐 [SpaPort](https://front.spaport.cc/#/dashboard), 购买后会得到一个订阅地址，类似于`https://.../.../.ini`，之后把这个地址填进软件，即可成功挂上梯子
 2. 下载软件：[Clash.for.Windows](https://github.com/Z-Siqi/Clash-for-Windows_Chinese/releases/download/CFW-V0.20.39_CN/Clash.for.Windows-0.20.39-win.7z)，解压后双击`Clash for Windows.exe`打开软件 (备用下载链接：[Clash](https://sockboomdownload.com/ssr-download/ClashforWindows.zip))
-3. 点击左侧的 `配置`，在顶部的输入栏中粘贴你复制的Clash订阅地址后点击 `下载`, 显示绿色的成功之后，点击名字为 `Sockboom` 的地方
-4. 点击左侧的`代理`，点击上方的`Rule`，一般选择`手动选择`内的节点即可，不同的节点名称代表不同地区的服务器，可以点右上方的WiFi图标进行测速，哪个延迟低选哪个节点（用ChatGPT不能选香港），节点有失效可能，注意切换
+3. 点击左侧的 `配置`，在顶部的输入栏中粘贴你复制的Clash订阅地址后点击 `下载`, 显示绿色的成功之后，点击你刚导入的配置（名字一般是梯子的名称，如SpaPort）
+4. 点击左侧的`代理`，点击上方的`Rule`，一般选择`手动选择`内的节点即可，不同的节点名称代表不同地区的服务器，可以点右上方的WiFi图标进行测速，哪个延迟低选哪个节点（用ChatGPT不能选香港），超时就是那个节点挂了，节点随时有失效可能，注意切换
 5. 点击左侧的`主页`，打开下面`系统代理`的开关，即**成功加速**，左上角会显示实时流量，建议在`设置>快捷键`中将系统代理设为`Ctrl+W`, 按需随时开关，节约流量
 （注意：在`系统代理`的开关打开的情况下关闭软件，将会*出现电脑连不上网的情况*，此时重新打开Clash即可解决，因此，建议也打开`开机自启动`的开关，保持Clash后台常驻）
 
@@ -111,12 +127,12 @@ Ubuntu设置-网络代理设为手动，将http/https代理指向clash默认端�
 ```sh
 wget https://github.com/Z-Siqi/Clash-for-Windows_Chinese/blob/main/image/image_clash.png    # 下载clash icon做为桌面图标
 vim clash.desktop
-# 输入下面的内容
+# 输入下面的内容(注意用户名和路径)
 [Desktop Entry]
  Name=clash
  Comment=Clash
- Exec=/home/.../clash/cfw
- Icon=/home/.../clash/image_clash.png
+ Exec=/home/arrow/clash/cfw
+ Icon=/home/arrow/clash/image_clash.png
  Type=Application
  Categories=Development;
  StartupNotify=true
@@ -149,11 +165,6 @@ Ctrl + ~    #控制台终端显示与隐藏：
 ```
 
 
-## Debug
-+ Could not get lock /var/lib/dpkg/lock – open > 执行 ``sudo rm -rf /var/lib/dpkg/lock``
-+ 共享文件夹ubuntu中不显示 > 重新安装VMware tools
-+ ``sudo apt-get install`` failed > 换源
-+ 若打不开终端：系统设置修改语言后重新登陆
  
 # Git
 下载 [Git](https://git-scm.com/downloads)，与 [TortoiseGit](https://tortoisegit.org/download/) 小乌龟配合使用可以少记很多指令，在目标文件夹右键可执行push、clone、commit等操作

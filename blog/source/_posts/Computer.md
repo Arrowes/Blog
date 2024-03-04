@@ -36,9 +36,9 @@ ip a
 vscode安装插件：Remote - SSH
 登录ubuntu用户：ssh username@10.99.1.55
 
->例如主用户lsg：
-ssh lsg@10.99.1.55
-密码：lsg204
+>例如主用户XXX：
+ssh XXX@10.99.1.55
+密码：XXX204
 
 # 拯救者R720-15IKBN
 ```sh
