@@ -115,8 +115,7 @@ TDA4VM processor starter kit for edge AI vision systems
 
 <img alt="图 TDA4VM-SK" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/TDA4VM-SK.png" /> 
 
-[SK-TDA4VM Evaluation board | TI.com](https://www.ti.com/tool/SK-TDA4VM)
-[SK-TDA4VM 用户指南](https://www.ti.com.cn/cn/lit/ug/zhcu912c/zhcu912c.pdf?ts=1688968746311), 提供了 SK-TDA4VM 的功能和接口详细信息
+[SK-TDA4VM Evaluation board | TI.com](https://www.ti.com/tool/SK-TDA4VM), 提供了 SK-TDA4VM 的功能和接口详细信息
 [Processor SDK Linux for Edge AI Documentation](https://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-sk-tda4vm/latest/exports/docs/running_simple_demos.html)
 [Processor SDK Linux for SK-TDA4VM Documentation](https://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-edgeai/TDA4VM/08_06_01/exports/docs/common/inference_models.html)
 

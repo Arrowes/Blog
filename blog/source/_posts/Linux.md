@@ -86,6 +86,10 @@ Host 键:右ctrl，方向键上：获取上次的命令，Tab：自动补全
 ``Ctrl + alt + T``	Terminal
 ``Ctrl + H``	显示隐藏文件
 
+
+**使用手机或其他USB设备提供网络**
+VirtualBox设置 > USB设备 > 添加对应的USB口 > 重新启动虚拟机 > 右上角网络 > 连接USB以太网
+
 > Debug:
 VirtualBox安装 64位的Ubuntu系统，在安装时没有显示64位的Linux安装项: 1.CPU要是64位, 2.CPU开启了虚拟化 > `进入BOIS > Security> Virtualization > Enable` 还是不行则要查看Win10系统安装了自带的Hyper-V虚拟机是否占用了CPU虚拟化技术，将其卸载
 
@@ -100,50 +104,8 @@ Could not get lock /var/lib/dpkg/lock – open > 执行 ``sudo rm -rf /var/lib/d
 ``sudo apt-get install`` failed > 换源
 若打不开终端：系统设置修改语言后重新登陆
 网络：虚拟机 > 设置 > 网络适配器 > NAT模式； 设置 > 虚拟网络编辑器 > 还原默认设置
+连不上USB: Win键+R键打开“运行”程序，输入“services.msc”,点击开启VMware USB Arbitration Service服务，并设置为自动启动; 然后虚拟机 > 可移动设备 > 选择
 
-
-## 学术加速
-### Windows
-1. 找一个合适的梯子，建议直接买付费的，稳定快速，推荐 [SpaPort](https://front.spaport.cc/#/dashboard), 购买后会得到一个订阅地址，类似于`https://.../.../.ini`，之后把这个地址填进软件，即可成功挂上梯子
-2. 下载软件：[Clash.for.Windows](https://github.com/Z-Siqi/Clash-for-Windows_Chinese/releases/download/CFW-V0.20.39_CN/Clash.for.Windows-0.20.39-win.7z)，解压后双击`Clash for Windows.exe`打开软件 (备用下载链接：[Clash](https://www.123pan.com/s/goS7Vv-JsSbd.html)，解压密码12345)
-3. 点击左侧的 `配置`，在顶部的输入栏中粘贴你复制的Clash订阅地址后点击 `下载`, 显示绿色的成功之后，点击你刚导入的配置（名字一般是梯子的名称，如SpaPort）
-4. 点击左侧的`代理`，点击上方的`Rule`，一般选择`手动选择`内的节点即可，不同的节点名称代表不同地区的服务器，可以点右上方的WiFi图标进行测速，哪个延迟低选哪个节点（用ChatGPT不能选香港），超时就是那个节点挂了，节点随时有失效可能，注意切换
-5. 点击左侧的`主页`，打开下面`系统代理`的开关，即**成功加速**，左上角会显示实时流量，建议在`设置>快捷键`中将系统代理设为`Ctrl+W`, 按需随时开关，节约流量
-（注意：在`系统代理`的开关打开的情况下关闭软件，将会*出现电脑连不上网的情况*，此时重新打开Clash即可解决，因此，建议也打开`开机自启动`的开关，保持Clash后台常驻）
-
-至此，即可流畅登录Github上传或下载代码，以及在终端中安装各种工具包，避免了换源等繁琐操作
-
-### Android
-下载[ClashforAndroid](https://sockboomdownload.com/ssr-download/clashforandroid.apk)
-配置 > 右上角＋号 > URL > 填入订阅链接 > 保存 > 回主界面点*启动*
-选代理，点一下右上角的⚡将进行测速，数字越小的节点延迟越低
-
-### Linux
-[Clash.for.Windows-x64-linux.tar.gz ](https://dl.gtk.pw/proxy/linux/)可用于Ubuntu，
-解压缩，进入文件夹终端，运行`./cfw`,即可打开软件
-Ubuntu设置-网络代理设为手动，将http/https代理指向clash默认端口7890：`HTTP代理：127.0.0.1 7890` `HTTPS代理：127.0.0.1 7890`
-
-创建软件快捷方式(Optional)
-```sh
-wget https://github.com/Z-Siqi/Clash-for-Windows_Chinese/blob/main/image/image_clash.png    # 下载clash icon做为桌面图标
-vim clash.desktop
-# 输入下面的内容(注意用户名和路径)
-[Desktop Entry]
- Name=clash
- Comment=Clash
- Exec=/home/arrow/clash/cfw
- Icon=/home/arrow/clash/image_clash.png
- Type=Application
- Categories=Development;
- StartupNotify=true
- NoDisplay=false
-
-sudo mv clash.desktop /usr/share/applications/
-```
-最终就能实现通过图标打开
-
-**使用手机或其他USB设备提供网络**
-VirtualBox设置 > USB设备 > 添加对应的USB口 > 重新启动虚拟机 > 右上角网络 > 连接USB以太网
 
 ## VScode
 vscode远程访问：1.安装remote插件 2.连接服务器``ssh ywang85@she1-w50502`` 3.connect，打开terminal

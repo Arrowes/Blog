@@ -1,5 +1,5 @@
 ---
-title: TDA4②：环境搭建、模型转换、Demo及Tools
+title: TDA4②：环境搭建，模型转换，Demo及Tools
 date: 2023-05-18 16:28:00
 tags:
 - 嵌入式
@@ -99,7 +99,12 @@ make linux_fs_install_sd
 上面都是EVM板的相关环境配置，后面只拿到了SK板，因此转为SK板的相关配置。
 
 # [TDA4VM-SK](https://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-edgeai/TDA4VM/08_06_01/exports/docs/devices/TDA4VM/linux/getting_started.html) 配置
-硬件信息：[SK-TDA4VM 用户指南](https://www.ti.com.cn/cn/lit/ug/zhcu912c/zhcu912c.pdf)
+
+<img alt="picture 0" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/TDA4VM2-SKtop.png" />  
+<img alt="picture 1" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/TDA4VM2-SKup.png" />  
+
+
+硬件信息：[SK-TDA4VM 官网](https://www.ti.com.cn/tool/cn/SK-TDA4VM)
 [Processor SDK Linux for Edge AI Documentation](https://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-sk-tda4vm/latest/exports/docs/running_simple_demos.html)
 配置文档：[Processor SDK Linux for SK-TDA4VM Documentation - getting_started](https://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-edgeai/TDA4VM/08_06_01/exports/docs/devices/TDA4VM/linux/getting_started.html)，详细说明了如何配置，下面是简要步骤：
 
