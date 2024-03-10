@@ -185,7 +185,7 @@ TIDL中需要量化的层：Convolution Layer、De-convolution Layer、Inner-Pro
     + Post Training Quantization (PTQ, 训练后量化、离线量化)
     + Training for Quantization (QAT，训练时量化，伪量化，在线量化)
     + Quantization aware Training
-<img src="https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/06_01_01_12/exports/docs/tidl_j7_01_00_01_00/ti_dl/docs/user_guide_html/TIDL_Quant_Options.png" width='70%'>
+<img src="https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/06_01_01_12/exports/docs/tidl_j7_01_00_01_00/ti_dl/docs/user_guide_html/TIDL_Quant_Options.png" width='60%'>
 
 [从零开始玩转TDA4之模型量化](https://zhuanlan.zhihu.com/p/639245713)
 
@@ -205,7 +205,7 @@ TIDL is a fundamental software component of [TI’s Edge AI solution](https://ww
 <img src="https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/08_06_00_12/exports/docs/tidl_j721e_08_06_00_10/ti_dl/docs/user_guide_html/dnn-workflow.png">
 
 [TIDL Runtime](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/08_06_00_12/exports/docs/tidl_j721e_08_06_00_10/ti_dl/docs/user_guide_html/md_tidl_overview.html)（TIDL-RT）是运行在TDA4端的实时推理单元，同时提供了TIDL的运行环境，对于input tensor，TIDL TIOVX Node 调用TIDL 的深度学习加速库进行感知，并将结果进行输出。
-<img alt="图 9" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/TDA4VMworkflow.png" width="60%"/>  
+<img alt="图 9" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/TDA4VMworkflow.png" width="50%"/>  
 
 [**TI’s EdgeAI Tools**](https://github.com/TexasInstruments/edgeai):Training and quantization tools,make DNNs more suitable for TI devices.
 
@@ -216,7 +216,7 @@ TIDL is a fundamental software component of [TI’s Edge AI solution](https://ww
 
 + [Edge AI Studio](https://dev.ti.com/edgeai/):Integrated development environment for development of AI applications for edge processors.（需授权）
 + [EdgeAI-ModelMaker](https://github.com/TexasInstruments/edgeai-modelmaker): Command line Integrated environment for training & compilation，集成了edgeai-modelzoo, edgeai-torchvision, edgeai-mmdetection, edgeai-benchmark, edgeai-modelmaker
-<img alt="图 9" src="https://raw.gitmirror.com/TexasInstruments/edgeai/blob/master/assets/workblocks_tools_software.png?raw=true" width="90%">  
+<img alt="图 9" src="https://github.com/TexasInstruments/edgeai/raw/main/assets/workblocks_tools_software.png" width="70%">  
 
 ## OpenVX
 [OpenVX](https://www.khronos.org/openvx/) 视觉加速中间件是芯片内部的硬件加速器与视觉应用间的桥梁(中间件:用于简化编程人员开发复杂度、抽象软硬件平台差异的软件抽象层)，是个由Khronos定义的API框架，包括：宏的定义与含义，结构体的定义与含义，函数的定义与行为。

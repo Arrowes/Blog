@@ -9,8 +9,9 @@ TDA4的SDK环境搭建，SK开发板配置，TIDL demo运行，TIDL Tools与Edge
 <!--more-->
 
 相关前置知识见上一篇：[TDA4①：SDK, TIDL, OpenVX](https://wangyujie.space/TDA4VM/)
-环境搭建需要下载SDK：[PROCESSOR-SDK-J721E](https://www.ti.com.cn/tool/cn/PROCESSOR-SDK-J721E)
+下一篇：[TDA4③：YOLOX的模型转换与SK板端运行](https://wangyujie.space/TDA4VM3/)
 
+环境搭建需要下载SDK：[PROCESSOR-SDK-J721E](https://www.ti.com.cn/tool/cn/PROCESSOR-SDK-J721E)
 以下两节是EVM板的PSDK RTOS与PSDK Linux的环境搭建，因为暂时没有EVM板所以*没有上板测试*，只有SK板可以跳到第三节 TDA4VM-SK 配置。
 # [Linux SDK](https://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-rt-jacinto7/08_06_00_11/exports/docs/devices/J7/linux/index.html) 环境搭建
 
@@ -100,8 +101,7 @@ make linux_fs_install_sd
 
 # [TDA4VM-SK](https://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-edgeai/TDA4VM/08_06_01/exports/docs/devices/TDA4VM/linux/getting_started.html) 配置
 
-<img alt="picture 0" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/TDA4VM2-SKtop.png" />  
-<img alt="picture 1" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/TDA4VM2-SKup.png" />  
+<img alt="picture 0" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/TDA4VM-SK.png" /> 
 
 
 硬件信息：[SK-TDA4VM 官网](https://www.ti.com.cn/tool/cn/SK-TDA4VM)
