@@ -27,10 +27,36 @@ tags: 总结
 以下为开发日志（倒叙）
 > 想法：
 合并分心与疲劳检测算法
+# 202403收尾
+重建edgeai tidl tool 和 edge ai yolox环境
+```sh
+git clone https://github.com/TexasInstruments/edgeai-tidl-tools.git
+git checkout 08_06_00_05
+conda create -n ti python=3.6
+...
+```
+训练很慢，而且权重文件68.5Mb，要改`exps/default/yolox_s_ti_lite.py`
+
+混合分心与疲劳数据集, 一箭双雕，但是分心没红外
+```
+COCO_CLASSES = (
+    "closed_eye",
+    "closed_mouth",
+    "cup",
+    "hand",
+    "open_eye",
+    "open_mouth",
+    "phone",
+    "wheel",
+)
+```
+
+
+
 # 202312 分心行为算法
 ## 20231207
 再换数据集试试，[DriverSep](https://universe.roboflow.com/driver-dectection/driver-s-dectection) 5k
-<img alt="图 4" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/PaperLogdataSep.png" width="50%"/> 
+<img alt="图 4" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/PaperLogdataSep.png" width="40%"/> 
 
 ```sh
 COCO_CLASSES = (
@@ -55,18 +81,10 @@ yolox_s_ti_lite7 |mAP=0.739:0.971 total_loss: 1.8 epoch=300|开了数据增强�
 有标注好的：[Modified distracted driver dataset](https://universe.roboflow.com/deloitte-ullms/modified-distracted-driver-dataset/browse?queryText=&pageSize=50&startingIndex=50&browseQuery=true)（Mdd 5842→1w 12类）（不行，疑似标注方法问题，效果很差）
 ```py
 COCO_CLASSES = (
-    "Safe Driving",
-    "Texting",
-    "Talking_on_the_phone",
-    "Operating_the_Radio",
-    "Drinking",
-    "Reaching_Behind",
-    "Hair_and_Makeup",
-    "Talking_to_Passenger",
-    "Eyes_Closed",
-    "Yawning",
-    "Nodding_Off",
-    "Eyes_Open",
+    "closed_eye",
+    "closed_mouth",
+    "open_eye",
+    "open_mouth",
 )
 ```
 
@@ -126,7 +144,7 @@ output.shape: (1, 1, 200, 6) [array([[[[ 2.8528796e+02,  1.7602501e+02,  3.30619
 
 配置板端文件：
 ```sh
-#运行配置文件yolo.yaml
+#运行配置文件opt/edgeai-gst-apps/yolo.yaml
 title: "DMS"
 log_level: 1
 inputs:

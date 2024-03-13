@@ -5,7 +5,7 @@ tags:
 - 嵌入式
 - 深度学习
 ---
-以目标检测算法YOLOX为例，记录模型从权重文件转换为ONNX，再使用TIDL(Importer/Tolls)编译为可执行文件，最后于SK板运行及评估的开发流程。
+以目标检测算法YOLOX为例，记录模型从权重文件转换为ONNX，再使用TIDL(Importer/Tools)编译为可执行文件，最后于SK板运行及评估的开发流程。
 <!--more-->
 
 接上一篇：[TDA4②：环境搭建、模型转换、Demo及Tools](https://wangyujie.space/TDA4VM2/)
@@ -41,8 +41,8 @@ python tools/demo.py image -f exps/default/yolox_s_ti_lite.py -c yolox-s-ti.pth 
 
 yolox/data/datasets/coco_classes.py #修改类别名称
 yolox/data/datasets/coco.py  #改size
-yolox/exp/yolox_base.py   #类别数量等训练参数
-exps/default/yolox_s_ti_lite.py #模型配置文件，在里面修改参数
+yolox/exp/yolox_base.py   #类别数量等训练参数,如interval改为1，配置数据增强等
+exps/default/yolox_s_ti_lite.py #模型配置文件，在里面修改参数，如模型大小
 
 #运行训练：
 python -m yolox.tools.train -n yolox-s-ti-lite -d 0 -b 16 --fp16 -o --cache
