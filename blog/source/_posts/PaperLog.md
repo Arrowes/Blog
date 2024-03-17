@@ -28,14 +28,68 @@ tags: 总结
 > 想法：
 合并分心与疲劳检测算法
 # 202403收尾
-重建edgeai tidl tool 和 edge ai yolox环境
+## 总结部署流程
+```sh
+#运行训练：
+python -m yolox.tools.train -n yolox-s-ti-lite -d 0 -b 64 --fp16 -o --cache
+#导出：
+python3 tools/export_onnx.py --output-name yolox_s_ti_lite0.onnx -f exps/default/yolox_s_ti_lite.py -c YOLOX_outputs/yolox_s_ti_lite/best_ckpt.pth --export-det
+#onnx推理：
+python3 demo/ONNXRuntime/onnx_inference.py -m yolox_s_ti_lite0.onnx -i test.jpg -s 0.3 --input_shape 640,640 --export-det
+
+#onnx拷贝到tool/models,/examples/osrt_python改model_configs的模型路径和类别数量
+#tools根目录运行
+./scripts/yolo_compile.sh
+#模型结果在model-artifacts/模型名称
+
+#挂载SD卡，model_zoo新建模型文件夹，拷贝模型
+CEAM-YOLOv7/
+├── artifacts
+│   ├── allowedNode.txt
+│   ├── detections_tidl_io_1.bin
+│   ├── detections_tidl_net.bin
+│   └── onnxrtMetaData.txt
+├── dataset.yaml    #改
+├── model
+│   └── yolox_s_ti_lite0.onnx
+├── param.yaml  #拷贝然后改
+└── run.log
+
+#dataset.yaml
+categories:
+- supercategory: distract
+  id: 1
+  name: cup
+- supercategory: distract
+  id: 2
+  name: hand
+- supercategory: distract
+  id: 3
+  name: phone
+- supercategory: distract
+  id: 4
+  name: wheel
+
+#param.yaml（copy from model_zoo_8220）
+threshold: 0.2  #好像没用
+model_path: model/yolox_s_ti_lite0.onnx
+
+#rootfs/opt/edgeai-gst-apps/configs改yolo.yaml
+
+#SD卡上板
+sudo minicom -D /dev/ttyUSB2 -c on
+#root登录，ctrl+A Z W换行，运行
+cd /opt/edgeai-gst-apps/apps_cpp && ./bin/Release/app_edgeai ../configs/yolo.yaml
+```
+
+## 20240313重新部署
+重建sk板，edgeai tidl tool 和 edge ai yolox环境 (要注意SK版本和tools版本对应！！！)
 ```sh
 git clone https://github.com/TexasInstruments/edgeai-tidl-tools.git
 git checkout 08_06_00_05
 conda create -n ti python=3.6
 ...
 ```
-训练很慢，而且权重文件68.5Mb，要改`exps/default/yolox_s_ti_lite.py`
 
 混合分心与疲劳数据集, 一箭双雕，但是分心没红外
 ```
@@ -49,6 +103,32 @@ COCO_CLASSES = (
     "phone",
     "wheel",
 )
+
+categories:
+- supercategory: Fatigue
+  id: 1
+  name: closed_eye
+- supercategory: Fatigue
+  id: 2
+  name: closed_mouth
+- supercategory: Distract
+  id: 3
+  name: cup
+- supercategory: Distract
+  id: 4
+  name: hand
+- supercategory: Fatigue
+  id: 5
+  name: open_eye
+- supercategory: Fatigue
+  id: 6
+  name: open_mouth
+- supercategory: Distract
+  id: 7
+  name: phone
+- supercategory: Distract
+  id: 8
+  name: wheel
 ```
 
 
