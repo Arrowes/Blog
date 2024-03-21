@@ -25,6 +25,8 @@ TI官方在[ ModelZOO ](https://github.com/TexasInstruments/edgeai-modelzoo)中�
 目标检测文档：[edgeai-yolox-2d_od](https://github.com/TexasInstruments/edgeai-yolox/blob/main/README_2d_od.md)
 
 ```sh
+git clone https://github.com/TexasInstruments/edgeai-yolox.git
+
 conda create -n pytorch python=3.6
 ./setup.sh  #若pytorch环境已建好，就不用全部跑通，后面运行时一个个装
 #运行demo，pth在文档中下载
