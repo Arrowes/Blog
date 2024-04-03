@@ -354,5 +354,6 @@ $$镜头转换系数=\frac{135胶片对角线长度}{非全幅的CCD/CMOS对角�
 ## Sony A6000
 [sony a6000菜单设置指南（2021版）](https://post.smzdm.com/p/ag449pm7/)
 [索尼a6000的入门和使用技巧 - 知乎](https://zhuanlan.zhihu.com/p/87543572)
-
 [索尼APP使用教程](https://kdocs.cn/l/cq3CTsJgxvNv?f=201)
+[索尼A6000(ILCE-6000)说明书](http://app.mydigi.net/manualdown/soft/ilce-6000(4532055811).pdf)
+[索尼黑卡1(DSC-RX100)说明书](http://app.mydigi.net/manualdown/soft/DSC-RX100(4429665112).pdf)
