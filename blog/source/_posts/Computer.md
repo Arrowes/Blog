@@ -57,7 +57,9 @@ BIOS版本: 4KCN45WW
 <img alt="picture 1" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/Computer-r720.jpg" />  
 <img alt="picture 2" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/Computer-r7202.jpg" />  
 
-# 一些偶尔用到的电脑功能
+[珂芝863(K75)说明书中文-更新7-28 (kzzi.com)](http://www.kzzi.com/media/files/20220825/20220825161014_9187.pdf)
+
+# 电脑小技巧
 + win10定时任务
 win+r打开运行框，输入`taskschd.msc`,回车进入任务计划程序
 例如打开特定的网页：
@@ -109,6 +111,6 @@ sudo mv clash.desktop /usr/share/applications/
 最终就能实现通过图标打开
 
 # Debug
-桌面闪烁，底部任务栏跟着刷新，造成的因素有许多可能，硬件显卡驱动的问题，以及刷新率,explorer资源管理器,注册列表问题,病毒问题
+> 桌面闪烁，底部任务栏跟着刷新，造成的因素有许多可能，硬件显卡驱动的问题，以及刷新率,explorer资源管理器,注册列表问题,病毒问题
 初步测试：win+R一直在闪烁，输入一个字母，然后又不能输入了，需要重新在下次刷新前点击，抢在刷新前，点击接着输入。意味着只要点的快，还是可以打开点东西的。Ctrl键+Alt键+Delete键，可以进入管控，打开任务资源管理器，重启explorer资源管理器，毫无效果。
 打开任务资源管理器 > 运行新任务 > 输入`cmd` > `sfc /scannow`（扫描修复系统文件）解决

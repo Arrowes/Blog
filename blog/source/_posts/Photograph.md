@@ -10,7 +10,7 @@ tags:
 <!--more-->
 
 # 调色笔记
-<img alt="图 7" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/Photograph-rrl.png" width=50%/>  
+<img alt="图 7" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/Photograph-rrl.png" width=30%/>  
 右右左，适当降低饱和度
 
 # 摄影笔记
