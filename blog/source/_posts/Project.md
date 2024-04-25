@@ -5,8 +5,27 @@ tags:
 - 总结
 - 技术
 ---
-FEY-YOLOv7，CEAM-YOLOv7，基于 STM32 的智能空压机状态监测系统，SE智厨，风功率密度便携式测量仪。
+车位线检测算法开发与部署，FEY-YOLOv7，CEAM-YOLOv7，基于 STM32 的智能空压机状态监测系统，SE智厨，风功率密度便携式测量仪。
 <!--more-->
+
+# 车位线检测算法开发与TDA4VM-SK板端部署
+## 车位线检测算法
+[泊车辅助系统：智能泊车辅助 (valeo.com)](https://www.valeo.com/cn/catalogue/cda/%E6%B3%8A%E8%BD%A6%E8%BE%85%E5%8A%A9%E7%B3%BB%E7%BB%9F%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/)
+[Arrowes/general\_parking\_slot\_detection (github.com)](https://github.com/Arrowes/general_parking_slot_detection)
+
+<img alt="图 44" src="https://pic3.zhimg.com/80/v2-0d7c0fec251f5a24d4c24e4ffe7fe642_720w.webp" width='100%'/>  
+
+<img alt="图 44" src="https://pic4.zhimg.com/80/v2-d9ffc679408c09c6ec4a77e74447eb8b_720w.webp" width='100%'/>  
+
+基于YOLOX网络架构提取车位关键点位，实现车位的抽象表示
+并部署于TDA4VM车载嵌入式板端
+
+## TDA4VM-SK板端部署（以FEY-YOLOv7为例）
+为验证本文提出算法的有效性，实现驾驶员危险行为检测算法的部署与应用，本研究依托于TDA4VM硬件平台和德州仪器（Texas Instruments, TI）软件平台，构建了实验平台，以将开发出的驾驶员危险行为检测算法有效部署至德州仪器的TDA4VM-SK开发板。此过程包括对经训练得到的模型进行的修改和量化，利用TI软件平台进行模型的转换，以及算法在实际车辆中的部署应用，并对算法的性能进行深入分析。
+本研究选用TI提供的TDA4VM Edge AI Starter Kit (SK) 硬件开发平台进行算法的部署与实验，TDA4VM-SK是一款专为边缘人工智能应用设计的低成本、小尺寸的开发板，以大约20W的功耗提供高达8TOPS的深度学习算力。这款开发板搭载TDA4VM处理器，不仅提供了卓越的深度学习性能，而且能实现低功耗下的硬件加速，非常适合需要高效率边缘AI计算的场景。
+
+<img alt="picture 50" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/Project-tda4FEY.png" />  
+
 
 # FEY-YOLOv7：基于面部小目标动态追踪的驾驶员疲劳检测算法
 + SCI四区论文：[A Driver Fatigue Detection Algorithm Based on Dynamic Tracking of Small Facial Targets Using YOLOv7](https://search.ieice.org/bin/summary_advpub.php?id=2023EDP7093&category=D&lang=E&abst=)
@@ -42,10 +61,9 @@ $PERYAWN = E/(N - w · M)$
 
 
 ## 实现效果
-<img alt="图 48" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/Project-FEYdetectResult.png" width='80%'/>  
+<img alt="图 48" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/Project-FEYdetectResult.png" width='60%'/>  
 
 <img alt="图 47" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/Project-FEYresult.png" width='80%'/>  
-
 
 # CEAM-YOLOv7：基于通道扩展注意机制的改进YOLOv7驾驶员行为检测算法
 + [CEAM-YOLOv7:Improved YOLOv7 Based on Channel Expansion Attention Mechanism for Driver behavior detection](https://ieeexplore.ieee.org/document/9980374/metrics)
@@ -124,7 +142,7 @@ GAM是一种能够捕捉所有三个维度的显著特征的注意机制，采�
 ### 电路设计
  ![图 13](https://raw.gitmirror.com/Arrowes/Blog/main/images/Project13.png)  
 ### 实物制作
-![图 14](https://raw.gitmirror.com/Arrowes/Blog/main/images/Project14.png)  
+<img alt="图 14" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/Project14.png" width='60%'/>  
 
 # 风功率密度便携式测量仪
 2018-2019
@@ -162,8 +180,10 @@ GAM是一种能够捕捉所有三个维度的显著特征的注意机制，采�
 
 ## 电路设计
 ![图 16](https://raw.gitmirror.com/Arrowes/Blog/main/images/Project16.png)  
-![图 17](https://raw.gitmirror.com/Arrowes/Blog/main/images/Project17.png)  
+
+<img alt="图 47" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/Project17.png" width='60%'/>  
  
 ## 实物制作
-![图 18](https://raw.gitmirror.com/Arrowes/Blog/main/images/Project18.png)  
-![图 19](https://raw.gitmirror.com/Arrowes/Blog/main/images/Project19.png)  
+<img alt="图 18" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/Project18.png" width='70%'/>  
+
+<img alt="图 19" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/Project19.png" width='70%'/>  
