@@ -5,7 +5,7 @@ tags:
 - 总结
 - 技术
 ---
-车位线检测算法开发与部署，FEY-YOLOv7，CEAM-YOLOv7，基于 STM32 的智能空压机状态监测系统，SE智厨，风功率密度便携式测量仪。
+车位检测算法开发与部署，FEY-YOLOv7，CEAM-YOLOv7，基于 STM32 的智能空压机状态监测系统，SE智厨，风功率密度便携式测量仪。
 <!--more-->
 
 # 车位线检测算法开发与TDA4VM-SK板端部署
@@ -24,8 +24,9 @@ tags:
 为验证本文提出算法的有效性，实现驾驶员危险行为检测算法的部署与应用，本研究依托于TDA4VM硬件平台和德州仪器（Texas Instruments, TI）软件平台，构建了实验平台，以将开发出的驾驶员危险行为检测算法有效部署至德州仪器的TDA4VM-SK开发板。此过程包括对经训练得到的模型进行的修改和量化，利用TI软件平台进行模型的转换，以及算法在实际车辆中的部署应用，并对算法的性能进行深入分析。
 本研究选用TI提供的TDA4VM Edge AI Starter Kit (SK) 硬件开发平台进行算法的部署与实验，TDA4VM-SK是一款专为边缘人工智能应用设计的低成本、小尺寸的开发板，以大约20W的功耗提供高达8TOPS的深度学习算力。这款开发板搭载TDA4VM处理器，不仅提供了卓越的深度学习性能，而且能实现低功耗下的硬件加速，非常适合需要高效率边缘AI计算的场景。
 
-<img alt="picture 50" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/Project-tda4FEY.png" />  
+<img alt="picture 51" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/Project-tad4FEY1.png" width='80%' />  
 
+<img alt="picture 50" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/Project-tda4FEY.png" width='80%' />  
 
 # FEY-YOLOv7：基于面部小目标动态追踪的驾驶员疲劳检测算法
 + SCI四区论文：[A Driver Fatigue Detection Algorithm Based on Dynamic Tracking of Small Facial Targets Using YOLOv7](https://search.ieice.org/bin/summary_advpub.php?id=2023EDP7093&category=D&lang=E&abst=)
