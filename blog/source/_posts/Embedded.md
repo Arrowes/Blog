@@ -79,6 +79,9 @@ tags:
 
 
 # PCB布局布线
+
+[立创EDA PCB设计笔记](https://blog.csdn.net/qq_36347513/article/details/121873555)
+
 ## 布局
 元器件布局的10条规则：
 
@@ -231,8 +234,6 @@ B. 对于点对多点（一个输出对应多个输出） 连接， 当网络的
 在布线中应保持接地良好。如下图。
 <img alt="图 22" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/Embedded22.png" width = "60%"/>  
 
-
-[立创EDA PCB设计](https://blog.csdn.net/qq_36347513/article/details/121873555)
 
 # RTOS
 应用程序是一个无限的循环，循环中调用相应的函数完成相应的操作,这部分可以看成后台行为。前台程序通过中断来处理事件；后台程序则掌管整个嵌入式系统软、硬件资源的分配、管理以及任务的调度，是一个系统管理调度程序。这就是通常所说的前后台系统。  
