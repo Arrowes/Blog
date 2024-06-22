@@ -73,7 +73,9 @@ free -m             #查内存使用情况
 df -hl              #查看磁盘剩余空间
 ```
 截图：1.screen截图应用程序   2.设置-设备-键盘-截图快捷键
-
+## 单系统安装
+下载：[Ubuntu中文官网](https://cn.ubuntu.com/download/desktop)
+安装：使用[Rufus](https://rufus.ie/zh/)，创建启动盘
 ## 虚拟机
 ### Virtual Box
 [Virtual Box](https://www.virtualbox.org/wiki/Downloads) + [Ubuntu 20.04](http://releases.ubuntu.com/20.04/), 或[18.04](https://releases.ubuntu.com/bionic/)（速度慢则换[镜像源](https://mirrors.tuna.tsinghua.edu.cn/ubuntu-releases/20.04/)）

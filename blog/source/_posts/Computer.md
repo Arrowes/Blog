@@ -9,12 +9,23 @@ PC折腾及服务器相关搭建记录
 
 # 实验室服务器配置
 ```sh
+#服务器1
 型号: DELL R730XD 12盘3.5寸
 处理器: E5-2683V4*2 2.1G主频 32核心/64线程
 内存: 96G内存（16G*6）
 硬盘: 3T SAS*4
 阵列卡: H730卡
 电源: 750W*1
+显卡：Tesla P40
+
+#服务器2
+型号: DELL R730 8盘2.5寸
+处理器: E5-2682V4*2 2.5G主频 32核心/64线程
+内存: 96G内存（16G*6）
+硬盘: 600G SAS*5
+阵列卡: H730卡
+电源: 1100W*1
+显卡：Tesla P100
 ```
 <img alt="picture 0" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/Computer-r730xd.jpg" />  
 
