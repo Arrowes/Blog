@@ -246,3 +246,7 @@ sudo docker rm openharmony
 #删除前，请确保该运行环境内的有效数据都已拷贝到主机上
 #删除后，该运行环境内的所有数据将被移除，不可恢复
 ```
+vscode使用docker
+1. 下载docker插件，Dev Containers插件
+2. 连接到 Docker 容器：点击左下角的绿色按钮，选择 "Attach to Running Container"。
+3. 连接后，VSCode将打开一个新的窗口，该窗口中包含了Docker容器的文件系统。在VSCode的资源管理器中，可以直接操作和管理容器中的文件。
