@@ -17,6 +17,8 @@ su username         #切换到其他用户
 sudo usermod -aG sudo username   #添加用户为root
 ps aux; kill [PID]  #查看进程; 根据进程号杀后台
 free -,             #查内存
+clear               #清空终端输出
+ping XX.XX -t       #长ping
 
 #安装 换源
 sudo apt-get install [] #安装 失败则换源
@@ -64,6 +66,14 @@ tar -xf XX.tar.gz XX   #解压 -C /path
 zip -r XX.zip XX XX.txt #压缩XX以及XX.txt（排除：加-x "./XX/X"）
 unzip *.zip -d /path    #解压
 zip -sf test.zip        #预览压缩包内容
+
+#ubuntu 7z解压
+sudo apt-get install p7zip
+#解压
+7z x XX.7z -r -o/home/xx
+#-o 是指定解压到的目录，注意-o后没有空格
+#压缩
+7z a -t7z -r XX.7z /home/XX/*
 ```
 # Ubuntu
 ```sh
