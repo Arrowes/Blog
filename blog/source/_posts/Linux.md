@@ -8,6 +8,11 @@ Linux常用指令，Ubuntu虚拟机使用指南，Git工作流，Docker基本概
 <!--more-->
 
 # Code
+[每天一个linux命令](https://www.cnblogs.com/peida/archive/2012/12/05/2803591.html)
+
+
+ 
+
 ```sh
 #系统
 lsb_release -a      #查ubuntu版本    
@@ -19,6 +24,7 @@ ps aux; kill [PID]  #查看进程; 根据进程号杀后台
 free -,             #查内存
 clear               #清空终端输出
 ping XX.XX -t       #长ping
+man XX                  #查看指令用法
 
 #安装 换源
 sudo apt-get install [] #安装 失败则换源
@@ -34,10 +40,13 @@ rm []               #删除文件
 mv file1 [dir]      #移动文件 (无dir则相当于重命名)
 cp -r [] []         #复制文件
 chmod u+x []        #添加可执行文件
+ls -R               #展开子文件夹
 
-cd -    #切换到上一工作目录
-cd ~    #导航到主目录 /home/user1
+cd -                #切换到上一工作目录
+cd ~                #导航到主目录 /home/user1
+cd 直接拖文件
 #.当前目录 ..父目录； cd XX相对路径，cd /XX绝对路径
+pwd                 #当前路径
 
 ls                  #检索
 tree []             #查看树状图
@@ -49,6 +58,7 @@ find / -name "[]"   #查找 find *XXX*
 ls -l | grep "^-" | wc -l   #统计当前目录下文件的个数（不包括目录）
 find -name "*.jpg" | wc -l  #统计当前文件夹下指定类型的文件的数量
 du -h --max-depth=1 #查磁盘占用情况
+diskutil list           #显示现有磁盘状况
 
 export 变量名=值     #设置或更新环境变量的值
 #配置永久环境变量更方便，sudo gedit /etc/profile，末尾加入如上代码，然后source /etc/profile加载立即生效
@@ -75,6 +85,13 @@ sudo apt-get install p7zip
 #压缩
 7z a -t7z -r XX.7z /home/XX/*
 ```
+Ctrl + R 搜索历史命令
+Ctrl + Backspace 删除整个单词
+多个语句可以通过`;`分割 `&&` 表示上一句返回码0才会执行 `||` 表示上一句返回码非0才会执行 `;` 无论如何都执行
+
+
+
+
 # Ubuntu
 ```sh
 cat /proc/version   #查版本信息
@@ -135,9 +152,21 @@ alt + ↑/↓   #移动行
 alt + ←/→   #光标跳到上/下一个单词
 Ctrl + L    #选择整行
 Ctrl + X    #删除整行
-Ctrl + ~    #控制台终端显示与隐藏：
+Ctrl + ~    #开关终端
+Ctrl + B    #开关侧边栏
+Ctrl + P    #快速打开文件(Ctrl + → 多开),?查看帮助文档,:跳行，>编辑器命令
+Ctrl + D    #选词，多按选择多个
+Ctrl + Backspace    #删除整个单词
+Ctrl + Shift + D    #快速复制当前行
+Ctrl + Shift + F    #全局搜索
+Alt + Click         #多行编辑
 ```
+网格布局：查看 > 编辑器布局 > 2x2 网格
+插件：Prettier——自动化代码格式化工具，帮助保持代码的一致性和可读性。
 
+调试代码是解决问题和优化代码的重要工具：
+1. 设置断点：单击行号左侧的空白区域，可以设置或取消断点。
+2. 启动调试会话：点击左侧的调试图标（或者使用快捷键F5），选择想要调试的环境（比如Node.js、Python等），然后启动调试会话。
 
  
 # Git
