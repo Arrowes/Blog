@@ -138,6 +138,75 @@ $$float32=int8/2^3$$
 [AI 框架部署方案之模型量化概述](https://zhuanlan.zhihu.com/p/354921065)
 [AI 框架部署方案之模型量化的损失分析](https://zhuanlan.zhihu.com/p/400927037)
 ___
+# 剪枝
+[pytorch如何使用自带的模型剪枝工具prune](https://blog.csdn.net/weixin_48304306/article/details/126993559)
+目前最先进的深度学习技术依赖于过度参数化的模型，这些模型很难部署。相反，生物神经网络被认为使用了高效的稀疏连接。识别出在模型中通过减少参数数量来压缩模型的最佳技术是很重要的，这样可以减少内存、电池和硬件消耗，同时又不损失准确性。可以在设备上部署轻量级模型，PyTorch 提供了多种剪枝技术，如随机剪枝、L1剪枝、结构化剪枝等
+```py
+import torch
+import torch.nn.utils.prune as prune
+import onnx
+from onnxsim import simplify
+
+from common import utils
+import model.net as net
+
+# 加载model
+json_path = 'experiments\params.json'
+params = utils.Params(json_path)
+params = utils.Params(json_path)
+model = net.fetch_net(params)
+state_dict = torch.load('509_best.pth', map_location=torch.device('cpu'))
+# 将状态字典加载到模型中
+model.load_state_dict(state_dict, strict=False)
+model.eval()
+
+# 定义剪枝函数，全局剪枝，根据全局的权重分布进行剪枝，而不是仅针对某一层
+def global_pruning(model, pruning_amount):
+    parameters_to_prune = []
+    for module_name, module in model.named_modules():  
+        if isinstance(module, torch.nn.Conv2d) or isinstance(module, torch.nn.Linear):  #遍历卷积层和全连接层
+            parameters_to_prune.append((module, 'weight'))
+
+    prune.global_unstructured(
+        parameters_to_prune,
+        pruning_method=prune.L1Unstructured,    #基于L1范数（绝对值和）进行非结构化剪枝
+        amount=pruning_amount,
+    )
+    return model
+
+# 移除剪枝掩码,永久移除剪枝后的 mask，使剪枝效果不可逆
+def remove_pruning_masks(model):
+    for module_name, module in model.named_modules():
+        if isinstance(module, torch.nn.Conv2d) or isinstance(module, torch.nn.Linear):
+            try:
+                prune.remove(module, 'weight')  #移除指定参数上的剪枝掩码
+            except:
+                pass
+    return model
+
+
+pruning_amount = 0.99    #剪枝率
+model = global_pruning(model, pruning_amount)   #全局剪枝
+
+# 移除剪枝掩码
+model = remove_pruning_masks(model)
+
+# 保存为PTH
+torch.save(model.state_dict(), '509_best_pruned.pth')
+# 导出为 ONNX 格式
+dummy_input = torch.randn(1, 3, 128, 256)
+onnx_path = '509_best_pruned.onnx'
+
+torch.onnx.export(model,dummy_input, onnx_path, verbose=False, export_params=True, opset_version=11)
+
+# 简化 ONNX 模型
+onnx_model = onnx.load(onnx_path)
+simplified_model, check = simplify(onnx_model)
+
+
+onnx.save(simplified_model, '509_best_pruned.onnx')
+print("Done")
+```
 
 # 模型部署的软件设计（以商汤的MMdeploy部署工具箱为例）
 ## 模型转换器设计

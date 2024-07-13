@@ -24,7 +24,8 @@ ps aux; kill [PID]  #查看进程; 根据进程号杀后台
 free -,             #查内存
 clear               #清空终端输出
 ping XX.XX -t       #长ping
-man XX                  #查看指令用法
+man XX              #查看指令用法
+sudo reboot         #重启
 
 #安装 换源
 sudo apt-get install [] #安装 失败则换源
@@ -58,12 +59,13 @@ find / -name "[]"   #查找 find *XXX*
 ls -l | grep "^-" | wc -l   #统计当前目录下文件的个数（不包括目录）
 find -name "*.jpg" | wc -l  #统计当前文件夹下指定类型的文件的数量
 du -h --max-depth=1 #查磁盘占用情况
-diskutil list           #显示现有磁盘状况
+diskutil list       #显示现有磁盘状况
 
 export 变量名=值     #设置或更新环境变量的值
 #配置永久环境变量更方便，sudo gedit /etc/profile，末尾加入如上代码，然后source /etc/profile加载立即生效
 echo []             #输出指定的字符串或变量的值,用于调试程序、输出信息
 script -f log.txt   #输出terminal内容到文件 exit退出记录，或在指令后加入 > log.txt
+bash XX.sh          #运行sh脚本
 
 #tar打包
 tar -cvf XX.tar XX  #将XX文件夹打包为XX.tar文件
@@ -103,6 +105,16 @@ df -hl              #查看磁盘剩余空间
 ## 单系统安装
 下载：[Ubuntu中文官网](https://cn.ubuntu.com/download/desktop)
 安装：使用[Rufus](https://rufus.ie/zh/)，创建启动盘
+...
+### 装显卡驱动
+```sh
+sudo apt upgrade  # 更新所有可更新的软件包
+lspci -k | grep -A 2 -i "VGA" #查显卡型号
+ubuntu-drivers devices    # ubuntu检测n卡的可选驱动
+sudo apt install nvidia-driver-510  # 根据自己的n卡可选驱动下载显卡驱动
+sudo reboot
+```
+
 ## 虚拟机
 ### Virtual Box
 [Virtual Box](https://www.virtualbox.org/wiki/Downloads) + [Ubuntu 20.04](http://releases.ubuntu.com/20.04/), 或[18.04](https://releases.ubuntu.com/bionic/)（速度慢则换[镜像源](https://mirrors.tuna.tsinghua.edu.cn/ubuntu-releases/20.04/)）
