@@ -16,6 +16,8 @@ tags:
 
 Netron神经网络可视化: [软件下载](https://github.com/lutzroeder/netron/releases/tag/v7.0.0), [在线网站](https://netron.app/)
 
+[MMDeploy中文文档](https://mmdeploy.readthedocs.io/zh-cn/latest/)
+
 ---
 # 模型部署
 [AI 框架部署方案之模型部署概述](https://zhuanlan.zhihu.com/p/367042545)
