@@ -17,7 +17,13 @@ BEV 图像可以通过多种方式生成，包括：
 SLAM (Simultaneous Localization And Mapping，同步定位与地图构建)，主要为了解决移动机器人在未知环境运行时定位导航与地图构建的问题。SLAM根据不同的传感器类型和应用需求建立不同的地图。常见的有 2D 栅格地图、2D 拓扑地图、3D 点云地图等。VSLAM（Visual SLAM）一种基于视觉的同步定位与地图构建。
 
 
-
+车载测试[[2]](https://www.51fusa.com/client/knowledge/knowledgedetail/id/2751.html)：
+学术上，严谨的“闭环”概念是在控制论中出现的。较为抽象的定义是：当我们要准确控制一个系统的行为时，我们根据系统的输出来校正对它的输入，以达到较为准确的控制精度。因为系统的输出会导入到输入端的计算，形成一个不断往复的循环，称之为闭环(Closed Loop)。
++ MIL（Hardware-in-the-Loop模型在环）：主要用于在模拟环境中评估控制算法的功能性，确认模型是否能实现设计的需求。这通常在早期开发阶段进行，有助于及早发现设计问题。
++ SIL（Software-in-the-Loop软件在环）：在PC上验证代码实现的功能是否与模型一致。
++ PIL（Processer-in-the-Loop处理器在环）：在目标处理器上验证代码实现的功能是否与模型一致。
++ HIL（Hardware-in-the-Loop硬件在环）：在ECU/EPP/整套系统上验证代码实现的功能是否与需求定义一致。
+<img alt="picture 1" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/Car-Loop.png" />  
 
 
 # 数据
