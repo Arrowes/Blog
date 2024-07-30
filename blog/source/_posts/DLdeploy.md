@@ -19,8 +19,8 @@ Netron神经网络可视化: [软件下载](https://github.com/lutzroeder/netron
 [MMDeploy中文文档](https://mmdeploy.readthedocs.io/zh-cn/latest/)
 
 
-
 ---
+
 # 模型部署
 [AI 框架部署方案之模型部署概述](https://zhuanlan.zhihu.com/p/367042545)
 [AI 框架部署方案之模型转换](https://zhuanlan.zhihu.com/p/396781295)
@@ -213,52 +213,26 @@ onnx.save(simplified_model, '509_best_pruned.onnx')
 print("Done")
 ```
 
-# 模型部署的软件设计（以商汤的MMdeploy部署工具箱为例）
-## 模型转换器设计
-[千行百业智能化落地，MMDeploy 助你一"部"到位 - 知乎 (zhihu.com)](https://zhuanlan.zhihu.com/p/450342651)
-<img alt="图 3" src="https://pic1.zhimg.com/80/v2-a076d9317d2167d9d6d8898e0db0fd7c_1440w.webp" width="80%"/>  
-模型转换器的具体步骤为：
 
-1. 把 PyTorch 转换成 ONNX 模型；
-2. 对 ONNX 模型进行优化；
-3. 把 ONNX 模型转换成后端推理引擎支持的模型格式;
-4. （可选）把模型转换中的 meta 信息和后端模型打包成 SDK 模型。
-
-在传统部署流水线中，兼容性是最难以解决的瓶颈。针对这些问题，MMDeploy 在模型转换器中添加了模块重写、模型分块和自定义算子这三大功能
-+ 模块重写——有效代码替换
-针对部分 Python 代码无法直接转换成 ONNX 的问题，MMDeploy 使用重写机制实现了函数、模块、符号表等三种粒度的代码替换，有效地适配 ONNX。
-+ 模型分块——精准切除冗余
-针对部分模型的逻辑过于复杂，在后端里无法支持的问题，MMDeploy 使用了模型分块机制，能像手术刀一样精准切除掉模型中难以转换的部分，把原模型分成多个子模型，分别转换。这些被去掉的逻辑会在 SDK 中实现。
-+ 自定义算子——扩展引擎能力
-OpenMMLab 实现了一些新算子，这些算子在 ONNX 或者后端中没有支持。针对这个问题，MMDeploy 把自定义算子在多个后端上进行了实现，扩充了推理引擎的表达能力。
-
-## 应用开发工具包 SDK
-<img alt="图 3" src="https://pic2.zhimg.com/80/v2-5618bc32c6018dbe6b7419555c373445_1440w.webp" width="80%"/>  
-
-+ 接口层
-SDK 为每种视觉任务均提供一组 C API。目前开放了分类、检测、分割、超分、文字检测、文字识别等几类任务的接口。 SDK 充分考虑了接口的易用性和友好性。每组接口均只由 ‘创建句柄’、‘应用句柄’、‘销毁数据’ 和 ‘销毁句柄’ 等函数组成。用法简单、便于集成。
-+ 流水线层
-SDK 把模型推理统一抽象为计算流水线，包括前处理、网络推理和后处理。对流水线的描述在 SDK Model 的 meta 信息中。使用 Model Converter 转换模型时，加入 --dump-info 命令，即可自动生成。 不仅是单模型，SDK同样可把流水线拓展到多模型推理场景。比如在检测任务后，接入识别任务。
-+ 组件层
-组件层为流水线中的节点提供具体的功能。SDK 定义了3类组件，
-    + 设备组件（Device）：对硬件设备以及 runtime 的抽象
-    + 模型组件（Model）：支持 SDK Model 不同的文件格式
-    + 任务组件（Task）：模型推理过程中，流水线的最小执行单元。它包括:
-        + 预处理（preprocess）：与 OpenMMLab Transform 算子对齐，比如 Resize、Crop、Pad、Normalize等等。每种算子均提供了 cpu、cuda 两种实现方式。
-        + 网络推理引擎（net）：对推理引擎的封装。目前，SDK 可以接入5种推理引擎：PPL.NN, TensorRT, ONNX Runtime, NCNN 和 OpenVINO
-        + 后处理（postprocess）：对应与 OpenMMLab 各算法库的后处理功能。
-+ 核心层
-核心层是 SDK 的基石，定义了 SDK 最基础、最核心的数据结构。
 
 # ONNX
-Open Neural Network Exchange 开源机器学习通用中间格式，兼容各种深度学习框架、推理引擎、终端硬件、操作系统，是深度学习框架到推理引擎的桥梁 
-链接：[ONNX](https://onnx.ai)，[Github](https://github.com/onnx/onnx)，[ONNX Runtime](https://onnxruntime.ai/)，[ONNX Runtime Web](https://onnx.coderai.cn)
+[模型部署简介 --- mmdeploy 1.3.1 文档](https://mmdeploy.readthedocs.io/zh-cn/latest/tutorial/01_introduction_to_model_deployment.html)
 
+神经网络实际上只是描述了数据计算的过程，其结构可以用计算图表示。比如 `a+b` 可以用下面的计算图来表示：
+![a+b](https://user-images.githubusercontent.com/4560679/156558717-96bbe544-4dc7-4460-8850-3cb1790e39ec.png)
+
+为了加速计算，一些框架会使用对神经网络“先编译，后执行”的静态图来描述网络。静态图的缺点是难以描述控制流（比如 if-else 分支语句和 for 循环语句），直接对其引入控制语句会导致产生不同的计算图。比如循环执行 n 次 `a=a+b`，对于不同的 n，会生成不同的计算图：
+![n=2](https://user-images.githubusercontent.com/4560679/156558606-6ff18e19-f3b1-463f-8f83-60bf6f7ef64b.png)
+
+ONNX（Open Neural Network Exchange）开源机器学习通用中间格式，兼容各种深度学习框架、推理引擎、终端硬件、操作系统，是 Facebook 和微软在 2017 年共同发布的，用于标准描述计算图的一种格式。目前，在数家机构的共同维护下，ONNX 已经对接了多种深度学习框架和多种推理引擎。因此，ONNX 被当成了深度学习框架到推理引擎的桥梁，就像编译器的中间语言一样。
+
+> 链接：[ONNX](https://onnx.ai)，[Github](https://github.com/onnx/onnx)，[ONNX Runtime](https://onnxruntime.ai/)，[ONNX Runtime Web](https://onnx.coderai.cn) 
 [TORCH.ONNX](https://pytorch.org/docs/stable/onnx.html)，[Github](https://github.com/pytorch/pytorch/tree/main/torch/onnx)
-Pytorch 模型导出使用自带的接口：`torch.onnx.export`
+PyTorch 对 ONNX 的算子支持:[官方算子文档](https://github.com/onnx/onnx/blob/main/docs/Operators.md)
 
-算子：深度学习算法由计算单元组成，我们称这些计算单元为算子（Operator，也称op）。 算子是一个函数空间到函数空间上的映射，同一模型中算子名称是唯一的，但是同一类型的算子可以存在多个。 如：Conv1、Conv2，是两个算子类型相同的不同算子。
- PyTorch 转 ONNX，实际上就是把每个 PyTorch 的操作**映射**成了 ONNX 定义的**算子**。PyTorch 对 ONNX 的算子支持:[官方算子文档](https://github.com/onnx/onnx/blob/main/docs/Operators.md)
+
+算子：深度学习算法由计算单元组成，我们称这些计算单元为算子（Operator，也称op）。 算子是一个函数空间到函数空间上的映射，同一模型中算子名称是唯一的，但是同一类型的算子可以存在多个。 如：Conv1、Conv2，是两个算子类型相同的不同算子。PyTorch 转 ONNX，实际上就是把每个 PyTorch 的操作**映射**成了 ONNX 定义的**算子**。
+
 
 
 在转换普通的torch.nn.Module模型时，PyTorch 一方面会用跟踪法执行前向推理，把遇到的算子整合成计算图；另一方面，PyTorch 还会把遇到的每个算子翻译成 ONNX 中定义的算子。要使 PyTorch 算子顺利转换到 ONNX ，我们需要保证：
@@ -398,6 +372,7 @@ cv2.imwrite("face_torch2_run.png", ort_output)  # 生成上采样图片，运行
 <img alt="picture 0" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/DLdeploynetron.png" width="80%"/>  
 
 ## torch.onnx.export模型转换接口
+Pytorch 模型导出使用自带的接口：`torch.onnx.export`
 [torch.onnx ‒ PyTorch 1.11.0 documentation](https://link.zhihu.com/?target=https%3A//pytorch.org/docs/stable/onnx.html%23functions)
 [TorchScript](https://link.zhihu.com/?target=https%3A//pytorch.org/docs/stable/jit.html) 是一种序列化和优化 PyTorch 模型的格式，在优化过程中，一个`torch.nn.Module`模型会被转换成 TorchScript 的 `torch.jit.ScriptModule`模型。
 而要把普通 PyTorch 模型转一个 TorchScript 模型，有跟踪（trace）和记录（script）两种导出计算图的方法：
@@ -433,3 +408,41 @@ def export(model, args, f, export_params=True, verbose=False, training=TrainingM
     -   定义新 ONNX 算子
 
 [模型部署入门教程（四）：在 PyTorch 中支持更多 ONNX 算子](https://zhuanlan.zhihu.com/p/513387413)
+
+
+# 模型部署的软件设计（以商汤的MMdeploy部署工具箱为例）
+## 模型转换器设计
+[千行百业智能化落地，MMDeploy 助你一"部"到位 - 知乎 (zhihu.com)](https://zhuanlan.zhihu.com/p/450342651)
+<img alt="图 3" src="https://pic1.zhimg.com/80/v2-a076d9317d2167d9d6d8898e0db0fd7c_1440w.webp" width="80%"/>  
+模型转换器的具体步骤为：
+
+1. 把 PyTorch 转换成 ONNX 模型；
+2. 对 ONNX 模型进行优化；
+3. 把 ONNX 模型转换成后端推理引擎支持的模型格式;
+4. （可选）把模型转换中的 meta 信息和后端模型打包成 SDK 模型。
+
+在传统部署流水线中，兼容性是最难以解决的瓶颈。针对这些问题，MMDeploy 在模型转换器中添加了模块重写、模型分块和自定义算子这三大功能
++ 模块重写——有效代码替换
+针对部分 Python 代码无法直接转换成 ONNX 的问题，MMDeploy 使用重写机制实现了函数、模块、符号表等三种粒度的代码替换，有效地适配 ONNX。
++ 模型分块——精准切除冗余
+针对部分模型的逻辑过于复杂，在后端里无法支持的问题，MMDeploy 使用了模型分块机制，能像手术刀一样精准切除掉模型中难以转换的部分，把原模型分成多个子模型，分别转换。这些被去掉的逻辑会在 SDK 中实现。
++ 自定义算子——扩展引擎能力
+OpenMMLab 实现了一些新算子，这些算子在 ONNX 或者后端中没有支持。针对这个问题，MMDeploy 把自定义算子在多个后端上进行了实现，扩充了推理引擎的表达能力。
+
+## 应用开发工具包 SDK
+<img alt="图 3" src="https://pic2.zhimg.com/80/v2-5618bc32c6018dbe6b7419555c373445_1440w.webp" width="80%"/>  
+
++ 接口层
+SDK 为每种视觉任务均提供一组 C API。目前开放了分类、检测、分割、超分、文字检测、文字识别等几类任务的接口。 SDK 充分考虑了接口的易用性和友好性。每组接口均只由 ‘创建句柄’、‘应用句柄’、‘销毁数据’ 和 ‘销毁句柄’ 等函数组成。用法简单、便于集成。
++ 流水线层
+SDK 把模型推理统一抽象为计算流水线，包括前处理、网络推理和后处理。对流水线的描述在 SDK Model 的 meta 信息中。使用 Model Converter 转换模型时，加入 --dump-info 命令，即可自动生成。 不仅是单模型，SDK同样可把流水线拓展到多模型推理场景。比如在检测任务后，接入识别任务。
++ 组件层
+组件层为流水线中的节点提供具体的功能。SDK 定义了3类组件，
+    + 设备组件（Device）：对硬件设备以及 runtime 的抽象
+    + 模型组件（Model）：支持 SDK Model 不同的文件格式
+    + 任务组件（Task）：模型推理过程中，流水线的最小执行单元。它包括:
+        + 预处理（preprocess）：与 OpenMMLab Transform 算子对齐，比如 Resize、Crop、Pad、Normalize等等。每种算子均提供了 cpu、cuda 两种实现方式。
+        + 网络推理引擎（net）：对推理引擎的封装。目前，SDK 可以接入5种推理引擎：PPL.NN, TensorRT, ONNX Runtime, NCNN 和 OpenVINO
+        + 后处理（postprocess）：对应与 OpenMMLab 各算法库的后处理功能。
++ 核心层
+核心层是 SDK 的基石，定义了 SDK 最基础、最核心的数据结构。
