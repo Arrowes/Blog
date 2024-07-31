@@ -227,8 +227,9 @@ print("Done")
 ONNX（Open Neural Network Exchange）开源机器学习通用中间格式，兼容各种深度学习框架、推理引擎、终端硬件、操作系统，是 Facebook 和微软在 2017 年共同发布的，用于标准描述计算图的一种格式。目前，在数家机构的共同维护下，ONNX 已经对接了多种深度学习框架和多种推理引擎。因此，ONNX 被当成了深度学习框架到推理引擎的桥梁，就像编译器的中间语言一样。
 
 > 链接：[ONNX](https://onnx.ai)，[Github](https://github.com/onnx/onnx)，[ONNX Runtime](https://onnxruntime.ai/)，[ONNX Runtime Web](https://onnx.coderai.cn) 
-[TORCH.ONNX](https://pytorch.org/docs/stable/onnx.html)，[Github](https://github.com/pytorch/pytorch/tree/main/torch/onnx)
+[torch.onnx 文档](https://pytorch.org/docs/stable/onnx.html)， [torch.onnx Github](https://github.com/pytorch/pytorch/tree/main/torch/onnx)
 PyTorch 对 ONNX 的算子支持:[官方算子文档](https://github.com/onnx/onnx/blob/main/docs/Operators.md)
+[opset_version版本对应关系](https://github.com/onnx/onnx/blob/main/docs/Versioning.md#released-versions)
 
 
 算子：深度学习算法由计算单元组成，我们称这些计算单元为算子（Operator，也称op）。 算子是一个函数空间到函数空间上的映射，同一模型中算子名称是唯一的，但是同一类型的算子可以存在多个。 如：Conv1、Conv2，是两个算子类型相同的不同算子。PyTorch 转 ONNX，实际上就是把每个 PyTorch 的操作**映射**成了 ONNX 定义的**算子**。
@@ -269,6 +270,8 @@ class NewInterpolate(torch.autograd.Function):
                            mode='bicubic',
                            align_corners=False)
 ```
+
+![alt text](https://user-images.githubusercontent.com/4560679/157627349-10ed5483-8bde-47d0-b190-a7a4d0ca2c03.png)
 
 <details>
     <summary>SRCNN超分辨率代码</summary>
@@ -373,6 +376,7 @@ cv2.imwrite("face_torch2_run.png", ort_output)  # 生成上采样图片，运行
 
 ## torch.onnx.export模型转换接口
 Pytorch 模型导出使用自带的接口：`torch.onnx.export`
+`torch.onnx.export(model,x,onnx_file,opset_version=11)` 
 [torch.onnx ‒ PyTorch 1.11.0 documentation](https://link.zhihu.com/?target=https%3A//pytorch.org/docs/stable/onnx.html%23functions)
 [TorchScript](https://link.zhihu.com/?target=https%3A//pytorch.org/docs/stable/jit.html) 是一种序列化和优化 PyTorch 模型的格式，在优化过程中，一个`torch.nn.Module`模型会被转换成 TorchScript 的 `torch.jit.ScriptModule`模型。
 而要把普通 PyTorch 模型转一个 TorchScript 模型，有跟踪（trace）和记录（script）两种导出计算图的方法：
@@ -388,8 +392,8 @@ def export(model, args, f, export_params=True, verbose=False, training=TrainingM
            enable_onnx_checker=True, use_external_data_format=False): 
 
 # model: 模型， args：输入， f：导出文件名，
-# export_params：是否存储模型权重， ONNX 是用同一个文件表示记录模型的结构和权重的。
-# input_names, output_names：设置输入和输出张量的名称。如果不设置的话，会自动分配一些简单的名字（如数字）
+# export_params：是否存储模型权重， ONNX 是用同一个文件表示记录模型的结构和权重的,默认True
+# input_names, output_names：设置输入和输出张量的名称。如果不设置的话，会自动分配一些简单的名字（如数字），最好设置，保证 ONNX 和推理引擎中使用同一套名称。
 # opset_version：转换时参考哪个 ONNX 算子集版本，默认为 9。
 # dynamic_axes：指定输入输出张量的哪些维度是动态的。为了效率，ONNX 默认所有参与运算的张量都是静态的（张量的形状不发生改变），必要时需要显式地指明输入输出张量的哪几个维度的大小是可变的。
 ```
