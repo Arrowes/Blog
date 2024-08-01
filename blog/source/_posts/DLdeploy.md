@@ -376,7 +376,7 @@ cv2.imwrite("face_torch2_run.png", ort_output)  # 生成上采样图片，运行
 
 ## torch.onnx.export模型转换接口
 Pytorch 模型导出使用自带的接口：`torch.onnx.export`
-`torch.onnx.export(model,x,onnx_file,opset_version=11)` 
+`torch.onnx.export(model,x,onnx_file,opset_version=11)`
 [torch.onnx ‒ PyTorch 1.11.0 documentation](https://link.zhihu.com/?target=https%3A//pytorch.org/docs/stable/onnx.html%23functions)
 [TorchScript](https://link.zhihu.com/?target=https%3A//pytorch.org/docs/stable/jit.html) 是一种序列化和优化 PyTorch 模型的格式，在优化过程中，一个`torch.nn.Module`模型会被转换成 TorchScript 的 `torch.jit.ScriptModule`模型。
 而要把普通 PyTorch 模型转一个 TorchScript 模型，有跟踪（trace）和记录（script）两种导出计算图的方法：

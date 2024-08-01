@@ -8,16 +8,46 @@ tags:
 相关笔记
 <!--more-->
 
-BEV bird's-eye-view 鸟瞰图，在自动驾驶领域，BEV 是指从车辆上方俯瞰的场景视图。BEV 图像可以提供车辆周围环境的完整视图，包括车辆前方、后方、两侧和顶部。
+## 相机标定
+[一文带你搞懂相机内参外参(Intrinsics & Extrinsics)](https://zhuanlan.zhihu.com/p/389653208)
+[相机标定（Camera calibration）原理、步骤](https://blog.csdn.net/baidu_38172402/article/details/81949447)
+相机标定：求出相机的内、外参数，以及畸变参数。
+在图像测量过程以及机器视觉应用中，为确定空间物体表面某点的三维几何位置与其在图像中对应点之间的相互关系，必须建立相机成像的几何模型，这些几何模型参数就是相机参数。
+1. 由于每个镜头的畸变程度各不相同，通过相机标定可以校正这种镜头畸变矫正畸变，生成矫正后的图像；
+2. 根据获得的图像重构三维场景。
+
+摄像机标定过程，可以简单的描述为通过标定板，得到n个对应的世界坐标三维点Xi和对应的图像坐标二维点xi，这些三维点到二维点的转换都可以通过相机内参K ，相机外参 R 和t，以及畸变参数 D ，经过一系列的矩阵变换得到。
+相机标定方法有：传统相机标定法、主动视觉相机标定方法、相机自标定法。
+
+> 常用术语
+内参矩阵: Intrinsic Matrix
+焦距: Focal Length
+主点: Principal Point
+径向畸变: Radial Distortion
+切向畸变: Tangential Distortion
+旋转矩阵: Rotation Matrices
+平移向量: Translation Vectors
+平均重投影误差: Mean Reprojection Error
+重投影误差: Reprojection Errors
+重投影点: Reprojected Points
+
+![alt text](https://i-blog.csdnimg.cn/blog_migrate/489c65e0ae105cc930f09b778e0ea26e.png)
+
+世界坐标系---(外参)--->相机坐标系---(内参)--->像素坐标系
+
+
+## BEV bird's-eye-view 鸟瞰图
+在自动驾驶领域，BEV 是指从车辆上方俯瞰的场景视图。BEV 图像可以提供车辆周围环境的完整视图，包括车辆前方、后方、两侧和顶部。
 BEV 图像可以通过多种方式生成，包括：
 + 使用激光雷达：激光雷达可以直接测量物体在三维空间中的位置，然后将这些数据转换为 BEV 图像。
 + 使用摄像头：摄像头可以通过计算图像的透视投影来生成 BEV 图像。
 + 使用混合传感器：可以使用激光雷达和摄像头的组合来生成 BEV 图像，以获得更精确和完整的视图。
 
+## SLAM
 SLAM (Simultaneous Localization And Mapping，同步定位与地图构建)，主要为了解决移动机器人在未知环境运行时定位导航与地图构建的问题。SLAM根据不同的传感器类型和应用需求建立不同的地图。常见的有 2D 栅格地图、2D 拓扑地图、3D 点云地图等。VSLAM（Visual SLAM）一种基于视觉的同步定位与地图构建。
 
 
-车载测试[[2]](https://www.51fusa.com/client/knowledge/knowledgedetail/id/2751.html)：
+## 车载测试[[2]](https://www.51fusa.com/client/knowledge/knowledgedetail/id/2751.html)：
 学术上，严谨的“闭环”概念是在控制论中出现的。较为抽象的定义是：当我们要准确控制一个系统的行为时，我们根据系统的输出来校正对它的输入，以达到较为准确的控制精度。因为系统的输出会导入到输入端的计算，形成一个不断往复的循环，称之为闭环(Closed Loop)。
 + MIL（Hardware-in-the-Loop模型在环）：主要用于在模拟环境中评估控制算法的功能性，确认模型是否能实现设计的需求。这通常在早期开发阶段进行，有助于及早发现设计问题。
 + SIL（Software-in-the-Loop软件在环）：在PC上验证代码实现的功能是否与模型一致。
