@@ -172,6 +172,7 @@ Ctrl + Backspace    #删除整个单词
 Ctrl + Shift + D    #快速复制当前行
 Ctrl + Shift + F    #全局搜索
 Alt + Click         #多行编辑
+shift + tab         #批量取消缩进
 ```
 网格布局：查看 > 编辑器布局 > 2x2 网格
 插件：Prettier——自动化代码格式化工具，帮助保持代码的一致性和可读性。
@@ -223,7 +224,7 @@ git tag [tag]       #新建一个 tag 在当前 commit
 git describe --tag  #查当前tag
 git show [tag]      #查看tag信息
 
-#tag 对应某次 commit, 是一个点，是不可移动的。
+#tag 对应某次 commit, 是一个点，是不可移动的。用来代替复杂的commit id
 #branch 对应一系列 commit，是很多点连成的一根线，有一个HEAD 指针，是可以依靠 HEAD 指针移动的。
 #两者的区别决定了使用方式，改动代码用 branch ,不改动只查看用 tag
 ```
@@ -242,6 +243,25 @@ git config --list   #检查当前配置
 git config --global user.name "[name]"
 git config --global user.email "[email address]"
 
+git branch -r       #输出你的分支名称
+git add  .
+git status
+git log
+git commit -m ""
+git push
+git pull
+git fetch
+git diff
+git checkout
+git branch
+git merge
+
+#submodule
+git submodule sync
+git submodule update 
+
+# 不要把工具文件上传到公共仓库
+# origin：远程
 ```
 
 # Docker

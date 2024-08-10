@@ -47,6 +47,25 @@ pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple  #pip�
 pip config list -v  #查源
 pip install opencv-python -i https://pypi.tuna.tsinghua.edu.cn/simple/  #pip换源安装
 conda config --remove-key channels    #换回默认源
+
+#Conda换源
+#直接修改.condarc配置文件，文件路径一般在用户目录下面:
+ssl_verify: false
+channels:
+  - defaults
+show_channel_urls: true
+default_channels:
+  - https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/main
+  - https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/r
+  - https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/msys2
+custom_channels:
+  conda-forge: https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud
+  msys2: https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud
+  bioconda: https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud
+  menpo: https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud
+  pytorch: https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud
+  pytorch-lts: https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud
+  simpleitk: https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud
 ```
 > 国内镜像源:
   清华大学：https://pypi.tuna.tsinghua.edu.cn/simple
