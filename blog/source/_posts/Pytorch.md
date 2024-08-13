@@ -29,7 +29,7 @@ tags:
   > （若要安装：[Anaconda](https://www.anaconda.com/)，执行下载的.sh文件，输入``bash XXX.sh``，然后一路enter和yes；激活：``cd ///root/anaconda3/bin``,输入：``source ./activate``，终端前出现``(base)``则激活成功）
 
 ```sh
-conda create -n pytorch python=3.8  #Anaconda创建环境
+conda create -n pytorch python=3.8 -y #Anaconda创建环境
 conda update python #更新py
 conda activate pytorch  #激活环境
 conda deactivate    #退出虚拟环境
@@ -206,6 +206,7 @@ torch.__version__ #查pytorch版本
 nvidia-smi -l 2   #查GPU CUDA, '-l 2':每2s更新一次
 python –-version  #查python版本
 conda install python=3.8  #升级(覆盖安装)python
+python -c 'import torch;print(torch.__version__);print(torch.version.cuda)'   #查torch和cuda版本
 ```
 
 ## 库
