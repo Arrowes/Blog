@@ -41,6 +41,7 @@ rm []               #删除文件
 mv file1 [dir]      #移动文件 (无dir则相当于重命名)
 cp -r [] []         #复制文件
 chmod u+x []        #添加可执行文件
+chmod +x ./XX.sh    #若直接执行被deny，添加执行权限
 ls -R               #展开子文件夹
 
 cd -                #切换到上一工作目录
@@ -106,6 +107,15 @@ df -hl              #查看磁盘剩余空间
 下载：[Ubuntu中文官网](https://cn.ubuntu.com/download/desktop)
 安装：使用[Rufus](https://rufus.ie/zh/)，创建启动盘
 ...
+
+
+> Debug
+DELL主板，装系统进入时，报错ACPI Error，表示计算机上的ACPI与该版本的ubuntu不兼容。
+1.在开机选中ubuntu时按e, 找到Linux...quite splash那一行，末尾加上acpi=off
+2.成功开机后，更改grub 修改grub文件：sudo vim /etc/default/grub 把GRUB_CMDLINE_LINUX_DEFAULT="quiet splash"改为GRUB_CMDLINE_LINUX_DEFAULT="quiet splash acpi=off"
+3.sudo update-grub
+4.发现安装显卡驱动会报错，因为惠普主板的acpi模块和ubuntu兼容不好，需要把acpi=off配置改为noapic
+
 ### 装显卡驱动
 ```sh
 sudo apt upgrade  # 更新所有可更新的软件包
