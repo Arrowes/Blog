@@ -281,8 +281,31 @@ git submodule update
 <img src="https://raw.gitmirror.com/Arrowes/Blog/main/images/Linux1.png" width="80%">
 <img src="https://raw.gitmirror.com/Arrowes/Blog/main/images/Linux2.png" width="80%">
 
+1. 容器（Container）
+容器是一种轻量级、可移植的、独立的环境，它包含应用程序及其所有依赖项。与传统的虚拟机不同，容器共享主机操作系统的内核，但具有隔离的用户空间。
+2. 镜像（Image）
+镜像是一个只读的模板，用于创建容器。镜像包含了应用程序运行所需的一切，比如代码、运行时、库和环境变量等。镜像可以通过 Dockerfile 定义并构建。
+3. 仓库（Registry）
+Docker 镜像存储在仓库中。Docker Hub 是一个公共的 Docker 镜像仓库，用户可以从中下载和上传镜像。你也可以设置私有仓库来存储公司内部的镜像。
+4. Docker 引擎（Docker Engine），Docker 引擎是一个客户端-服务器应用程序，包含以下主要组件：
+    1. 服务器：一种长期运行的守护进程（dockerd），负责管理容器。
+    2. REST API：用于与守护进程进行交互的接口。
+    3. 客户端（Client）：用户与 Docker 进行交互的命令行工具（docker）
+5. Dockerfile
+Dockerfile 是一个文本文件，包含了一系列指令，用于构建 Docker 镜像。每一条指令都在镜像中创建一个新的层次。例如，FROM 指令指定了基础镜像，COPY 指令将文件复制到镜像中，RUN 指令执行命令。
+
 ## 配置
+[Ubuntu 22.04下Docker安装（最全指引）](https://blog.csdn.net/u011278722/article/details/137673353)
 ```shell
+#Docker 安装
+sudo apt install docker-ce docker-ce-cli containerd.io
+#查看Docker版本
+sudo docker version
+#查看Docker运行状态
+sudo systemctl status docker
+#验证
+docker run hello-world
+
 # 查看当前运⾏的docker实例状态 
 sudo docker ps -a 
 # 在上⼀条指显示结果列表中，查看openharmony的STATUS
@@ -331,3 +354,11 @@ vscode使用docker
 1. 下载docker插件，Dev Containers插件
 2. 连接到 Docker 容器：点击左下角的绿色按钮，选择 "Attach to Running Container"。
 3. 连接后，VSCode将打开一个新的窗口，该窗口中包含了Docker容器的文件系统。在VSCode的资源管理器中，可以直接操作和管理容器中的文件。
+
+> Debug
+1.VSCode连接docker失败 Failed to connect. Is docker running?:
+sudo chmod 777 /var/run/docker.sock
+2.could not select device driver "" with capabilities: [[gpu]] ，是NVIDIA Docker 组件未安装：
+sudo apt-get update
+sudo apt-get install -y nvidia-docker2
+sudo systemctl restart docker
