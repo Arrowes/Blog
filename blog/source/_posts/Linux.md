@@ -71,7 +71,7 @@ bash XX.sh          #运行sh脚本
 #tar打包
 tar -cvf XX.tar XX  #将XX文件夹打包为XX.tar文件
 tar -tf XX.tar      #查看tar内容
-tar -xf []          #解包 -C /path 
+tar -xzvf XXX.tar.gz #解压
 #tar压缩
 tar -zcvf XX.tar.gz XX #压缩XX（ 排除：XX前加--exclude=dataset）
 tar -xf XX.tar.gz XX   #解压 -C /path
