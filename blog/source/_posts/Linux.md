@@ -168,6 +168,7 @@ vscode插件离线安装：如装python插件，直接进[ marketplace ](https:/
 
 **快捷键**
 打开vscode左下角键盘快捷键设置，找到copy line down，即可查看当前默认快捷键为`shift + Alt + ↓`，双击快捷键，输入自己想要的快捷组合，如Ctrl+D，然后回车即可设置自己的组合了
+在文件夹中，终端输入``code .`` 即可用vscode打开当前文件夹
 ```sh
 Ctrl + /    #注释
 alt + ↑/↓   #移动行
