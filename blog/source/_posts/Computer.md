@@ -6,6 +6,11 @@ tags:
 ---
 PC折腾及服务器相关搭建记录
 <!--more-->
+# 远程串流
+使用Sunshine + Moonlight 来实现毫秒级延迟的远程串流
+PC端安装[Sunshine](https://github.com/LizardByte/Sunshine/releases)
+远控端安装[MoonLight](https://github.com/moonlight-stream/moonlight-android/releases) (安卓)
+然后连接同一个网络即可
 
 # 实验室服务器配置
 ```sh
