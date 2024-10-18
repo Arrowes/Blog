@@ -265,6 +265,8 @@ pytorch下安装 ``pip install tensorboard (conda install tensorboard)``
   pip install setuptools==59.5.0
   pip install brotli
   ```
+vscode中有tensorboard插件，能够直接在vscode中看到tensorboard的结果，通过快捷键 Ctrl+Shift+P，调出命令窗口，里面输入`python:launch tensorboard`，选择对应的文件夹即可
+
 ### Transform
 transforms.py图像处理工具箱
 1. 调用工具tool=transforms.XXX()	

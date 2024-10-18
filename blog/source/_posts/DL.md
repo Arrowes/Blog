@@ -159,7 +159,7 @@ $$Accuracy=\frac{TP+TN}{TP+FP+TN+FN}$$
 $$precision(P)=\frac{TP}{TP+FP}$$
 **召回率（查全率） recall**：所有ground truths中真阳性的预测数，针对原样本，当敏感度高时，容易将部分（与正样本相似度高）负样本也判断为正样本。
 $$recall(R)=\frac{TP}{TP+FN}$$
-**F1 score**：对Precision和Recall两个指标的调和平均值（类似平均速度），F1分值越高，目标检测的准确性越好。
+**F1 score**：对Precision和Recall两个指标的调和平均值（类似平均速度），F1分值越高，目标检测的准确性越好。F1-score最常用于数据集的类别不平衡的情况。
 $$F_1 score=2\cdot \frac{P\cdot R}{P+R}$$
 **AP**：同时考察Precision和Recall两个指标来衡量模型对于各个类别的性能。 
 $$AP_i=\int_0^1P_i(R_i)dR_i$$
@@ -222,3 +222,8 @@ map*map是下个featuremap的大小，也就是上个weight*weight到底做了�
 ![图 13](https://raw.gitmirror.com/Arrowes/Blog/main/images/DL13.png)  
 ![图 14](https://raw.gitmirror.com/Arrowes/Blog/main/images/DL14.png)  
 ![图 15](https://raw.gitmirror.com/Arrowes/Blog/main/images/DL15.png)  
+
+# 联邦学习
+联邦学习（Federated Learning）是一种先进的分布式机器学习方法，它在数据隐私保护和数据利用效率方面具有显著的优势。在联邦学习中，多个参与方（也称为客户端或节点）可以在保持数据本地化的同时，共享模型训练的成果。
+让各个企业自己进行模型的训练，各个企业在完成模型的训练之后，将各自模型的参数上传至一个中心服务器（也可以是点对点），中心服务器结合各个企业的参数（可以上传梯度，也可以是自己更新后的参数），重新拟定新的参数（例如通过加权平均，这一步叫做联邦聚合），将新的参数下发至各个企业，企业将新参数部署到模型上，从而继续新的训练，这个过程可以进行反复的迭代，直到模型收敛，或者满足其他的条件。
+![alt text](https://i-blog.csdnimg.cn/direct/dbf3bfb8a37c4c1582d09b9ebd6ad01b.png#pic_center)

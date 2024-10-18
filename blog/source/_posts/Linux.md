@@ -26,6 +26,7 @@ clear               #清空终端输出
 ping XX.XX -t       #长ping
 man XX              #查看指令用法
 sudo reboot         #重启
+sudo chmod -R 777 /home -R  #赋予权限
 
 #安装 换源
 sudo apt-get install [] #安装 失败则换源
@@ -43,6 +44,7 @@ cp -r [] []         #复制文件
 chmod u+x []        #添加可执行文件
 chmod +x ./XX.sh    #若直接执行被deny，添加执行权限
 ls -R               #展开子文件夹
+scp username@asd-123:/path/to/file /path/to/destination #复制文件夹：scp -r /folder/
 
 cd -                #切换到上一工作目录
 cd ~                #导航到主目录 /home/user1
@@ -51,7 +53,7 @@ cd 直接拖文件
 pwd                 #当前路径
 
 ls                  #检索
-tree []             #查看树状图
+tree []             #查看树状图 tree /F #windows下查看树状图  
 wget [url]          #下载, wget -O myfile.zip [url] 重命名文件
 vi []               #命令行进入文件，按i进入插入模式，按Esc返回命令模式并输入:wq 保存退出, :q! 不保存退出
 gedit []            #图形界面进入文件直接编辑
@@ -123,6 +125,15 @@ lspci -k | grep -A 2 -i "VGA" #查显卡型号
 ubuntu-drivers devices    # ubuntu检测n卡的可选驱动
 sudo apt install nvidia-driver-510  # 根据自己的n卡可选驱动下载显卡驱动
 sudo reboot
+```
+> Debug
+执行nvidia-smi报错：Failed to initialize NVML: Driver/library version mismatch
+NVML library version: 560.35
+是Ubuntu自动更新导致NVIDIA 驱动与 NVML 库版本不匹配所致，重启可解决
+最好关闭ubuntu自动更新：
+```
+echo -e "APT::Periodic::Update-Package-Lists \"0\";\nAPT::Periodic::Download-Upgradeable-Packages \"0\";\nAPT::Periodic::AutocleanInterval \"0\";\nAPT::Periodic::Unattended-Upgrade \"0\";" | sudo tee /etc/apt/apt.conf.d/10periodic
+echo -e "APT::Periodic::Update-Package-Lists \"0\";\nAPT::Periodic::Unattended-Upgrade \"0\";" | sudo tee /etc/apt/apt.conf.d/20auto-upgrades
 ```
 
 ## 虚拟机
@@ -266,6 +277,10 @@ git diff
 git checkout
 git branch
 git merge
+
+git stash 
+git stash pop
+git diff branch1 branch2
 
 #submodule
 git submodule sync
