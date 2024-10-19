@@ -157,6 +157,8 @@ q3mbRZwwnnKUXHcibZg6UN8ulCHE2UDXMjaEB4LKd
 `hexo clean && hexo g && hexo s` 快速预览
 `hexo clean && hexo g && hexo d` 快速部署
 
+VScode终端中使用：
+`bash -c "cd blog && hexo clean && hexo g && hexo d"`
 
 ### Bug
 √ 网站底部的图标不显示:Font Awesome部分图标收费
