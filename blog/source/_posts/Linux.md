@@ -39,6 +39,7 @@ rmdir []            #删除文件夹( rm -r XXX
 sudo nautilus       #以root进入文件夹     
 touch [] []         #创建文件
 rm []               #删除文件
+rm -rf []           #删除文件夹
 mv file1 [dir]      #移动文件 (无dir则相当于重命名)
 cp -r [] []         #复制文件
 chmod u+x []        #添加可执行文件
@@ -232,12 +233,12 @@ shift + tab         #批量取消缩进
 2. ``git pull origin master`` 再把远端的最新代码拉至本地
 
 [十分钟学会正确的github工作流，和开源作者们使用同一套流程](https://www.bilibili.com/video/BV19e4y1q7JJ)
+[rebase和merge](https://blog.csdn.net/weixin_42310154/article/details/119004977)
 
 <img src="https://www.ruanyifeng.com/blogimg/asset/2015/bg2015120901.png" width="100%">
 
-
+## branch 与 tag
 ```sh
-#branch 与 tag：
 git tag/branch  #查本地仓库所有的tag或branch -r:远程分支 -a:所有分支
 git checkout [tag/branch]   #已有仓库切换 tag/branch
 git checkout -b [branch]    #新建一个分支，并切换到该分支
@@ -250,41 +251,28 @@ git show [tag]      #查看tag信息
 #branch 对应一系列 commit，是很多点连成的一根线，有一个HEAD 指针，是可以依靠 HEAD 指针移动的。
 #两者的区别决定了使用方式，改动代码用 branch ,不改动只查看用 tag
 ```
-
-
+## 常用命令
 ```sh
-#常用指令：
 git init [project-name] #新建一个目录，将其初始化为Git代码库
-git status  #显示有变更的文件
+git branch -r       #输出你的分支名称
+git fetch           #git pull = git fetch + git merge
+git submodule sync    #同步子模块
+git submodule update  #更新子模块
+git config --list   #检查当前配置
+git config --global user.name "[name]"    #配置全局信息 无global则是在项目中配置
+git config --global user.email "[email address]" 
+
 git log     #显示当前分支的版本历史 commit id
-git diff    #显示暂存区和工作区的差异
+git status          #查看当前状态
+git reflog          #查看历史命令
+git diff    #显示暂存区和工作区的差异(git diff branch1 branch2)
 git reset --hard [commitId]  # 进行回溯
 
-git config --list   #检查当前配置
-# 配置全局信息 无global则是在项目中配置
-git config --global user.name "[name]"
-git config --global user.email "[email address]"
-
-git branch -r       #输出你的分支名称
-git add  .
-git status
-git log
-git commit -m ""
-git push
-git pull
-git fetch
-git diff
-git checkout
-git branch
-git merge
-
-git stash 
-git stash pop
-git diff branch1 branch2
-
-#submodule
-git submodule sync
-git submodule update 
+git reset --soft HEAD^  #回退commit
+git commit --amend      #重新写commit信息
+git branch -d <branches>删除分支
+git stash               #备份当前工作区的内容，保存到git栈中，从最近的一次commit中读取相关内容
+git stash pop           #恢复工作区的内容(git stash list, git stash apply stash@{1})
 
 # 不要把工具文件上传到公共仓库
 # origin：远程
