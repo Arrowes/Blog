@@ -121,6 +121,8 @@ index_generator:
 ``npm install hexo-reference --save`` 支持Markdown脚注
 ``npm install hexo-wordcount --save`` 字数统计
 
+**Markdown All in One** markdown编辑插件（vs code）
+
 **Markdown Preview Enhanced** markdown预览插件（vs code）
 如果无法正常导出：Chrome Puppeteer导出PDF > 搜索“chrome”，在相应选项中填入你的浏览器的“chrome.exe”文件的地址即可
 ``C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe``

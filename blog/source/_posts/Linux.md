@@ -170,8 +170,8 @@ Could not get lock /var/lib/dpkg/lock – open > 执行 ``sudo rm -rf /var/lib/d
 连不上USB: Win键+R键打开“运行”程序，输入“services.msc”,点击开启VMware USB Arbitration Service服务，并设置为自动启动; 然后虚拟机 > 可移动设备 > 选择
 
 
-## VScode
-vscode远程访问：1.安装remote插件 2.连接服务器``ssh ywang85@she1-w50502`` 3.connect，打开terminal
+# VScode
+vscode远程访问：1.安装remote插件 2.连接服务器``ssh username@server-ip`` 3.connect，打开terminal
 
 上传文件：vscode直接拖拽到目录
 下载文件：右键download
@@ -199,7 +199,12 @@ shift + tab         #批量取消缩进
 ```
 网格布局：查看 > 编辑器布局 > 2x2 网格
 vscode 文件标签栏多行显示：文件 > 首选项 > 设置 > workbench.editor.wrapTabs
-插件：Prettier——自动化代码格式化工具，帮助保持代码的一致性和可读性。
+
+插件：
++ Prettier——自动化代码格式化工具，帮助保持代码的一致性和可读性。
++ GitLens——查看git历史，快速定位代码作者
++ Remote - SSH——远程连接服务器
++ Chinese (Simplified) Language Pack for Visual Studio Code——中文语言包
 
 调试代码是解决问题和优化代码的重要工具：
 1. 设置断点：单击行号左侧的空白区域，可以设置或取消断点。

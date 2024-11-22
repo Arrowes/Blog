@@ -8,7 +8,89 @@ tags:
 车位检测算法开发与部署，FEY-YOLOv7，CEAM-YOLOv7，基于 STM32 的智能空压机状态监测系统，SE智厨，风功率密度便携式测量仪。
 <!--more-->
 
-# 车位线检测算法开发与TDA4VM-SK板端部署
+# 目标检测算法开发与TDA4VM-SK板端部署
+## 驾驶员行为检测算法
+论文《基于YOLOv8的驾驶员行为检测算法及其实现》
+项目地址：[DMS-YOLOv8](https://github.com/Arrowes/DMS-YOLOv8)
+
+整体框架为之前两篇论文的整合：
++ 基于通道扩展与注意力机制的YOLOv7驾驶员分心行为检测
+[CEAM-YOLOv7: Improved YOLOv7 Based on Channel Expansion and Attention Mechanism for Driver Distraction Behavior Detection](https://ieeexplore.ieee.org/document/9980374/metrics#metrics)
+项目地址：[CEAM-YOLOv7](https://github.com/Arrowes/CEAM-YOLOv7)
++ 基于面部小目标动态追踪的YOLOv7驾驶员疲劳检测
+[A Driver Fatigue Detection Algorithm Based on Dynamic Tracking of Small Facial Targets Using YOLOv7](https://www.jstage.jst.go.jp/article/transinf/E106.D/11/E106.D_2023EDP7093/_article)
+项目地址：[FEY-YOLOv7](https://github.com/Arrowes/FEY-YOLOv7)
+
+此外，加入算法部署实现部分，基于实习期间对TDA4的研究：
++ [TDA4①：SDK, TIDL, OpenVX](https://wangyujie.space/TDA4VM/)
++ [TDA4②：环境搭建、模型转换、Demo及Tools](https://wangyujie.space/TDA4VM2/)
++ [TDA4③：YOLOX的模型转换与SK板端运行](https://wangyujie.space/TDA4VM3/)
++ [TDA4④：部署自定义模型](https://wangyujie.space/TDA4VM4/)
+
+训练数据：[exp](https://docs.qq.com/sheet/DWmV1TnhIdlBodW1C?tab=BB08J2&u=d859dabcd86a47b181e758b366a48fdc)
+思维导图：[论文框架](https://www.zhixi.com/drawing/76e1ba59522effb3b63bde7b613518e8?page=owner&current=1)
+
+### 部署流程
+为验证本文提出算法的有效性，实现驾驶员危险行为检测算法的部署与应用，本研究依托于TDA4VM硬件平台和德州仪器（Texas Instruments, TI）软件平台，构建了实验平台，以将开发出的驾驶员危险行为检测算法有效部署至德州仪器的TDA4VM-SK开发板。此过程包括对经训练得到的模型进行的修改和量化，利用TI软件平台进行模型的转换，以及算法在实际车辆中的部署应用，并对算法的性能进行深入分析。
+本研究选用TI提供的TDA4VM Edge AI Starter Kit (SK) 硬件开发平台进行算法的部署与实验，TDA4VM-SK是一款专为边缘人工智能应用设计的低成本、小尺寸的开发板，以大约20W的功耗提供高达8TOPS的深度学习算力。这款开发板搭载TDA4VM处理器，不仅提供了卓越的深度学习性能，而且能实现低功耗下的硬件加速，非常适合需要高效率边缘AI计算的场景。
+TI部署相关修改：[DMS-YOLOv8: TI](https://github.com/Arrowes/DMS-YOLOv8/tree/main/TI)
+```sh
+#运行训练：
+python -m yolox.tools.train -n yolox-s-ti-lite -d 0 -b 64 --fp16 -o --cache
+#导出：
+python3 tools/export_onnx.py --output-name yolox_s_ti_lite0.onnx -f exps/default/yolox_s_ti_lite.py -c YOLOX_outputs/yolox_s_ti_lite/best_ckpt.pth --export-det
+#onnx推理：
+python3 demo/ONNXRuntime/onnx_inference.py -m yolox_s_ti_lite0.onnx -i test.jpg -s 0.3 --input_shape 640,640 --export-det
+
+#onnx拷贝到tool/models,/examples/osrt_python改model_configs的模型路径和类别数量
+#tools根目录运行
+./scripts/yolo_compile.sh
+#模型结果在model-artifacts/模型名称
+
+#挂载SD卡，model_zoo新建模型文件夹，拷贝模型
+CEAM-YOLOv7/
+├── artifacts
+│   ├── allowedNode.txt
+│   ├── detections_tidl_io_1.bin
+│   ├── detections_tidl_net.bin
+│   └── onnxrtMetaData.txt
+├── dataset.yaml    #改
+├── model
+│   └── yolox_s_ti_lite0.onnx
+├── param.yaml  #拷贝然后改
+└── run.log
+
+#dataset.yaml
+categories:
+- supercategory: distract
+  id: 1
+  name: cup
+- supercategory: distract
+  id: 2
+  name: hand
+- supercategory: distract
+  id: 3
+  name: phone
+- supercategory: distract
+  id: 4
+  name: wheel
+
+#param.yaml（copy from model_zoo_8220）
+threshold: 0.2  #好像没用
+model_path: model/yolox_s_ti_lite0.onnx
+
+#rootfs/opt/edgeai-gst-apps/configs改yolo.yaml
+
+#SD卡上板
+sudo minicom -D /dev/ttyUSB2 -c on
+#root登录，ctrl+A Z W换行，运行
+cd /opt/edgeai-gst-apps/apps_cpp && ./bin/Release/app_edgeai ../configs/yolo.yaml
+```
+<img alt="图 2" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/PaperLogDeploy.gif" width="100%"/> 
+
+<img alt="图 5" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/Project_DMS_car.gif" width='60%'/>  
+
+
 ## 车位线检测算法
 [泊车辅助系统：智能泊车辅助 (valeo.com)](https://www.valeo.com/cn/catalogue/cda/%E6%B3%8A%E8%BD%A6%E8%BE%85%E5%8A%A9%E7%B3%BB%E7%BB%9F%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/)
 [Arrowes/general\_parking\_slot\_detection (github.com)](https://github.com/Arrowes/general_parking_slot_detection)
@@ -20,13 +102,17 @@ tags:
 基于YOLOX网络架构提取车位关键点位，实现车位的抽象表示
 并部署于TDA4VM车载嵌入式板端
 
-## TDA4VM-SK板端部署（以FEY-YOLOv7为例）
-为验证本文提出算法的有效性，实现驾驶员危险行为检测算法的部署与应用，本研究依托于TDA4VM硬件平台和德州仪器（Texas Instruments, TI）软件平台，构建了实验平台，以将开发出的驾驶员危险行为检测算法有效部署至德州仪器的TDA4VM-SK开发板。此过程包括对经训练得到的模型进行的修改和量化，利用TI软件平台进行模型的转换，以及算法在实际车辆中的部署应用，并对算法的性能进行深入分析。
-本研究选用TI提供的TDA4VM Edge AI Starter Kit (SK) 硬件开发平台进行算法的部署与实验，TDA4VM-SK是一款专为边缘人工智能应用设计的低成本、小尺寸的开发板，以大约20W的功耗提供高达8TOPS的深度学习算力。这款开发板搭载TDA4VM处理器，不仅提供了卓越的深度学习性能，而且能实现低功耗下的硬件加速，非常适合需要高效率边缘AI计算的场景。
+车位线准确、快速的识别是实现自动泊车系统功能的前提，但由于车位类型多样、光照条件多变、车位标线模糊、树叶或冰雪等物盖住停车线等诸多因素影响，现有应用的车位线识别方法在复杂环境下识别率较低、偏差较大，主流识别方法仅达60%-70%；而且识别速度较慢，基本未达到30 FPS的实时检测标准，严重影响自动泊车系统的推广应用。本项目将致力于实时识别车位的轻量化深度学习模型研究，借鉴高效、多尺度特征融合的YOLOv8主干网络结构，将车位角点、车位线与车位占用情况等多种特征相结合，同时把车位线抽象为角点间的线段，以避免车位线本身形态的影响，拟实现在复杂环境下高准确性和目标联合的车位线识别；随后，基于轻量化的思想对深度学习模型网络结构进行优化设计，引入Coordinate Attention (CA) 注意力机制模块，并优化损失函数，提高车位识别速度与精度，减少模型算力消耗；最后，为验证算法的有效性，研究该车位线识别算法在车载嵌入式移动终端的部署策略，通过对模型的剪枝、量化与转换，实现车位识别算法的低成本应用，推动自动泊车系统的智能化应用水平进一步提高。
 
-<img alt="picture 51" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/Project-tad4FEY1.png" width='80%' />  
+<img alt="picture 4" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/Project_slot_project.png" />  
 
-<img alt="picture 50" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/Project-tda4FEY.png" width='80%' />  
+本项目的特色与创新之处包括以下几个方面：
+1.	深度学习模型架构研究与优化：在车位识别的深度学习模型架构研究中，提出了一种全新的车位线特征提取网络结构，以提取复杂的道路车位线特征，将特征应用于设计的创新的车位线抽象算法中，把车位线抽象为角点间的线段，创新性的解决了车位形状多变、道路环境复杂的问题。
+2.	车位识别模型优化设计：引入了CA注意力机制等模型优化方法，进行了数据集增强和消融实验，能有效提高车位识别的准确性和鲁棒性。此外，还注重模型的轻量化，利用剪枝算法减少模型的计算量，提高检测速度的同时为下一步的部署实现提供了可能，
+3.	车位识别模型部署策略：采用了量化和转换等步骤进行模型调优，采用了ONNX模型在板端完成模型验证，拟选用TDA4硬件平台，确定了部署策略和硬件加速方法。本项目重视模型的工业应用，关注于深度学习模型应用于车载终端的实际可行性，有望推动相关领域的发展。
+总之，本项目在深度学习模型架构研究、特征提取、数据处理、模型轻量化和部署等多个方面都展现了创新性，有望为道路车位识别领域带来重要的进展和改进。
+
+<img alt="picture 3" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/Projectslot.png" />
 
 # FEY-YOLOv7：基于面部小目标动态追踪的驾驶员疲劳检测算法
 + SCI四区论文：[A Driver Fatigue Detection Algorithm Based on Dynamic Tracking of Small Facial Targets Using YOLOv7](https://search.ieice.org/bin/summary_advpub.php?id=2023EDP7093&category=D&lang=E&abst=)
@@ -34,7 +120,10 @@ tags:
 
 ## 项目简介
 在车辆安全技术中，驾驶员疲劳检测应用广泛，其准确性和实时性至关重要。在本文中，我们提出了一种基于人脸眼睛和嘴巴打哈欠动态追踪的YOLOv7驾驶员疲劳检测算法，其中YOLOv7针对眼睛和嘴巴小目标进行了优化，结合PERCLOS算法，称为FEY-YOLOv7。在YOLOv7中插入Coordinate Attention(CA)模块，将重点放在坐标信息上，以提高动态追踪的准确性；增加一个小目标检测头，使网络能够提取小目标特征，增强了对眼睛、嘴巴的检测性能，提高了检测的精度。对YOLOv7的网络架构进行了显著简化，以减少计算量，提高检测速度。通过提取视频中每一帧驾驶员睁眼、闭眼、张嘴、闭嘴四种面部行为状态，利用 PERYAWN 判定算法对驾驶员状态进行标注及检测。在RGB-infrared Datasets上使用Guided Image Filtering图像增强算法，并进行混合训练及验证，验证结果表明，FEY-YOLOv7的mAP达到了0.983，FPS达到101，说明FEY-YOLOv7在准确率和速度上都优于最先进的方法，为基于图像信息的驾驶员疲劳检测提供了一个有效和实用的方案。
+
 ## 技术点
+<img alt="picture 2" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/ProjectFEY-network.png" />  
+
 ### CA注意力机制
 CA模块在空间维度上自适应地对不同位置的特征进行加权，从而使得模型更加关注重要的空间位置，不仅捕获跨通道信息，还捕获方向感知和位置敏感信息，这有助于模型更准确地定位和识别感兴趣的对象。 
 具体来说，Coordinate Attention引入了一个全局自注意力模块，该模块可以对输入特征图的每个位置进行自适应的加权。该加权由两个步骤完成：Coordinate信息嵌入和Coordinate Attention生成。
