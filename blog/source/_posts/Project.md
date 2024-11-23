@@ -28,7 +28,11 @@ tags:
 + [TDA4④：部署自定义模型](https://wangyujie.space/TDA4VM4/)
 
 训练数据：[exp](https://docs.qq.com/sheet/DWmV1TnhIdlBodW1C?tab=BB08J2&u=d859dabcd86a47b181e758b366a48fdc)
-思维导图：[论文框架](https://www.zhixi.com/drawing/76e1ba59522effb3b63bde7b613518e8?page=owner&current=1)
+开发日志：[log](https://github.com/Arrowes/DMS-YOLOv8/blob/main/README.md)
+
+论文框架
+<img alt="图 6" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/Project_dms_framework.png" />  
+
 
 ### 部署流程
 为验证本文提出算法的有效性，实现驾驶员危险行为检测算法的部署与应用，本研究依托于TDA4VM硬件平台和德州仪器（Texas Instruments, TI）软件平台，构建了实验平台，以将开发出的驾驶员危险行为检测算法有效部署至德州仪器的TDA4VM-SK开发板。此过程包括对经训练得到的模型进行的修改和量化，利用TI软件平台进行模型的转换，以及算法在实际车辆中的部署应用，并对算法的性能进行深入分析。
