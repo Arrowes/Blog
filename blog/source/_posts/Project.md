@@ -10,7 +10,7 @@ tags:
 
 # 目标检测算法开发与TDA4VM-SK板端部署
 ## 驾驶员行为检测算法
-论文《基于YOLOv8的驾驶员行为检测算法及其实现》
+论文《基于深度学习的驾驶员危险行为检测算法研究及实现》
 项目地址：[DMS-YOLOv8](https://github.com/Arrowes/DMS-YOLOv8)
 
 整体框架为之前两篇论文的整合：
@@ -33,6 +33,7 @@ tags:
 论文框架
 <img alt="图 6" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/Project_dms_framework.png" />  
 
+研究一种高效的驾驶员危险行为检测系统，以规范驾驶员行为，保障驾驶安全。本项目结合实际应用需求，以提高复杂场景下的检测准确率和检测速度为目标，提出了一种基于深度学习的驾驶员分心行为检测与疲劳驾驶检测算法，并部署于TI的车规级硬件平台TDA4VM，实现了驾驶员分心行为及疲劳驾驶行为的检测。
 
 ### 部署流程
 为验证本文提出算法的有效性，实现驾驶员危险行为检测算法的部署与应用，本研究依托于TDA4VM硬件平台和德州仪器（Texas Instruments, TI）软件平台，构建了实验平台，以将开发出的驾驶员危险行为检测算法有效部署至德州仪器的TDA4VM-SK开发板。此过程包括对经训练得到的模型进行的修改和量化，利用TI软件平台进行模型的转换，以及算法在实际车辆中的部署应用，并对算法的性能进行深入分析。
@@ -270,7 +271,7 @@ GAM是一种能够捕捉所有三个维度的显著特征的注意机制，采�
 ③模-数转换电路：单片机所能处理的是数字量，而风速传感器输出为模拟电压量。因此，设置一个模-数转换电路，将对应的模拟量转换成数字量并输入至单片机中，对其进行处理及显示。
 ```
 ### 信号处理
-![图 15](https://raw.gitmirror.com/Arrowes/Blog/main/images/Project15.png)  
+<img alt="图 15" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/Project15.png" width='80%'/>  
 
 ## 电路设计
 ![图 16](https://raw.gitmirror.com/Arrowes/Blog/main/images/Project16.png)  

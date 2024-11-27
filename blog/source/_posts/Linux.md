@@ -304,34 +304,52 @@ Docker 镜像存储在仓库中。Docker Hub 是一个公共的 Docker 镜像仓
 5. Dockerfile
 Dockerfile 是一个文本文件，包含了一系列指令，用于构建 Docker 镜像。每一条指令都在镜像中创建一个新的层次。例如，FROM 指令指定了基础镜像，COPY 指令将文件复制到镜像中，RUN 指令执行命令。
 
-## 配置
-[Ubuntu 22.04下Docker安装（最全指引）](https://blog.csdn.net/u011278722/article/details/137673353)
-```shell
-#Docker 安装
-sudo apt install docker-ce docker-ce-cli containerd.io
-#查看Docker版本
-sudo docker version
-#查看Docker运行状态
-sudo systemctl status docker
-#验证
-docker run hello-world
 
-# 查看当前运⾏的docker实例状态 
-sudo docker ps -a 
-# 在上⼀条指显示结果列表中，查看openharmony的STATUS
-# 如为 Exited，则需要执⾏下⾯这条指令，再次启动 
-# 如为 Up，则跳过下⾯这条指令 
-sudo docker start openharmony
-# 进⼊docker编译环境 
-sudo docker exec -it openharmony bash 
-# 执⾏后，出现类似如下信息，说明再次进⼊成功 
-# root@bae85ba0f77c:/home/openharmony#
-#退出
-exit
+[Ubuntu 22.04下Docker安装（最全指引）](https://blog.csdn.net/u011278722/article/details/137673353)
+
+```bash
+# Container
+docker ps       # 查看运行中的容器列表  
+docker ps -a    # 查看所有容器（包括已停止的）  
+docker start <container_name_or_id>     # 启动容器  
+docker stop <container_name_or_id>      # 停止容器  
+docker restart <container_name_or_id>   # 重启容器  
+docker logs <container_name_or_id>      # 查看容器日志  
+docker exec -it <container_name_or_id> /bin/bash    # 进入容器交互式命令行  
+docker rm <container_name_or_id>    # 删除容器
+docker run <options> <image_name>    # 运行一个容器  
+# 示例：后台运行 Nginx 容器，将主机的8080端口映射到容器的80端口  
+docker run -d -p 8080:80 nginx  
+
+# Image
+docker images    # 查看本地镜像  
+docker pull <image_name>    # 从远程仓库拉取镜像  
+docker rmi <image_name_or_id>    # 删除镜像  
+docker build -t <image_name> <path_to_dockerfile>    # 构建镜像  
+docker history <image_name>    # 查看镜像历史  
+
+docker info    # 查看 Docker 的系统信息  
+docker --version    # 查看 Docker 版本  
+docker top <container_name_or_id>    # 查看容器的进程  
+docker diff <container_name_or_id>    # 查看容器的文件系统改动 
 ```
-启动docker的samba服务：``service smbd restart``
-查看ip：``ifconfig``
-连接：``\\192.168.174.128\docker``
+
+## Docker Compose
+```bash
+#确保已经安装了 Docker 和 Docker Compose：
+docker --version
+docker-compose --version
+#在终端中进入到存放 docker-compose.yml 文件的目录，运行以下命令来启动服务：
+docker-compose up
+#该命令会自动根据配置文件中的内容拉取所需的镜像（如果本地没有缓存），并启动配置的服务。
+#如果你需要以后台模式启动（不占用当前终端窗口），可以加上 -d 参数
+
+docker-compose ps       #查看正在运行的容器状态
+docker-compose down     #停止所有正在运行的容器，加上 -v 同时删除持久化卷中的数据
+docker-compose logs     #查看容器的输出日志
+docker-compose exec <服务名称> bash #进入容器
+docker-compose build    #重建镜像
+```
 
 ## 文件拷贝
 ```shell
