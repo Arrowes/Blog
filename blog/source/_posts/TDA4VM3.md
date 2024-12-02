@@ -355,8 +355,68 @@ print(f' Inference Time Per Image : {tt :7.2f} ms  \n DDR BW Per Image        : 
 `find . -name "*.tar.gz" -exec tar --one-top-level -zxvf "{}" \;`
 + 内核频繁挂掉：重启EVM
 
+### c. 使用EdgeAI-TIDL-Tools
+此处仅简单介绍YOLOX的最简部署流程，详见：[TDA4VM4_EdgeAI-TIDL-Tools](https://wangyujie.space/TDA4VM4/#EdgeAI-TIDL-Tools)
+
+TI部署相关修改代码：[DMS-YOLOv8: TI](https://github.com/Arrowes/DMS-YOLOv8/tree/main/TI)
+EdgeAI-TIDL-Tools版本：08_06_00_05
+```sh
+#运行训练：
+python -m yolox.tools.train -n yolox-s-ti-lite -d 0 -b 64 --fp16 -o --cache
+#导出：
+python3 tools/export_onnx.py --output-name yolox_s_ti_lite0.onnx -f exps/default/yolox_s_ti_lite.py -c YOLOX_outputs/yolox_s_ti_lite/best_ckpt.pth --export-det
+#onnx推理：
+python3 demo/ONNXRuntime/onnx_inference.py -m yolox_s_ti_lite0.onnx -i test.jpg -s 0.3 --input_shape 640,640 --export-det
+
+#onnx拷贝到tool/models,/examples/osrt_python改model_configs的模型路径和类别数量
+#tools根目录运行
+./scripts/yolo_compile.sh
+#模型结果在model-artifacts/模型名称
+
+#挂载SD卡，model_zoo新建模型文件夹，拷贝模型
+YOLOX/
+├── artifacts
+│   ├── allowedNode.txt
+│   ├── detections_tidl_io_1.bin
+│   ├── detections_tidl_net.bin
+│   └── onnxrtMetaData.txt
+├── dataset.yaml    #改
+├── model
+│   └── yolox_s_ti_lite0.onnx
+├── param.yaml  #拷贝然后改
+└── run.log
+
+#dataset.yaml
+categories:
+- supercategory: distract
+  id: 1
+  name: cup
+- supercategory: distract
+  id: 2
+  name: hand
+- supercategory: distract
+  id: 3
+  name: phone
+- supercategory: distract
+  id: 4
+  name: wheel
+
+#param.yaml（copy from model_zoo_8220）
+threshold: 0.2  #好像没用
+model_path: model/yolox_s_ti_lite0.onnx
+
+#rootfs/opt/edgeai-gst-apps/configs改yolo.yaml
+
+#SD卡上板
+sudo minicom -D /dev/ttyUSB2 -c on
+#root登录，ctrl+A Z W换行，运行
+cd /opt/edgeai-gst-apps/apps_cpp && ./bin/Release/app_edgeai ../configs/yolo.yaml
+```
 
 ## 4. 板端运行(TDA4VM-SK)
+SK板环境搭建见：[TDA4VM2_TDA4VM-SK-配置](https://wangyujie.space/TDA4VM2/#TDA4VM-SK-配置)
+注意SK的镜像版本需要与EdgeAI-TIDL-Tools版本一致，此处均为08_06_00_05
+
 ~~连接SK板进入minicom串口通讯传输模型文件(失败)~~（若能连网线通过jupyternotebook配置更方便，这里网络有限制所以配置都通过SD卡进行）
 
 通过SD卡配置编译生成的模型，配置模型文件夹yolox放入modelzoo文件夹：

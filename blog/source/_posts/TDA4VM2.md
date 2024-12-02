@@ -111,11 +111,12 @@ make linux_fs_install_sd
 > 物料准备：
 SK板，microUSB串口线，USB camera，HDMI/DP显示器，≥16GB的内存卡，网线和局域网*，串口电源（5-20V DC ≥20w），散热风扇
 
-通过USB挂载SD卡到Ubuntu（在虚拟机设置里）
-下载[SD card .wic image](https://www.ti.com/tool/download/PROCESSOR-SDK-LINUX-SK-TDA4VM)，使用[Balena etcher tool 1.7.0](https://github.com/balena-io/etcher/releases/tag/v1.7.0) 把 image `flash`到SD卡上
-然后插入SD卡到SK板，拨码开关拨到数字端，系统从SD卡启动
-SK板连接显示器，上电，进入界面。
-连接串口线，在虚拟机设置中挂载USB串口，使用 [minicom](https://help.ubuntu.com/community/Minicom) 串口通讯：
+1. 通过USB挂载SD卡到Ubuntu（在虚拟机设置里）
+2. 下载[SD card .wic image](https://www.ti.com/tool/download/PROCESSOR-SDK-LINUX-SK-TDA4VM)，本文选用08_06_00_05版本，后续若使用EdgeAI-TIDL-Tools则也需要08_06_00_06版本
+3. 使用[Balena etcher tool 1.7.0](https://github.com/balena-io/etcher/releases/tag/v1.7.0) 把 image `flash`到SD卡上
+4. 然后插入SD卡到SK板，拨码开关拨到数字端，系统从SD卡启动
+5. SK板连接显示器，上电，进入界面。
+6. 连接串口线，在虚拟机设置中挂载USB串口，使用 [minicom](https://help.ubuntu.com/community/Minicom) 串口通讯：
 
 ```sh
 sudo apt-get install minicom  #安装minicom(在minicom中自动换行：Ctrl+A Z W)
@@ -124,7 +125,7 @@ sudo minicom -D /dev/ttyUSB2 -c on
 #若连接了USB摄像头此时会显示端口信息，也可以运行 ./init_script.sh 查摄像头端口号：/dev/video2
 ```
 
-连接显示器后（HDMI/DP），可以鼠标点击试运行开箱即用的 GUI 应用程序，也可使用 Python 和C++参考示例开发边缘 AI 应用程序：
+连接显示器后（HDMI/DP），会有TI提供的例程界面，可以鼠标点击试运行开箱即用的 GUI 应用程序，也可使用 Python 和C++参考示例开发边缘 AI 应用程序：
 ```sh
 #配置
 cd /opt/edgeai-gst-apps/configs/  #app_config_template.yaml中有参数介绍
@@ -148,6 +149,7 @@ flows:
     flow2: [input1,model0,output0,[160,540,800,450]]
     flow3: [input1,model3,output0,[960,540,800,450]]
 ```
+如果开机就不断重启，一般是电源问题，电源至少需要20w(pd协议)
 如果运行过程中突然重启，一般是需要加个*风扇*增强散热
 
 可选操作：

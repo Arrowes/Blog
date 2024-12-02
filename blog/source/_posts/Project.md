@@ -38,59 +38,7 @@ tags:
 ### 部署流程
 为验证本文提出算法的有效性，实现驾驶员危险行为检测算法的部署与应用，本研究依托于TDA4VM硬件平台和德州仪器（Texas Instruments, TI）软件平台，构建了实验平台，以将开发出的驾驶员危险行为检测算法有效部署至德州仪器的TDA4VM-SK开发板。此过程包括对经训练得到的模型进行的修改和量化，利用TI软件平台进行模型的转换，以及算法在实际车辆中的部署应用，并对算法的性能进行深入分析。
 本研究选用TI提供的TDA4VM Edge AI Starter Kit (SK) 硬件开发平台进行算法的部署与实验，TDA4VM-SK是一款专为边缘人工智能应用设计的低成本、小尺寸的开发板，以大约20W的功耗提供高达8TOPS的深度学习算力。这款开发板搭载TDA4VM处理器，不仅提供了卓越的深度学习性能，而且能实现低功耗下的硬件加速，非常适合需要高效率边缘AI计算的场景。
-TI部署相关修改：[DMS-YOLOv8: TI](https://github.com/Arrowes/DMS-YOLOv8/tree/main/TI)
-```sh
-#运行训练：
-python -m yolox.tools.train -n yolox-s-ti-lite -d 0 -b 64 --fp16 -o --cache
-#导出：
-python3 tools/export_onnx.py --output-name yolox_s_ti_lite0.onnx -f exps/default/yolox_s_ti_lite.py -c YOLOX_outputs/yolox_s_ti_lite/best_ckpt.pth --export-det
-#onnx推理：
-python3 demo/ONNXRuntime/onnx_inference.py -m yolox_s_ti_lite0.onnx -i test.jpg -s 0.3 --input_shape 640,640 --export-det
 
-#onnx拷贝到tool/models,/examples/osrt_python改model_configs的模型路径和类别数量
-#tools根目录运行
-./scripts/yolo_compile.sh
-#模型结果在model-artifacts/模型名称
-
-#挂载SD卡，model_zoo新建模型文件夹，拷贝模型
-CEAM-YOLOv7/
-├── artifacts
-│   ├── allowedNode.txt
-│   ├── detections_tidl_io_1.bin
-│   ├── detections_tidl_net.bin
-│   └── onnxrtMetaData.txt
-├── dataset.yaml    #改
-├── model
-│   └── yolox_s_ti_lite0.onnx
-├── param.yaml  #拷贝然后改
-└── run.log
-
-#dataset.yaml
-categories:
-- supercategory: distract
-  id: 1
-  name: cup
-- supercategory: distract
-  id: 2
-  name: hand
-- supercategory: distract
-  id: 3
-  name: phone
-- supercategory: distract
-  id: 4
-  name: wheel
-
-#param.yaml（copy from model_zoo_8220）
-threshold: 0.2  #好像没用
-model_path: model/yolox_s_ti_lite0.onnx
-
-#rootfs/opt/edgeai-gst-apps/configs改yolo.yaml
-
-#SD卡上板
-sudo minicom -D /dev/ttyUSB2 -c on
-#root登录，ctrl+A Z W换行，运行
-cd /opt/edgeai-gst-apps/apps_cpp && ./bin/Release/app_edgeai ../configs/yolo.yaml
-```
 <img alt="图 2" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/PaperLogDeploy.gif" width="100%"/> 
 
 <img alt="图 5" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/Project_DMS_car.gif" width='60%'/>  
