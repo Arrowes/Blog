@@ -125,9 +125,9 @@ python3 demo/ONNXRuntime/onnx_inference.py -m yolox_s_ti_lite.onnx -i assets/dog
 <img alt="图 1" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/TDA4VM3onnxinference.jpg" width="50%"/>  
 
 ## 3. 模型转换
-本节使用了两种不同的方法完成PC端TIDL的编译运行：
-1. TIDL Importer: 使用RTOS SDK中提供的导入工具，提供了很多例程（SDK8.6中没有，copy 8.5的），适用于EVM板；见a.
-2. TIDL Tools：TI提供的工具，见github [edgeai-tidl-tools](https://github.com/TexasInstruments/edgeai-tidl-tools)，灵活度高，不支持的算子分配到ARM核，支持的会使用TIDL加速运行，增加了深度学习模型开发和运行的效率。但要求平台有onnx运行环境, 适用于SK板；见b/c.
+对于模型转换，硬件不同，使用的工具也不同：
+1. EVM：使用TIDL Importer，这是RTOS SDK中提供的工具，有很多例程（SDK8.6中例程文件缺失，copy 8.5的），见a.
+2. SK板：使用TIDL Tools(Edge AI Studio/Edge AI Tools)，见[edgeai-tidl-tools](https://github.com/TexasInstruments/edgeai-tidl-tools)，灵活度高，不支持的算子分配到ARM核，支持的会使用TIDL加速运行，增加了深度学习模型开发和运行的效率。但要求平台有onnx运行环境, 适用于SK板, 见b/c.
 
 ### a. 使用[TIDL Importer](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/06_01_01_12/exports/docs/tidl_j7_01_00_01_00/ti_dl/docs/user_guide_html/md_tidl_model_import.html) (in RTOS SDK)
 1. 模型文件配置：拷贝 .onnx, .prototxt 文件至/ti_dl/test/testvecs/models/public/onnx/，**yolox_s_ti_lite.prototxt**中改in_width&height，根据情况改nms_threshold: 0.4，confidence_threshold: 0.4
