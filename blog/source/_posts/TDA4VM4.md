@@ -123,6 +123,7 @@ for result in raw_result:
 TIDL Importer 是RTOS SDK中提供的导入工具，需要网络结构完全支持tidl，以使模型都通过tidl加速（即转换只生成net,io 2个bin文件）
 
 下面的流程重构了文件夹架构，原文件跳来跳去改起来很麻烦，就合并到了XXX文件夹，原文件路径可参考上一篇官方例程： [TDA4③_使用TIDL Importer导入YOLOX](https://wangyujie.space/TDA4VM3/#a-%E4%BD%BF%E7%94%A8TIDL-Importer-by-RTOS-SDK)
+源码见：[Arrowes/DMS-YOLOv8/tree/main/TI/tidl_importer/](https://github.com/Arrowes/DMS-YOLOv8/tree/main/TI/tidl_importer/)
 
 1. 配置文件：新建文件夹：`SDK/${TIDL_INSTALL_PATH}/ti_dl/test/testvecs/XXX`
     拷贝 onnx 文件至 XXX 文件夹 (*此处是自定义模型，不使用prototxt, 经测试可以正常编译*)
@@ -169,7 +170,7 @@ debugTraceLevel = 1
 `inScale`配置太大可能导致tensor不匹配
 `metaLayersNamesList`注释掉, 除非与TI提供的元架构相同；
 
-3. 执行编译，得到可执行文件 `.bin`
+1. 执行编译，得到可执行文件 `.bin`
     ```sh
     export TIDL_INSTALL_PATH=/home/wyj/sda2/TAD4VL_SKD_8_5/ti-processor-sdk-rtos-j721s2-evm-08_05_00_11/tidl_j721s2_08_05_00_16
     cd ${TIDL_INSTALL_PATH}/ti_dl/utils/tidlModelImport
@@ -182,7 +183,7 @@ debugTraceLevel = 1
     tidl_out.png, tidl_out.txt  #执行的目标检测测试结果
     ```
 
-4. TIDL运行(inference)
+2. TIDL运行(inference)
 [TI Deep Learning Library User Guide: TIDL Inference](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/06_01_01_12/exports/docs/tidl_j7_01_00_01_00/ti_dl/docs/user_guide_html/md_tidl_sample_test.html)
     ```sh
     #在文件ti_dl/test/testvecs/config/config_list.txt顶部加入:
@@ -241,7 +242,7 @@ FileLink(zip_path) # 生成下载链接
 研读 [edgeai-tidl-tools/examples/osrt_python/ort/onnxrt_ep.py](https://github.com/TexasInstruments/edgeai-tidl-tools/blob/08_06_00_05/examples/osrt_python/ort/onnxrt_ep.py):
 进入搭建好的环境：（例）`pyenv activate benchmark` 或 `conda activate tidl`
 运行：`./scripts/run_python_examples.sh`
-下面基于例程进行基本的修改以编译运行自定义模型, 至少需要修改四个文件：
+下面基于例程进行基本的修改以编译运行自定义模型, 至少需要修改四个文件，源码见：[Arrowes/DMS-YOLOv8/tree/main/TI/tidl_tools](https://github.com/Arrowes/DMS-YOLOv8/tree/main/TI/tidl_tools)
 ```sh
 #新建运行脚本./script/run.sh
 CURDIR=`pwd`
@@ -250,16 +251,18 @@ export TIDL_TOOLS_PATH=$(pwd)/tidl_tools
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$TIDL_TOOLS_PATH
 export ARM64_GCC_PATH=$(pwd)/gcc-arm-9.2-2019.12-x86_64-aarch64-none-linux-gnu
     cd $CURDIR/examples/osrt_python/ort
+    #编译：
     #python3 onnxrt_ep.py -c
+    #推理：
     python3 onnxrt_ep.py
+    #关闭TIDL加速：
     #python3 onnxrt_ep.py -d
 
 #修改examples/osrt_python/ort/onnxrt_ep.py
 def infer_image(sess, image_files, config): #此处修改模型输入数据格式
-models = ['custom_model_name']  #修改对应的模型名称
+models = ['custom_model_name']  #修改为下面配置的对应的模型名称
 
-#修改examples/osrt_python/model_configs.py 导入并配置模型
-#onnx文件移入model/public文件夹
+#在examples/osrt_python/model_configs.py 配置模型名称与路径与模型参数
     'custom_model_name' : {
         'model_path' : os.path.join(models_base_path, 'custom_model_name.onnx'),
         'source' : {'model_url': 'https..XXX./.onnx', 'opt': True,  'infer_shape' : True},
@@ -270,8 +273,9 @@ models = ['custom_model_name']  #修改对应的模型名称
         'session_name' : 'onnxrt' ,
         'model_type': 'classification'
     },
+#custom_model_name.onnx文件移入model/public文件夹
 
-#examples/osrt_python/common_utils.py 配置编译选项
+#examples/osrt_python/common_utils.py 配置编译选项（一般不需要修改）
 tensor_bits = 8
 debug_level = 0
 max_num_subgraphs =16   #16
@@ -294,8 +298,13 @@ ti_internal_nc_flag = 1601
 配置编译选项文档：[edgeai-tidl-tools/examples/osrt_python/README.md](https://github.com/TexasInstruments/edgeai-tidl-tools/blob/master/examples/osrt_python/README.md#optional-options)
 
 > **Debug:**
-有些模型可能要到model_configs中找到链接手动下载放入models/public
-`'TIDLCompilationProvider' is not in available:`环境问题，没有进入配置好的环境，正常应该是: `Available execution providers :  ['TIDLExecutionProvider', 'TIDLCompilationProvider', 'CPUExecutionProvider']`
+有些模型下载会卡住，要到model_configs中找到链接手动下载放入models/public
+
+> `'TIDLCompilationProvider' is not in available:`
+> 环境问题，没有进入配置好的环境，正常应该是: `Available execution providers :  ['TIDLExecutionProvider', 'TIDLCompilationProvider', 'CPUExecutionProvider']`
+Provider的问题可能会引发`AttributeError: 'InferenceSession' object has no attribute 'get_TI_benchmark_data'`
+解决办法：`pip uninstall onnxruntime`, `pip uninstall onnxruntime-gpu`, `pip uninstall onnxruntime-tidl`, 然后重新 setup.sh
+
 
 ### onnxrt_ep.py详解
 [edgeai-tidl-tools/examples/osrt_python/ort/onnxrt_ep.py](https://github.com/TexasInstruments/edgeai-tidl-tools/blob/08_06_00_05/examples/osrt_python/ort/onnxrt_ep.py) 是主要运行文件，也是修改的最多的部分，因此梳理此处代码有助于理解*tidl编译和运行的全流程*。
@@ -624,7 +633,6 @@ cd /opt/edgeai-gst-apps/apps_cpp
 如果不是常规的OD、SEG等任务，需要高度自定义的话，需要修改SK板 `/opt/edgeai-gst-apps` DEMO相关的源码，主要阅读源码并参考两大文档：
 [Edge AI sample apps &mdash; Processor SDK Linux for SK-TDA4VM Documentation](https://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-edgeai/TDA4VM/08_06_01/exports/docs/common/sample_apps.html)
 [Running Simple demos &mdash; Processor SDK Linux for Edge AI Documentation](https://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-sk-tda4vm/latest/exports/docs/running_simple_demos.html)
-下面对demo源码进行研读：
 
 ---
 也许可以将tidl-tools放到板子里然后运行? 然后选择正确的平台

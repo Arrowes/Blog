@@ -12,9 +12,14 @@ TDA4的SDK环境搭建，SK开发板配置，TIDL demo运行，TIDL Tools与Edge
 下一篇：[TDA4③：YOLOX的模型转换与SK板端运行](https://wangyujie.space/TDA4VM3/)
 
 环境搭建需要下载SDK：[PROCESSOR-SDK-J721E](https://www.ti.com.cn/tool/cn/PROCESSOR-SDK-J721E)
-以下两节是EVM板的PSDK RTOS与PSDK Linux的环境搭建，因为暂时没有EVM板所以*没有上板测试*，只有SK板可以跳到第三节 TDA4VM-SK 配置。
+
+硬件不同，环境配置也不同：
++ EVM板：见第一二节的Linux SDK 和 RTOS SDK 环境配置
++ SK板：直接烧录官方提供的SD卡镜像，见第三节[TDA4VM-SK 配置](https://wangyujie.space/TDA4VM2/#TDA4VM-SK-配置)
+
 # [Linux SDK](https://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-rt-jacinto7/08_06_00_11/exports/docs/devices/J7/linux/index.html) 环境搭建
 
+对于Linux SDK，本项目不涉及底层修改，实际模型算法开发与部署过程中没有用到，但RTOS SDK对Linux SDK有依赖，因此需要配置。
 ```shell
 #添加执行文件并执行
 chmod +x ./ti-processor-sdk-linux-j7-evm-08_06_01_02-Linux-x86-Install.bin 
@@ -36,7 +41,7 @@ Make sysfw-image  #生成sysfw固件，主要在修改MSMC大小的时候会用�
 
 
 # [RTOS SDK](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/08_06_00_12/exports/docs/psdk_rtos/docs/user_guide/index.html) 环境搭建
-
+在RTOS SDK中，模型转换主要用到的工具是TIDL_Importer，详见[TIDL_Importer](https://wangyujie.space/TDA4VM2/#TIDL-Importer)。
 > 下载：
 ti-processor-sdk-rtos-j721e-evm-08_06_01_03.tar.gz
 ti-processor-sdk-rtos-j721e-evm-08_06_01_03-prebuilt.tar
@@ -97,7 +102,10 @@ make linux_fs_install_sd
 </details>
 
 ---
-上面都是EVM板的相关环境配置，后面只拿到了SK板，因此转为SK板的相关配置。
+以上为EVM板的相关环境配置，以下为SK板的环境配置。
+
+---
+
 
 # [TDA4VM-SK](https://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-edgeai/TDA4VM/08_06_01/exports/docs/devices/TDA4VM/linux/getting_started.html) 配置
 
@@ -112,7 +120,7 @@ make linux_fs_install_sd
 SK板，microUSB串口线，USB camera，HDMI/DP显示器，≥16GB的内存卡，网线和局域网*，串口电源（5-20V DC ≥20w），散热风扇
 
 1. 通过USB挂载SD卡到Ubuntu（在虚拟机设置里）
-2. 下载[SD card .wic image](https://www.ti.com/tool/download/PROCESSOR-SDK-LINUX-SK-TDA4VM)，本文选用08_06_00_05版本，后续若使用EdgeAI-TIDL-Tools则也需要08_06_00_06版本
+2. 下载镜像文件SD card image：[tisdk-edgeai-image-j721e-evm.wic.xz](https://www.ti.com/tool/download/PROCESSOR-SDK-LINUX-SK-TDA4VM)，本文选用08_06_00_05版本，后续若使用EdgeAI-TIDL-Tools则也需要08_06_00_06版本
 3. 使用[Balena etcher tool 1.7.0](https://github.com/balena-io/etcher/releases/tag/v1.7.0) 把 image `flash`到SD卡上
 4. 然后插入SD卡到SK板，拨码开关拨到数字端，系统从SD卡启动
 5. SK板连接显示器，上电，进入界面。
@@ -235,9 +243,8 @@ cd ${TIDL_INSTALL_PATH}/ti_dl/test
 
 
 ## [EdgeAI TIDL Tools](https://github.com/TexasInstruments/edgeai-tidl-tools)
-EdgeAI TIDL Tools是TI提供的深度学习开发工具，后续会多次用到。
-
-要求：OS——Ubuntu 18.04，Python Version——3.6
+EdgeAI TIDL Tools是TI提供的深度学习开发工具，后续基于TDA4VM-SK板进行模型转换时会多次用到。
+本节使用版本为08_06_00_05，要求：OS——Ubuntu 18.04，Python Version——3.6
 <img alt="图 9" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/TDA4VM2onnxruntimeflow.png" width="60%"/>  
 
 1. OSRT(Open Source Runtimes:TFLite,ONNX,TVM) 作为用户应用程序的顶级推理 API
@@ -245,6 +252,7 @@ EdgeAI TIDL Tools是TI提供的深度学习开发工具，后续会多次用到�
 3. 在 ARM 核心上运行优化代码，以支持 TIDL 不支持的层（[支持情况](https://github.com/TexasInstruments/edgeai-tidl-tools/blob/master/docs/supported_ops_rts_versions.md)）
 
 [Setup - TexasInstruments/edgeai-tidl-tools at 08_06_00_05](https://github.com/TexasInstruments/edgeai-tidl-tools/tree/08_06_00_05#setup)
+建议用conda单独建环境: `conda create -n tidl python=3.6`
 ```sh
 sudo apt-get install libyaml-cpp-dev
 git clone https://github.com/TexasInstruments/edgeai-tidl-tools.git #failed：手动安装证书 git config --global http.sslVerify false，export GIT_SSL_NO_VERIFY=1
@@ -255,7 +263,7 @@ source ./setup.sh
 #Docker Based X86_PC Setup 跳过，不用docker装
 
 #配置变量
-export SOC=am68pa
+export SOC=am68pa   #对应SK板
 export TIDL_TOOLS_PATH=$(pwd)/tidl_tools
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$TIDL_TOOLS_PATH
 export ARM64_GCC_PATH=$(pwd)/gcc-arm-9.2-2019.12-x86_64-aarch64-none-linux-gnu
@@ -264,7 +272,7 @@ export ARM64_GCC_PATH=$(pwd)/gcc-arm-9.2-2019.12-x86_64-aarch64-none-linux-gnu
 #Compile and Validate on X86_PC for cpp_example
 mkdir build && cd build
 cmake ../examples && make -j && cd ..
-source ./scripts/run_python_examples.sh #编译运行
+source ./scripts/run_python_examples.sh #编译运行例程
 python3 ./scripts/gen_test_report.py    #评估
 ```
 | Image Classification | Object detection | Semantic Segmentation |
@@ -273,6 +281,7 @@ python3 ./scripts/gen_test_report.py    #评估
 
 
 ## [Edge AI Studio](https://dev.ti.com/edgeaistudio/)
+相当于edgeai-tidl-tools的云端应用程序，由TI提供服务器，帮助用户在进行模型开发与转换工作时，无需本地搭环境。
 <img src="https://raw.gitmirror.com/Arrowes/Blog/main/images/TDA4VM2studio.png" width="80%"/>  
 
 TI官方提供的云端环境，集成了一系列工具,无需本地搭环境，使用需要申请，提供两个工具：
@@ -334,24 +343,6 @@ Then using Onnx with the libtidl_onnxrt_EP inference library we run the model an
 
 [edgeai-tidl-tools:Python Examples](https://github.com/TexasInstruments/edgeai-tidl-tools/blob/master/examples/osrt_python/README.md)
 [适用于嵌入式应用的深度学习推理参考设计](https://www.ti.com.cn/cn/lit/ug/zhcu546/zhcu546.pdf)
-
-# Others
-## [TIDL-RT](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/08_06_00_12/exports/docs/tidl_j721e_08_06_00_10/ti_dl/docs/user_guide_html/md_tidl_dependency_info.html)（略）
-```sh
-export TIDL_INSTALL_PATH=/home/ywang85/SDK/RTOSSDK/tidl_j721e_08_06_00_10   #设置环境变量
-#TARGET_PLATFORM=PC make gv失败：../../inc/itidl_ti.h:91:21: fatal error: ivision.h: No such file or directory
-#跳过，不修改code暂时不要rebuild
-```
-
-
-## [EdgeAI-Benchmark](https://github.com/TexasInstruments/edgeai-benchmark/tree/master)（ongoing）
-EdgeAI-Benchmark提供了一系列针对不同图像识别任务的脚本，包括分类、分割、检测和关键点检测。（使用[edgeai-tidl-tools](https://github.com/TexasInstruments/edgeai-tidl-tools)用于模型编译和推理）
-
-### 环境搭建
-文档：[setup_instructions](https://github.com/TexasInstruments/edgeai-benchmark/blob/master/docs/setup_instructions.md)，其中`pyenv install 3.6`可能因为网络原因下载极慢，这时可以先从官网或镜像源下载所需要的包到 ~/.pyenv/cache 目录下，再执行安装命令
-此后每次需要激活环境：`pyenv activate benchmark`
-
-[edgeai-tidl-tools/docs/custom_model_evaluation.md](https://github.com/TexasInstruments/edgeai-tidl-tools/blob/master/docs/custom_model_evaluation.md)
 
 ---
 > TDA4系列文章：
