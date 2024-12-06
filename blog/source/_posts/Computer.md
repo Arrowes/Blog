@@ -6,33 +6,64 @@ tags:
 ---
 PC折腾及服务器相关搭建记录
 <!--more-->
-# 远程串流
+# 网络
+## X-WRT 路由器配置
+小米R3G路由器 刷了不死和X-WRT的固件
+
+### USB接随身Wifi
+http://192.168.15.1/ 进入后台
+网络 > 接口 > 添加新接口 > 名称：随便填 > 协议：DHCP客户端 > 设备：以太网适配器：“eth2”
+防火墙设备 > WAN > 保存
+### IPv6
+网络 > 接口 > LAN > 编辑 > DCHP服务器 > IPv6配置 > 三个服务都改成中继模式
+网络 > 接口 > WAN > 编辑 > DCHP服务器 > IPv6配置 > 指定的主接口:勾选 > 三个服务都改成中继模式
+然后无线设备也可以使用ipv6了
+
+## 学术加速
+### Windows
+1. 找一个合适的梯子，建议直接买付费的，稳定快速，推荐 [SpaPort](https://front.spaport.cc/#/dashboard)或[yctf](https://tf233.top/#/home), 购买后会得到一个订阅地址，类似于`https://.../.../.ini`，之后把这个地址填进软件，即可成功挂上梯子
+2. 下载软件：[Clash.for.Windows](https://github.com/Z-Siqi/Clash-for-Windows_Chinese/releases/download/CFW-V0.20.39_CN/Clash.for.Windows-0.20.39-win.7z)，解压后双击`Clash for Windows.exe`打开软件 (备用下载链接：[Clash](https://www.123pan.com/s/goS7Vv-fWSbd.html)，解压密码12345)
+3. 点击左侧的 `配置`，在顶部的输入栏中粘贴你复制的Clash订阅地址后点击 `下载`, 显示绿色的成功之后，点击你刚导入的配置（名字一般是梯子的名称，如SpaPort）
+4. 点击左侧的`代理`，点击上方的`Rule`，一般选择`手动选择`内的节点即可，不同的节点名称代表不同地区的服务器，可以点右上方的WiFi图标进行测速，哪个延迟低选哪个节点（用ChatGPT不能选香港），超时就是那个节点挂了，节点随时有失效可能，注意切换
+5. 点击左侧的`主页`，打开下面`系统代理`的开关，即**成功加速**，左上角会显示实时流量，建议在`设置>快捷键`中将系统代理设为`Ctrl+W`, 按需随时开关，节约流量
+（注意：在`系统代理`的开关打开的情况下关闭软件，将会*出现电脑连不上网的情况*，此时重新打开Clash即可解决，因此，建议也打开`开机自启动`的开关，保持Clash后台常驻）
+
+至此，即可流畅登录Github上传或下载代码，以及在终端中安装各种工具包，避免了换源等繁琐操作
+
+### Android
+下载[ClashforAndroid](https://sockboomdownload.com/ssr-download/clashforandroid.apk)
+配置 > 右上角＋号 > URL > 填入订阅链接 > 保存 > 回主界面点*启动*
+选代理，点一下右上角的⚡将进行测速，数字越小的节点延迟越低
+
+### Linux
+[Clash.for.Windows-x64-linux.tar.gz ](https://dl.gtk.pw/proxy/linux/)可用于Ubuntu，
+解压缩，进入文件夹终端，运行`./cfw`,即可打开软件
+Ubuntu设置-网络代理设为手动，将http/https代理指向clash默认端口7890：`HTTP代理：127.0.0.1 7890` `HTTPS代理：127.0.0.1 7890`
+
+创建软件快捷方式(Optional)
+```sh
+wget https://github.com/Z-Siqi/Clash-for-Windows_Chinese/blob/main/image/image_clash.png    # 下载clash icon做为桌面图标
+vim clash.desktop
+# 输入下面的内容(注意用户名和路径)
+[Desktop Entry]
+ Name=clash
+ Comment=Clash
+ Exec=/home/arrow/clash/cfw
+ Icon=/home/arrow/clash/image_clash.png
+ Type=Application
+ Categories=Development;
+ StartupNotify=true
+ NoDisplay=false
+
+sudo mv clash.desktop /usr/share/applications/
+```
+最终就能实现通过图标打开
+
+## 远程串流
 使用Sunshine + Moonlight 来实现毫秒级延迟的远程串流
 PC端安装[Sunshine](https://github.com/LizardByte/Sunshine/releases)
 远控端安装[MoonLight](https://github.com/moonlight-stream/moonlight-android/releases) (安卓)
 然后连接同一个网络即可
-
-# 实验室服务器配置
-```sh
-#服务器1
-型号: DELL R730XD 12盘3.5寸
-处理器: E5-2683V4*2 2.1G主频 32核心/64线程
-内存: 96G内存（16G*6）
-硬盘: 3T SAS*4
-阵列卡: H730卡
-电源: 750W*1
-显卡：Tesla P40
-
-#服务器2
-型号: DELL R730 8盘2.5寸
-处理器: E5-2682V4*2 2.5G主频 32核心/64线程
-内存: 96G内存（16G*6）
-硬盘: 600G SAS*5
-阵列卡: H730卡
-电源: 1100W*1
-显卡：Tesla P100
-```
-<img alt="picture 0" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/Computer-r730xd.jpg" />  
 
 ## 配置SSH
 ```sh
@@ -48,7 +79,6 @@ sudo ufw allow ssh
 ip a
 ```
 
-## 使用SSH远程访问服务器
 vscode安装插件：Remote - SSH
 登录ubuntu用户：ssh username@10.99.1.55
 
@@ -90,45 +120,7 @@ win+r 输入`shell:startup`
 `irm https://get.activated.win | iex`
 
 
-# 学术加速
-## Windows
-1. 找一个合适的梯子，建议直接买付费的，稳定快速，推荐 [SpaPort](https://front.spaport.cc/#/dashboard)或[yctf](https://tf233.top/#/home), 购买后会得到一个订阅地址，类似于`https://.../.../.ini`，之后把这个地址填进软件，即可成功挂上梯子
-2. 下载软件：[Clash.for.Windows](https://github.com/Z-Siqi/Clash-for-Windows_Chinese/releases/download/CFW-V0.20.39_CN/Clash.for.Windows-0.20.39-win.7z)，解压后双击`Clash for Windows.exe`打开软件 (备用下载链接：[Clash](https://www.123pan.com/s/goS7Vv-fWSbd.html)，解压密码12345)
-3. 点击左侧的 `配置`，在顶部的输入栏中粘贴你复制的Clash订阅地址后点击 `下载`, 显示绿色的成功之后，点击你刚导入的配置（名字一般是梯子的名称，如SpaPort）
-4. 点击左侧的`代理`，点击上方的`Rule`，一般选择`手动选择`内的节点即可，不同的节点名称代表不同地区的服务器，可以点右上方的WiFi图标进行测速，哪个延迟低选哪个节点（用ChatGPT不能选香港），超时就是那个节点挂了，节点随时有失效可能，注意切换
-5. 点击左侧的`主页`，打开下面`系统代理`的开关，即**成功加速**，左上角会显示实时流量，建议在`设置>快捷键`中将系统代理设为`Ctrl+W`, 按需随时开关，节约流量
-（注意：在`系统代理`的开关打开的情况下关闭软件，将会*出现电脑连不上网的情况*，此时重新打开Clash即可解决，因此，建议也打开`开机自启动`的开关，保持Clash后台常驻）
 
-至此，即可流畅登录Github上传或下载代码，以及在终端中安装各种工具包，避免了换源等繁琐操作
-
-## Android
-下载[ClashforAndroid](https://sockboomdownload.com/ssr-download/clashforandroid.apk)
-配置 > 右上角＋号 > URL > 填入订阅链接 > 保存 > 回主界面点*启动*
-选代理，点一下右上角的⚡将进行测速，数字越小的节点延迟越低
-
-## Linux
-[Clash.for.Windows-x64-linux.tar.gz ](https://dl.gtk.pw/proxy/linux/)可用于Ubuntu，
-解压缩，进入文件夹终端，运行`./cfw`,即可打开软件
-Ubuntu设置-网络代理设为手动，将http/https代理指向clash默认端口7890：`HTTP代理：127.0.0.1 7890` `HTTPS代理：127.0.0.1 7890`
-
-创建软件快捷方式(Optional)
-```sh
-wget https://github.com/Z-Siqi/Clash-for-Windows_Chinese/blob/main/image/image_clash.png    # 下载clash icon做为桌面图标
-vim clash.desktop
-# 输入下面的内容(注意用户名和路径)
-[Desktop Entry]
- Name=clash
- Comment=Clash
- Exec=/home/arrow/clash/cfw
- Icon=/home/arrow/clash/image_clash.png
- Type=Application
- Categories=Development;
- StartupNotify=true
- NoDisplay=false
-
-sudo mv clash.desktop /usr/share/applications/
-```
-最终就能实现通过图标打开
 
 # Debug
 > 桌面闪烁，底部任务栏跟着刷新，造成的因素有许多可能，硬件显卡驱动的问题，以及刷新率,explorer资源管理器,注册列表问题,病毒问题
