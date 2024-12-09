@@ -46,6 +46,7 @@ chmod u+x []        #添加可执行文件
 chmod +x ./XX.sh    #若直接执行被deny，添加执行权限
 ls -R               #展开子文件夹
 scp username@asd-123:/path/to/file /path/to/destination #复制文件夹：scp -r /folder/
+find / -type d -name "foldername" #搜索文件夹(/所有目录 改为.则为当前目录)
 
 cd -                #切换到上一工作目录
 cd ~                #导航到主目录 /home/user1
@@ -349,6 +350,33 @@ docker-compose down     #停止所有正在运行的容器，加上 -v 同时删
 docker-compose logs     #查看容器的输出日志
 docker-compose exec <服务名称> bash #进入容器
 docker-compose build    #重建镜像
+```
+
+## Docker Registry
+```sh
+#在训练服务器上启动 Docker Registry 服务容器：
+docker run -d -p 5000:5000 --name registry --restart always registry:latest
+
+#编辑 Docker 的配置文件，允许使用不安全的 registry：打开/创建 /etc/docker/daemon.json 文件，加入：
+{
+  "insecure-registries": ["wuh7-sdc003:5000"]
+}
+#重新启动 Docker 服务：
+sudo systemctl restart docker
+#关闭防火墙，防火墙可能导致push失败：
+sudo systomctl stop firewalld
+#可以通过访问 http://ipxxxx:5000/v2/_catalog 查看镜像列表
+
+Build image:
+docker build -t ipxxxx:5000/Imagename:1.0.0  -f docker/Dockerfile .
+
+#为现有镜像赋个别名，可以方便管理镜像，尤其是在推送到远程仓库时
+docker tag ipxxxx:5000/Imagename:1.0.0 ipxxxx2:5000/Imagename:1.0.0
+#Docker 会根据推送的镜像名称来确定推送的目标 IP 地址和端口号，格式为：<registry>/<repository>:<tag>：
+docker push ipxxxx:5000/Imagename:1.0.0
+
+#手动run image:
+docker run -v /mnt/:/mnt/ -w /workspath --rm ipxxxx:5000/Imagename:1.0.0 python xxx.py
 ```
 
 ## 文件拷贝
