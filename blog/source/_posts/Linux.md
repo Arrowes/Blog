@@ -16,7 +16,7 @@ Linux常用指令，Ubuntu虚拟机使用指南，Git工作流，Docker基本概
 ```sh
 #系统
 lsb_release -a      #查ubuntu版本    
-sudo passwd root    #更改root账户的密码
+sudo passwd root    #更改root账户的密码, 改其他用户换为用户名即可
 su                  #切换到root用户，$ 是普通权限， #是管理员权限
 su username         #切换到其他用户
 sudo usermod -aG sudo username   #添加用户为root
@@ -44,7 +44,6 @@ mv file1 [dir]      #移动文件 (无dir则相当于重命名)
 cp -r [] []         #复制文件
 chmod u+x []        #添加可执行文件
 chmod +x ./XX.sh    #若直接执行被deny，添加执行权限
-ls -R               #展开子文件夹
 scp username@asd-123:/path/to/file /path/to/destination #复制文件夹：scp -r /folder/
 find / -type d -name "foldername" #搜索文件夹(/所有目录 改为.则为当前目录)
 
@@ -55,6 +54,8 @@ cd 直接拖文件
 pwd                 #当前路径
 
 ls                  #检索
+ls -R               #展开子文件夹 加-l列出所有详细信息
+ll                  #ls -l命令的一个别名，列出当前目录下文件和目录的详细信息
 tree []             #查看树状图 tree /F #windows下查看树状图  
 wget [url]          #下载, wget -O myfile.zip [url] 重命名文件
 vi []               #命令行进入文件，按i进入插入模式，按Esc返回命令模式并输入:wq 保存退出, :q! 不保存退出
@@ -333,6 +334,13 @@ docker info    # 查看 Docker 的系统信息
 docker --version    # 查看 Docker 版本  
 docker top <container_name_or_id>    # 查看容器的进程  
 docker diff <container_name_or_id>    # 查看容器的文件系统改动 
+
+# Docker用户组
+sudo groupadd docker            # 1. 创建docker用户组
+sudo usermod -aG docker ${USER} # 2. 添加当前用户加入docker用户组
+sudo systemctl restart docker   # 3. 重启docker服务
+sudo newgrp docker              # 4. 生效配置
+docker info                     # 5. 验证 Docker 组成员身份
 ```
 
 ## Docker Compose
@@ -379,33 +387,6 @@ docker push ipxxxx:5000/Imagename:1.0.0
 docker run -v /mnt/:/mnt/ -w /workspath --rm ipxxxx:5000/Imagename:1.0.0 python xxx.py
 ```
 
-## 文件拷贝
-```shell
-#1、主机拷贝文件到docker编译环境里：
-sudo docker cp源文件openharmony:/目标文件
-#参数解析：
-#源文件：主机上的，可为文件或者目录
-#盘目标文件：docker编译环境里的，通常为目录，表示将文件拷贝到该目录
-
-#2、docker编译环境拷贝文件到主机：
-sudo docker cp openharmony:/源文件目标文件
-#源文件：docker编译环境里的，可为文件或者目录
-#目标文件：主机上的，通常为目录，表示将文件拷贝到该目录下
-#删除docker编译环境【谨慎操作，不可恢复】
-
-#查看当前运行的docker实例状态
-sudo docker ps -a
-#在上一条指显示结果列表中，查看openharmony的STATUS
-#如为Up，则需要执行下面这条指令，停止其运行
-#如为Exited，则跳过下面这条指令
-sudo docker stop openharmony
-#删除
-sudo docker rm openharmony
-
-#提醒：
-#删除前，请确保该运行环境内的有效数据都已拷贝到主机上
-#删除后，该运行环境内的所有数据将被移除，不可恢复
-```
 vscode使用docker
 1. 下载docker插件，Dev Containers插件
 2. 连接到 Docker 容器：点击左下角的绿色按钮，选择 "Attach to Running Container"。
