@@ -25,7 +25,7 @@ C-->5.模型保存
 A-->E[C.定义]
 ```
 
-<img src="https://raw.gitmirror.com/Arrowes/Blog/main/images/DL1.png" width = "80%" />
+<img src="https://raw.gitmirror.com/Arrowes/Blog/main/images/DL1.png" width = "60%" />
 
 GPU 网络和数据要同时送进GPU
 
@@ -56,7 +56,7 @@ $   n_{output.features}=[\frac{n_{input.features}+2p_{adding.size}-k_{ernel.size
 较小的感受野通常用于捕获局部特征，而较大的感受野则有助于捕获全局信息。
 <img src="https://raw.gitmirror.com/Arrowes/Blog/main/images/DL2.png" width = "50%" />
 
-<img src="https://pic1.zhimg.com/50/v2-d552433faa8363df84c53b905443a556_720w.webp?source=1940ef5c" width = "40%" />
+<img src="https://pic1.zhimg.com/50/v2-d552433faa8363df84c53b905443a556_720w.webp?source=1940ef5c" width = "20%" />
 
 ## 卷积
 <img alt="图 37" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/DL-Conv.jpg" />  

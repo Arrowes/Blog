@@ -34,7 +34,7 @@ sudo gedit /ect/apt/source.list #最后一行加入其他源
 sudo apt update	    #更新索引(源)
 
 #文件
-mkdir []            #新建文件夹  
+mkdir []            #新建文件夹
 rmdir []            #删除文件夹( rm -r XXX  
 sudo nautilus       #以root进入文件夹     
 touch [] []         #创建文件
@@ -46,6 +46,9 @@ chmod u+x []        #添加可执行文件
 chmod +x ./XX.sh    #若直接执行被deny，添加执行权限
 scp username@asd-123:/path/to/file /path/to/destination #复制文件夹：scp -r /folder/
 find / -type d -name "foldername" #搜索文件夹(/所有目录 改为.则为当前目录)
+ln -s /path/to/file link  # 创建软链接
+mount /dev/sda1 /mnt      # 将 /dev/sda1 分区挂载到 /mnt 目录
+umount /mnt              # 卸载挂载点
 
 cd -                #切换到上一工作目录
 cd ~                #导航到主目录 /home/user1
