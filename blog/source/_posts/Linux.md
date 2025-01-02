@@ -214,7 +214,7 @@ vscode 文件标签栏多行显示：文件 > 首选项 > 设置 > workbench.edi
 调试代码是解决问题和优化代码的重要工具：
 1. 设置断点：单击行号左侧的空白区域，可以设置或取消断点。
 2. 启动调试会话：点击左侧的调试图标（或者使用快捷键F5），选择想要调试的环境（比如Node.js、Python等），然后启动调试会话。
-
+3. Run and Debug - Add configuration - .vscode/launch.json
  
 # Git
 下载 [Git](https://git-scm.com/downloads)，`sudo apt-get install git`
@@ -322,7 +322,7 @@ docker restart <container_name_or_id>   # 重启容器
 docker logs <container_name_or_id>      # 查看容器日志  
 docker exec -it <container_name_or_id> /bin/bash    # 进入容器交互式命令行  
 docker rm <container_name_or_id>    # 删除容器
-docker run <options> <image_name>    # 运行一个容器  
+docker run <options> <image_name>    # 运行一个容器  --shm-size=8g[分配共享内存,默认64MB] [df -lh | grep shm] 查看共享内存
 # 示例：后台运行 Nginx 容器，将主机的8080端口映射到容器的80端口  
 docker run -d -p 8080:80 nginx  
 
@@ -378,7 +378,7 @@ sudo systemctl restart docker
 sudo systomctl stop firewalld
 #可以通过访问 http://ipxxxx:5000/v2/_catalog 查看镜像列表
 
-Build image:
+# Build image:
 docker build -t ipxxxx:5000/Imagename:1.0.0  -f docker/Dockerfile .
 
 #为现有镜像赋个别名，可以方便管理镜像，尤其是在推送到远程仓库时
