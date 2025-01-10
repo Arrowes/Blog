@@ -108,7 +108,7 @@ Ctrl + Backspace 删除整个单词
 cat /proc/version   #查版本信息
 lsb_release -a      #查ubuntu版本
 free -m             #查内存使用情况
-df -hl              #查看磁盘剩余空间
+df -h              #查看磁盘剩余空间
 ```
 截图：1.screen截图应用程序   2.设置-设备-键盘-截图快捷键
 ## 单系统安装
@@ -322,9 +322,10 @@ docker restart <container_name_or_id>   # 重启容器
 docker logs <container_name_or_id>      # 查看容器日志  
 docker exec -it <container_name_or_id> /bin/bash    # 进入容器交互式命令行  
 docker rm <container_name_or_id>    # 删除容器
-docker run <options> <image_name>    # 运行一个容器  --shm-size=8g[分配共享内存,默认64MB] [df -lh | grep shm] 查看共享内存
+docker run <options> <image_name>    # 运行一个容器  --shm-size=8g[分配共享内存,默认64MB] [df -h] 查看共享内存
 # 示例：后台运行 Nginx 容器，将主机的8080端口映射到容器的80端口  
 docker run -d -p 8080:80 nginx  
+service ssh restart #重启整个docker服务
 
 # Image
 docker images    # 查看本地镜像  

@@ -120,6 +120,9 @@ win+r 输入`shell:startup`
 + Microsoft-Activation-Scripts激活
 `irm https://get.activated.win | iex`
 
++ windows 步骤记录器
+Win + R > PSR，打开步骤记录器页面。
+点击【开始记录】按钮，录制步骤
 
 
 
