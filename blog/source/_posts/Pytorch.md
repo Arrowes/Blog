@@ -179,7 +179,9 @@ drive.mount('/content/drive')
 要调用GPU进行训练的话，需要安装显卡驱动对应的CUDA
 1. ``nvidia-smi`` 查询支持CUDA版本, 显卡驱动程序显示的cuda版本为电脑最高可适配的cuda版本
 ![图 3](https://raw.gitmirror.com/Arrowes/Blog/main/images/Pytorch3.png)  
-2. 到 [Pytorch官网](https://pytorch.org/get-started/locally/) 复制对应code进行安装
+另有nvitop: 最强GPU性能实时监测工具 `pip3 install --upgrade nvitop`
+
+1. 到 [Pytorch官网](https://pytorch.org/get-started/locally/) 复制对应code进行安装
 ![图 4](https://raw.gitmirror.com/Arrowes/Blog/main/images/Pytorch4.png)  
 
 ## 安装
@@ -556,3 +558,49 @@ with torch.no_grad():
     output = model(image)
 print(output)
 ```
+
+# Python
+## 回调函数
+def __call__(self, results: dict) -> dict:
+这段代码定义了一个名为 __call__ 的特殊方法，它属于一个 Python 类（class）。
+
+__call__ 方法可以让一个类的实例像函数一样被调用。
+self 是 Python 类方法中的第一个参数，它指向类的实例本身。
+results: dict 表示该方法接收一个名为 results 的字典作为参数。
+-> dict 表示该方法返回一个字典。
+作用：
+
+当你使用圆括号调用一个类的实例时，Python 解释器会自动调用该实例的 __call__ 方法。
+__call__ 方法通常用于执行一些操作，并返回一个结果。
+例子：
+```py
+class MyClass:
+    def __init__(self, value):
+        self.value = value
+
+    def __call__(self, x):
+        return self.value * x
+
+my_instance = MyClass(2)
+result = my_instance(3)  # 等价于调用 my_instance.__call__(3)
+print(result)  # 输出 6
+```
+在这个例子中，MyClass 类定义了一个 __call__ 方法，它接收一个参数 x，并返回 self.value * x 的结果。当我们使用圆括号调用 my_instance 实例时，Python 解释器会自动调用 __call__ 方法，并将 3 作为参数传递给它。
+
+__call__ 方法可以让一个类的实例像函数一样被调用，它通常用于执行一些操作，并返回一个结果。
+
+
+
+
+
+
+
+
+## 其他 
+pwd = os.getcwd()   # 获取当前工作目录
+
+self: 在类的上下文中，self 是一种约定，使得方法能够访问和操作实例的属性和其他方法，从而实现类的功能。
+
+hook: hook编程是一种编程模式，是指在程序的一个或者多个位置设置位点（挂载点），当程序运行至某个位点时，会自动调用运行时注册到位点的所有方法。
+
+断言: assert 用于测试一个表达式是否为真。如果表达式为假，程序会抛出 AssertionError 异常，并终止程序运行。它通常用于调试和检查程序中某些假设是否成立。
