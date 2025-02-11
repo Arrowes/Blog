@@ -14,7 +14,7 @@ AI相关折腾记录: LLM-Deepseek,chat-on-wechat, AI绘画-StableDiffusion, 音
 
 ### 使用 ollama + Deepseek 本地部署
 1. 下载并安装ollama： https://ollama.com/download （关闭开机自启动：C:\Users\Arrow\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup 删除快捷方式）
-2. 修改模型下载路径，避免占C盘：设置>系统>系统信息>高级系统设置>环境变量>在系统变量中新建：OLLAMA_MODELS D:\XXX\models 重启电脑（默认在C:\Users\XX\.Ollama\models）（顺便加一下OLLAMA_HOST 0.0.0.0:11434）
+2. 修改模型下载路径，避免占C盘：设置>系统>系统信息>高级系统设置>环境变量>在系统变量中新建：OLLAMA_MODELS D:\XXX\models 重启电脑（默认在C:\Users\XX\.Ollama\models）（顺便加一下OLLAMA_HOST 0.0.0.0）
 3. 搜索模型：https://ollama.com/search （注意显存要求，我使用的笔记本端4060 8G大概能跑7-14B，其中名字带uncensored或abliterated是未限制版本的, Q是量化精度，最低q4, 影响不大，优先考虑B）
 4. 下载：`ollama run deepseek-r1:14b` `ollama run huihui_ai/deepseek-r1-abliterated:14b`
 https://ollama.com/huihui_ai/deepseek-r1-abliterated
@@ -64,7 +64,10 @@ pip install open-webui
 open-webui serve
 ```
 http://localhost:8080/
-ipconfig查看自己的ipv4地址，比如 http://192.168.15.195:8080/ 就是我的web网址了
+ipconfig查看自己的ipv4地址，比如192.168.15.195，那么我的web网址为：
+http://192.168.15.195:8080/
+使用 Windows 防火墙开放端口，使局域网能成功访问：
+`netsh advfirewall firewall add rule name="Allow Port 8080" dir=in action=allow protocol=TCP localport=8080`
 
 系统提示词
 温度：温度越高 模型越会自由发挥
@@ -89,6 +92,7 @@ num_gpu, num_thread
 
 手机端连接：config.yaml：listen: true; whitelist: - 192.168.*.*
 http://192.168.15.195:8000/
+`netsh advfirewall firewall add rule name="Allow Port 8000" dir=in action=allow protocol=TCP localport=8000`
 
 ## chat-on-wechat
 
