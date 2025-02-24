@@ -345,6 +345,14 @@ sudo usermod -aG docker ${USER} # 2. 添加当前用户加入docker用户组
 sudo systemctl restart docker   # 3. 重启docker服务
 sudo newgrp docker              # 4. 生效配置
 docker info                     # 5. 验证 Docker 组成员身份
+
+#打包镜像
+docker images
+docker save -o <output-file.tar> <image-name:tag>
+#打包容器
+docker ps -a
+docker commit <container-id> <new-image-name>
+docker save -o <output-file.tar> <new-image-name>
 ```
 
 ## Docker Compose

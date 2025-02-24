@@ -46,6 +46,8 @@ ollama rm deepseek:14B  # 卸载模型（还需要到文件路径下删除模型
 ollama list
 ollama ps
 ```
+ollama: http://192.168.15.195:11434/
+
 ---
 
 `deepseek-r1:14b`： 10.08 tokens/s, 用到了8G显存+4G共享GPU内存，尝试了三种14B：
@@ -86,6 +88,7 @@ num_gpu, num_thread
    + 最后验证⼀下，点击NewThread，问它个相关的问题，看到回答的最下⽅显⽰有引⽤就OK
 
 ### Deepseek API + SillyTavern
+Node.js环境：https://nodejs.org/en/download
 酒馆：https://github.com/SillyTavern/ Release - Source code下载 - Start.bat
 打开SillyTavern网址，点插头图标，选聊天补全， Deepseek, 填入自己的API密钥
 右上角创建角色或导入角色卡，中间世界信息，左边导入预设
@@ -93,6 +96,12 @@ num_gpu, num_thread
 手机端连接：config.yaml：listen: true; whitelist: - 192.168.*.*
 http://192.168.15.195:8000/
 `netsh advfirewall firewall add rule name="Allow Port 8000" dir=in action=allow protocol=TCP localport=8000`
+
+连本地ollama: ollama 打开后，选文本补全-ollama Api填http://192.168.15.195:11434/ - 连接
+
+Gemini API: 注意并非可以访问gemini的网站就代表梯子正常。对于PC用户而言，需要打开CLASH中的“TUN模式”才可以正常链接API使用。
+
+[小白也能看懂的本地文生图](https://docs.google.com/document/d/11vPOdz_4q_DrAhdL3fLP61FkzRZSppyCuqpLps4qIkA/edit?tab=t.0#heading=h.suwlqsio29mz)
 
 ## chat-on-wechat
 
