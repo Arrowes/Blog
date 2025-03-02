@@ -245,3 +245,282 @@ map*map是下个featuremap的大小，也就是上个weight*weight到底做了�
   + P2P（Peer-to-Peer）是指单个节点内的 GPU 之间直接通信，而不需要通过 CPU 或系统内存中转，可以显著提高通信效率。但若某些 GPU 之间没有直接的 P2P 连接（NVLink 或 PCIe P2P），NCCL可能会初始化后挂死，通过设置 NCCL_P2P_DISABLE=1，可以强制 NCCL 使用系统内存中转的方式代替 P2P 通信，从而避免这些问题。
 
 NCCL遇到显卡P2P通信问题:[1](https://huo.zai.meng.li/p/vllm%E5%90%AF%E5%8A%A8%E6%97%B6nccl%E9%81%87%E5%88%B0%E6%98%BE%E5%8D%A1p2p%E9%80%9A%E4%BF%A1%E9%97%AE%E9%A2%98/) [2](https://huo.zai.meng.li/p/vllm%E5%90%AF%E5%8A%A8%E6%97%B6nccl%E9%81%87%E5%88%B0%E6%98%BE%E5%8D%A1p2p%E9%80%9A%E4%BF%A1%E9%97%AE%E9%A2%98/)
+
+
+# MMDetection
+
+[MMDetection](https://mmdetection.readthedocs.io/zh-cn/latest/) 由 7 个主要部分组成，apis、structures、datasets、models、engine、evaluation 和 visualization。
++ apis 为模型推理提供高级 API。
++ structures 提供 bbox、mask 和 DetDataSample 等数据结构。
++ datasets 支持用于目标检测、实例分割和全景分割的各种数据集。
+  + transforms 包含各种数据增强变换。
+  + samplers 定义了不同的数据加载器采样策略。
++ models 是检测器最重要的部分，包含检测器的不同组件。
+  + detectors 定义所有检测模型类。
+  + data_preprocessors 用于预处理模型的输入数据。
+  + backbones 包含各种骨干网络。
+  + necks 包含各种模型颈部组件。
+  + dense_heads 包含执行密集预测的各种检测头。
+  + roi_heads 包含从 RoI 预测的各种检测头。
+  + seg_heads 包含各种分割头。
+  + losses 包含各种损失函数。
+  + task_modules 为检测任务提供模块，例如 assigners、samplers、box coders 和 prior generators。
+  + layers 提供了一些基本的神经网络层。
++ engine 是运行时组件的一部分。
+  + runner 为 MMEngine 的执行器提供扩展。
+  + schedulers 提供用于调整优化超参数的调度程序。
+  + optimizers 提供优化器和优化器封装。
+  + hooks 提供执行器的各种钩子。
++ evaluation 为评估模型性能提供不同的指标。
++ visualization 用于可视化检测结果。
+
+[文档 - 环境安装与验证](https://mmdetection.readthedocs.io/zh-cn/latest/get_started.html)
+1. 使用 MIM 安装 MMEngine 和 MMCV。
+2. 从源码安装MMDetection
+3. 验证
+> Debug: 
+1.验证推理时报AssertionError: MMCV == 2.2.0 is used but incompatible. Please install mmcv>=2.0.0rc4, <2.2.0. 解决: mmdet/__init__.py", line 17 强行改版本适配 <=
+2.ModuleNotFoundError: No module named 'mmdet' 解决：编译mmdetection：python setup.py develop
+3.cuda版本问题：conda install pytorch == 1.13.1 torchvision == 0.14.1 torchaudio==0.13.1 cudatoolkit=11.7 pytorch-cuda=11.7 -c pytorch -c nvidia
+
+[训练 & 测试](https://mmdetection.readthedocs.io/zh-cn/latest/user_guides/index.html#id1)：使用开源模型和数据集来执行常见的训练和测试任务
+
+[实用工具](https://mmdetection.readthedocs.io/zh-cn/latest/user_guides/index.html#id2)：
++ 查看模型配置:`python tools/misc/print_config.py ./configs/_base_/models/mask-rcnn_r50_fpn.py`
++ 列出所有模型：`models = DetInferencer.list_models('mmdet')`
+
++ 推理：推理的高层编程接口——推理器Inferencer
+    ```py
+    from mmdet.apis import DetInferencer
+    inferencer = DetInferencer('rtmdet_tiny_8xb32-300e_coco')   # 初始化模型
+    inferencer('demo/demo.jpg', show=False,out_dir='./outputs',print_result=True)   # 推理示例图片
+    # 快速验证：
+    python demo/image_demo.py demo/demo.jpg rtmdet_tiny_8xb32-300e_coco.py --weights rtmdet_tiny_8xb32-300e_coco_20220902_112414-78e30dcc.pth --device cpu
+    ```
+    
++ 下载COCO数据集：`python tools/misc/download_dataset.py --dataset-name coco2017`
+
++ 测试：`python tools/test.py ${CONFIG_FILE} ${CHECKPOINT_FILE} [--out ${RESULT_FILE}] [--show]`
+    ```sh
+    python tools/test.py configs/rtmdet/rtmdet_l_8xb32-300e_coco.py checkpoints/rtmdet_l_8xb32-300e_coco_20220719_112030-5a0be7c4.pth --show-dir rtmdet_l_8xb32-300e_coco_results
+    ```
++ 训练：
+    ```sh
+    python tools/train.py {CONFIG_FILE} [optional arguments]
+    python tools/train.py configs/retinanet/retinanet_r50_fpn_1x_coco.py
+    ```
++ `tensorboard --logdir=work_dirs`:
+    tensorboard可视化--在`../_base_/default_runtime.py`--visualizer中：
+    ```py
+    vis_backends = [
+        dict(type='LocalVisBackend'),
+        dict(type='TensorboardVisBackend')
+    ]
+    ```
+
+## [配置文件](https://mmdetection.readthedocs.io/zh-cn/latest/user_guides/config.html#id1)
+[MMEngine - 配置（CONFIG）详细文档](https://mmengine.readthedocs.io/zh-cn/latest/advanced_tutorials/config.html)
+在 MMDetection 中，一个模型被定义为一个配置文件 和对应被存储在 checkpoint 文件内的模型参数的集合。
+`./mmdetection/configs/_base_/..`
+在 config/_base_ 文件夹下有 4 个基本组件类型，分别是：数据集(dataset)，模型(model)，训练策略(schedule)和运行时的默认设置(default runtime)。许多方法，例如 Faster R-CNN、Mask R-CNN、Cascade R-CNN、RPN、SSD 能够很容易地构建出来。由 _base_ 下的组件组成的配置，被我们称为 原始配置(primitive)。
+1. 模型配置: 在 mmdetection 的配置中，我们使用 model 字段来配置检测算法的组件。 除了 backbone、neck 等神经网络组件外，还需要 data_preprocessor、train_cfg 和 test_cfg。 data_preprocessor 负责对 dataloader 输出的每一批数据进行预处理。 模型配置中的 train_cfg 和 test_cfg 用于设置训练和测试组件的超参数。
+2. 数据集和评测器配置: 在使用执行器 进行训练、测试、验证时，我们需要配置 Dataloader。构建数据 dataloader 需要设置数据集（dataset）和数据处理流程（data pipeline）。 由于这部分的配置较为复杂，我们使用中间变量来简化 dataloader 配置的编写。
+3. 训练和测试的配置: MMEngine 的 Runner 使用 Loop 来控制训练，验证和测试过程。 用户可以使用这些字段设置最大训练轮次和验证间隔。
+4. 优化相关配置: optim_wrapper 是配置优化相关设置的字段。优化器封装（OptimWrapper）不仅提供了优化器的功能，还支持梯度裁剪、混合精度训练等功能。param_scheduler 字段用于配置参数调度器（Parameter Scheduler）来调整优化器的超参数（例如学习率和动量）。 用户可以组合多个调度器来创建所需的参数调整策略。
+5. 钩子配置与运行相关配置：用户可以在训练、验证和测试循环上添加钩子，以便在运行期间插入一些操作。配置中有两种不同的钩子字段，一种是 default_hooks，另一种是 custom_hooks。
+[MMEngine - Hook](https://mmengine.readthedocs.io/zh-cn/latest/tutorials/hook.html)
+
+
+
+
+## [进阶教程](https://mmdetection.readthedocs.io/zh-cn/latest/advanced_guides/index.html)
+
+自定义模型重点看：[组件定制](https://mmdetection.readthedocs.io/zh-cn/latest/advanced_guides/index.html#id2)
+
+深入理解看：[中文教程](https://mmdetection.readthedocs.io/zh-cn/latest/article.html)
+
+[MMEngine](https://mmengine.readthedocs.io/zh-cn/latest/get_started/introduction.html)，较深入时要看
+
+### [算法组件](https://zhuanlan.zhihu.com/p/337375549)：
+**训练核心组件**
+1. Backbone: 任何一个 batch 的图片先输入到 backbone 中进行特征提取，典型的骨干网络是 ResNet, Darknet `mmdet/models/backbones`
+2. Neck: 输出的单尺度或者多尺度特征图输入到 neck 模块中进行特征融合或者增强，neck 可以认为是 backbone 和 head 的连接层，主要负责对 backbone 的特征进行高效融合和增强，能够对输入的单尺度或者多尺度特征进行融合、增强输出等。典型的 neck 是 FPN `mmdet/models/necks`
+3. Head: 上述多尺度特征最终输入到 head 部分，一般都会包括分类和回归分支输出;目标检测算法输出一般包括分类和框坐标回归两个分支，不同算法 head 模块复杂程度不一样，灵活度比较高。在网络构建方面，理解目标检测算法主要是要理解 head 模块。`mmdet/models/dense_heads + roi_heads`
+虽然 head 部分的网络构建比较简单，但是由于正负样本属性定义、正负样本采样和 bbox 编解码模块都在 head 模块中进行组合调用，故 MMDetection 中最复杂的模块就是 head。
+3. 1. Enhance: 在整个网络构建阶段都可以引入一些即插即用增强算子来增加提取提取能力，典型的例如 SPP、DCN、注意力机制 等等
+3. 2. BBox Assigner，BBox Sampler：目标检测 head 输出一般是特征图，对于分类任务存在严重的正负样本不平衡，可以通过正负样本属性分配和采样策略控制 `mmdet/core/bbox/assigners + samplers`
+3. 3. BBox Encoder：为了方便收敛和平衡多分支，一般都会对 gt bbox 进行编码，如归一化 `mmdet/core/bbox/coder`
+3. 4. Loss: 最后一步是计算分类和回归 loss，进行训练 `mmdet/models/losses`
+8. Training tricks: 在训练过程中也包括非常多的 trick，例如优化器选择等，参数调节也非常关键
+
+`bbox_head.forward_train`
+
+**测试核心组件**
+BBox Decoder：对应Encoder `mmdet/core/bbox/coder`
+BBox PostProcess：最常用的后处理就是非极大值抑制以及其变种。`mmdet/core/post_processing`
+Testing tricks：典型的是多尺度测试以及各种模型集成手段
+
+`bbox_head.get_bboxes`
+
+![MM](https://pic3.zhimg.com/80/v2-c4e6229a1fd42692d090108481be34a6_1440w.webp)
+
+### [整体构建细节](https://zhuanlan.zhihu.com/p/341954021)
+![1](https://pic2.zhimg.com/80/v2-2463639f7e39afd273fdeccbfa530d49_1440w.webp)
+
+Pipeline: 由一系列按照插入顺序运行的数据处理模块组成，每个模块完成某个特定功能，例如 Resize，因为其流式顺序运行特性，故叫做 Pipeline。
+![pipe](https://pic3.zhimg.com/80/v2-d7eb7e24335613da3da22da4ea93e132_1440w.webp)
+
+MMDataParallel:处理Dataloader中pytorch 无法解析的DataContainer 对象,且额外实现了 `train_step()` 和 `val_step() `两个函数，可以被 Runner 调用
+
+Model:
+![mmdetect](https://pic1.zhimg.com/80/v2-7ecc8e5e19c59a3e6682c5e3cdc34918_1440w.webp)
+
+Runner:封装了 OpenMMLab 体系下各个框架的训练和验证详细流程，其负责管理训练和验证过程中的整个生命周期，通过预定义回调函数，用户可以插入定制化 Hook ，从而实现各种各样的需求。
+![Hook](https://pic4.zhimg.com/80/v2-5d614997aa85e1b841457094b7bc0cbb_1440w.webp)
+
+整体代码抽象
+![codepipe](https://pic4.zhimg.com/80/v2-b03d43ed4b3dc4c02e68712e57023cff_1440w.webp)
+```py
+#=================== tools/train.py ==================
+# 1.初始化配置
+cfg = Config.fromfile(args.config)
+# 2.判断是否为分布式训练模式
+# 3.初始化 logger
+logger = get_root_logger(log_file=log_file, log_level=cfg.log_level)
+# 4.收集运行环境并且打印，方便排查硬件和软件相关问题
+env_info_dict = collect_env()
+# 5.初始化 model
+model = build_detector(cfg.model, ...)
+# 6.初始化 datasets
+
+#=================== mmdet/apis/train.py ==================
+# 1.初始化 data_loaders ，内部会初始化 GroupSampler
+data_loader = DataLoader(dataset,...)
+# 2.基于是否使用分布式训练，初始化对应的 DataParallel
+if distributed:
+  model = MMDistributedDataParallel(...)
+else:
+  model = MMDataParallel(...)
+# 3.初始化 runner
+runner = EpochBasedRunner(...)
+# 4.注册必备 hook
+runner.register_training_hooks(cfg.lr_config, optimizer_config,
+                               cfg.checkpoint_config, cfg.log_config,
+                               cfg.get('momentum_config', None))
+# 5.如果需要 val，则还需要注册 EvalHook           
+runner.register_hook(eval_hook(val_dataloader, **eval_cfg))
+# 6.注册用户自定义 hook
+runner.register_hook(hook, priority=priority)
+# 7.权重恢复和加载
+if cfg.resume_from:
+    runner.resume(cfg.resume_from)
+elif cfg.load_from:
+    runner.load_checkpoint(cfg.load_from)
+# 8.运行，开始训练
+runner.run(data_loaders, cfg.workflow, cfg.total_epochs)
+```
+
+Runner训练和验证代码抽象
+runner 对象内部的 run 方式是一个通用方法，可以运行任何 workflow，目前常用的主要是 train 和 val。
+```py
+def train(self, data_loader, **kwargs):
+    self.model.train()
+    self.mode = 'train'
+    self.data_loader = data_loader
+    self.call_hook('before_train_epoch')
+    for i, data_batch in enumerate(self.data_loader):
+        self.call_hook('before_train_iter')
+        self.run_iter(data_batch, train_mode=True)
+        self.call_hook('after_train_iter')
+
+    self.call_hook('after_train_epoch')
+
+def val(self, data_loader, **kwargs):
+  ...
+
+#核心函数实际上是 self.run_iter()，如下：
+def run_iter(self, data_batch, train_mode, **kwargs):
+    if train_mode:
+        # 对于每次迭代，最终是调用如下函数
+        outputs = self.model.train_step(data_batch,...)
+    else:
+        # 对于每次迭代，最终是调用如下函数
+        outputs = self.model.val_step(data_batch,...)
+
+    if 'log_vars' in outputs:
+        self.log_buffer.update(outputs['log_vars'],...)
+    self.outputs = outputs
+
+#上述 self.call_hook() 表示在不同生命周期调用所有已经注册进去的 hook，而字符串参数表示对应的生命周期。以 OptimizerHook 为例，其执行反向传播、梯度裁剪和参数更新等核心训练功能：
+@HOOKS.register_module()
+class OptimizerHook(Hook):
+
+    def __init__(self, grad_clip=None):
+        self.grad_clip = grad_clip
+
+    def after_train_iter(self, runner):
+        runner.optimizer.zero_grad()
+        runner.outputs['loss'].backward()
+        if self.grad_clip is not None:
+            grad_norm = self.clip_grads(runner.model.parameters())
+        runner.optimizer.step()
+
+#可以发现 OptimizerHook 注册到的生命周期是 after_train_iter，故在每次 train() 里面运行到self.call_hook('after_train_iter') 时候就会被调用，其他 hook 也是同样运行逻辑。
+```
+
+Model 训练和测试代码抽象
+训练和验证的时候实际上调用了 model 内部的 train_step 和 val_step 函数，理解了两个函数调用流程就理解了 MMDetection 训练和测试流程。
+由于 model 对象会被 DataParallel 类包裹，故实际上上此时的 model，是指的 MMDataParallel, 以train_step 流程为例，其内部完成调用流程图示如下：
+![train_step](https://pic4.zhimg.com/80/v2-0d17b53f68286931803bf9d1dca10467_1440w.webp)
+
+### [Head流程](https://zhuanlan.zhihu.com/p/343433169)
+![Head](https://pic4.zhimg.com/80/v2-ba9edb24f8cbf10ee77bacb7f10befa7_1440w.webp)
+```py
+#============= mmdet/models/detectors/single_stage.py/SingleStageDetector ============
+def forward_train(...):
+    super(SingleStageDetector, self).forward_train(img, img_metas)
+    # 先进行 backbone+neck 的特征提取
+    x = self.extract_feat(img)
+    # 主要是调用 bbox_head 内部的 forward_train 方法
+    losses = self.bbox_head.forward_train(x, ...)
+    return losses
+```
+读起来有点吃力，后续结合源码读
+
+    
+
+# 修改
+```sh
+│
+├───configs
+│   └───FedPSD
+│           yolo.py
+│
+├───mmdet
+│   ├───datasets
+│   │   │   markingpoint.py
+│   │   │   __init__.py
+│   │   │
+│   │   └───pipelines   #pipeline似乎可以复用，在配置文件里改？
+│   │       │   formating.py    
+│   │       │   loading.py  #数据加载
+│   │       │   transforms.py   #数据处理
+│   │       └───__init__.py
+│   │
+│   └───models
+│       ├───dense_heads
+│       │   │   psd_head.py
+│       │   └───__init__.py
+│       │
+│       └───detectors
+│           │   parking_slot_det.py
+│           └───__init__.py
+```
+在修改之后，需要重新编译mmdet,在根目录使用 
+`python setup.py install` `pip install -v -e .`, 否则会报错
+
+## notes
++ `@TRANSFORMS.register_module()`
+这是 MMDetection 库提供的一个 Python 装饰器。它用于将一个新的模块（通常是一个定义数据增强或预处理操作的类）注册到 MMDetection 库的流水线系统中。位于一个类定义的上方。
+TRANSFORMS: 这是 MMDetection 中的一个注册表，用于存储目标检测流水线中使用的不同数据增强和预处理步骤。
+register_module(): 这是 TRANSFORMS 注册表中的一个函数，用于注册一个新的模块。

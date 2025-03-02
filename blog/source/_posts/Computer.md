@@ -137,3 +137,10 @@ Win + R > PSR，打开步骤记录器页面。
 > 桌面闪烁，底部任务栏跟着刷新，造成的因素有许多可能，硬件显卡驱动的问题，以及刷新率,explorer资源管理器,注册列表问题,病毒问题
 初步测试：win+R一直在闪烁，输入一个字母，然后又不能输入了，需要重新在下次刷新前点击，抢在刷新前，点击接着输入。意味着只要点的快，还是可以打开点东西的。Ctrl键+Alt键+Delete键，可以进入管控，打开任务资源管理器，重启explorer资源管理器，毫无效果。
 打开任务资源管理器 > 运行新任务 > 输入`cmd` > `sfc /scannow`（扫描修复系统文件）解决
+
+
+# Windows使用VoiceMeeter实现音频多路输出
+如果有多组音箱，可以用VoiceMeeter的虚拟输出实现多声道输出
+下载：[Voicemeeter-banana](https://vb-audio.com/Voicemeeter/banana.htm)
+参考视频：[VoiceMeeter组多设备详细教程](https://www.bilibili.com/video/BV1Hj421d7j3/?p=1)
+我的配置：<img alt="图 0" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/Computer_VoiceMeeter.png" width="80%"/>  
