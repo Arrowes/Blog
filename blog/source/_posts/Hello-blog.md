@@ -166,7 +166,7 @@ VScode终端中使用：
 √ 网站底部的图标不显示:Font Awesome部分图标收费
 √ 访客数、文章字数没有数据：busuanzi链接过期
 √ 生成的文章目录结构混乱：避免写跨级结构
-部署经常超时 error：spawn failed，多试几次
+部署经常超时 error：spawn failed，多试几次, 也可能是windows解析的github.com网址IP不对，解决方法见：https://wangyujie.space/Linux/#Debug
 
 
 ### 总结

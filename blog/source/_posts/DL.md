@@ -238,6 +238,9 @@ map*map是下个featuremap的大小，也就是上个weight*weight到底做了�
     3. 梯度同步更新:每个GPU设备得到了mini-batch训练后的权重值，这些值需要汇总然后更新至每一个GPU设备，保证每一次迭代后，每个GPU设备上的模型完全一致。
     <img src="https://i-blog.csdnimg.cn/blog_migrate/480474efbee3b54d014a3f6691284354.jpeg" width = "50%" />
 
+> 分布式训练中的学习率自动缩放：在数据并行中，多个GPU同时处理不同的数据子集（每个GPU的批量大小为 B），总批量大小为 B × GPU数量。例如，单GPU批量大小为256，使用4个GPU时，总批量大小变为1024。
+更大的批量意味着梯度估计的方差更小，更新方向更准确。为了保持参数更新的有效步长与单GPU训练一致，需要按比例调整学习率。
+
 分布式系统中因为面临大量的信息同步、更新需求，因此传统的点对点(P2P, Point-to-point)的通信方式不能很好的满足需求。需要使用集合通信库(Collective communication Library)，用于分布式训练时，多个计算设备之间的集合通信，常见的有 Open MPI、NCCL:
 + Open MPI:Open MPI项目是一个开源MPI（消息传递接口 ）实现，由学术，研究和行业合作伙伴联盟开发和维护。因此，Open MPI可以整合高性能计算社区中所有专家，技术和资源，以构建可用的最佳MPI库。
 + Gloo:facebook开源的一套集体通信库，他提供了对机器学习中有用的一些集合通信算法如：barrier, broadcast, allreduce
@@ -365,7 +368,7 @@ Testing tricks：典型的是多尺度测试以及各种模型集成手段
 ![MM](https://pic3.zhimg.com/80/v2-c4e6229a1fd42692d090108481be34a6_1440w.webp)
 
 ### [整体构建细节](https://zhuanlan.zhihu.com/p/341954021)
-![1](https://pic2.zhimg.com/80/v2-2463639f7e39afd273fdeccbfa530d49_1440w.webp)
+<img src="https://pic2.zhimg.com/80/v2-2463639f7e39afd273fdeccbfa530d49_1440w.webp" width = "80%" />
 
 Pipeline: 由一系列按照插入顺序运行的数据处理模块组成，每个模块完成某个特定功能，例如 Resize，因为其流式顺序运行特性，故叫做 Pipeline。
 ![pipe](https://pic3.zhimg.com/80/v2-d7eb7e24335613da3da22da4ea93e132_1440w.webp)
@@ -373,13 +376,14 @@ Pipeline: 由一系列按照插入顺序运行的数据处理模块组成，每�
 MMDataParallel:处理Dataloader中pytorch 无法解析的DataContainer 对象,且额外实现了 `train_step()` 和 `val_step() `两个函数，可以被 Runner 调用
 
 Model:
-![mmdetect](https://pic1.zhimg.com/80/v2-7ecc8e5e19c59a3e6682c5e3cdc34918_1440w.webp)
+<img src="https://pic1.zhimg.com/80/v2-7ecc8e5e19c59a3e6682c5e3cdc34918_1440w.webp" width = "80%" />
 
 Runner:封装了 OpenMMLab 体系下各个框架的训练和验证详细流程，其负责管理训练和验证过程中的整个生命周期，通过预定义回调函数，用户可以插入定制化 Hook ，从而实现各种各样的需求。
-![Hook](https://pic4.zhimg.com/80/v2-5d614997aa85e1b841457094b7bc0cbb_1440w.webp)
+<img src="https://pic4.zhimg.com/80/v2-5d614997aa85e1b841457094b7bc0cbb_1440w.webp" width = "90%" />
 
 整体代码抽象
-![codepipe](https://pic4.zhimg.com/80/v2-b03d43ed4b3dc4c02e68712e57023cff_1440w.webp)
+<img src="https://pic4.zhimg.com/80/v2-b03d43ed4b3dc4c02e68712e57023cff_1440w.webp" width = "80%" />
+
 ```py
 #=================== tools/train.py ==================
 # 1.初始化配置

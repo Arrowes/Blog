@@ -68,6 +68,7 @@ find / -name "[]"   #查找 find *XXX*
 ls -l | grep "^-" | wc -l   #统计当前目录下文件的个数（不包括目录）
 find -name "*.jpg" | wc -l  #统计当前文件夹下指定类型的文件的数量
 du -h --max-depth=1 #查磁盘占用情况
+du -sh ./*          #查看当前目录下每个文件和子目录占用的总空间
 diskutil list       #显示现有磁盘状况
 
 export 变量名=值     #设置或更新环境变量的值
@@ -204,6 +205,7 @@ shift + tab         #批量取消缩进
 ```
 网格布局：查看 > 编辑器布局 > 2x2 网格
 vscode 文件标签栏多行显示：文件 > 首选项 > 设置 > workbench.editor.wrapTabs
+竖向选中：按住 Alt + Shift，然后使用鼠标左键拖动进行选择。
 
 插件：
 + Prettier——自动化代码格式化工具，帮助保持代码的一致性和可读性。
@@ -289,6 +291,17 @@ git stash pop           #恢复工作区的内容(git stash list, git stash appl
 # origin：远程
 ```
 
+## Debug
+如果发现github ping不通，但网站可以正常访问，则需要配置host:
+1. 在 https://www.ipaddress.com/ 查询 `github.com`与`github.global.ssl.fastly.net`的IP
+2. 打开hosts文件:`C:\Windows\System32\drivers\etc`
+3. 配置Host,在文件最后加入查到的IP, 如：
+   ```sh
+    #github地址
+    140.82.114.4 github.com
+    151.101.1.194 github.global.ssl.fastly.net
+   ```
+
 # Docker
 `Docker`是一种开源的容器化平台，可以帮助开发者更高效地打包、部署和运行应用程序。它基于 `Linux` 容器（LXC）技术，通过将应用程序及其所有依赖项打包到一个容器中，从而消除了应用程序在不同环境之间迁移所面临的问题。使用Docker，开发者可以快速构建、测试和部署应用程序，减少了与操作系统和基础设施相关的问题，从而提高了开发、测试和发布的速度。
 
@@ -356,6 +369,7 @@ docker save -o <output-file.tar> <new-image-name>
 ```
 
 ## Docker Compose
+docker compose 是 Docker 的内置命令，随着 Docker 的安装自动安装, 与 Docker CLI 集成更紧密。是对 docker-compose 的进化和集成
 ```bash
 #确保已经安装了 Docker 和 Docker Compose：
 docker --version
