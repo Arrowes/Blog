@@ -12,7 +12,7 @@ Linux常用指令，Ubuntu虚拟机使用指南，Git工作流，Docker基本概
 
 
  
-
+## 常用命令
 ```sh
 #系统
 lsb_release -a      #查ubuntu版本    
@@ -97,7 +97,12 @@ sudo apt-get install p7zip
 #压缩
 7z a -t7z -r XX.7z /home/XX/*
 ```
+## 终端快捷键
 Ctrl + R 搜索历史命令
+Ctrl + S：挂起，类似于暂停
+Ctrl + Q：退出挂起
+Ctrl + C：中断并杀死，程序终止。
+Ctrl + Z：中断程序放到后台，唤醒使用“fg”命令。
 Ctrl + Backspace 删除整个单词
 多个语句可以通过`;`分割 `&&` 表示上一句返回码0才会执行 `||` 表示上一句返回码非0才会执行 `;` 无论如何都执行
 
@@ -271,6 +276,7 @@ git branch -r       #输出你的分支名称
 git fetch           #git pull = git fetch + git merge
 git submodule sync    #同步子模块
 git submodule update  #更新子模块
+git submodule update --init --recursive --remote # 初始化所有子模块（递归），并强制更新到远程仓库的最新版本。
 git config --list   #检查当前配置
 git config --global user.name "[name]"    #配置全局信息 无global则是在项目中配置
 git config --global user.email "[email address]" 
@@ -290,7 +296,13 @@ git stash pop           #恢复工作区的内容(git stash list, git stash appl
 # 不要把工具文件上传到公共仓库
 # origin：远程
 ```
-
+## 公钥和私钥
+```sh
+# 按提示选择密钥存储路径（默认是 ~/.ssh/id_rsa），并设置密码短语（可选）。
+ssh-keygen -t rsa -b 4096 -C "your_email@example.com"
+# 将公钥添加到远程服务器，如果 ssh-copy-id 不可用，可以手动将公钥内容（~/.ssh/id_rsa.pub）复制到远程服务器的 ~/.ssh/authorized_keys 文件中
+ssh-copy-id user@remote_host
+```
 ## Debug
 如果发现github ping不通，但网站可以正常访问，则需要配置host:
 1. 在 https://www.ipaddress.com/ 查询 `github.com`与`github.global.ssl.fastly.net`的IP
