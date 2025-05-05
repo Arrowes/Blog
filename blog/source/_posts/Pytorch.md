@@ -141,8 +141,8 @@ IDLE Ctrl+N 编辑多行代码
 
 
 
-# [Google Colab](https://colab.research.google.com/)
-
+# Google Colab
+[Google Colab](https://colab.research.google.com/)
 ```py
 #设置并查看GPU 修改>笔记本设置>GPU
 import tensorflow as tf
@@ -175,6 +175,16 @@ drive.mount('/content/drive')
 #云训练时还是要将盘里的文件拿出来再开始，否则容易直接断连!
 ```
 续航插件：[Colab Alive](https://chrome.google.com/webstore/detail/colab-alive/eookkckfbbgnhdgcbfbicoahejkdoele?hl=zh-CN), 防止训练时掉线
+
+# 炼丹笔记
+**后台运行训练任务工具**
+1. nohup python train.py > train_output.log 2>&1 &
+   linux自带的命令，忽略终端挂断信号（SIGHUP），确保即使关闭终端或退出 SSH 连接，程序仍继续运行
+2. tmux
+  一个终端复用工具（Terminal Multiplexer），需要单独安装，可以在单个终端窗口中创建多个虚拟终端会话，并支持会话的持久化（即使断开 SSH 连接也不会中断任务）。
+
+**dlview**
+a  Python package dlview (short for deep learning view), a print tool to simplify APN debugging
 
 # Pytorch
 要调用GPU进行训练的话，需要安装显卡驱动对应的CUDA
@@ -561,15 +571,53 @@ print(output)
 ```
 
 # Python
-## 回调函数
+## self
+self = 当前对象实例的引用，由 Python 自动传递（无需手动传参）。
+本质语法糖：obj.method() → Class.method(obj)。
+```py
+# 1. 访问实例属性
+class Dog:  
+    def __init__(self, name):  
+        self.name = name  # 绑定到当前实例  
+
+    def bark(self):  
+        print(f"{self.name} 在叫！")  # 访问当前实例的属性  
+# 2. 调用同类方法
+class ImageProcessor:  
+    def process(self):  
+        self._convert_format()  # 调用当前实例的其他方法  
+
+    def _convert_format(self):  
+        pass  
+# 3. 支持多实例共存
+obj1 = Dog("Buddy")  
+obj2 = Dog("Max")  
+obj1.name  # "Buddy"  
+obj2.name  # "Max"  （数据隔离） 
+``` 
+```py
+# 必须显式声明：方法定义时第一个参数写 self
+def method(self): ...  # ✅  
+def method(): ...     # ❌ TypeError  
+
+# 静态方法无 self：用 @staticmethod 时禁止用 self
+@staticmethod  
+def util(): ...      # ✅  
+@staticmethod  
+def util(self): ...  # ❌  
+```
+self 是实例的“身份证”，让对象知道自己是谁、能做什么。
+
+
+## call 回调函数
+
+__call__ 方法: 让一个类的实例像函数一样被调用。
+语法糖：obj() → obj.__call__()
+
+
 def __call__(self, results: dict) -> dict:
 这段代码定义了一个名为 __call__ 的特殊方法，它属于一个 Python 类（class）。
-
-__call__ 方法可以让一个类的实例像函数一样被调用。
-self 是 Python 类方法中的第一个参数，它指向类的实例本身。
-results: dict 表示该方法接收一个名为 results 的字典作为参数。
 -> dict 表示该方法返回一个字典。
-作用：
 
 当你使用圆括号调用一个类的实例时，Python 解释器会自动调用该实例的 __call__ 方法。
 __call__ 方法通常用于执行一些操作，并返回一个结果。
@@ -588,8 +636,7 @@ print(result)  # 输出 6
 ```
 在这个例子中，MyClass 类定义了一个 __call__ 方法，它接收一个参数 x，并返回 self.value * x 的结果。当我们使用圆括号调用 my_instance 实例时，Python 解释器会自动调用 __call__ 方法，并将 3 作为参数传递给它。
 
-__call__ 方法可以让一个类的实例像函数一样被调用，它通常用于执行一些操作，并返回一个结果。
-
+__call__ 方法可以让一个类的实例像函数一样被调用，它通常用于执行一些操作，并返回一个结果。让对象像函数一样工作，适合需要封装状态+行为的场景。
 
 
 ## 数据
