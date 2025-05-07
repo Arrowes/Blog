@@ -104,11 +104,26 @@ Gemini API: 注意并非可以访问gemini的网站就代表梯子正常。对�
 [小白也能看懂的本地文生图](https://docs.google.com/document/d/11vPOdz_4q_DrAhdL3fLP61FkzRZSppyCuqpLps4qIkA/edit?tab=t.0#heading=h.suwlqsio29mz)
 
 ## chat-on-wechat
-
+https://github.com/zhayujie/chatgpt-on-wechat
+config example:
+```log
+ "channel_type": "wx",
+  "model": "xunfei",
+  "xunfei_app_id": "2c706062",
+  "xunfei_api_key": "99da3dd9feaf65eXXX",
+  "xunfei_api_secret": "ZTg3MmMyODJkZmQyXXX9b98ad41989a47e97XXXNzQ5M2YzM2M1YzYy",
+  "xunfei_domain": "generalv3.5",
+  "xunfei_spark_url": "wss://spark-api.xf-yun.com/v3.5/chat",  
+```
 # AI绘画
-sd-webui-aki
+[秋葉aaaki](https://space.bilibili.com/12566101)：
+   - [Stable Diffusion整合包](https://www.bilibili.com/video/BV1iM4y1y7oA/?spm_id_from=333.1387.homepage.video_card.click&vd_source=b530b63b4657d68926b54a618d047d04)
+   - [ComfyUI整合包](https://www.bilibili.com/video/BV1Ew411776J/?spm_id_from=333.1387.homepage.video_card.click&vd_source=b530b63b4657d68926b54a618d047d04)
 
 # AI音视频
 ## DeepLive
-
+[Deep-Live-Cam](https://github.com/hacksider/Deep-Live-Cam)
+注意图片不能有中文路径
 ## F5-TTS
+[F5-TTS](https://github.com/SWivid/F5-TTS)
+安装cuda以加速
