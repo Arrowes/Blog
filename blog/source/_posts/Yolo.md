@@ -82,7 +82,9 @@ YOLOv7网络结构：[理解yolov7网络结构](https://blog.csdn.net/athrunsunn
 
 算法精品仓库：[Bubbliiiing](https://github.com/bubbliiiing), [YOLO Air](https://github.com/iscyy/yoloair)，[YOLO Air2](https://github.com/iscyy/yoloair2), [yolov5_research](https://github.com/positive666/yolov5_research)
 
-[YOLO_Note](https://github.com/Arrowes/DLpractice/blob/main/DL_note/YOLO_Note.pdf)
+[YOLO_Note](https://github.com/Arrowes/DLpractice/tree/main/YOLO_note)
+
+[笔记：目标检测二十年综述Object Detection in 20 Years: A Survey中英对照翻译、重点标注及关键词翻译](https://blog.csdn.net/Arrowes/article/details/121877601?spm=1001.2014.3001.5501)
 
 # Ideas
 ## 数据集
@@ -98,6 +100,9 @@ YOLOv7网络结构：[理解yolov7网络结构](https://blog.csdn.net/athrunsunn
 数据增强：抖动模糊；三种不同的数据增强方法合成三通道；针对红外图像优化
 扩大数据集：旋转 偏移（首先要保证原始数据量够）；混合数据集——彩色+红外
 各集种类分配不均，测试集要用不同的人
+
+[红外图像通道扩展特征增强算法](https://blog.csdn.net/Arrowes/article/details/130020241?spm=1001.2014.3001.5501)
+[Guided image filtering 引导滤波算法实现图像细节增强](https://blog.csdn.net/Arrowes/article/details/130020426?spm=1001.2014.3001.5501)
 
 
 ## Anchor
