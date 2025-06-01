@@ -77,13 +77,11 @@ echo []             #输出指定的字符串或变量的值,用于调试程序�
 script -f log.txt   #输出terminal内容到文件 exit退出记录，或在指令后加入 > log.txt
 bash XX.sh          #运行sh脚本
 
-#tar打包
-tar -cvf XX.tar XX  #将XX文件夹打包为XX.tar文件
+#tar
+tar -czvf XX.tar.gz XX  # 压缩 XX 文件夹为 XX.tar.gz （排除：--exclude=dataset ）
+tar -xzvf XX.tar.gz     # 解压 XX.tar.gz （ -C /path ）
 tar -tf XX.tar      #查看tar内容
-tar -xzvf XXX.tar.gz #解压
-#tar压缩
-tar -zcvf XX.tar.gz XX #压缩XX（ 排除：XX前加--exclude=dataset）
-tar -xf XX.tar.gz XX   #解压 -C /path
+
 #zip
 zip -r XX.zip XX XX.txt #压缩XX以及XX.txt（排除：加-x "./XX/X"）
 unzip *.zip -d /path    #解压

@@ -691,7 +691,26 @@ glob
   substr = s[1:4]                 # 切片（'ell'）
   s_upper = s.upper()             # 转为大写
   ```
+## pdb
+在Python代码中插入import pdb; pdb.set_trace()，程序执行到该行时会暂停进入调试模式。此时可以使用以下命令：
 
+1. n 执行下一行
+2. s 进入函数调用
+3. c 继续运行
+4. l 查看当前代码段
+5. p 变量名查看变量值
+6. q 退出调试
+
+```py
+def test():
+    for i in range(3):
+        import pdb; pdb.set_trace()  # 断点位置
+        print(i)
+
+test()
+
+# 运行后会在循环每次迭代时暂停，可检查变量i的值，按n继续下一次循环。
+```
 
 ## 其他 
 pwd = os.getcwd()   # 获取当前工作目录
@@ -701,3 +720,7 @@ self: 在类的上下文中，self 是一种约定，使得方法能够访问和
 hook: hook编程是一种编程模式，是指在程序的一个或者多个位置设置位点（挂载点），当程序运行至某个位点时，会自动调用运行时注册到位点的所有方法。
 
 断言: assert 用于测试一个表达式是否为真。如果表达式为假，程序会抛出 AssertionError 异常，并终止程序运行。它通常用于调试和检查程序中某些假设是否成立。
+
+super() 函数: super() 是 Python 中的一个内置函数，用于调用父类（也称为超类）的方法。
+在 Python 中，super(LSS, self).__init__() 用于 调用父类 (BaseModule) 的构造函数，确保 LSS 继承 BaseModule 的所有初始化逻辑。
+
