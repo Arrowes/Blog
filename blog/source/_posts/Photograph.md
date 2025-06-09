@@ -9,12 +9,18 @@ tags:
 摄影笔记总结，专题拍摄笔记，摄影名词解释及相机知识，调色笔记更新中。
 <!--more-->
 
-**Sony A6000**
+# Sony A6000
 [sony a6000菜单设置指南（2021版）](https://post.smzdm.com/p/ag449pm7/)
 [索尼a6000的入门和使用技巧 - 知乎](https://zhuanlan.zhihu.com/p/87543572)
 [索尼APP使用教程](https://kdocs.cn/l/cq3CTsJgxvNv?f=201)
 [索尼A6000(ILCE-6000)说明书](http://app.mydigi.net/manualdown/soft/ilce-6000(4532055811).pdf)
 [索尼黑卡1(DSC-RX100)说明书](http://app.mydigi.net/manualdown/soft/DSC-RX100(4429665112).pdf)
+
+# 大疆Action5pro
+说明书：[DJI_Osmo_Action_5_Pro_User_Manual_v1.0_chs.pdf](https://dl.djicdn.com/downloads/DJI_Osmo_Action_5_Pro/UM/20240919/DJI_Osmo_Action_5_Pro_User_Manual_v1.0_chs.pdf)
+新手指引：[Osmo Action 5 Pro 新手快速攻略](https://support.dji.com/help/content?customId=zh-cn03400011286&spaceId=34&re=CN&lang=zh-CN)
+色彩还原lut: [d-log-m-to-rec-709-vivid-lut](https://www.dji.com/cn/downloads/softwares/dji-osmo-action-5-pro-d-log-m-to-rec-709-vivid-lut)
+大师滤镜lut: [rec-709-to-color-grading-luts](https://www.dji.com/cn/downloads/softwares/dji-osmo-action-5-pro-rec-709-to-color-grading-luts)
 
 # 调色笔记
 <img alt="图 7" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/Photograph-rrl.png" width=30%/>  
