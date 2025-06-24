@@ -22,12 +22,6 @@ tags:
 色彩还原lut: [d-log-m-to-rec-709-vivid-lut](https://www.dji.com/cn/downloads/softwares/dji-osmo-action-5-pro-d-log-m-to-rec-709-vivid-lut)
 大师滤镜lut: [rec-709-to-color-grading-luts](https://www.dji.com/cn/downloads/softwares/dji-osmo-action-5-pro-rec-709-to-color-grading-luts)
 
-开4k50帧 避免频闪，
-平时开Dlog，拍人时普通10bit肤色会更自然？
-接近肉眼的动态模糊的快门速度设置：1/2X帧率
-打开自动白平衡,然后开手动,能避免色温跳变
-多使用升格降格技巧
-
 # 调色笔记
 <img alt="图 7" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/Photograph-rrl.png" width=30%/>  
 
@@ -89,8 +83,7 @@ B-->C
 摆拍结合抓拍，引导自然的情绪流露。
 
 ## 星空摄影
-使用光污染地图：[light pollution map](www.lightpollutionmap.info)，[天文通-全球光污染地图](https://www.darkmap.cn/)，或直接用天文通小程序,还可以看蓝调时间，另还有 [火烧云分析与记录
-](https://sunsetbot.top/)
+使用光污染地图：[light pollution map](www.lightpollutionmap.info)，[天文通-全球光污染地图](https://www.darkmap.cn/)，或直接用天文通小程序
 对焦：手动对焦最亮的星星（无穷远），直到最小、最实
 + 星轨：月亮不能太亮，用star walk2找**小熊座**，即是星轨的圆心位置，ISO最低320，光圈最大（北极星是夜空中唯一不会移动的星星，北斗七星勺头两颗星连线 5 倍距离处都指向北极星）
 + 银河：春夏秋，银河核心会出现在夜空中用，最大光圈

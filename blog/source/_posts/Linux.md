@@ -311,11 +311,6 @@ ssh-copy-id user@remote_host
     140.82.114.4 github.com
     151.101.1.194 github.global.ssl.fastly.net
    ```
-git仓全部显示changes修改问题，需要git windows 和linux 统一换行符和权限，
-```sh
-git config --global core.autocrlf true
-git config core.fileMode false
-```
 
 # Docker
 `Docker`是一种开源的容器化平台，可以帮助开发者更高效地打包、部署和运行应用程序。它基于 `Linux` 容器（LXC）技术，通过将应用程序及其所有依赖项打包到一个容器中，从而消除了应用程序在不同环境之间迁移所面临的问题。使用Docker，开发者可以快速构建、测试和部署应用程序，减少了与操作系统和基础设施相关的问题，从而提高了开发、测试和发布的速度。
