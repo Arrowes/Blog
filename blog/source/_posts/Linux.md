@@ -94,6 +94,17 @@ sudo apt-get install p7zip
 #-o 是指定解压到的目录，注意-o后没有空格
 #压缩
 7z a -t7z -r XX.7z /home/XX/*
+
+# 硬盘制作与挂载
+df -h #查看所有挂载 
+fdisk -l #查看所有硬盘 找到未挂载的 如/dev/nvme4n1
+fdisk /dev/nvme4n1
+g
+n
+w
+mkfs.ext4 /dev/nvme4n1p1 #格式化
+mount /dev/nvme3n1p1 /root/7T_1
+mount /dev/nvme4n1p1 /root/7T_2  #挂载
 ```
 ## 终端快捷键
 Ctrl + R 搜索历史命令
@@ -103,9 +114,6 @@ Ctrl + C：中断并杀死，程序终止。
 Ctrl + Z：中断程序放到后台，唤醒使用“fg”命令。
 Ctrl + Backspace 删除整个单词
 多个语句可以通过`;`分割 `&&` 表示上一句返回码0才会执行 `||` 表示上一句返回码非0才会执行 `;` 无论如何都执行
-
-
-
 
 # Ubuntu
 ```sh
@@ -316,6 +324,7 @@ git仓全部显示changes修改问题，需要git windows 和linux 统一换行�
 git config --global core.autocrlf true
 git config core.fileMode false
 ```
+
 
 # Docker
 `Docker`是一种开源的容器化平台，可以帮助开发者更高效地打包、部署和运行应用程序。它基于 `Linux` 容器（LXC）技术，通过将应用程序及其所有依赖项打包到一个容器中，从而消除了应用程序在不同环境之间迁移所面临的问题。使用Docker，开发者可以快速构建、测试和部署应用程序，减少了与操作系统和基础设施相关的问题，从而提高了开发、测试和发布的速度。

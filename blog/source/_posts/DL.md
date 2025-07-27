@@ -61,6 +61,7 @@ $   n_{output.features}=[\frac{n_{input.features}+2p_{adding.size}-k_{ernel.size
 ## 卷积
 <img alt="图 37" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/DL-Conv.jpg" />  
 
+深度可分离卷积是一种高效的卷积方式，它通过先对每个通道单独做空间上的卷积（depthwise），再用 1×1 卷积融合通道信息（pointwise），与标准卷积相比显著减少了参数量和计算成本，特别适合部署在轻量级或移动设备上，同时仍保有较强的特征提取能力。
 
 ## 反向传播
 待续
@@ -109,6 +110,40 @@ $$L=\sum_{i=1}^{N}y^ilog\hat{y}^i+(1-y^i)log(1-\hat{y}^i)$$
 在Pytorch中，BCELoss和BCEWithLogitsLoss是一组常用的二元交叉熵损失函数，常用于二分类问题。区别在于BCELoss的输入需要先进行Sigmoid处理，而BCEWithLogitsLoss则是将Sigmoid和BCELoss合成一步，也就是说BCEWithLogitsLoss函数内部自动先对output进行Sigmoid处理，再对output 和target进行BCELoss计算。 
 
 one-hot独热编码：将类别变量转换为机器学习算法易于利用的一种形式的过程。
+
+### IoU Loss
+
+在目标检测和图像分割任务中，IoU Loss（Intersection over Union Loss）用于衡量预测框与真实框之间的重叠程度。相比于传统的 L1/L2 或 Smooth L1 损失，IoU 类损失更关注几何上的匹配，对边界框回归尤为关键。下面是主流几种 IoU 类损失的介绍：
+
+| 损失类型     | 特点与优势                                         | 适用场景                         |
+|--------------|----------------------------------------------------|----------------------------------|
+| IoU Loss     | 基础形式，仅考虑重叠区域比例                      | 边界框回归基础版本              |
+| GIoU Loss    | 引入最小闭包区域作为惩罚项，解决无交集的问题     | 较大偏移框，对空区域更敏感      |
+| DIoU Loss    | 加入中心点距离作为惩罚，提高定位精度             | 对目标位置要求高的检测任务      |
+| CIoU Loss    | 综合考虑中心点距离、重叠率、纵横比               | 高精度框回归，如人脸检测等      |
+| SIoU Loss    | 引入角度、方向对齐等几何信息，优化收敛速度       | 高稳定性和收敛效率的检测模型    |
+
+- **IoU**：
+  \[
+  IoU = \frac{\text{Area of Overlap}}{\text{Area of Union}}
+  \]
+
+- **GIoU Loss**：
+  \[
+  GIoU = IoU - \frac{|C - (A \cup B)|}{|C|}
+  \]
+  C 是最小闭包区域。
+
+- **DIoU Loss**：
+  \[
+  DIoU = IoU - \frac{\rho^2(b, b^{gt})}{c^2}
+  \]
+  其中 \( \rho \) 是中心距离，\( c \) 是对角线长度。
+
+- **CIoU Loss**：
+  在 DIoU 基础上增加形状约束项，综合角度与纵横比。
+
+IoU Loss 系列通过引入几何对齐、惩罚项等方式，让模型在训练时更关注框的位置与形状，提升检测精度和稳定性。
 
 # 注意力机制（Attention Mechanism）
 自上而下有意识的聚焦称为**聚焦式注意力**，自下而上无意识、由外界刺激引发的注意力称为**显著式注意力**。
