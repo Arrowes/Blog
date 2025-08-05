@@ -177,7 +177,7 @@ drive.mount('/content/drive')
 续航插件：[Colab Alive](https://chrome.google.com/webstore/detail/colab-alive/eookkckfbbgnhdgcbfbicoahejkdoele?hl=zh-CN), 防止训练时掉线
 
 # 炼丹笔记
-**后台运行训练任务工具**
+## 后台运行训练任务工具
 1. nohup python train.py > train_output.log 2>&1 &
    linux自带的命令，忽略终端挂断信号（SIGHUP），确保即使关闭终端或退出 SSH 连接，程序仍继续运行
 2. tmux
@@ -185,6 +185,37 @@ drive.mount('/content/drive')
 
 **dlview**
 a  Python package dlview (short for deep learning view), a print tool to simplify APN debugging
+
+## DataLoader的num_works参数设置
+数据集较小时（小于2W）建议num_works不用管默认就行，因为用了反而比没用慢。
+当数据集较大时建议采用，num_works一般设置为（CPU线程数+-1）为最佳，可以用以下代码找出最佳num_works（注意windows用户如果要使用多核多线程必须把训练放在if __name__ == '__main__':下才不会报错）
+
+```py
+import time
+import torch.utils.data as d
+import torchvision
+import torchvision.transforms as transforms
+
+if __name__ == '__main__':
+    BATCH_SIZE = 100
+    transform = transforms.Compose([transforms.ToTensor(),
+                                    transforms.Normalize((0.5,), (0.5,))])
+    train_set = torchvision.datasets.MNIST('\mnist', download=False, train=True, transform=transform)
+    
+    # data loaders
+    train_loader = d.DataLoader(train_set, batch_size=BATCH_SIZE, shuffle=True)
+    
+    for num_workers in range(20):
+        train_loader = d.DataLoader(train_set, batch_size=BATCH_SIZE, shuffle=True, num_workers=num_workers)
+        # training ...
+        start = time.time()
+        for epoch in range(1):
+            for step, (batch_x, batch_y) in enumerate(train_loader):
+                pass
+        end = time.time()
+        print('num_workers is {} and it took {} seconds'.format(num_workers, end - start))
+```
+[Pytorch之DataLoader的num_works参数设置](https://blog.csdn.net/qq_41196472/article/details/106393994?utm_medium=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-2.channel_param&depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-2.channel_param)
 
 # Pytorch
 要调用GPU进行训练的话，需要安装显卡驱动对应的CUDA
@@ -691,6 +722,16 @@ glob
   substr = s[1:4]                 # 切片（'ell'）
   s_upper = s.upper()             # 转为大写
   ```
+
++ *args：接收 任意数量的位置参数
++ **kwargs：接收 任意数量的关键字参数
+```py
+def super_function(name, *args, **kwargs):
+  print(f"Name: {name}")
+  print(f"Positional Args: {args}")
+  print(f"Keyword Args: {kwargs}")
+super_function("MyFunc", 1, 2, 3, option1="A", option2="B")
+```
 ## pdb
 在Python代码中插入import pdb; pdb.set_trace()，程序执行到该行时会暂停进入调试模式。此时可以使用以下命令：
 
