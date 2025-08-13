@@ -58,6 +58,20 @@ S 全屏看图
 裁剪R：O切换网格线，Ctrl+]旋转图片，X选择裁剪框
 蒙版：拉渐变，提亮人物，蒙版交叉
 
+## 达芬奇 DaVinci Resolve 视频调色
+官网下载免费的[davinci resolve](https://www.blackmagicdesign.com/cn/products/davinciresolve)
+在下方的剪辑面板中剪辑视频，再选择调色面板，导入LUT,  右下方打开示波器
+调色让示波器[顶天立地]，和修图一样拉S曲线
+```sh
+快捷键：
+ALT+S       创建节点
+Ctrl+D      显示/隐藏单个节点 
+ALT+D       显示/隐藏全部节点
+鼠标中键    复制上一个素材的节点
+```
+抓取静帧，划像对比，静帧会放到画廊，可以导出分享
+LUT 键输出 调整LUT浓度
+
 # 专题拍摄
 主题拍摄：一直拍一种，最后放在一起
 ## 人像写真
