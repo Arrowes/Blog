@@ -673,7 +673,7 @@ __call__ 方法可以让一个类的实例像函数一样被调用，它通常�
 ## 数据
 glob
 
-
+### 数据类型
 **1. 列表（List）**
 - **特点**：有序、可变、可存储任意类型元素。
 - **常用操作**：
@@ -732,6 +732,45 @@ def super_function(name, *args, **kwargs):
   print(f"Keyword Args: {kwargs}")
 super_function("MyFunc", 1, 2, 3, option1="A", option2="B")
 ```
+### numpy
+有些数据集会用更高效的npz格式存取：
+NumPy：tofile、fromfile、load 和 save。将NumPy数组存储到文件中，以及从文件中加载数组。
+1. tofile
+tofile 函数将数组的内容写入到二进制文件中。它不保存数组的形状或数据类型，只是将数据以二进制格式存储。
+```py
+import numpy as np
+# 创建一个示例数组
+array = np.array([1, 2, 3, 4, 5])
+# 将数组写入到文件中
+array.tofile('array.bin')
+```
+2. fromfile
+fromfile 函数从二进制文件中读取数据并将其转换为NumPy数组。它需要指定数据类型和形状，以便正确解析文件中的数据。
+```py
+# 从二进制文件中读取数据
+array = np.fromfile('array.bin', dtype=np.int64)  # 确保 dtype 和文件内容一致
+print(array)
+```
+3. save
+save 函数将NumPy数组保存为 .npy 格式的文件，这种格式会保存数组的形状、数据类型等元数据。
+```py
+# 创建一个示例数组
+array = np.array([1, 2, 3, 4, 5])
+# 将数组保存到 .npy 文件
+np.save('array.npy', array)
+```
+4. load
+load 函数从 .npy 文件中加载数组，恢复保存时的形状和数据类型。
+import numpy as np
+```py
+# 从 .npy 文件中加载数组
+array = np.load('array.npy')
+print(array)
+tofile 和 fromfile 用于处理二进制数据文件，通常不保存数组的元数据（形状和数据类型）。
+```
+save 和 load 使用 NumPy 的 .npy 格式，保存和加载时会包括数组的形状和数据类型信息。
+如果需要保存元数据并且确保数据的完整性，使用 .npy 格式是更好的选择；如果只是处理原始数据，使用二进制格式可能会更高效。
+
 ## pdb
 在Python代码中插入import pdb; pdb.set_trace()，程序执行到该行时会暂停进入调试模式。此时可以使用以下命令：
 

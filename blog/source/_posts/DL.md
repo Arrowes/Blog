@@ -294,6 +294,26 @@ map*map是下个featuremap的大小，也就是上个weight*weight到底做了�
 
 NCCL遇到显卡P2P通信问题:[1](https://huo.zai.meng.li/p/vllm%E5%90%AF%E5%8A%A8%E6%97%B6nccl%E9%81%87%E5%88%B0%E6%98%BE%E5%8D%A1p2p%E9%80%9A%E4%BF%A1%E9%97%AE%E9%A2%98/) [2](https://huo.zai.meng.li/p/vllm%E5%90%AF%E5%8A%A8%E6%97%B6nccl%E9%81%87%E5%88%B0%E6%98%BE%E5%8D%A1p2p%E9%80%9A%E4%BF%A1%E9%97%AE%E9%A2%98/)
 
+## 上采样相关概念
+放大特征图（feature map）尺寸的技术：转置卷积 (Deconvolution)、上采样 (Upsampling) 和 上池化 (Unpooling)
+1. **转置卷积**：又称反卷积，与普通卷积相反，它将小尺寸的输入映射到更大的输出。常用于语义分割、图像生成等任务中。
+通过在输入特征图的像素之间填充0（这个过程称为 dilation），并在周围添加 padding，然后进行一次标准的卷积操作，从而实现输出尺寸的放大。卷积核的权重是通过反向传播学习得到的。由于其学习特性，反卷积能够生成比插值方法更精细、信息更丰富的特征图。但计算量更大。
+<img src="https://i-blog.csdnimg.cn/blog_migrate/62be732a9003bfc80c298a2ecd5058a8.jpeg" width = "20%" />
+2. **上采样**：泛指所有将图像或特征图分辨率扩大的技术。在深度学习中，它通常特指那些不带可学习参数的、基于插值（Interpolation）的方法。
++ 最近邻插值 (Nearest Neighbor Interpolation): 将输出图像中每个像素的值设为输入图像中最近邻像素的值。这种方法简单快速，但容易产生块状效应。
++ 双线性插值 (Bilinear Interpolation): 考虑了输入图像中四个最近邻像素的加权平均值，生成的图像更平滑。
++ 双三次插值 (Bicubic Interpolation): 考虑了更广泛的邻域（16个像素），效果更好，但计算更复杂。
+3. **上池化**：池化（Pooling）操作的逆操作，特别是最大池化（Max Pooling）的逆操作。它旨在将特征图恢复到池化前的大小。
+利用池化过程中记录的位置信息来恢复特征图的结构。在进行最大池化时，不仅会保留池化区域内的最大值，还会记录这个最大值在原始特征图中的位置索引。在上池化阶段，会创建一个与池化前尺寸相同的全零特征图，然后根据之前记录的位置索引，将池化后的特征值放回相应位置。其余位置则保持为0。
+
+在U-Net等经典的图像分割网络中，解码器部分可能会先使用上采样或上池化来放大尺寸，然后再通过卷积层（或反卷积层）来学习和丰富特征。
+<img src="https://mmbiz.qpic.cn/mmbiz_png/teF4oHzZ4IQzKII5nhSaQrQV4tmXKQvf0ibE3QUVDR8X6FcDBqicuTE3riaO2QDLS5nibEoMzI7ugWPu33yVZUAydQ/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" width = "100%" />
+图（a）是输入层；
+图（b）是14\*14反卷积的结果；
+图（c）（d）是28\*28的UnPooling和反卷积的结果；
+图（e）（f）是56\*56的Unpooling和反卷积的结果；
+图（g）（h）是112\*112 UnPooling和反卷积的结果；
+图（i）（j）是224\*224的UnPooling和反卷积的结果
 
 # MMDetection
 
