@@ -441,7 +441,7 @@ Pipeline: 由一系列按照插入顺序运行的数据处理模块组成，每�
 MMDataParallel:处理Dataloader中pytorch 无法解析的DataContainer 对象,且额外实现了 `train_step()` 和 `val_step() `两个函数，可以被 Runner 调用
 
 Model:
-<img src="https://pic1.zhimg.com/80/v2-7ecc8e5e19c59a3e6682c5e3cdc34918_1440w.webp" width = "80%" />
+<img src="https://pic1.zhimg.com/80/v2-7ecc8e5e19c59a3e6682c5e3cdc34918_1440w.webp" width = "50%" />
 
 Runner:封装了 OpenMMLab 体系下各个框架的训练和验证详细流程，其负责管理训练和验证过程中的整个生命周期，通过预定义回调函数，用户可以插入定制化 Hook ，从而实现各种各样的需求。
 <img src="https://pic4.zhimg.com/80/v2-5d614997aa85e1b841457094b7bc0cbb_1440w.webp" width = "90%" />

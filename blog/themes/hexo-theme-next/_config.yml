@@ -566,7 +566,7 @@ quicklink:
 # See: https://theme-next.org/docs/third-party-services/comments
 # ---------------------------------------------------------------
 
-# Multiple Comment System Support
+# Multiple Comment System Support 评论区
 comments:
   # Available values: tabs | buttons
   style: tabs
@@ -576,7 +576,7 @@ comments:
   # Setting `true` means remembering the comment system selected by the visitor.
   storage: true
   # Lazyload all comment systems.
-  lazyload: false
+  lazyload: true
   # Modify texts or order for any navs, here are some examples.
   nav:
     #disqus:
@@ -639,7 +639,7 @@ livere_uid: # <your_uid>
 # Gitalk
 # For more information: https://gitalk.github.io, https://github.com/gitalk/gitalk
 gitalk:
-  enable: true
+  enable: false
   github_id: Arrowes # GitHub repo owner
   repo: Arrowes.github.io # Repository name to store issues
   client_id: 0cf14e51c1582cf64289 # GitHub Application Client ID
@@ -752,7 +752,7 @@ local_search:
   # Show top n results per article, show all results by setting to -1
   top_n_per_article: -1
   # Unescape html strings to the readable one.
-  unescape: true
+  unescape: false
   # Preload the search data when the page loads.
   preload: false
 
