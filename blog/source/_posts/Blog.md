@@ -21,8 +21,6 @@ tags:
 
 Github网站项目地址：[Arrowes.github.io](https://github.com/Arrowes/Arrowes.github.io)
 
-用关键词在谷歌里搜到自己的网页：[让Google搜索到自己的博客](https://zoharandroid.github.io/2019-08-03-%E8%AE%A9%E8%B0%B7%E6%AD%8C%E6%90%9C%E7%B4%A2%E5%88%B0%E8%87%AA%E5%B7%B1%E7%9A%84%E5%8D%9A%E5%AE%A2/)
-
 ### 网站配置
 #### 添加动态背景，以动态线条为例：
 1. themes/next/layout/_layout 在`</body>`末尾添加如下代码：
@@ -117,9 +115,47 @@ index_generator:
 ``npm install hexo-filter-mermaid-diagrams``
 主题配置文件：``mermaid:  enable: true``
 
-#### 访问加速
-[使用vercel加速Hexo静态博客访问](https://vincentqin.tech/posts/speedup-gitpage/)
+#### 底部加入网站运行时间
+<div>
+<span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>
+<script>
+    var now = new Date();
+    function createtime() {
+        var grt= new Date("11/22/2022 00:00:00");
+        now.setTime(now.getTime()+250);
+        days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days);
+        hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours);
+        if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum);
+        mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;}
+        seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum);
+        snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;}
+        document.getElementById("timeDate").innerHTML = "本站已运行 "+dnum+" 天 ";
+        document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒";
+    }
+setInterval("createtime()",250);
+</script>
+</div>
 
+#### 接入Cloudflare CDN加速
+部署在GitHub Pages上的Hexo博客接入Cloudflare CDN，实现全站加速。
+对于在GitHub Pages上搭建的个人博客，国内访问速度缓慢是一个普遍存在的痛点。由于GitHub服务器位于海外，未经优化的站点在不使用VPN的情况下，页面加载通常需要耗费大量时间，严重影响用户体验。
+这个过程的核心是将域名的DNS解析服务从当前的域名注册商迁移到Cloudflare，让所有访问博客的流量都先经过Cloudflare的全球网络进行加速和分发。
+1. 访问 Cloudflare官网 并创建一个免费账户。登录后，点击仪表板上的 “+ 添加站点” 按钮，输入域名，选择免费套餐
+2. Cloudflare会自动扫描域名现有的DNS记录。并提供两个新的DNS服务器地址，找到域名的DNS管理或DNS服务器设置区域。这个功能通常被标记为 “DNS Management”, “Nameserver Settings” 或 “修改DNS服务器”。删除掉原有的DNS服务器地址，然后添加Cloudflare提供的两个新地址。
+3. 等待DNS生效
+4. 顺便在Cloudflare页面开启其他性能和安全服务
+
+#### 提交搜索引擎索引
+让用户用关键词在谷歌里搜到自己的网页：
+
+1. 使用搜索引擎搜索`site:wangyujie.space`，如果查看的结果是没有显示自己网站相关的内容的时候，说明网站是没有被收录的。
+2. 添加站点地图：XML-Sitemaps.com 页面，输入博客地址，点击 start。下载 SITEMAP 文件sitemap.xml并将其上传到网站的根目录（blog\themes\hexo-theme-next\source，这个位置的内容不会被hexo渲染，后面各搜索引擎的验证文件也放这里）
+3. 在各搜索引擎验证站点，并提交sitemap
+     + [Bing](https://www.bing.com/webmasters/)
+     + [Google](https://search.google.com/search-console/sitemaps?resource_id=sc-domain%3Awangyujie.space&hl=zh)
+     + [Baidu](https://ziyuan.baidu.com/linksubmit/index),很垃圾，免费用户无法提交sitemap,只能挨个手动提交网址，一天一次
+
+谷歌：[让Google搜索到自己的博客](https://zoharandroid.github.io/2019-08-03-%E8%AE%A9%E8%B0%B7%E6%AD%8C%E6%90%9C%E7%B4%A2%E5%88%B0%E8%87%AA%E5%B7%B1%E7%9A%84%E5%8D%9A%E5%AE%A2/)
 ### markdown插件
 ``npm install hexo-reference --save`` 支持Markdown脚注
 ``npm install hexo-wordcount --save`` 字数统计
