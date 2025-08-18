@@ -116,6 +116,8 @@ index_generator:
 主题配置文件：``mermaid:  enable: true``
 
 #### 底部加入网站运行时间
+blog\themes\hexo-theme-next\layout\_partials\footer.swig
+```html
 <div>
 <span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>
 <script>
@@ -135,7 +137,7 @@ index_generator:
 setInterval("createtime()",250);
 </script>
 </div>
-
+```
 #### 接入Cloudflare CDN加速
 部署在GitHub Pages上的Hexo博客接入Cloudflare CDN，实现全站加速。
 对于在GitHub Pages上搭建的个人博客，国内访问速度缓慢是一个普遍存在的痛点。由于GitHub服务器位于海外，未经优化的站点在不使用VPN的情况下，页面加载通常需要耗费大量时间，严重影响用户体验。

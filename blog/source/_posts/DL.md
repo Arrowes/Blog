@@ -316,7 +316,7 @@ NCCL遇到显卡P2P通信问题:[1](https://huo.zai.meng.li/p/vllm%E5%90%AF%E5%8
 图（i）（j）是224\*224的UnPooling和反卷积的结果
 
 # MMDetection
-
+## 基本概念和环境搭建
 [MMDetection](https://mmdetection.readthedocs.io/zh-cn/latest/) 由 7 个主要部分组成，apis、structures、datasets、models、engine、evaluation 和 visualization。
 + apis 为模型推理提供高级 API。
 + structures 提供 bbox、mask 和 DetDataSample 等数据结构。
@@ -386,111 +386,308 @@ NCCL遇到显卡P2P通信问题:[1](https://huo.zai.meng.li/p/vllm%E5%90%AF%E5%8
     ]
     ```
 
-## [配置文件](https://mmdetection.readthedocs.io/zh-cn/latest/user_guides/config.html#id1)
-[MMEngine - 配置（CONFIG）详细文档](https://mmengine.readthedocs.io/zh-cn/latest/advanced_tutorials/config.html)
-在 MMDetection 中，一个模型被定义为一个配置文件 和对应被存储在 checkpoint 文件内的模型参数的集合。
-`./mmdetection/configs/_base_/..`
-在 config/_base_ 文件夹下有 4 个基本组件类型，分别是：数据集(dataset)，模型(model)，训练策略(schedule)和运行时的默认设置(default runtime)。许多方法，例如 Faster R-CNN、Mask R-CNN、Cascade R-CNN、RPN、SSD 能够很容易地构建出来。由 _base_ 下的组件组成的配置，被我们称为 原始配置(primitive)。
-1. 模型配置: 在 mmdetection 的配置中，我们使用 model 字段来配置检测算法的组件。 除了 backbone、neck 等神经网络组件外，还需要 data_preprocessor、train_cfg 和 test_cfg。 data_preprocessor 负责对 dataloader 输出的每一批数据进行预处理。 模型配置中的 train_cfg 和 test_cfg 用于设置训练和测试组件的超参数。
-2. 数据集和评测器配置: 在使用执行器 进行训练、测试、验证时，我们需要配置 Dataloader。构建数据 dataloader 需要设置数据集（dataset）和数据处理流程（data pipeline）。 由于这部分的配置较为复杂，我们使用中间变量来简化 dataloader 配置的编写。
-3. 训练和测试的配置: MMEngine 的 Runner 使用 Loop 来控制训练，验证和测试过程。 用户可以使用这些字段设置最大训练轮次和验证间隔。
-4. 优化相关配置: optim_wrapper 是配置优化相关设置的字段。优化器封装（OptimWrapper）不仅提供了优化器的功能，还支持梯度裁剪、混合精度训练等功能。param_scheduler 字段用于配置参数调度器（Parameter Scheduler）来调整优化器的超参数（例如学习率和动量）。 用户可以组合多个调度器来创建所需的参数调整策略。
-5. 钩子配置与运行相关配置：用户可以在训练、验证和测试循环上添加钩子，以便在运行期间插入一些操作。配置中有两种不同的钩子字段，一种是 default_hooks，另一种是 custom_hooks。
-[MMEngine - Hook](https://mmengine.readthedocs.io/zh-cn/latest/tutorials/hook.html)
-
-
-
-
-## [进阶教程](https://mmdetection.readthedocs.io/zh-cn/latest/advanced_guides/index.html)
-
+[进阶教程](https://mmdetection.readthedocs.io/zh-cn/latest/advanced_guides/index.html)
 自定义模型重点看：[组件定制](https://mmdetection.readthedocs.io/zh-cn/latest/advanced_guides/index.html#id2)
-
 深入理解看：[中文教程](https://mmdetection.readthedocs.io/zh-cn/latest/article.html)
-
 [MMEngine](https://mmengine.readthedocs.io/zh-cn/latest/get_started/introduction.html)，较深入时要看
+[算法组件](https://zhuanlan.zhihu.com/p/337375549)
 
-### [算法组件](https://zhuanlan.zhihu.com/p/337375549)：
-**训练核心组件**
+![MM](https://pic3.zhimg.com/80/v2-c4e6229a1fd42692d090108481be34a6_1440w.webp)
+
+
+[整体构建细节](https://zhuanlan.zhihu.com/p/341954021)
+
+Pipeline: 由一系列按照插入顺序运行的数据处理模块组成，每个模块完成某个特定功能，例如 Resize，因为其流式顺序运行特性，故叫做 Pipeline。
+
+MMDataParallel:处理Dataloader中pytorch 无法解析的DataContainer 对象,且额外实现了 `train_step()` 和 `val_step() `两个函数，可以被 Runner 调用
+
+<img src="https://pic4.zhimg.com/80/v2-b03d43ed4b3dc4c02e68712e57023cff_1440w.webp" width = "80%" />
+
+[MMDetection框架入门教程（完全版）](https://blog.csdn.net/qq_16137569/article/details/121316235)
+Pytorch
+1. 构建数据集：新建一个类，并继承Dataset类，重写__getitem__()方法实现数据和标签的加载和遍历功能，并以pipeline的方式定义数据预处理流程
+2. 构建数据加载器：传入相应的参数实例化DataLoader
+3. 构建模型：新建一个类，并继承Module类，重写forward()函数定义模型的前向过程
+4. 定义损失函数和优化器：根据算法选择合适和损失函数和优化器
+5. 训练和验证：循环从DataLoader中获取数据和标签，送入网络模型，计算loss，根据反传的梯度使用优化器进行迭代优化
+6. 其他操作：在主调函数里可以任意穿插训练Tricks、日志打印、检查点保存等操作
+
+MMDetection
+1. 注册数据集：CustomDataset是MMDetection在原始的Dataset基础上的再次封装，其__getitem__()方法会根据训练和测试模式分别重定向到prepare_train_img()和prepare_test_img()函数。用户以继承CustomDataset类的方式构建自己的数据集时，需要重写load_annotations()和get_ann_info()函数，定义数据和标签的加载及遍历方式。完成数据集类的定义后，还需要使用DATASETS.register_module()进行模块注册。
+2. 注册模型：模型构建的方式和Pytorch类似，都是新建一个Module的子类然后重写forward()函数。唯一的区别在于MMDetection中需要继承BaseModule而不是Module，BaseModule是Module的子类，MMLab中的任何模型都必须继承此类。另外，MMDetection将一个完整的模型拆分为backbone、neck和head三部分进行管理，所以用户需要按照这种方式，将算法模型拆解成3个类，分别使用BACKBONES.register_module()、NECKS.register_module()和HEADS.register_module()完成模块注册。
+3. 构建配置文件：配置文件用于配置算法各个组件的运行参数，大体上可以包含四个部分：datasets、models、schedules和runtime。完成相应模块的定义和注册后，在配置文件中配置好相应的运行参数，然后MMDetection就会通过Registry类读取并解析配置文件，完成模块的实例化。另外，配置文件可以通过_base_字段实现继承功能，以提高代码复用率。
+4. 训练和验证：在完成各模块的代码实现、模块的注册、配置文件的编写后，就可以使用./tools/train.py和./tools/test.py对模型进行训练和验证，不需要用户编写额外的代码。
+![alt text](https://i-blog.csdnimg.cn/blog_migrate/9623846bf1a2b09682eab74e606063bb.png)
+蓝色部分表示Pytorch流程，橙色部分表示MMDetection流程，绿色部分表示和算法框架无关的通用流程。
+## Registry注册机制
+从本质上讲，MMDetection 的注册机制是一个全局的键值映射系统，其“键”是字符串（例如，'ResNet'），“值”则是对应的类或函数（例如，ResNet 类）。这个机制由 MMDetection 的底层库 MMCV (OpenMMLab Computer Vision Foundation) 提供。
+在 MMDetection 中，几乎所有的模型组件，包括骨干网络 (Backbones)、颈部 (Necks)、检测头 (Heads)、损失函数 (Losses)、数据增强流程 (Pipelines) 等，都是通过注册机制来管理的。
+```py
+# 实例化一个注册器用来管理模型
+MODELS = Registry('myModels')
+
+# 在类的创建过程中, 使用函数装饰器进行注册
+@MODELS.register_module() #该装饰器是实现注册的核心。它将 ResNet 类和字符串 'ResNet' 关联起来。
+class ResNet(object):
+    def __init__(self, depth):
+        self.depth = depth
+        print('Initialize ResNet{}'.format(depth))
+print(MODELS)
+""" 打印结果为:
+Registry(name=myModels, items={'ResNet': <class '__main__.ResNet'>})
+"""
+
+# 配置参数, 一般cfg从配置文件中获取
+backbone_cfg = dict(type='ResNet', depth=101)
+# 实例化模型(将配置参数传给模型的构造函数), 得到实例化对象
+my_backbone = MODELS.build(backbone_cfg)
+print(my_backbone)
+""" 打印结果为:
+Initialize ResNet101
+<__main__.ResNet object at 0x000001E68E99E198>
+"""
+```
++ `@TRANSFORMS.register_module()`
+这是 MMDetection 库提供的一个 Python 装饰器。它用于将一个新的模块（通常是一个定义数据增强或预处理操作的类）注册到 MMDetection 库的流水线系统中。位于一个类定义的上方。
+TRANSFORMS: 这是 MMDetection 中的一个注册表，用于存储目标检测流水线中使用的不同数据增强和预处理步骤。
+register_module(): 这是 TRANSFORMS 注册表中的一个函数，用于注册一个新的模块。
+## Hook机制
+[MMEngine - Hook](https://mmengine.readthedocs.io/zh-cn/latest/tutorials/hook.html)
+Hook可以理解为一种触发器，可以在程序预定义的位置执行预定义的函数。MMCV根据算法的生命周期预定义了6个可以插入自定义函数的位点，用户可以在每个位点自由地插入任意数量的函数操作，如下图所示：
+<img src="https://i-blog.csdnimg.cn/blog_migrate/a3e9e76563206c4bab09b91762341533.png" width = "50%" />
+MMCV已经实现了部分常用Hook，其中默认Hook不需要用户自行注册，通过配置文件配置对应的参数即可；定制Hook则需要用户在配置文件中手动配置custom_hooks字段进行注册。
+![alt text](https://i-blog.csdnimg.cn/blog_migrate/945ac8d55f31965189e6fcdc2b86a3d0.png)
+和其他模块不同，当我们定义好一个Hook(并注册到HOOKS注册器中)之后，还需要注册到Runner中才能使用，前后一共进行两次注册。第一次注册到HOOKS是为了程序能够根据Hook名称找到对应的模块，第二次注册到Runner中是为了程序执行到预定义位置时能够调用对应的函数。
+
+Runner是MMCV用来管理训练过程的一个类，封装了 OpenMMLab 体系下各个框架的训练和验证详细流程，其负责管理训练和验证过程中的整个生命周期；它内部会维护一个list类型变量self._hooks，我们需要把训练过程会调用的Hook实例对象按照优先级顺序全部添加到self._hooks中，这个过程通过Runner.register_hook()函数实现。MMCV预定义了几种优先级, 数字越小表示优先级越高, 如果觉得默认的分级方式颗粒度过大, 也可以直接传入0~100的整数进行精细划分。
+
+实现一个Hook包含5个步骤：
+1. 定义一个类，继承Hook基类
+2. 根据自定义Hook的功能有选择地重写Hook基类中对应的函数
+3. 注册自定义Hook模块到HOOKS查询表中（register_module）
+4. 实例化Hook模块并注册到Runner中（register_hook）
+5. 使用回调函数调用重写的Hook函数（call_hook）
+
+## 算法实现流程
+### 数据集
+在Pytorch中Dataset的遍历是通过重写`__getitem__()`函数实现的，而MMDetection已经重写了`__getitem__()`函数，可以根据当前运行模式调用`prepare_train_img()`或`prepare_test_img()`，两者的区别在于是否加载训练标签。所以我们只需要重写`load_annotations()`和`get_ann_info()`函数
+
+完成自定义的Dataset类后要加上`@DATASETS.register_module()`将当前模块注册到DATASETS表中。
+### 注册模型
+相比Pytorch的区别：
+继承的父类从Module变成了BaseModule
+需要按照backbone、neck和head的结构将模型拆解成3个部分，分别定义并注册到BACKBONES、NECKS以及HEADS当中：
 1. Backbone: 任何一个 batch 的图片先输入到 backbone 中进行特征提取，典型的骨干网络是 ResNet, Darknet `mmdet/models/backbones`
 2. Neck: 输出的单尺度或者多尺度特征图输入到 neck 模块中进行特征融合或者增强，neck 可以认为是 backbone 和 head 的连接层，主要负责对 backbone 的特征进行高效融合和增强，能够对输入的单尺度或者多尺度特征进行融合、增强输出等。典型的 neck 是 FPN `mmdet/models/necks`
 3. Head: 上述多尺度特征最终输入到 head 部分，一般都会包括分类和回归分支输出;目标检测算法输出一般包括分类和框坐标回归两个分支，不同算法 head 模块复杂程度不一样，灵活度比较高。在网络构建方面，理解目标检测算法主要是要理解 head 模块。`mmdet/models/dense_heads + roi_heads`
 虽然 head 部分的网络构建比较简单，但是由于正负样本属性定义、正负样本采样和 bbox 编解码模块都在 head 模块中进行组合调用，故 MMDetection 中最复杂的模块就是 head。
-3. 1. Enhance: 在整个网络构建阶段都可以引入一些即插即用增强算子来增加提取提取能力，典型的例如 SPP、DCN、注意力机制 等等
-3. 2. BBox Assigner，BBox Sampler：目标检测 head 输出一般是特征图，对于分类任务存在严重的正负样本不平衡，可以通过正负样本属性分配和采样策略控制 `mmdet/core/bbox/assigners + samplers`
-3. 3. BBox Encoder：为了方便收敛和平衡多分支，一般都会对 gt bbox 进行编码，如归一化 `mmdet/core/bbox/coder`
-3. 4. Loss: 最后一步是计算分类和回归 loss，进行训练 `mmdet/models/losses`
-8. Training tricks: 在训练过程中也包括非常多的 trick，例如优化器选择等，参数调节也非常关键
+   1. Enhance: 在整个网络构建阶段都可以引入一些即插即用增强算子来增加提取提取能力，典型的例如 SPP、DCN、注意力机制 等等
+   2. BBox Assigner，BBox Sampler：目标检测 head 输出一般是特征图，对于分类任务存在严重的正负样本不平衡，可以通过正负样本属性分配和采样策略控制 `mmdet/core/bbox/assigners + samplers`
+   3. BBox Encoder：为了方便收敛和平衡多分支，一般都会对 gt bbox 进行编码，如归一化 `mmdet/core/bbox/coder`
+   4. Loss: 最后一步是计算分类和回归 loss，进行训练 `mmdet/models/losses`
+1. Training tricks: 在训练过程中也包括非常多的 trick，例如优化器选择等，参数调节也非常关键
+### 配置文件
+在 MMDetection 中，一个模型被定义为一个配置文件 和对应被存储在 checkpoint 文件内的模型参数的集合。
+在MMDetection框架下，不需要另外实现迭代训练/测试流程的代码，只需要执行现成的train.py或test.py即可，由配置文件实现
+[配置文件](https://mmdetection.readthedocs.io/zh-cn/latest/user_guides/config.html#id1)
+[MMEngine - 配置（CONFIG）详细文档](https://mmengine.readthedocs.io/zh-cn/latest/advanced_tutorials/config.html)
 
-`bbox_head.forward_train`
-
-**测试核心组件**
-BBox Decoder：对应Encoder `mmdet/core/bbox/coder`
-BBox PostProcess：最常用的后处理就是非极大值抑制以及其变种。`mmdet/core/post_processing`
-Testing tricks：典型的是多尺度测试以及各种模型集成手段
-
-`bbox_head.get_bboxes`
-
-![MM](https://pic3.zhimg.com/80/v2-c4e6229a1fd42692d090108481be34a6_1440w.webp)
-
-### [整体构建细节](https://zhuanlan.zhihu.com/p/341954021)
-<img src="https://pic2.zhimg.com/80/v2-2463639f7e39afd273fdeccbfa530d49_1440w.webp" width = "80%" />
-
-Pipeline: 由一系列按照插入顺序运行的数据处理模块组成，每个模块完成某个特定功能，例如 Resize，因为其流式顺序运行特性，故叫做 Pipeline。
-![pipe](https://pic3.zhimg.com/80/v2-d7eb7e24335613da3da22da4ea93e132_1440w.webp)
-
-MMDataParallel:处理Dataloader中pytorch 无法解析的DataContainer 对象,且额外实现了 `train_step()` 和 `val_step() `两个函数，可以被 Runner 调用
-
-Model:
-<img src="https://pic1.zhimg.com/80/v2-7ecc8e5e19c59a3e6682c5e3cdc34918_1440w.webp" width = "50%" />
-
-Runner:封装了 OpenMMLab 体系下各个框架的训练和验证详细流程，其负责管理训练和验证过程中的整个生命周期，通过预定义回调函数，用户可以插入定制化 Hook ，从而实现各种各样的需求。
-<img src="https://pic4.zhimg.com/80/v2-5d614997aa85e1b841457094b7bc0cbb_1440w.webp" width = "90%" />
-
-整体代码抽象
-<img src="https://pic4.zhimg.com/80/v2-b03d43ed4b3dc4c02e68712e57023cff_1440w.webp" width = "80%" />
+`./mmdetection/configs/_base_/..`
 
 ```py
-#=================== tools/train.py ==================
-# 1.初始化配置
-cfg = Config.fromfile(args.config)
-# 2.判断是否为分布式训练模式
-# 3.初始化 logger
-logger = get_root_logger(log_file=log_file, log_level=cfg.log_level)
-# 4.收集运行环境并且打印，方便排查硬件和软件相关问题
-env_info_dict = collect_env()
-# 5.初始化 model
-model = build_detector(cfg.model, ...)
-# 6.初始化 datasets
+_base_ = [
+    'mmdetection/configs/_base_/models/fast_rcnn_r50_fpn.py',		# models
+    'mmdetection/configs/_base_/datasets/coco_detection.py',		# datasets
+    'mmdetection/configs/_base_/schedules/schedule_1x.py',			# schedules
+    'mmdetection/configs/_base_/default_runtime.py',				# defualt_runtime
+]
+# 这些配置信息样例如下：
+# 1. 模型配置(models) =========================================
+model = dict(
+	type='FastRCNN',			# 模型名称是FastRCNN
+	backbone=dict(				# BackBone是ResNet
+        type='ResNet',
+        ...,
+    ),
+    neck=dict(					# Neck是FPN
+        type='FPN',
+        ...,
+    ),
+    roi_head=dict(				# Head是StandardRoIHead
+        type='StandardRoIHead',
+        ...,
+        loss_cls=dict(...),		# 分类损失函数
+        loss_bbox=dict(...),	# 回归损失函数
+    ),
+    train_cfg=dict(				# 训练参数配置
+    	assigner=dict(...),		# BBox Assigner
+    	sampler=dict(...),		# BBox Sampler
+    	...
+	),
+    test_cfg =dict(				# 测试参数配置
+    	nms=dict(...),			# NMS后处理
+    	...,
+    )
+)
 
-#=================== mmdet/apis/train.py ==================
-# 1.初始化 data_loaders ，内部会初始化 GroupSampler
-data_loader = DataLoader(dataset,...)
-# 2.基于是否使用分布式训练，初始化对应的 DataParallel
-if distributed:
-  model = MMDistributedDataParallel(...)
-else:
-  model = MMDataParallel(...)
-# 3.初始化 runner
-runner = EpochBasedRunner(...)
-# 4.注册必备 hook
-runner.register_training_hooks(cfg.lr_config, optimizer_config,
-                               cfg.checkpoint_config, cfg.log_config,
-                               cfg.get('momentum_config', None))
-# 5.如果需要 val，则还需要注册 EvalHook           
-runner.register_hook(eval_hook(val_dataloader, **eval_cfg))
-# 6.注册用户自定义 hook
-runner.register_hook(hook, priority=priority)
-# 7.权重恢复和加载
-if cfg.resume_from:
-    runner.resume(cfg.resume_from)
-elif cfg.load_from:
-    runner.load_checkpoint(cfg.load_from)
-# 8.运行，开始训练
-runner.run(data_loaders, cfg.workflow, cfg.total_epochs)
+# 2. 数据集配置(datasets) =========================================
+dataset_type = '...'			# 数据集名称
+data_root = '...'				# 数据集根目录
+img_norm_cfg = dict(...)		# 图像归一化参数
+train_pipeline = [				# 训练数据处理Pipeline
+	...,
+]
+test_pipeline = [...]			# 测试数据处理Pipeline
+data = dict(
+	samples_per_gpu=2,			# batch_size
+    workers_per_gpu=2,			# GPU数量
+	train=dict(					# 训练集配置
+		type=dataset_type,
+        ann_file=data_root + 'annotations/instances_train2017.json',	# 标注问加你
+        img_prefix=data_root + 'train2017/',	# 图像前缀
+		pipline=trian_pipline,					# 数据预处理pipeline
+	),
+	val=dict(					# 验证集配置
+		...,
+		pipline=test_pipline,
+	),
+	test=dict(					# 测试集配置
+		...,
+		pipline=test_pipline,
+	)
+)
+
+# 3. 训练策略配置(schedules) =========================================
+evaluation = dict(interval=1, metric='bbox')
+optimizer = dict(type='SGD', lr=0.02, momentum=0.9, weight_decay=0.0001)
+optimizer_config = dict(grad_clip=None)
+lr_config = dict(
+    policy='step',
+    warmup='linear',
+    warmup_iters=500,
+    warmup_ratio=0.001,
+    step=[8, 11])
+runner = dict(type='EpochBasedRunner', max_epochs=12)
+
+# 4. 运行配置(runtime) =========================================
+checkpoint_config = dict(interval=1)
+log_config = dict(interval=50, hooks=[dict(type='TextLoggerHook')])
+custom_hooks = [dict(type='NumClassCheckHook')]
+dist_params = dict(backend='nccl')
+log_level = 'INFO'
+load_from = None
+resume_from = None
+workflow = [('train', 1)]
+```
+需要继承的配置文件，新建一个配置文件的时候，一般都是继承这4个基础配置文件，然后在此基础上进行针对性调整：
+```py
+# 从_base_中继承的原始优化器
+optimizer = dict(type='SGD', lr=0.02, momentum=0.9, weight_decay=0.0001)
+
+# 修改学习率
+optimizer = dict(lr=0.001)		
+# 修改后optimizer变成
+optimizer = dict(type='SGD', lr=0.001, momentum=0.9, weight_decay=0.0001)
+
+# 将原来的SGD替换成AdamW
+optimizer = dict(_delete_=True, type='AdamW', lr=0.0001, weight_decay=0.0001)  
+# 替换后optimizer变成
+optimizer = dict(type='AdamW', lr=0.0001, weight_decay=0.0001)
+
+```
+### 训练和测试
+**train.py**
+```py
+def main():
+	# Step1: 解析配置文件, args.config是配置文件路径
+	cfg = Config.fromfile(args.config)
+
+	# Step2: 初始化模型, 函数内部调用的是DETECTORS.build(cfg)
+	model = build_detector(cfg.model)
+  model.init_weights()
+	
+	# Step3: 初始化训练集和验证集, 函数内部调用build_from_cfg(cfg, DATASETS), 等价于DATASETS.build(cfg)
+	datasets = [build_dataset(cfg.data.train)]
+    if len(cfg.workflow) == 2:
+        val_dataset = copy.deepcopy(cfg.data.val)
+        val_dataset.pipeline = cfg.data.train.pipeline # 验证集在训练过程中使用train pipeline而不是test pipeline
+        datasets.append(build_dataset(val_dataset))
+    
+    # Step4: 传入模型和数据集, 准备开始训练模型
+    train_detector(model, datasets, cfg)
+```
+**train_detector**
+```py
+def train_detector(model, dataset, cfg):
+	# 获取Runner类型, EpochBasedRunner或IterBasedRuner
+	runner_type = 'EpochBasedRunner' if 'runner' not in cfg else cfg.runner['type']
+	
+	# Step1: 获取dataloader, 因为dataset列表里包含了训练集和验证集, 所以使用for循环的方式构建dataloader
+	# build_dataloader()会用DataLoader类进行dataloader的初始化
+    data_loaders = [
+        build_dataloader(
+            ds,
+            cfg.data.samples_per_gpu,		# batch_size
+            runner_type=runner_type) for ds in dataset
+    ]
+	
+	# Step2: 封装模型, 为了进行分布式训练
+	model = MMDataParallel(model.cuda(cfg.gpu_ids[0]), device_ids=cfg.gpu_ids)
+	
+	# Step3: 初始化优化器
+	optimizer = build_optimizer(model, cfg.optimizer)
+
+	# Step4: 初始化Runner
+	runner = build_runner(
+        cfg.runner,
+        default_args=dict(model=model, optimizer=optimizer)
+
+	# Step5: 注册默认Hook(注册到runner._hooks列表中)
+	runner.register_training_hooks(cfg.lr_config, optimizer_config,
+                                   cfg.checkpoint_config, cfg.log_config,
+                                   cfg.get('momentum_config', None))
+	
+	# Step6: 注册自定义Hook(注册到runner._hooks列表中)
+	 if cfg.get('custom_hooks', None):
+        custom_hooks = cfg.custom_hooks
+        for hook_cfg in cfg.custom_hooks:
+            hook_cfg = hook_cfg.copy()
+            priority = hook_cfg.pop('priority', 'NORMAL')
+            hook = build_from_cfg(hook_cfg, HOOKS)
+            runner.register_hook(hook, priority=priority)
+
+	# Step7: 开始训练流程
+    if cfg.resume_from:
+    	# 恢复检查点
+        runner.resume(cfg.resume_from)
+    elif cfg.load_from:
+    	# 加载预训练模型
+        runner.load_checkpoint(cfg.load_from)
+    # 调用run()方法, 开始迭代过程
+    runner.run(data_loaders, cfg.workflow)
+```
+**runner** 
+runner 对象内部的 run 方式是一个通用方法，可以运行任何 workflow，目前常用的主要是 train 和 val。
+```py
+def run(self, data_loaders, workflow, max_epochs=None, **kwargs):
+    while self.epoch < self._max_epochs:
+        for i, flow in enumerate(workflow):
+            mode, epochs = flow
+            
+            # 如果mode='train', 则调用self.train()函数
+            # 如果mode='val', 则调用self.val()函数
+            epoch_runner = getattr(self, mode)
+
+            for _ in range(epochs):
+                if mode == 'train' and self.epoch >= self._max_epochs:
+                    break
+                # 运行train()或val()
+                epoch_runner(data_loaders[i], **kwargs)
+
 ```
 
-Runner训练和验证代码抽象
-runner 对象内部的 run 方式是一个通用方法，可以运行任何 workflow，目前常用的主要是 train 和 val。
+**train() val()**
+train()和val()的核心函数是run_iter()，根据train_mode参数调用model.train_step()或model.val_step()，这两个函数最终都会指向我们自己模型的forward()函数，返回模型的前向推理结果（一般是Loss值）。Runner到我们自己的模型中间还会经过MMDataParallel、BaseDetector、SingleStageDetector(或TwoStageDetector)四个类，最终调用我们自己模型的forward()函数，执行推理过程。
 ```py
 def train(self, data_loader, **kwargs):
     self.model.train()
@@ -504,8 +701,14 @@ def train(self, data_loader, **kwargs):
 
     self.call_hook('after_train_epoch')
 
+@torch.no_grad()  #由于测试过程不需要梯度回传，所以val函数加了一个装饰器
 def val(self, data_loader, **kwargs):
-  ...
+	# 将模块设置为验证模式
+    self.model.eval()
+    self.mode = 'val'
+    self.data_loader = data_loader
+    for i, data_batch in enumerate(self.data_loader):
+        self.run_iter(data_batch, train_mode=False)
 
 #核心函数实际上是 self.run_iter()，如下：
 def run_iter(self, data_batch, train_mode, **kwargs):
@@ -536,13 +739,16 @@ class OptimizerHook(Hook):
 
 #可以发现 OptimizerHook 注册到的生命周期是 after_train_iter，故在每次 train() 里面运行到self.call_hook('after_train_iter') 时候就会被调用，其他 hook 也是同样运行逻辑。
 ```
-
-Model 训练和测试代码抽象
 训练和验证的时候实际上调用了 model 内部的 train_step 和 val_step 函数，理解了两个函数调用流程就理解了 MMDetection 训练和测试流程。
-由于 model 对象会被 DataParallel 类包裹，故实际上上此时的 model，是指的 MMDataParallel, 以train_step 流程为例，其内部完成调用流程图示如下：
-![train_step](https://pic4.zhimg.com/80/v2-0d17b53f68286931803bf9d1dca10467_1440w.webp)
 
-### [Head流程](https://zhuanlan.zhihu.com/p/343433169)
+MMDetection的梯度反传优化是通过一个实现了after_train_iter()的Hook实现的
+![alt text](https://i-blog.csdnimg.cn/blog_migrate/bbc1b91aef9aa68f0fc1dff0720c1a29.png)
+
+
+
+## notes
+### Head流程
+[Head流程](https://zhuanlan.zhihu.com/p/343433169)
 ![Head](https://pic4.zhimg.com/80/v2-ba9edb24f8cbf10ee77bacb7f10befa7_1440w.webp)
 ```py
 #============= mmdet/models/detectors/single_stage.py/SingleStageDetector ============
@@ -555,10 +761,7 @@ def forward_train(...):
     return losses
 ```
 读起来有点吃力，后续结合源码读
-
-    
-
-## 修改
+### 修改
 ```sh
 │
 ├───configs
@@ -587,9 +790,3 @@ def forward_train(...):
 ```
 在修改之后，需要重新编译mmdet,在根目录使用 
 `python setup.py install` `pip install -v -e .`, 否则会报错
-
-## notes
-+ `@TRANSFORMS.register_module()`
-这是 MMDetection 库提供的一个 Python 装饰器。它用于将一个新的模块（通常是一个定义数据增强或预处理操作的类）注册到 MMDetection 库的流水线系统中。位于一个类定义的上方。
-TRANSFORMS: 这是 MMDetection 中的一个注册表，用于存储目标检测流水线中使用的不同数据增强和预处理步骤。
-register_module(): 这是 TRANSFORMS 注册表中的一个函数，用于注册一个新的模块。

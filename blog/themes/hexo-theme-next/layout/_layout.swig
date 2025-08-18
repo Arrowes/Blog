@@ -56,5 +56,7 @@
   {%- if theme.pjax %}
     </div>
   {%- endif %}
+<script src="https://awp-assets.meituan.net/thh/thh_feb_web_portal/js/jquery-3.6.0.min.js"></script>
+<script src="{{ url_for('js/code-unfold.js') }}"></script>
 </body>
 </html>

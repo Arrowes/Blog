@@ -31,7 +31,7 @@ custom_file_path:
   #bodyEnd: source/_data/body-end.swig
   #variable: source/_data/variables.styl
   #mixin: source/_data/mixins.styl
-  #style: source/_data/styles.styl
+  style: source/_data/styles.styl
 
 
 # ---------------------------------------------------------------
@@ -57,14 +57,14 @@ footer:
   # Icon between year and copyright info.
   icon:
     # Icon name in Font Awesome. See: https://fontawesome.com/icons
-    name: fa fa-heart
+    name: 
     # If you want to animate the icon, set it to true.
     animated: false
     # Change the color of icon, using Hex Code.
     color: "#ff0000"
 
   # If not defined, `author` from Hexo `_config.yml` will be used.
-  copyright:
+  copyright: Arrow
 
   # Powered by Hexo & NexT
   powered: false
@@ -914,10 +914,10 @@ vendors:
   #pjax: //cdn.staticfile.org/next-theme-pjax/0.4.0/pjax.min.js
 
   # FancyBox
-  # jquery: //cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js
+  jquery: //cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js
   # fancybox: //cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js
   # fancybox_css: //cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css
-  jquery:
+  # jquery:
   fancybox:
   fancybox_css:
 
@@ -980,8 +980,8 @@ vendors:
   # pace: //cdnjs.cloudflare.com/ajax/libs/pace/1.0.2/pace.min.js
   # pace_css: //cdn.jsdelivr.net/npm/pace-js@1/themes/blue/pace-theme-minimal.css
   # pace_css: //cdnjs.cloudflare.com/ajax/libs/pace/1.0.2/themes/blue/pace-theme-minimal.min.css
-  pace:
-  pace_css:
+  pace: //cdn.jsdelivr.net/npm/pace-js@1/pace.min.js
+  pace_css: //cdn.jsdelivr.net/npm/pace-js@1/themes/blue/pace-theme-minimal.css
 
   # Internal version: 1.0.0
   # three: //cdn.jsdelivr.net/gh/theme-next/theme-next-three@1/three.min.js
