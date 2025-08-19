@@ -158,6 +158,32 @@ setInterval("createtime()",250);
      + [Baidu](https://ziyuan.baidu.com/linksubmit/index),很垃圾，免费用户无法提交sitemap,只能挨个手动提交网址，一天一次
 
 谷歌：[让Google搜索到自己的博客](https://zoharandroid.github.io/2019-08-03-%E8%AE%A9%E8%B0%B7%E6%AD%8C%E6%90%9C%E7%B4%A2%E5%88%B0%E8%87%AA%E5%B7%B1%E7%9A%84%E5%8D%9A%E5%AE%A2/)
+
+#### 折叠代码块
+[Hexo 实现代码折叠功能](https://gerrit1999.github.io/2024/Hexo%E5%AE%9E%E7%8E%B0%E4%BB%A3%E7%A0%81%E6%8A%98%E5%8F%A0%E5%8A%9F%E8%83%BD/)
+区别：不改layout/_scripts/index.njk, layout/_scripts/vendors.njk, source/js/next-boot.js
+打开主题的主布局文件，通常是 layout/layout.njk (或者 layout/_layout.swig 等)。
+在最末尾注入脚本：
+```html
+... (文件原有的其他内容) ...
+
+<script src="https://awp-assets.meituan.net/thh/thh_feb_web_portal/js/jquery-3.6.0.min.js"></script>
+<script src="{{ url_for('js/code-unfold.js') }}"></script>
+
+</body>
+</html>
+```
+修改 code-unfold.js 使其自执行：
+```javascript
+// ... (文件原有的所有代码) ...
+
+$(document).ready(function() {
+    codeUnfold();
+});
+```
+
+---
+
 ### markdown插件
 ``npm install hexo-reference --save`` 支持Markdown脚注
 ``npm install hexo-wordcount --save`` 字数统计

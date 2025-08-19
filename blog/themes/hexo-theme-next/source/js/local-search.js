@@ -111,6 +111,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Show search results
         if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+            // 【新增】将搜索关键词编码并附加到 URL 后面
+          const searchParam = encodeURIComponent(searchText);
+          const finalUrl = `${url}?highlight=${searchParam}`;
+
           let hitCount = indexOfTitle.length + indexOfContent.length;
           // Sort index by position of keyword
           [indexOfTitle, indexOfContent].forEach(index => {
@@ -169,13 +173,16 @@ document.addEventListener('DOMContentLoaded', () => {
           let resultItem = '';
 
           if (slicesOfTitle.length !== 0) {
-            resultItem += `<li><a href="${url}" class="search-result-title">${highlightKeyword(title, slicesOfTitle[0])}</a>`;
+            // 【修改】使用 finalUrl
+            resultItem += `<li><a href="${finalUrl}" class="search-result-title">${highlightKeyword(title, slicesOfTitle[0])}</a>`;
           } else {
-            resultItem += `<li><a href="${url}" class="search-result-title">${title}</a>`;
+            // 【修改】使用 finalUrl
+            resultItem += `<li><a href="${finalUrl}" class="search-result-title">${title}</a>`;
           }
 
           slicesOfContent.forEach(slice => {
-            resultItem += `<a href="${url}"><p class="search-result">${highlightKeyword(content, slice)}...</p></a>`;
+                // 【修改】使用 finalUrl
+            resultItem += `<a href="${finalUrl}"><p class="search-result">${highlightKeyword(content, slice)}...</p></a>`;
           });
 
           resultItem += '</li>';
