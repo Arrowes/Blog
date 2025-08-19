@@ -113,7 +113,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
             // 【新增】将搜索关键词编码并附加到 URL 后面
           const searchParam = encodeURIComponent(searchText);
-          const finalUrl = `${url}?highlight=${searchParam}`;
+          const finalUrl = `${url}?highlight=${encodeURIComponent(searchText)}`;
 
           let hitCount = indexOfTitle.length + indexOfContent.length;
           // Sort index by position of keyword
@@ -173,16 +173,19 @@ document.addEventListener('DOMContentLoaded', () => {
           let resultItem = '';
 
           if (slicesOfTitle.length !== 0) {
-            // 【修改】使用 finalUrl
-            resultItem += `<li><a href="${finalUrl}" class="search-result-title">${highlightKeyword(title, slicesOfTitle[0])}</a>`;
+            // 标题链接使用基础 URL
+          resultItem += `<li><a href="${finalUrl}" class="search-result-title">${highlightKeyword(title, slicesOfTitle[0])}</a>`;
           } else {
-            // 【修改】使用 finalUrl
+            // 标题链接使用基础 URL
             resultItem += `<li><a href="${finalUrl}" class="search-result-title">${title}</a>`;
           }
 
-          slicesOfContent.forEach(slice => {
-                // 【修改】使用 finalUrl
-            resultItem += `<a href="${finalUrl}"><p class="search-result">${highlightKeyword(content, slice)}...</p></a>`;
+          // 【核心修改】将 forEach 循环改为可以获取索引的模式
+          slicesOfContent.forEach((slice, index) => {
+            // 为每个内容摘要链接创建一个带索引的特定 URL
+            const snippetUrl = `${finalUrl}&index=${index}`;
+            // 【核心修改】在 a 标签的 href 中使用这个特定的 URL
+            resultItem += `<a href="${snippetUrl}"><p class="search-result">${highlightKeyword(content, slice)}...</p></a>`;
           });
 
           resultItem += '</li>';
