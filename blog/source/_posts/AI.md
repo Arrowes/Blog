@@ -81,18 +81,22 @@ num_gpu, num_thread
 ### OpenWebUI+Ollama Container 部署
 [Qwen3-Coder-30B-A3B-Instruct-GGUF](https://huggingface.co/unsloth/Qwen3-Coder-30B-A3B-Instruct-GGUF/discussions/4)
 ```sh
+
 # 拉OpenWebUI镜像，创建容器
-docker run -d -p 3000:8080 --gpus all --add-host=host.docker.internal:host-gateway --health-cmd "curl -fsSL http://localhost:8080 || exit 1" --health-interval 60s --health-retries 5 --health-timeout 20s --health-start-period 60s --restart=always -v open-webui:/app/backend/data -v /mnt:/mnt -v /root/ollama:/root/.ollama --name open-webui ghcr.io/open-webui/open-webui:cuda
+docker run -d -p 3000:8080 --gpus all --add-host=host.docker.internal:host-gateway --health-cmd "curl -fsSL http://localhost:8080 || exit 1" --health-interval 60s --health-retries 5 --health-timeout 20s --health-start-period 60s --restart=always -v open-webui:/app/backend/data -v /root/.ollama:/root/.ollama --name open-webui ghcr.io/open-webui/open-webui:cuda
 # 在容器内安装ollama:
 curl -fsSL https://ollama.com/install.sh | sh
 apt update
 apt install pciutils lshw
-nohup ollama serve > /root/ollama.log 2>&1 & 
-# 每次都要运行 好麻烦，待解决
+
+# 配置ollama serve 在容器内自启动
+容器内：\app\backend\start.sh
+在最后一行WEBUI_SECRET_KEY前加入：
+nohup ollama serve > /root/.ollama/ollama.log 2>&1 & 
 
 # 封装镜像
 docker commit [commitID] open-webui-ollama
-docker run -d -p 3000:8080 --gpus all --add-host=host.docker.internal:host-gateway --health-cmd "curl -fsSL http://localhost:8080 || exit 1" --health-interval 60s --health-retries 5 --health-timeout 20s --health-start-period 60s --restart=always -v open-webui:/app/backend/data -v /mnt:/mnt -v /root:/root --name open-webui-ollama open-webui-ollama
+docker run -d -p 3000:8080 --gpus all --add-host=host.docker.internal:host-gateway --health-cmd "curl -fsSL http://localhost:8080 || exit 1" --health-interval 60s --health-retries 5 --health-timeout 20s --health-start-period 60s --restart=always -v open-webui:/app/backend/data -v /root/.ollama:/root/.ollama --name open-webui-ollama open-webui-ollama
 
 # 创建模型
 ollama create Qwen3-Coder-30B -f Qwen3-Coder-30B/qwen.mf

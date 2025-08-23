@@ -792,6 +792,30 @@ test()
 # 运行后会在循环每次迭代时暂停，可检查变量i的值，按n继续下一次循环。
 ```
 
+## Python的多进程和多线程
++ 进程（Process）：是操作系统进行资源分配和调度的基本单位。每个进程都有自己独立的内存空间、数据栈以及其他系统资源。可以简单地理解为一个正在运行的应用程序实例。
++ 线程（Thread）：是进程内的一个执行单元，是 CPU 调度的最小单位。一个进程可以包含多个线程，这些线程共享该进程的内存空间和资源。
+Python 的多线程Multithreading 在 CPU密集型任务中受限于 GIL，无法实现真正的并行处理。GIL 是一把全局锁，它确保在任何时刻，只有一个线程能够执行 Python 的字节码。但多线程在 IO密集型任务中有效，当一个线程在等待 I/O 操作（如文件读写、网络请求、数据库查询）时，它会释放 GIL，让其他线程得以运行。
+```py
+import threading
+if __name__=="__main__":
+  threads = [threading.Thread(target=cpu_task) for _ in range(4)] #创建4个线程
+  for t in threads:
+      t.start()  #启动线程
+  for t in threads:
+      t.join()  #等待线程执行完毕
+```
+Python的多进程multiprocessing 适用于CPU密集型任务，每个进程都有自己独立的内存空间，每个进程都由操作系统独立调度，拥有自己的 Python 解释器和 GIL。消耗更多的系统资源
+```py
+import multiprocessing
+if __name__=="__main__":
+  process = [multiprocessing.Process(target=cpu_task) for _ in range(4)] #创建4个进程
+  for t in process:
+      t.start()  #启动进程
+  for t in process:
+      t.join()  #等待所有进程执行完毕
+```
+
 ## 其他 
 pwd = os.getcwd()   # 获取当前工作目录
 
