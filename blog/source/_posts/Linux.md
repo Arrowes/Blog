@@ -110,7 +110,7 @@ mount /dev/nvme3n1p1 /root/7T_1
 mount /dev/nvme4n1p1 /root/7T_2  #挂载
 ```
 ## 终端快捷键
-Ctrl + R 搜索历史命令
+Ctrl + R 搜索历史命令 或者使用命令：`history | grep XXX`
 Ctrl + S：挂起，类似于暂停
 Ctrl + Q：退出挂起
 Ctrl + C：中断并杀死，程序终止。
@@ -312,6 +312,9 @@ ssh-keygen -t rsa -b 4096 -C "your_email@example.com"
 # 将公钥添加到远程服务器，如果 ssh-copy-id 不可用，可以手动将公钥内容（~/.ssh/id_rsa.pub）复制到远程服务器的 ~/.ssh/authorized_keys 文件中
 ssh-copy-id user@remote_host
 ```
+通过SSH隧道实现本地端口到远程服务器端口的转发:
+`ssh -L PORT:localhost:PORT awang13@10.168.60.59`
+相当于在本地和远程服务器之间建立了一条加密的“管道”，把本地的请求“传送”到远程服务器的目标服务，实现安全的远程访问。
 ## Debug
 如果发现github ping不通，但网站可以正常访问，则需要配置host:
 1. 在 https://www.ipaddress.com/ 查询 `github.com`与`github.global.ssl.fastly.net`的IP
@@ -324,8 +327,8 @@ ssh-copy-id user@remote_host
    ```
 git仓全部显示changes修改问题，需要git windows 和linux 统一换行符和权限，
 ```sh
-git config --global core.autocrlf true
 git config core.fileMode false
+git submodule foreach 'git config core.fileMode false' #对所有子仓进行操作
 ```
 
 
