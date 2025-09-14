@@ -316,6 +316,7 @@ ssh-copy-id user@remote_host
 `ssh -L PORT:localhost:PORT awang13@10.168.60.59`
 相当于在本地和远程服务器之间建立了一条加密的“管道”，把本地的请求“传送”到远程服务器的目标服务，实现安全的远程访问。
 ## Debug
+### ping不通
 如果发现github ping不通，但网站可以正常访问，则需要配置host:
 1. 在 https://www.ipaddress.com/ 查询 `github.com`与`github.global.ssl.fastly.net`的IP
 2. 打开hosts文件:`C:\Windows\System32\drivers\etc`
@@ -325,12 +326,20 @@ ssh-copy-id user@remote_host
     140.82.114.4 github.com
     151.101.1.194 github.global.ssl.fastly.net
    ```
+### 全部显示changes
 git仓全部显示changes修改问题，需要git windows 和linux 统一换行符和权限，
 ```sh
 git config core.fileMode false
 git submodule foreach 'git config core.fileMode false' #对所有子仓进行操作
 ```
-
+### git clone频繁失败
+git clone频繁失败：配置Git专用代理
+如果上网工具有提供HTTP代理端口（例如Clash 127.0.0.1:7890），可以为Git单独设置代理，这样就不需要开启全局代理了。在命令行中输入以下命令：
+```sh
+# 将 "http://127.0.0.1:7890" 替换成你自己的代理地址和端口
+git config --global http.proxy http://127.0.0.1:7890
+git config --global https.proxy http://127.0.0.1:7890
+```
 
 # Docker
 `Docker`是一种开源的容器化平台，可以帮助开发者更高效地打包、部署和运行应用程序。它基于 `Linux` 容器（LXC）技术，通过将应用程序及其所有依赖项打包到一个容器中，从而消除了应用程序在不同环境之间迁移所面临的问题。使用Docker，开发者可以快速构建、测试和部署应用程序，减少了与操作系统和基础设施相关的问题，从而提高了开发、测试和发布的速度。
