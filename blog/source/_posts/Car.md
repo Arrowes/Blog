@@ -290,3 +290,10 @@ $$\|\vec{A} - \vec{B}\|^2 = \|\vec{A}\|^2 + \|\vec{B}\|^2 - 2\|\vec{A}\|\|\vec{B
 $$\|\vec{A} - \vec{B}\|^2 = 1^2 + 1^2 - 2(1)(1)\cos(\theta) = 2 - 2\cos(\theta)$$
 
 在这种情况下，**最大化余弦相似度等价于最小化欧氏距离**。因此，对于单位向量而言，这两种度量方式是等价的，可以互相转换。
+
+## 贝塞尔曲线
+贝塞尔曲线于1962年，由法国工程师皮埃尔·贝兹（Pierre Bézier）所广泛发表，他运用贝塞尔曲线来为汽车的主体进行设计。
+一阶：$ B(t) = (1-t)P0 + tP1, t=[0,1] $
+二阶：$ B(t) = (1-t)² * P0 + 2 * (1-t) * t * P1 + t² * P2 $
+![alt text](https://pic4.zhimg.com/v2-e40165c7c4d059db8c913daecf337d85_b.webp)
+三阶：![alt text](https://picx.zhimg.com/v2-45d35cb4e1b446501fcefac07b3dab55_b.webp)

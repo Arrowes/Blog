@@ -254,6 +254,41 @@ python -c 'import torch;print(torch.__version__);print(torch.version.cuda)'   #�
 ```
 
 ## 库
+常用张量操作函数汇总（适合分类、回归、图像任务）
+```py
+# 🎯 分类相关
+torch.argmax()          #获取最大值的索引 分类预测
+torch.gather()          #按索引提取值 提取预测概率
+torch.nn.functional.one_hot() #转换为独热编码 标签处理
+torch.nn.functional.cross_entropy() #计算交叉熵损失 多分类任务
+# 📐 张量维度操作
+torch.unsqueeze()       #增加维度 [B, C, H, W] 构造
+torch.squeeze()         #去除维度 去掉 [1] 维度
+torch.permute()         #改变维度顺序 [B, H, W, C] → [B, C, H, W]
+torch.transpose()       #转置两个维度 图像翻转或矩阵转置
+torch.reshape() / view()#改变形状 展平、重构张量
+# 🔍 索引与掩码
+torch.where()           #条件选择 mask = torch.where(x > 0)
+torch.masked_select()   #按掩码提取元素 x[mask]
+torch.nonzero()         #获取非零元素索引 torch.nonzero(mask)
+torch.index_select()    #按索引提取子张量 select rows/cols
+# 🔧 数值计算
+torch.mean() / sum()    #求均值 / 求和  loss.mean()
+torch.max() / min()     #最大 / 最小值  torch.max(x)
+torch.clamp()           #限制数值范围 clamp(x, 0, 1)
+torch.norm()            #求范数 向量长度计算
+torch.round() / floor() / ceil()  #四舍五入 / 向下 / 向上取整 数据处理
+# 🧠 模型训练辅助
+torch.nn.Parameter()    #可训练参数 自定义模型
+torch.nn.ModuleList() / Sequential()  #模块容器 多层网络
+torch.no_grad()         #禁用梯度 推理阶段
+model.eval() / model.train()  #切换模式 训练 vs 推理
+# 🖼️ 图像处理常用
+torch.nn.functional.interpolate() #上采样 / 下采样  图像缩放
+torch.nn.functional.pad() #边缘填充 卷积前处理
+torch.flip()            #翻转图像	数据增强
+torch.rot90()           #旋转图像	数据增强
+```
 
 **两大查询函数**：
 dir() 函数，能让我们知道工具箱以及工具箱中的分隔区有什么东西。
@@ -264,7 +299,6 @@ help() 函数，能让我们知道每个工具是如何使用的，工具的使�
 
 + 文件
   ```py
-  ../XXX #上一层
   root=“D:\\desktop”  #window下绝对路径使用双斜杠\\避免转义：
   root=r“D:\\desktop” #或统一加上r取消转义
   ```
