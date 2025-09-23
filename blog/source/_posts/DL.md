@@ -104,29 +104,27 @@ https://www.bbbdata.com/text/337
 
 #### 香农信息量（Shannon Information）
 表示某个事件发生时所携带的信息量：
-\[
-I(x) = -\log_b P(x) = -\ln P(x)
-\]
+$$I(x) = -\log_b P(x) = -\ln P(x)$$
 
-- \( P(x) \)：事件 \( x \) 的概率  
-- \( b \)：对数底，通常取 2（单位为 bit）或 \( e \)（单位为 nat）  
+- $ P(x) $：事件 $ x $ 的概率  
+- $ b $：对数底，通常取 2（单位为 bit）或 $ e $（单位为 nat）  
 - 概率越小，信息量越大（越“惊讶”）
 #### CE
 交叉熵（Cross Entropy）是信息论中的一个概念，最初用于估算平均编码长度，引入机器学习后，用于评估当前训练得到的概率分布与真实分布的差异情况。是在不知道真实分布、仅有猜测的概率时，我们知道真相时所获得的信息量期望；交叉熵的意义是，它可用于评估我们认知概率的准确性，在认知概率与真实概率一致，交叉熵是最小的，反过来说，交叉熵越小则说明预测越准确
 
-衡量两个概率分布之间（交叉）的差异，真实分布 \( y \) 与预测分布 \( \hat{y} \)：
+衡量两个概率分布之间（交叉）的差异，真实分布 $ y $ 与预测分布 $ \hat{y} $：
 
 $$H(y, \hat{y}) = - \sum_{i=1}^{n} y_i \ln(\hat{y}_i)$$
  
-- \( y_i \)：真实标签（通常是 one-hot）  
-- \( \hat{y}_i \)：模型预测的概率（通常是 softmax 输出）
+- $ y_i $：真实标签（通常是 one-hot）  
+- $ \hat{y}_i $：模型预测的概率（通常是 softmax 输出）
   
 交叉熵是模型对正确类别预测概率的负对数期望
 #### CE loss
 交叉熵损失函数(Cross-Entropy Loss)是一种常用于概率预测模型的损失函数。交叉熵损失函数是指，基于模型的预测概率，在知道真实标签时的交叉熵
 $$CE Loss =- \frac{1}{m} \sum_{i=1}^{m}\sum_{j=1}^{C}y_i,_j · \ln(\hat{y}_i,_j) = - \frac{1}{m} \sum_{i=1}^{m}\sum_{i(y_i=k)} · \ln(\hat{y}_i,_k) = - \frac{1}{m} \sum_{i=1}^{m}· \ln(\hat{y}_i,_k)$$
 * $m$： 样本的总数（一个 batch 的大小）。求平均就是期望
-* \( C \)：类别数 
+* $ C $：类别数 
 * i：样本的索引（从 1 到 m）。
 * j：类别的索引（从 1 到 C）。
 * 如果是One-Hot 编码，y_i,k=1,其他为0，可以得到简化的第3个公式
@@ -152,14 +150,12 @@ Focal Loss 是对传统的 CE Loss 的一种改进。它的核心思想是： **
 
 以二分类为例，Focal Loss 的公式如下：
 
-\[
-\text{FL}(p_t) =- [\alpha_i y_i (1 - \hat{y}_i)^\gamma \cdot \ln(\hat{y}_i) + (1 - \alpha_i)(1 - y_i) \hat{y}_i^\gamma \cdot \ln(1 - \hat{y}_i)]= -\alpha_t (1 - p_t)^\gamma \log(p_t)
-\]
+$$\text{FL}(p_t) =- [\alpha_i y_i (1 - \hat{y}_i)^\gamma \cdot \ln(\hat{y}_i) + (1 - \alpha_i)(1 - y_i) \hat{y}_i^\gamma \cdot \ln(1 - \hat{y}_i)]= -\alpha_t (1 - p_t)^\gamma \log(p_t)$$
 
 其中：
-- \( p_t \)：模型对真实类别的预测概率
-- \( \alpha_t \)：类别权重（控制正负样本不平衡）,通常设为 0.25 [正类（y=1）的重要性是 0.25，而负类（y=0）的重要性是 0.75）
-- \( \gamma \)：聚焦因子，控制对易分类样本的抑制程度，通常设为 2
+- $ p_t $：模型对真实类别的预测概率
+- $ \alpha_t $：类别权重（控制正负样本不平衡）,通常设为 0.25 [正类（y=1）的重要性是 0.25，而负类（y=0）的重要性是 0.75）
+- $ \gamma $：聚焦因子，控制对易分类样本的抑制程度，通常设为 2
   - 如果样本**易分类**（模型很有把握，$\hat{y}_i \to 1$），那么 $(1 - \hat{y}_i)^\gamma \to 0$。这个因子的值会变得非常小，从而**极大地降低**了这个“简单”样本对总损失的贡献。
   - 如果样本**难分类**（模型预测错误，$\hat{y}_i \to 0$），那么 $(1 - \hat{y}_i)^\gamma \to 1$。损失几乎不受影响，模型会**重点关注**它。
   - $\gamma = 0$ 时，Focal Loss 就退化为了标准的（加权）BCE Loss。
@@ -190,21 +186,15 @@ one-hot独热编码：将类别变量转换为机器学习算法易于利用的�
 | SIoU Loss    | 引入角度、方向对齐等几何信息，优化收敛速度       | 高稳定性和收敛效率的检测模型    |
 
 - **IoU**：
-  \[
-  IoU = \frac{\text{Area of Overlap}}{\text{Area of Union}}
-  \]
+  $$IoU = \frac{\text{Area of Overlap}}{\text{Area of Union}}$$
 
 - **GIoU Loss**：
-  \[
-  GIoU = IoU - \frac{|C - (A \cup B)|}{|C|}
-  \]
+  $$GIoU = IoU - \frac{|C - (A \cup B)|}{|C|}$$
   C 是最小闭包区域。
 
 - **DIoU Loss**：
-  \[
-  DIoU = IoU - \frac{\rho^2(b, b^{gt})}{c^2}
-  \]
-  其中 \( \rho \) 是中心距离，\( c \) 是对角线长度。
+  $$DIoU = IoU - \frac{\rho^2(b, b^{gt})}{c^2}$$
+  其中 $ \rho $ 是中心距离，$ c $ 是对角线长度。
 
 - **CIoU Loss**：
   在 DIoU 基础上增加形状约束项，综合角度与纵横比。
