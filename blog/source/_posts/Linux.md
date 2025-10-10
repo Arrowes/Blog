@@ -304,6 +304,13 @@ git stash pop           #恢复工作区的内容(git stash list, git stash appl
 
 # 不要把工具文件上传到公共仓库
 # origin：远程
+
+# Merge develop：
+git fetch origin
+git merge origin/develop
+# 手动解决冲突
+git add . 
+git merge --continue
 ```
 ## 公钥和私钥
 ```sh

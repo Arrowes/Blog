@@ -881,3 +881,110 @@ hook: hook编程是一种编程模式，是指在程序的一个或者多个位�
 super() 函数: super() 是 Python 中的一个内置函数，用于调用父类（也称为超类）的方法。
 在 Python 中，super(LSS, self).__init__() 用于 调用父类 (BaseModule) 的构造函数，确保 LSS 继承 BaseModule 的所有初始化逻辑。
 
+## PEP8规范
+PEP 8 是 Python 的官方代码风格指南，它为 Python 代码的格式化提供了一套约定，以增强代码的可读性和一致性。遵循 PEP 8 规范是成为一名专业 Python 开发者的基本要求。
+PEP 8 的核心在于“可读性至关重要”（Readability counts）。当代码易于阅读时，也更容易理解、调试和维护。
+
+### 1\. 命名规范 (Naming Conventions)
+
+  * **变量名 (Variables):** 使用小写字母，并用下划线分隔单词，即蛇形命名法 (snake\_case)。
+      * 正确: `my_variable`, `user_name`
+      * 错误: `myVariable`, `UserName`
+  * **函数名 (Functions):** 与变量名相同，使用蛇形命名法。
+      * 正确: `def calculate_sum():`
+      * 错误: `def CalculateSum():`
+  * **常量 (Constants):** 使用全部大写字母，并用下划线分隔。
+      * 正确: `MAX_OVERFLOW`, `PI`
+      * 错误: `max_overflow`, `pi`
+  * **类名 (Classes):** 使用首字母大写的驼峰命名法 (CapWords or PascalCase)。
+      * 正确: `class MyClass:`
+      * 错误: `class my_class:`
+  * **模块名 (Modules):** 应该是简短的、全小写的名字。如果需要，可以使用下划线。
+      * 正确: `my_module.py`
+      * 错误: `MyModule.py`
+
+### 2\. 代码布局 (Code Layout)
+
+  * **缩进 (Indentation):** 使用 4 个空格作为一级缩进。这是 Python 中最严格的规则之一。绝对不要混用制表符和空格。
+
+  * **每行最大长度 (Maximum Line Length):** 每行代码的长度不应超过 79 个字符。这有助于在小屏幕上并排查看多个文件。
+
+  * **空行 (Blank Lines):**
+
+      * 顶级函数和类定义之间应有两个空行。
+      * 类中的方法定义之间应有一个空行。
+      * 在函数内部，可以使用空行来分隔逻辑上独立的代码块。
+
+  * **换行 (Line Breaks):** 当一行代码过长时，需要进行换行。Python 推荐在括号、方括号和花括号内换行。如果不能，可以在操作符前换行。
+
+    ```python
+    # 推荐的换行方式
+    def my_function(
+            param_one, param_two,
+            param_three, param_four):
+        return param_one + param_two
+    ```
+
+### 3\. 导入 (Imports)
+
+  * `import` 语句应该放在文件的顶部，仅在模块注释和文档字符串之后。
+
+  * `import` 应该按照以下顺序分组：
+    1.  标准库导入 (e.g., `os`, `sys`)
+    2.  第三方库导入 (e.g., `numpy`, `pandas`)
+    3.  本地应用程序/库的特定导入
+  * 在每个组之间留一个空行。
+  * 避免使用通配符导入 (`from module import *`)，因为它会使命名空间变得不清晰。
+    ```python
+    # 正确的导入顺序
+    import os
+    import sys
+
+    import numpy as np
+
+    from my_project import my_module
+    ```
+
+### 4\. 空格的使用 (Whitespace in Expressions and Statements)
+
+  * **二元操作符:** 在二元操作符（如 `+`, `-`, `*`, `/`, `=`, `==`, `<`）的两侧各留一个空格。
+      * 正确: `x = 1`
+      * 错误: `x=1`
+  * **函数调用和定义:** 函数名和左括号之间不应有空格。
+      * 正确: `print('hello')`
+      * 错误: `print ('hello')`
+  * **逗号:** 逗号后面应该有一个空格，但前面不应该有。
+      * 正确: `[1, 2, 3]`
+      * 错误: `[1,2,3]`
+
+### 5\. 注释 (Comments)
+
+  * 注释应该与代码保持同步，当代码更改时，注释也应相应更新。
+
+  * **块注释 (Block Comments):** 用于注释一段代码。每行都以 `#` 和一个空格开头。
+
+  * **行内注释 (Inline Comments):** 在代码行的末尾，应至少与代码隔开两个空格，并以 `#` 和一个空格开头。
+
+    ```python
+    x = x + 1  # 这是一个行内注释
+    ```
+
+  * **文档字符串 (Docstrings):** 为所有公共模块、函数、类和方法编写文档字符串。文档字符串以 `"""` 开头和结尾。
+
+    ```python
+    def calculate_sum(a, b):
+        """这是一个计算两个数之和的函数。"""
+        return a + b
+    ```
+
+### 自动化地符合 PEP 8
+
+  * **`flake8`**: 这是一个非常流行的工具，它整合了 `PyFlakes` (检查代码错误)、`pycodestyle` (检查代码风格) 和 `McCabe` (检查代码复杂度)。
+
+      * **安装**: `pip install flake8`
+      * **使用**: `flake8 your_script.py`。
+
+  * **`autopep8`**: 这个工具会自动将代码格式化为符合 PEP 8 风格。它比 `black` 更灵活，但也意味着在不同开发者之间可能存在细微的风格差异。
+
+      * **安装**: `pip install autopep8`
+      * **使用**: `autopep8 --in-place your_script.py`
