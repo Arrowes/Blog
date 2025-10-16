@@ -72,6 +72,46 @@ $   n_{output.features}=[\frac{n_{input.features}+2p_{adding.size}-k_{ernel.size
 $$SGD → SGDM → NAG → AdaGrad → AdaDelta → Adam → Nadam$$
 ![图 4](https://raw.gitmirror.com/Arrowes/Blog/main/images/DL4.png)  
 
+### 学习率与优化器调度策略
+
+| 策略名称 | 作用 | 说明 |
+|----------|------|------|
+| **Warmup** | 稳定训练初期 | 学习率从小逐渐升高，避免梯度爆炸 |
+| **余弦退火（Cosine Annealing）** | 平滑收敛 | 学习率按余弦曲线下降，后期趋近于零 |
+| **Step Decay** | 分段衰减 | 每隔固定 epoch 将学习率乘以一个因子 |
+| **Exponential Decay** | 指数衰减 | 学习率按指数函数持续下降 |
+| **Cyclical Learning Rate (CLR)** | 提升探索能力 | 学习率在两个边界之间周期性波动 |
+| **OneCycle Policy** | 快速收敛 | 学习率先升后降，动量反向变化 |
+| **自适应学习率（如 Adam、RMSprop）** | 自动调整 | 根据梯度历史动态调整每个参数的学习率 |
+
+### 动量与梯度控制策略
+
+| 策略名称 | 作用 | 说明 |
+|----------|------|------|
+| **动量（Momentum）** | 加速收敛 | 保留上一次梯度方向，减少震荡 |
+| **周期性动量调整** | 提升泛化 | 动量值随训练周期变化，配合 CLR 使用 |
+| **梯度裁剪（Gradient Clipping）** | 防止梯度爆炸 | 限制梯度最大值，常用于 RNN 或 Transformer |
+| **梯度累积（Gradient Accumulation）** | 显存优化 | 多个小 batch 累积后再更新参数，适用于大模型 |
+
+### 模型正则化与泛化策略
+
+| 策略名称 | 作用 | 说明 |
+|----------|------|------|
+| **Dropout** | 防止过拟合 | 随机丢弃神经元，增强模型鲁棒性 |
+| **L1/L2 正则化** | 限制权重 | 控制模型复杂度，避免过拟合 |
+| **Early Stopping** | 提前终止训练 | 验证集性能不再提升时停止训练 |
+| **Label Smoothing** | 提升分类鲁棒性 | 将标签分布平滑处理，减少过拟合倾向 |
+| **Stochastic Depth** | 深度网络正则化 | 随机跳过某些层，常用于 ResNet/ViT |
+
+### 常见组合推荐
+
+| 目标 | 推荐策略组合 |
+|------|---------------|
+| 稳定训练 | Warmup + Cosine Annealing + Gradient Clipping |
+| 控制过拟合 | Dropout + L2 正则化 + Early Stopping |
+| 提升精度 | Mixup + Label Smoothing + OneCycle Policy |
+| 显存受限 | Gradient Accumulation + Mixed Precision Training |
+| 多任务场景 | MTL + Shared Backbone + Task-specific Heads |
 
 ## Batch size
 batch size的大小影响的是训练过程中的完成*每个epoch所需的时间* $^1$（假设算力确定了）和每次迭代(iteration)之间*梯度的平滑程度* $^2$。

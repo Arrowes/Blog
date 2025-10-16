@@ -45,6 +45,9 @@ ollama run deepseek:14B-Uncensored.Q4_K_M --verbose
 ollama rm deepseek:14B  # 卸载模型（还需要到文件路径下删除模型文件）
 ollama list
 ollama ps
+
+# ollama更新：
+curl -sSL https://ollama.com/install.sh | bash
 ```
 ollama: http://192.168.15.195:11434/
 
@@ -79,9 +82,7 @@ num_gpu, num_thread
 可以通过修改回答记录进行破甲
 
 ### OpenWebUI+Ollama Container 部署
-[Qwen3-Coder-30B-A3B-Instruct-GGUF](https://huggingface.co/unsloth/Qwen3-Coder-30B-A3B-Instruct-GGUF/discussions/4)
 ```sh
-
 # 拉OpenWebUI镜像，创建容器
 docker run -d -p 3000:8080 --gpus all --add-host=host.docker.internal:host-gateway --health-cmd "curl -fsSL http://localhost:8080 || exit 1" --health-interval 60s --health-retries 5 --health-timeout 20s --health-start-period 60s --restart=always -v open-webui:/app/backend/data -v /root/.ollama:/root/.ollama --name open-webui ghcr.io/open-webui/open-webui:cuda
 # 在容器内安装ollama:
@@ -107,6 +108,49 @@ ollama run Qwen3-Coder-30B
 api:http://localhost:11434
 ```
 [qwen3-coder-deploy](https://www.xugj520.cn/archives/qwen3-coder-deploy.html)
+
+```py
+# Deepseek
+ollama run hf.co/unsloth/DeepSeek-R1-0528-Qwen3-8B-GGUF:Q4_K_XL
+https://huggingface.co/unsloth/DeepSeek-R1-0528-Qwen3-8B-GGUF
+
+# mf文件：
+FROM ./DeepSeek-R1-0528-Qwen3-8B-UD-Q4_K_XL.gguf
+
+PARAMETER temperature 0.6
+PARAMETER top_p 0.95
+
+TEMPLATE """<｜begin of sentence｜><｜User｜>
+{{ .Prompt }}<｜Assistant｜>"""
+
+PARAMETER stop "<｜end of sentence｜>"
+PARAMETER stop "<｜begin of sentence｜>"
+PARAMETER stop "<｜User｜>"
+PARAMETER stop "<｜Assistant｜>"
+
+# Qwen3-Coder
+[Qwen3-Coder-30B-A3B-Instruct-GGUF](https://huggingface.co/unsloth/Qwen3-Coder-30B-A3B-Instruct-GGUF/discussions/4)
+# mf模板
+FROM ./Qwen3-Coder-30B-A3B-Instruct-UD-Q4_K_XL.gguf
+
+TEMPLATE """<|im_start|>system
+{{ .System }}<|im_end|>
+<|im_start|>user
+{{ .Prompt }}<|im_end|>
+<|im_start|>assistant
+"""
+
+SYSTEM """你是Qwen，由阿里云开发的AI助手。你对用户的问题和请求总是有帮助、准确和诚实的。"""
+
+PARAMETER temperature 0.7
+PARAMETER top_p 0.8
+PARAMETER top_k 20
+PARAMETER repeat_penalty 1.05
+PARAMETER num_ctx 65536
+
+PARAMETER stop "<|im_end|>"
+PARAMETER stop "<|im_start|>"
+```
 
 ### Deepseek + AnythingLLM 自建知识库
 1. 下载[nomic-embed-text](https://ollama.com/library/nomic-embed-text)：`ollama pull nomic-embed-text`，一个具有大型 token 上下文窗口的高性能开放嵌入模型。
