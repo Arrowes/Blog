@@ -147,3 +147,8 @@ Win + R > PSR，打开步骤记录器页面。
 下载：[Voicemeeter-banana](https://vb-audio.com/Voicemeeter/banana.htm)
 参考视频：[VoiceMeeter组多设备详细教程](https://www.bilibili.com/video/BV1Hj421d7j3/?p=1)
 我的配置：<img alt="图 0" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/Computer_VoiceMeeter.png" width="80%"/>  
+
+# 语音唤醒小爱同学
+实现任何电脑语音唤醒小爱同学PC版，参考[【小爱同学】任何电脑语音唤醒小爱同学PC版 彻底无需点击 解放双手！](https://www.bilibili.com/video/BV1uj411e7dT/?share_source=copy_web&vd_source=b148fb6f311bfe6f3870ad8f4dfda92a)
+1. 源码: https://github.com/chhc007/OneClickXiaoai/releases
+2. 配置语音唤醒key: https://console.picovoice.ai/

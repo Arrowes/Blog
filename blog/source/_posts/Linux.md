@@ -44,7 +44,10 @@ mv file1 [dir]      #移动文件 (无dir则相当于重命名)
 cp -r [] []         #复制文件
 chmod u+x []        #添加可执行文件
 chmod +x ./XX.sh    #若直接执行被deny，添加执行权限
-find / -type d -name "foldername" #搜索文件夹(/所有目录 改为.则为当前目录)
+find . -name "[]"   #查找
+find . -type d -name "foldername" #搜索文件夹(/所有目录 .为当前目录)
+find . -name "*_inpaint.npz" -exec rm {} \;
+find . -name "*_inpaint.npz" -delete
 ln -s /path/to/file link  # 创建软链接
 mount /dev/sda1 /mnt      # 将 /dev/sda1 分区挂载到 /mnt 目录
 umount /mnt              # 卸载挂载点
@@ -67,7 +70,6 @@ wget [url]          #下载, wget -O myfile.zip [url] 重命名文件
 vi []               #命令行进入文件，按i进入插入模式，按Esc返回命令模式并输入:wq 保存退出, :q! 不保存退出
 gedit []            #图形界面进入文件直接编辑
 whereis []          #查找
-find / -name "[]"   #查找 find *XXX*
 ls -l | grep "^-" | wc -l   #统计当前目录下文件的个数（不包括目录）
 find -name "*.jpg" | wc -l  #统计当前文件夹下指定类型的文件的数量
 du -h --max-depth=1 #查磁盘占用情况
@@ -92,11 +94,11 @@ zip -sf test.zip        #预览压缩包内容
 
 #ubuntu 7z解压
 sudo apt-get install p7zip
-#解压
-7z x XX.7z -r -o/home/xx
-#-o 是指定解压到的目录，注意-o后没有空格
+#解压 -o 是指定解压到的目录，注意-o后没有空格
+7z x XX.7z -o/home/xx
 #压缩
-7z a -t7z -r XX.7z /home/XX/*
+7z a XX.7z /home/XX/
+
 
 # 硬盘制作与挂载
 df -h #查看所有挂载 
