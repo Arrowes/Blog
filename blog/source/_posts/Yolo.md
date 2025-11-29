@@ -95,6 +95,23 @@ YOLOv7网络结构：[理解yolov7网络结构](https://blog.csdn.net/athrunsunn
 
 标注工具：[Roboflow](https://app.roboflow.com/395841716-qq-com)
 
+### CVAT
+```py
+git clone https://github.com/cvat-ai/cvat
+# 在docker-compose.yml配置端口号   traefik:   - 5000:8080 - 5001:8090
+# 改数据目录  cvat_server:   volumes: - cvat_data:/home/django/data
+# 配置IP
+export CVAT_HOST=FQDN_or_YOUR-IP-ADDRESS
+# 启动
+docker compose up -d
+# 添加用户
+docker exec -it cvat_server bash -ic 'python3 ~/manage.py createsuperuser'
+# 改数据目录
+docker run --name cvat-server -v /my/cvat_data_dir:/home/django/data -d cvat/server
+# 关闭
+docker compose down
+```
+
 开源驾驶员行为数据集：[StateFarm-distracted-driver-detection](https://www.kaggle.com/c/state-farm-distracted-driver-detection/data)
 
 数据增强：抖动模糊；三种不同的数据增强方法合成三通道；针对红外图像优化
@@ -214,6 +231,18 @@ data.yaml数据只能用绝对地址
 
 使用云服务器快速训练（收费）：[AutoDL算力云 | 弹性、好用、省钱](https://www.autodl.com/home)
 [AutoDL帮助文档-GPU选型](https://www.autodl.com/docs/gpu/)
+
+## ImageNet 预训练
+ImageNet预训练是指在大型图像数据集ImageNet上先训练好一个深度学习模型，然后将其用于其他图像任务的迁移学习。
+ImageNet数据集：https://image-net.org/ , 包含超过1400万张标注图像，涵盖约1000个类别，是计算机视觉领域最广泛使用的图像分类数据集之一。
+在ImageNet上训练模型可以让其学习到通用的图像特征（如边缘、纹理、形状等），这些特征在很多其他任务中也很有用。
+迁移学习：将预训练模型的参数（尤其是底层卷积层）迁移到新任务中，比如医学图像分类、工业检测等:
+1. Frozen（冻结）策略：只使用预训练模型的底层参数，不更新它们，只训练新任务的高层参数。
+2. Fine-tuning（微调）策略：在新任务中继续训练整个模型或部分层，使其更适应当前任务的数据分布。
+
++ 节省计算资源：从零开始训练一个深度神经网络需要大量数据和算力，预训练可以显著降低成本。
++ 提升性能：在数据量有限的任务中，预训练模型能提供更好的初始参数，从而提高最终模型的准确率。
++ 通用性强：ImageNet涵盖类别广泛，训练出的模型具有良好的泛化能力。
 
 # 其他未实现的想法
 剪枝：[模型剪枝、蒸馏、压缩-CSDN博客](https://blog.csdn.net/m0_70388905/article/details/128222629)

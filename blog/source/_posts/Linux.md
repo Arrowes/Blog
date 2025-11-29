@@ -86,6 +86,9 @@ bash XX.sh          #运行sh脚本
 tar -czvf XX.tar.gz XX  # 压缩 XX 文件夹为 XX.tar.gz （排除：--exclude=dataset ）
 tar -xzvf XX.tar.gz     # 解压 XX.tar.gz （ -C /path ）
 tar -tf XX.tar      #查看tar内容
+#分包打包和解压
+tar -cf - /path/to/source_folder | pigz -p 8 | split -b 50G -d - output.tar.gz.
+cat output.tar.gz.* | pigz -d | tar -xf -
 
 #zip
 zip -r XX.zip XX XX.txt #压缩XX以及XX.txt（排除：加-x "./XX/X"）
@@ -313,6 +316,10 @@ git merge origin/develop
 # 手动解决冲突
 git add . 
 git merge --continue
+
+# git patch 导出最近 N 个 commit（例如最近 5 个）
+git format-patch -n 5
+git am *.patch
 ```
 ## 公钥和私钥
 ```sh
@@ -386,6 +393,8 @@ docker rm <container_name_or_id>    # 删除容器
 docker run <options> <image_name>    # 运行一个容器  --shm-size=8g[分配共享内存,默认64MB] [df -h] 查看共享内存
 # 示例：后台运行 Nginx 容器，将主机的8080端口映射到容器的80端口  
 docker run -d -p 8080:80 nginx  
+docker run --restart always --gpus all --shm-size=32g -it -w /root/ -p 2003:22 -p 2026:2026 -v /mnt:/mnt -v /root:/root --name container_name image:name
+
 service ssh restart #重启整个docker服务
 
 # Image
