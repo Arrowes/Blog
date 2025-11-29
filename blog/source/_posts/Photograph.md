@@ -77,6 +77,10 @@ LUT 键输出 调整LUT浓度
 
 主要就是通过调色轮来调整**亮度 色相 饱和度**
 
+导出：
+![picture 0](https://raw.github.com/Arrowes/Blog/main/images/Photograph-export.png)  
+对于需要上传微信视频号的视频，建议上传1080p，避免被压缩
+
 # 专题拍摄
 主题拍摄：一直拍一种，最后放在一起
 ## 人像写真

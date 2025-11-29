@@ -208,11 +208,14 @@ Github
 main #Branch
 /images #Path
 https://github.com/Arrowes/Blog #Repository
-github_pat_11AV245NA0ZkjSgYjmtK5T_fyxLh1yhNVlT13FFsC #TokenMjaEB4LKd
+ghp_xxAlc6Mt96IBuszy #Token
 
 #使用raw.gitmirror.com代替raw.githubusercontent.com,实现github图片加速
-https://raw.gitmirror.com/${username}/${repository}/${branch}/${filepath} #Github: Cdn
-q3mbRZwwnnKUXHcibZg6UN8ulCHE2UDXMjaEB4LKd
+https://raw.gitmirror.com/${username}/${repository}/${branch}/${filepath} #Github: CdnstHHTfuz79M8SY0k0cEU
+
+
+# File Name Format
+${mdname}-${prompt}
  ```
 
 ### 常用[Hexo指令](https://hexo.io/zh-cn/docs/commands)
