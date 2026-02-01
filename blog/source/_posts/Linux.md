@@ -113,6 +113,16 @@ w
 mkfs.ext4 /dev/nvme4n1p1 #格式化
 mount /dev/nvme3n1p1 /root/7T_1
 mount /dev/nvme4n1p1 /root/7T_2  #挂载
+
+#配置硬盘开机自动挂载的步骤
+#1. 获取分区的 UUID
+blkid /dev/nvme3n1p1
+#2. 编辑 /etc/fstab
+vi /etc/fstab
+#在文件末尾添加：
+UUID=abcd-1234   /root/7T_1   ext4   defaults   0 0
+#3. 测试配置是否正确 如果没有报错，说明配置正确。
+mount -a
 ```
 ## 终端快捷键
 Ctrl + R 搜索历史命令 或者使用命令：`history | grep XXX`
@@ -144,7 +154,7 @@ DELL主板，装系统进入时，报错ACPI Error，表示计算机上的ACPI�
 3.sudo update-grub
 4.发现安装显卡驱动会报错，因为惠普主板的acpi模块和ubuntu兼容不好，需要把acpi=off配置改为noapic
 
-### 装显卡驱动
+### 显卡驱动
 ```sh
 sudo apt upgrade  # 更新所有可更新的软件包
 lspci -k | grep -A 2 -i "VGA" #查显卡型号
@@ -162,6 +172,19 @@ echo -e "APT::Periodic::Update-Package-Lists \"0\";\nAPT::Periodic::Download-Upg
 echo -e "APT::Periodic::Update-Package-Lists \"0\";\nAPT::Periodic::Unattended-Upgrade \"0\";" | sudo tee /etc/apt/apt.conf.d/20auto-upgrades
 ```
 
+N卡多卡训练时会挂死的问题（现象是显存各占一点点，GPU utils占满 max， 训练卡住），临时方法是通过配置export NCCL_P2P_DISABLE=1或backend='gloo'，现在发现可以手动关闭PCI bridge的ACS来解决，因为服务器没有ACS的BIOS配置, 需要把这个脚本配置为开机运行：
+```bash
+#!/bin/bash
+for BDF in `lspci -d "*:*:*" | awk '{print $1}'`; do
+  # skip if it doesn't support ACS
+  setpci -v -s ${BDF} ECAP_ACS+0x6.w > /dev/null 2>&1
+  if [ $? -ne 0 ]; then
+    continue
+  fi
+  setpci -v -s ${BDF} ECAP_ACS+0x6.w=0000
+done
+```
+参考文档：[nvidia-troubleshooting](https://docs.nvidia.com/deeplearning/nccl/user-guide/docs/troubleshooting.html#pci-access-control-services-acs)
 ## 虚拟机
 ### Virtual Box
 [Virtual Box](https://www.virtualbox.org/wiki/Downloads) + [Ubuntu 20.04](http://releases.ubuntu.com/20.04/), 或[18.04](https://releases.ubuntu.com/bionic/)（速度慢则换[镜像源](https://mirrors.tuna.tsinghua.edu.cn/ubuntu-releases/20.04/)）
@@ -347,6 +370,8 @@ git仓全部显示changes修改问题，需要git windows 和linux 统一换行�
 ```sh
 git config core.fileMode false
 git submodule foreach 'git config core.fileMode false' #对所有子仓进行操作
+git config --global core.autocrlf false
+#或者修正用户名
 ```
 ### git clone频繁失败
 git clone频繁失败：配置Git专用代理
@@ -361,8 +386,8 @@ git config --global https.proxy http://127.0.0.1:7890
 `Docker`是一种开源的容器化平台，可以帮助开发者更高效地打包、部署和运行应用程序。它基于 `Linux` 容器（LXC）技术，通过将应用程序及其所有依赖项打包到一个容器中，从而消除了应用程序在不同环境之间迁移所面临的问题。使用Docker，开发者可以快速构建、测试和部署应用程序，减少了与操作系统和基础设施相关的问题，从而提高了开发、测试和发布的速度。
 
 [🐳Docker概念，工作流和实践](https://www.bilibili.com/video/BV1MR4y1Q738/)
-<img src="https://raw.gitmirror.com/Arrowes/Blog/main/images/Linux1.png" width="80%">
-<img src="https://raw.gitmirror.com/Arrowes/Blog/main/images/Linux2.png" width="80%">
+<img src="https://raw.github.com/Arrowes/Blog/main/images/Linux1.png" width="80%">
+<img src="https://raw.github.com/Arrowes/Blog/main/images/Linux2.png" width="80%">
 
 1. 容器（Container）
 容器是一种轻量级、可移植的、独立的环境，它包含应用程序及其所有依赖项。与传统的虚拟机不同，容器共享主机操作系统的内核，但具有隔离的用户空间。

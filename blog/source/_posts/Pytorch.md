@@ -92,7 +92,7 @@ Ctrl + / 批量注释
 调试：打断点 > debug > 使用工具栏内的“下一步”或“计算器内输入表达式”进行调试
 
 调试时使用Console的python调试台，print指令
-![图 1](https://raw.gitmirror.com/Arrowes/Blog/main/images/Pytorch1.png) ![图 2](https://raw.gitmirror.com/Arrowes/Blog/main/images/Pytorch2.png)  
+![图 1](https://raw.github.com/Arrowes/Blog/main/images/Pytorch1.png) ![图 2](https://raw.github.com/Arrowes/Blog/main/images/Pytorch2.png)  
 
 
 ```py
@@ -220,11 +220,11 @@ if __name__ == '__main__':
 # Pytorch
 要调用GPU进行训练的话，需要安装显卡驱动对应的CUDA
 1. ``nvidia-smi`` 查询支持CUDA版本, 显卡驱动程序显示的cuda版本为电脑最高可适配的cuda版本
-![图 3](https://raw.gitmirror.com/Arrowes/Blog/main/images/Pytorch3.png)  
+![图 3](https://raw.github.com/Arrowes/Blog/main/images/Pytorch3.png)  
 另有nvitop: 最强GPU性能实时监测工具 `pip3 install --upgrade nvitop`
 
 1. 到 [Pytorch官网](https://pytorch.org/get-started/locally/) 复制对应code进行安装
-![图 4](https://raw.gitmirror.com/Arrowes/Blog/main/images/Pytorch4.png)  
+![图 4](https://raw.github.com/Arrowes/Blog/main/images/Pytorch4.png)  
 
 ## 安装
 **windows**
@@ -439,7 +439,7 @@ for data in dataloader:
     print(output.shape)
 ```
 ## CIFAR 10 model结构
-![图 1](https://raw.gitmirror.com/Arrowes/Blog/main/images/Network1.png)  
+![图 1](https://raw.github.com/Arrowes/Blog/main/images/Network1.png)  
 
 ```py
 import torch
@@ -880,6 +880,8 @@ hook: hook编程是一种编程模式，是指在程序的一个或者多个位�
 
 super() 函数: super() 是 Python 中的一个内置函数，用于调用父类（也称为超类）的方法。
 在 Python 中，super(LSS, self).__init__() 用于 调用父类 (BaseModule) 的构造函数，确保 LSS 继承 BaseModule 的所有初始化逻辑。
+
+运行windows超长路径前面要加\\\\?\\
 
 ## PEP8规范
 PEP 8 是 Python 的官方代码风格指南，它为 Python 代码的格式化提供了一套约定，以增强代码的可读性和一致性。遵循 PEP 8 规范是成为一名专业 Python 开发者的基本要求。

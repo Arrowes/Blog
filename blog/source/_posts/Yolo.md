@@ -111,6 +111,12 @@ docker run --name cvat-server -v /my/cvat_data_dir:/home/django/data -d cvat/ser
 # 关闭
 docker compose down
 ```
+### webdataset
+WebDataset 是一种基于 TAR 文件的高效数据集存储与加载方式，专为深度学习任务设计，能够将大规模图像、音频、视频等数据以分片形式流式传输到训练管道中，从而显著提升 I/O 性能。
+import webdataset as wds
+将数据打包成 TAR 分片文件（每个分片包含图像、标签等）。
+使用 WebDataset 库读取这些分片。
+配合 torch.utils.data.DataLoader 进行批量加载和训练。
 
 开源驾驶员行为数据集：[StateFarm-distracted-driver-detection](https://www.kaggle.com/c/state-farm-distracted-driver-detection/data)
 
@@ -124,14 +130,14 @@ docker compose down
 
 ## Anchor
 设计——anchor的计算函数Autoanchor
-![图 1](https://raw.gitmirror.com/Arrowes/Blog/main/images/Yolo1.png)  
+![图 1](https://raw.github.com/Arrowes/Blog/main/images/Yolo1.png)  
 
 
 ## 网络结构
 1. 在 `models/common.py` 加入新的结构代码
 2. 在`models/yolo.py` 的parse_model函数中引入上面新写的结构名称
 3. `.yaml` 修改网络结构
-![图 2](https://raw.gitmirror.com/Arrowes/Blog/main/images/Yolo2.png)  
+![图 2](https://raw.github.com/Arrowes/Blog/main/images/Yolo2.png)  
 
 ## 注意力模块
 [CV中即插即用的注意力模块](https://zhuanlan.zhihu.com/p/330535757)

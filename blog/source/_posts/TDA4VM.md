@@ -15,7 +15,7 @@ TDA4的基本知识，包括数据手册研读，SDK介绍，TIDL概念。
 适用于 ADAS 和自动驾驶汽车的TDA4VM Jacinto™ 处理器,具有深度学习、视觉功能和多媒体加速器的双核 Arm® Cortex®-A72 SoC 和 C7x DSP.
 Jacinto 7系列架构芯片含两款汽车级芯片：TDA4VM 处理器和 DRA829V 处理器，前者应用于 ADAS，后者应用于网关系统，以及加速数据密集型任务的专用加速器，如计算机视觉和深度学习。二者都基于J721E平台开发。
 ## 多核异构
-<img alt="图 3" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/TDA4VMedit.jpg"/>  
+<img alt="图 3" src="https://raw.github.com/Arrowes/Blog/main/images/TDA4VMedit.jpg"/>  
 
 ## 处理器内核
 + **C7x 浮点矢量 DSP，性能高达 1.0GHz、 80GFLOPS、256GOPS**：C7x是TI的一款高性能数字信号处理器，其中的浮点矢量 DSP 可以进行高效的信号处理、滤波和计算，大幅提高神经网络模型的计算效率。
@@ -50,7 +50,7 @@ Edge AI SDK主要基于Linux开发，用于工业领域，工作量少但实时�
 
 ## Processor SDK RTOS (PSDK RTOS) 
 **PSDK RTOS Block Diagram**
-<img alt="图 4" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/TDA4VMSDKedit.png" />  
+<img alt="图 4" src="https://raw.github.com/Arrowes/Blog/main/images/TDA4VMSDKedit.png" />  
 **Hardware**
 Evaluation Module (EVM):Ti 推出的硬件开发板。用于快速原型设计和新产品开发，可以帮助开发人员在短时间内实现复杂的嵌入式系统功能, [EVM Setup for J721E](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/08_06_00_12/exports/docs/psdk_rtos/docs/user_guide/evm_setup_j721e.html)
 JTAG:debug execution, load program via JTAG-*No Boot Mode*
@@ -76,7 +76,7 @@ tiadalg|TI Autonomous Driving Algorithms|[TIADALG](https://software-dl.ti.com/ja
 RTOS SDK 中集成了众多的Demo展示TIDL在TDA4处理器上对实时的语义分割和 SSD 目标检测的能力。如下图,	Vision Apps User Guide 中 [AVP Demo](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/07_02_00_06/exports/docs/vision_apps/docs/user_guide/group_apps_dl_demos_app_tidl_avp3.html) 的展示了使用TIDL对泊车点、车辆的检测。[^1]
 [^1]:[Deep Learning with Jacinto™ 7 SoCs: TDA4x](https://www.ti.com.cn/cn/lit/ml/slyp667/slyp667.pdf?raw=true) | [当深度学习遇上TDA4](https://e2echina.ti.com/blogs_/b/behindthewheel/posts/tda4)
 
-<img alt="图 7" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/TDA4VMAVP.jpg" />  
+<img alt="图 7" src="https://raw.github.com/Arrowes/Blog/main/images/TDA4VMAVP.jpg" />  
 
 ## Processor SDK Linux
 <details>
@@ -102,18 +102,18 @@ Linux SDK最主要是用于A72核心上的启动引导、操作系统、文件�
 
 ## PSDK Linux for Edge AI
 对于Edge AI，无需对深度学习算法进行深入了解，使用python或C++即可进行部署，不支持的算法可以放在ARM端计算和实施推理，TI会自动生成推理文件，如下图；
-<img alt="图 sdk" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/TDA4VMsdk.png" />  
+<img alt="图 sdk" src="https://raw.github.com/Arrowes/Blog/main/images/TDA4VMsdk.png" />  
 
 而对于ADAS领域，要把深度学习算法都放在TIDL端，最大化利用算力，需要手写加速算子进行自定义层的设计；
 
 两套SDK部署深度学习算法的区别如下：
-<img alt="图 compare" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/TDA4VMcompare.png" />  
-<img alt="图 compare" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/TDA4VMcompare2.png" /> 
+<img alt="图 compare" src="https://raw.github.com/Arrowes/Blog/main/images/TDA4VMcompare.png" />  
+<img alt="图 compare" src="https://raw.github.com/Arrowes/Blog/main/images/TDA4VMcompare2.png" /> 
 
 # TDA4VM-SK开发板
 TDA4VM processor starter kit for edge AI vision systems
 
-<img alt="图 TDA4VM-SK" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/TDA4VM-SK.png" /> 
+<img alt="图 TDA4VM-SK" src="https://raw.github.com/Arrowes/Blog/main/images/TDA4VM-SK.png" /> 
 
 [SK-TDA4VM Evaluation board | TI.com](https://www.ti.com/tool/SK-TDA4VM), 提供了 SK-TDA4VM 的功能和接口详细信息
 [Processor SDK Linux for Edge AI Documentation](https://software-dl.ti.com/jacinto7/esd/processor-sdk-linux-sk-tda4vm/latest/exports/docs/running_simple_demos.html)
@@ -148,7 +148,7 @@ Functions:
 + **Execute the network on PC** using the imported files and validate the results.bin
 + **Execute the network on TI** Jacinto7 SoC using the imported files and validate the results.bin
 
-<img alt="图 14" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/TDA4VMTIDLppt.jpg" width="80%"/>  
+<img alt="图 14" src="https://raw.github.com/Arrowes/Blog/main/images/TDA4VMTIDLppt.jpg" width="80%"/>  
 
 TIDL当前支持的训练框架有Tensorflow、Pytorch、Caffe等，用户可以根据需要选择合适的训练框架进行模型训练。TIDL可以将PC端训练好的模型导入编译生成TIDL可以识别的模型格式，同时在导入编译过程中进行层级合并以及量化等操作，方便导入编译后的模型高效的运行在具有高性能定点数据感知能力TDA4硬件加速器上。
 
@@ -205,7 +205,7 @@ TIDL is a fundamental software component of [TI’s Edge AI solution](https://ww
 <img src="https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/08_06_00_12/exports/docs/tidl_j721e_08_06_00_10/ti_dl/docs/user_guide_html/dnn-workflow.png">
 
 [TIDL Runtime](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/08_06_00_12/exports/docs/tidl_j721e_08_06_00_10/ti_dl/docs/user_guide_html/md_tidl_overview.html)（TIDL-RT）是运行在TDA4端的实时推理单元，同时提供了TIDL的运行环境，对于input tensor，TIDL TIOVX Node 调用TIDL 的深度学习加速库进行感知，并将结果进行输出。
-<img alt="图 9" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/TDA4VMworkflow.png" width="50%"/>  
+<img alt="图 9" src="https://raw.github.com/Arrowes/Blog/main/images/TDA4VMworkflow.png" width="50%"/>  
 
 [**TI’s EdgeAI Tools**](https://github.com/TexasInstruments/edgeai):Training and quantization tools,make DNNs more suitable for TI devices.
 
@@ -228,7 +228,7 @@ TIDL is a fundamental software component of [TI’s Edge AI solution](https://ww
 每个进程内可以有多个context（上下文），每个context内可以有多个graph（图，或连接关系），每个graph内可以有多个node（节点）。[^4]
 [^4]:[TIOVX – TI’s OpenVX Implementation](https://www.ti.com/content/dam/videos/external-videos/2/3816841626001/5624955361001.mp4/subassets/openvx-implementation-on-ti-tda-adas-socs-presentation.pdf)
 
-<img alt="图 4" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/TDA4VMopenvxflow.png" />  
+<img alt="图 4" src="https://raw.github.com/Arrowes/Blog/main/images/TDA4VMopenvxflow.png" />  
 
 ```c
 //Example Program
@@ -242,7 +242,7 @@ vx_node F2 = vxF2Node( graph, intermediate, output ); //创建两个节点，分
 vxVerifyGraph( graph ); //验证图的正确性
 vxProcessGraph( graph ); //执行图像处理
 ```
-<img alt="图 5" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/TDA4VMopenvxexample.png" width="80%"/>  
+<img alt="图 5" src="https://raw.github.com/Arrowes/Blog/main/images/TDA4VMopenvxexample.png" width="80%"/>  
 
 ### 基本数据结构
 ``Vx_image, Vx_tensor, Vx_matrix, Vx_array, Vx_user_object_data``
@@ -261,7 +261,7 @@ TI: Target, Target Kernel, Obj Desc。
 + TI官方提供OpenVX的支持，提供标准算法的硬件加速实现，提供各个功能的Demo，能够简化开发调试工作。
 + 简化多核异构的开发，可以在X86模拟运行，所有的板级开发和调试都位于A72 Linux端，减少了对RTOS调试的工作量。
 + OpenVX提供了数据流调度机制，能够支持流水线运行，简化了多线程和并行调度的工作。结合RTOS的实时特性，减少Linux非实时操作系统带来的负面影响[^5]
-<img alt="图 6" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/TDA4VMtiovx.png" width="80%"/>  
+<img alt="图 6" src="https://raw.github.com/Arrowes/Blog/main/images/TDA4VMtiovx.png" width="80%"/>  
 
 [PyTIOVX](https://software-dl.ti.com/jacinto7/esd/processor-sdk-rtos-jacinto7/08_06_00_12/exports/docs/tiovx/docs/user_guide/PYTIOVX.html): Automated OpenVX “C” Code Generation
 [^5]:[OpenVX视觉加速中间件与TDA4VM平台上的应用](https://zhuanlan.zhihu.com/p/423179832) | [TDA4横扫行泊一体市场与其背后的OpenVX](https://zhuanlan.zhihu.com/p/606584605)

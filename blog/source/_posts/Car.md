@@ -15,7 +15,7 @@ CAN（Controller Area Network, 控制器局域网络）是一种用于嵌入式�
 2. 采用差分数据线，抗干扰能力强；
 3. 多主通信模式，减少单点通信线束成本；
 4. 具有错误侦听的自我诊断功能，通信可靠信较高。
-<img alt="picture 2" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/Car-CAN.png" width=50%/>  
+<img alt="picture 2" src="https://raw.github.com/Arrowes/Blog/main/images/Car-CAN.png" width=50%/>  
 两根线CAN-H、CAN-L，所有的CAN节点连接到上面。每个CAN节点包含CAN收发器、CAN控制器、MCU、MCU应用电路(如控制电机)四大部分。
 在发送数据时，CAN控制器把要发送的二进制编码通过CAN_Tx线发送到CAN收发器，然后由收发器把这个普通的逻辑电平信号转化成差分信号，通过差分线CAN_High和CAN_Low输出到CAN总线网络。接收数据过程则相反。采用双线差分信号，用两根信号线的电压差来表示逻辑0和逻辑1的传输方式，可以有效地抑制共模干扰
 CAN收发器的作用则是把逻辑信号转换为差分信号。 CAN总线分高速CAN和低速CAN，收发器也分为高速CAN收发器（1Mbps）和低速CAN收发器（125Kbps）。低速CAN也叫Fault Tolerance CAN，指的是即使总线上一根线失效，总线依然可以通信。
@@ -59,7 +59,7 @@ SLAM (Simultaneous Localization And Mapping，同步定位与地图构建)，主
 + SIL（Software-in-the-Loop软件在环）：在PC上验证代码实现的功能是否与模型一致。
 + PIL（Processer-in-the-Loop处理器在环）：在目标处理器上验证代码实现的功能是否与模型一致。
 + HIL（Hardware-in-the-Loop硬件在环）：在ECU/EPP/整套系统上验证代码实现的功能是否与需求定义一致。
-<img alt="picture 1" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/Car-Loop.png" />  
+<img alt="picture 1" src="https://raw.github.com/Arrowes/Blog/main/images/Car-Loop.png" />  
 
 
 # 相机模型
@@ -225,7 +225,7 @@ C：Channel，图片的通道数。
 但是数据只能线性存储，因此四个维度有对应的顺序，不同的数据排布（format）方式，会显著影响计算性能。 常见的数据存储格式有NCHW和NHWC两种,是流行的深度学习框架不同的数据格式[[1]](https://blog.csdn.net/thl789/article/details/109037433?spm=1001.2014.3001.5506)：
 NCHW：将同一通道的所有像素值按顺序进行存储。
 NHWC：将不同通道的同一位置的像素值按顺序进行存储。
-<img alt="picture 0" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/Car-NCHW.png" />  
+<img alt="picture 0" src="https://raw.github.com/Arrowes/Blog/main/images/Car-NCHW.png" />  
 
 
 ## BEV感知

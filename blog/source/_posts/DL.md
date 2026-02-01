@@ -25,7 +25,7 @@ C-->5.模型保存
 A-->E[C.定义]
 ```
 
-<img src="https://raw.gitmirror.com/Arrowes/Blog/main/images/DL1.png" width = "60%" />
+<img src="https://raw.github.com/Arrowes/Blog/main/images/DL1.png" width = "60%" />
 
 GPU 网络和数据要同时送进GPU
 
@@ -45,7 +45,7 @@ GPU 网络和数据要同时送进GPU
 挤压函数（squashing function）$$sigmoid(x) = \frac 1{1 + exp(−x)}$$  | 将输入映射到范围(0, 1)，常用于二元分类问题。sigmoid可以视为softmax的特例 | <img src="https://zh.d2l.ai/_images/output_mlp_76f463_51_0.svg"  />
 双曲正切 $$tanh(x) = \frac {1 − exp(−2x)}{1 + exp(−2x)}$$   |   将输入映射到范围(-1, 1)，也用于某些分类和回归问题, 当输入在0附近时，tanh函数接近线性变换。形状类似于sigmoid函数，不同的是tanh函数关于坐标系原点中心对称。（LSTM）|<img src="https://zh.d2l.ai/_images/output_mlp_76f463_81_0.svg"  />
 修正线性单元（Rectified Linear Unit）$$ReLU(x) = max(x, 0)$$  $$LeakyReLU=max(αx,x)$$ |求导表现得特别好：要么让参数消失，要么让参数通过。最常用的激活函数，通常能够加速收敛和减轻梯度消失问题（Transfromer）； LeakyReLU中通常设α=0.01来调整负值的零梯度，缓解dead ReLU问题（YOLO） 若α为可学习参数，则为PReLU|    <img src="https://zh.d2l.ai/_images/output_mlp_76f463_21_0.svg"  />
-指数线性单元 (Exponential Linear Units) <img src="https://raw.gitmirror.com/Arrowes/Blog/main/images/DL_ELU.png"/>|   对小于零的情况采用类似指数计算的方式进行输出。与 ReLU 相比，ELU 有负值，这会使激活的平均值接近零。均值激活接近于零可以使学习更快，因为它们使梯度更接近自然梯度。但计算量较大 |<img src="https://imgconvert.csdnimg.cn/aHR0cHM6Ly9waWMyLnpoaW1nLmNvbS84MC92Mi02MDRiZTExNGZhMDQ3OGYzYTEwNTk5MjNmZDEwMjJkMV9oZC5wbmc?x-oss-process=image/format,png"  />
+指数线性单元 (Exponential Linear Units) <img src="https://raw.github.com/Arrowes/Blog/main/images/DL_ELU.png"/>|   对小于零的情况采用类似指数计算的方式进行输出。与 ReLU 相比，ELU 有负值，这会使激活的平均值接近零。均值激活接近于零可以使学习更快，因为它们使梯度更接近自然梯度。但计算量较大 |<img src="https://imgconvert.csdnimg.cn/aHR0cHM6Ly9waWMyLnpoaW1nLmNvbS84MC92Mi02MDRiZTExNGZhMDQ3OGYzYTEwNTk5MjNmZDEwMjJkMV9oZC5wbmc?x-oss-process=image/format,png"  />
 
 
 ## 感受野(Receptive field)
@@ -54,23 +54,31 @@ GPU 网络和数据要同时送进GPU
 
 $   n_{output.features}=[\frac{n_{input.features}+2p_{adding.size}-k_{ernel.size}}{s_{tride.size}}+1]   $
 较小的感受野通常用于捕获局部特征，而较大的感受野则有助于捕获全局信息。
-<img src="https://raw.gitmirror.com/Arrowes/Blog/main/images/DL2.png" width = "50%" />
+<img src="https://raw.github.com/Arrowes/Blog/main/images/DL2.png" width = "50%" />
 
 <img src="https://pic1.zhimg.com/50/v2-d552433faa8363df84c53b905443a556_720w.webp?source=1940ef5c" width = "20%" />
 
 ## 卷积
-<img alt="图 37" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/DL-Conv.jpg" />  
+<img alt="图 37" src="https://raw.github.com/Arrowes/Blog/main/images/DL-Conv.jpg" />  
 
 深度可分离卷积是一种高效的卷积方式，它通过先对每个通道单独做空间上的卷积（depthwise），再用 1×1 卷积融合通道信息（pointwise），与标准卷积相比显著减少了参数量和计算成本，特别适合部署在轻量级或移动设备上，同时仍保有较强的特征提取能力。
+
+可变形卷积（Deformable Convolution, DCN）是一种改进的卷积操作，它通过引入可学习的“偏移量（offsets）”来动态调整卷积核的采样位置，使网络能够更好地适应图像中的几何变形和复杂结构。
+核心思想
+传统卷积：卷积核在特征图上采样的位置是固定的、规则的（如 3×3 网格）。
+可变形卷积：在每个采样点上增加一个可学习的偏移量 Δ𝑝，使得卷积核能够“变形”，灵活地选择更合适的采样位置。
+结果：卷积核不再局限于规则网格，而是可以根据任务需求自适应地调整感受野。
+
+二维高斯核：这种高斯核生成的方式使得置信度图在真实关键点位置达到峰值，并向周围平滑地衰减，为模型提供了更平滑、更有信息量的监督信号，而不是一个孤立的点。
 
 ## 反向传播
 待续
 
 ## Optimizer
-<img src="https://raw.gitmirror.com/Arrowes/Blog/main/images/DL3.gif" width = "60%" />
+<img src="https://raw.github.com/Arrowes/Blog/main/images/DL3.gif" width = "60%" />
 
 $$SGD → SGDM → NAG → AdaGrad → AdaDelta → Adam → Nadam$$
-![图 4](https://raw.gitmirror.com/Arrowes/Blog/main/images/DL4.png)  
+![图 4](https://raw.github.com/Arrowes/Blog/main/images/DL4.png)  
 
 ### 学习率与优化器调度策略
 
@@ -265,14 +273,14 @@ IoU Loss 系列通过引入几何对齐、惩罚项等方式，让模型在训�
 空间域将原始图片中的空间信息变换到另一个空间中并保留了关键信息。
 普通的卷积神经网络中的池化层（pooling layer）直接用一些max pooling 或者average pooling 的方法，将图片信息压缩，减少运算量提升准确率。
 发明者认为之前pooling的方法太过于暴力，直接将信息合并会导致关键信息无法识别出来，所以提出了一个叫 **空间转换器（spatial transformer）** 的模块，将图片中的的空间域信息做对应的空间变换，从而能将关键的信息提取出来。
-<img src="https://raw.gitmirror.com/Arrowes/Blog/main/images/DL5.png" width = "50%" />
+<img src="https://raw.github.com/Arrowes/Blog/main/images/DL5.png" width = "50%" />
 
 ### 通道域（Channel Domain）
 通道注意力机制在计算机视觉中，更关注特征图中channel之间的关系，而普通的卷积会对通道做通道融合，这个开山鼻祖是SENet,后面有GSoP-Net，FcaNet 对SENet中的squeeze部分改进，EACNet对SENet中的excitation部分改进，SRM,GCT等对SENet中的scale部分改进。
 
 [SENet](https://arxiv.org/abs/1709.01507),[pytorch](https://github.com/moskomule/senet.pytorch)
 SENet《Squeeze-and-Excitation Networks》是CVPR17年的一篇文章，提出SE module。在卷积神经网络中，卷积操作更多的是关注感受野，在通道上默认为是所有通道的融合（深度可分离卷积不对通道进行融合，但是没有学习通道之间的关系，其主要目的是为了减少计算量），SENet提出SE模块，将注意力放到通道之间，希望模型可以学习到不同通道之间的权重：
-![图 6](https://raw.gitmirror.com/Arrowes/Blog/main/images/DL6.png)  
+![图 6](https://raw.github.com/Arrowes/Blog/main/images/DL6.png)  
 
 ### 时域注意力机制
 时域注意力机制在cv领域主要考虑有时序信息的领域，如视频领域中的动作识别方向，其注意力机制主要是在时序列中，关注某一时序即某一帧的信息。
@@ -282,12 +290,12 @@ SENet《Squeeze-and-Excitation Networks》是CVPR17年的一篇文章，提出SE
 
 [CBAM](https://arxiv.org/abs/1807.06521),[github](https://github.com/luuuyi/CBAM.PyTorch) 
 CBAM (Convolutional Block Attention Module)是SENet的一种拓展，SENet主要基于通道注意力，CBAM是通道注意力和空间注意力融合的注意力机制。
-![图 7](https://raw.gitmirror.com/Arrowes/Blog/main/images/DL7.png)  
+![图 7](https://raw.github.com/Arrowes/Blog/main/images/DL7.png)  
 如上图所示，输入一个h*w*c的特征图，通过channel Attention Module 生成通道注意力权重对输入特征图在通道层添加权重，再通过spatial Attention Module 生成空间注意力权重，对特征图在空间层添加权重，输出特征图。
 
 # Metrics 评估
 ## 混淆矩阵
-<img src="https://raw.gitmirror.com/Arrowes/Blog/main/images/DL8.png" width = "70%" />
+<img src="https://raw.github.com/Arrowes/Blog/main/images/DL8.png" width = "70%" />
 
 X横坐标为正确的分类（即你用标签所标注的真实分类）
 Y纵坐标为模型所预测的分类（即图片经过模型推理后模型将其辨别为的分类）
@@ -311,14 +319,14 @@ $$AP_i=\int_0^1P_i(R_i)dR_i$$
 将recall设置为横坐标，precision设置为纵坐标。PR曲线下围成的面积即AP，所有类别AP平均值即mAP.
 $$mAP=\frac1n\sum_{i = 1}^{n}AP_i$$
 **置信度 Confidence**：置信度设定越大，Prediction约接近1，Recall越接近0，要寻找最优的F1分数，需要遍历置信度。
-![图 9](https://raw.gitmirror.com/Arrowes/Blog/main/images/DL9.png)  
+![图 9](https://raw.github.com/Arrowes/Blog/main/images/DL9.png)  
 
 **交并比 IoU**（Intersection over Union）：是目标检测中使用的一个概念，IoU计算的是“预测的边框”和“真实的边框”的交叠率，即它们的交集和并集的比值。最理想情况是完全重叠，即比值为1。
 
 *mAP@0.5*：IoU阈值设为 0.5，即预测框与真实框的重叠面积占比 ≥ 50% 就算正确。对每个类别计算 AP，再取平均值得到 mAP。评估标准较宽松，适合快速验证模型是否具备基本检测能力。
 *mAP@0.5:0.95*：在 IoU 阈值从 0.5 到 0.95（步长为 0.05） 的 10 个点上分别计算 AP，然后取平均。更严格地评估模型在不同定位精度要求下的表现。全面衡量模型稳定性和定位能力，常用于学术论文和高精度场景（如自动驾驶）。
 如果一个模型在 mAP@0.5 上表现很好，但在 mAP@0.5:0.95 上得分低，说明它能大致定位目标，但在精确定位方面表现不佳。
-<img src="https://raw.gitmirror.com/Arrowes/Blog/main/images/DL10.png" width = "60%" />
+<img src="https://raw.github.com/Arrowes/Blog/main/images/DL10.png" width = "60%" />
 
 **NMS**（Non-Maximum Suppression，非极大值抑制）
 一种用于目标检测任务的后处理技术，主要用于消除冗余的检测框，保留最可能准确的预测结果。
@@ -333,10 +341,10 @@ IoU阈值：通常设为0.3\~0.7，控制框的重叠容忍度。阈值越低，
 **ROC曲线**(Receiver Operating Characteristic 受试者工作特征)
 $$TPR=\frac{TP}{TP+FN},FPR=\frac{FP}{FP+TN}$$可以理解为分类器对正样本的覆盖敏感性和对负样本的敏感性的权衡。
 在ROC曲线图中，每个点以对应的FPR值为横坐标，以TPR值为纵坐标 
-<img src="https://raw.gitmirror.com/Arrowes/Blog/main/images/DL11ROC.jpg" width = "40%" />
+<img src="https://raw.github.com/Arrowes/Blog/main/images/DL11ROC.jpg" width = "40%" />
 
 **AUC值**：PR曲线下方的面积
-<img src="https://raw.gitmirror.com/Arrowes/Blog/main/images/DL12AUC.png" width = "70%" />
+<img src="https://raw.github.com/Arrowes/Blog/main/images/DL12AUC.png" width = "70%" />
 
 > 1.AUC = 1，是完美分类器，采用这个预测模型时，存在至少一个阈值能得出完美预测。绝大多数预测的场合，不存在完美分类器。
 2.0.5 < AUC < 1，优于随机猜测。这个分类器（模型）妥善设定阈值的话，能有预测价值。
@@ -377,9 +385,9 @@ map*map是下个featuremap的大小，也就是上个weight*weight到底做了�
 **换算计算量**,一般一个参数是指一个float，也就是４个字节,1kb=1024字节
 
 # Transformer
-![图 13](https://raw.gitmirror.com/Arrowes/Blog/main/images/DL13.png)  
-![图 14](https://raw.gitmirror.com/Arrowes/Blog/main/images/DL14.png)  
-![图 15](https://raw.gitmirror.com/Arrowes/Blog/main/images/DL15.png)  
+![图 13](https://raw.github.com/Arrowes/Blog/main/images/DL13.png)  
+![图 14](https://raw.github.com/Arrowes/Blog/main/images/DL14.png)  
+![图 15](https://raw.github.com/Arrowes/Blog/main/images/DL15.png)  
 
 # 相关概念
 ## 联邦学习
@@ -427,6 +435,48 @@ NCCL遇到显卡P2P通信问题:[1](https://huo.zai.meng.li/p/vllm%E5%90%AF%E5%8
 图（e）（f）是56\*56的Unpooling和反卷积的结果；
 图（g）（h）是112\*112 UnPooling和反卷积的结果；
 图（i）（j）是224\*224的UnPooling和反卷积的结果
+
+## 曼哈顿距离 (Manhattan distance)
+曼哈顿距离（Manhattan distance），也叫 城市街区距离（City Block Distance） 或 L1 距离，是一种常见的距离度量方法。它的名字来源于美国纽约曼哈顿的街道布局——街道呈网格状，行走时只能沿着水平或垂直方向移动。
+𝑑 ( 𝑃 1 , 𝑃 2 ) = ∣ 𝑥 1 − 𝑥 2 ∣ + ∣ 𝑦 1 − 𝑦 2 ∣
+应用场景
+机器学习：在 KNN、聚类等算法中作为距离度量。
+优化问题：L1 范数常用于稀疏解（如 Lasso 回归）。
+图像处理：计算像素间的差异。
+路径规划：在网格地图中估算步数或路径长度。
+
+## 匈牙利算法（Hungarian Algorithm）
++ Step 1：代价矩阵的每一行减去其最小的值。
++ Step 2：然后，对第一步完成后的代价矩阵的每一列减去其最小的值。
++ Step 3：接着，用最小的行与列来覆盖代价矩阵中已经是0的元素。如果这个行与列的总数达到n，算法结束，否则进入Step 4。
++ Step 4：对于所有没有被覆盖的元素，找出其中的最小值，然后所有没有被覆盖的元素减去该最小值，所有被覆盖了两次的元素（行覆盖了一次，列又覆盖一次）加上该最小值。然后重新回到Step3。当找到对应的 0元素后，代入回最开始的原来的代价矩阵中对应的位置，便能找到最小的匹配。
+
+在目标检测中：
+模型会输出 一组预测框（通常数量比真实框多）。
+数据集提供 一组真实框（ground truth）。
+我们需要把预测框和真实框 一一对应，才能计算损失函数。
+如果直接用 IoU 或贪心匹配，可能出现：
+一个真实框被多个预测框匹配/有些预测框没有对应真实框/导致训练不稳定
+
+匈牙利算法的作用
+匈牙利算法解决的是 最优匹配问题：
+输入：预测框集合 𝑃，真实框集合 𝐺。
+构造一个 代价矩阵 𝐶，其中元素 𝑐𝑖𝑗表示预测框 𝑝𝑖与真实框 𝑔𝑗的匹配代价。
+输出：一个最优分配方案，使得总代价最小。
+代价矩阵的构造
+在检测任务中，代价通常由以下部分组成：
+分类代价：预测类别与真实类别的交叉熵。
+位置代价：预测框与真实框的 L1 距离。
+IoU 代价：预测框与真实框的重叠度（1 - IoU）。
+
+## 全卷积网络（FCNs）
+全卷积网络（Fully Convolutional Networks, FCNs）是一种专门用于图像语义分割的深度学习架构，它将传统卷积神经网络中的全连接层替换为卷积层，从而能够处理任意尺寸的输入图像，并输出与输入同尺寸的像素级预测结果。
+核心思想
+去掉全连接层：传统 CNN 在最后通常有全连接层用于分类，而 FCN 将其替换为卷积层，使得输出不再是单一类别，而是一个空间分布（热力图）。
+端到端训练：输入原始图像，输出预测分割图，不需要额外的手工特征设计。
+任意尺寸输入：由于没有全连接层，FCN 可以接受不同大小的图像作为输入。
+上采样（Upsampling）：通过反卷积（转置卷积）或插值方法恢复特征图尺寸，使输出与原图大小一致。
+跳级结构（Skip connections）：结合深层语义信息和浅层细节信息，提高分割精度和细节保真度。
 
 # MMDetection
 ## 基本概念和环境搭建

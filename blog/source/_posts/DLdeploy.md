@@ -12,7 +12,7 @@ tags:
 + Network selection：
 + Optimization：分组卷积、深度可分离卷积、稀疏卷积
 + Deployment：
-<img alt="图 1" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/TDA4VMdeploy.png" width="70%"/>  
+<img alt="图 1" src="https://raw.github.com/Arrowes/Blog/main/images/TDA4VMdeploy.png" width="70%"/>  
 
 Netron神经网络可视化: [软件下载](https://github.com/lutzroeder/netron/releases/tag/v7.0.0), [在线网站](https://netron.app/)
 
@@ -130,13 +130,13 @@ $$float32=int8/2^3$$
 
 > 8位和16位是指量化的位深度，表示用多少个二进制位来表示每个权重或激活值。在量化时，8位会将每个权重或激活值分成256个不同的离散值，而16位则分为65536个离散值，因此16位的表示范围更广，可以更精确地表示模型中的参数和激活值。但是，使用较高的位深度会增加存储要求和计算成本，因此需要在预测精度和计算开销之间进行权衡。
 
-<img alt="picture 1" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/DLdeploy-16to8bit.png" width="70%"/>  
+<img alt="picture 1" src="https://raw.github.com/Arrowes/Blog/main/images/DLdeploy-16to8bit.png" width="70%"/>  
 
 
 
 乘一个系数把float类型的小数部分转换成整数部分，然后用这个转换出来的整数进行计算，计算结果再还原成float
 
-<img alt="图 3" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/DLdeployquantized.png" width="80%"/>  
+<img alt="图 3" src="https://raw.github.com/Arrowes/Blog/main/images/DLdeployquantized.png" width="80%"/>  
 
 [A White Paper on Neural Network Quantization](https://arxiv.org/pdf/2106.08295.pdf)
 
@@ -372,7 +372,7 @@ ort_output = np.clip(ort_output, 0, 255)
 ort_output = np.transpose(ort_output, [1, 2, 0]).astype(np.uint8)
 cv2.imwrite("face_torch2_run.png", ort_output)  # 生成上采样图片，运行成功
 ```
-<img alt="picture 0" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/DLdeploynetron.png" width="80%"/>  
+<img alt="picture 0" src="https://raw.github.com/Arrowes/Blog/main/images/DLdeploynetron.png" width="80%"/>  
 
 ## torch.onnx.export模型转换接口
 Pytorch 模型导出使用自带的接口：`torch.onnx.export`

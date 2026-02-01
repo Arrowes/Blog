@@ -111,8 +111,8 @@ BIOS版本: 4KCN45WW
 [拯救者工具箱 Lenovo Legion Toolkit](https://pan.leekarl.com/LLT)
 [拯救者R720如何恢复原厂系统](https://www.bilibili.com/read/cv17598773/?spm_id_from=333.999.collection.opus.click)
 
-<img alt="picture 1" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/Computer-r720.jpg" />  
-<img alt="picture 2" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/Computer-r7202.jpg" />  
+<img alt="picture 1" src="https://raw.github.com/Arrowes/Blog/main/images/Computer-r720.jpg" />  
+<img alt="picture 2" src="https://raw.github.com/Arrowes/Blog/main/images/Computer-r7202.jpg" />  
 
 [珂芝863(K75)说明书中文-更新7-28 (kzzi.com)](http://www.kzzi.com/media/files/20220825/20220825161014_9187.pdf)
 
@@ -146,7 +146,8 @@ Win + R > PSR，打开步骤记录器页面。
 如果有多组音箱，可以用VoiceMeeter的虚拟输出实现多声道输出
 下载：[Voicemeeter-banana](https://vb-audio.com/Voicemeeter/banana.htm)
 参考视频：[VoiceMeeter组多设备详细教程](https://www.bilibili.com/video/BV1Hj421d7j3/?p=1)
-我的配置：<img alt="图 0" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/Computer_VoiceMeeter.png" width="80%"/>  
+我的配置：<img alt="图 0" src="https://raw.github.com/Arrowes/Blog/main/images/Computer_VoiceMeeter.png" width="80%"/>  
+配置延迟：Menu > System Settings > OUT A1(音箱)=80ms, OUT A2(Y27q-30)=100ms
 
 # 语音唤醒小爱同学
 实现任何电脑语音唤醒小爱同学PC版，参考[【小爱同学】任何电脑语音唤醒小爱同学PC版 彻底无需点击 解放双手！](https://www.bilibili.com/video/BV1uj411e7dT/?share_source=copy_web&vd_source=b148fb6f311bfe6f3870ad8f4dfda92a)

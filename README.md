@@ -6,7 +6,7 @@ tags:
 ---
 第一篇博客用来记录搭建该网站并成功发表这篇博客的流程，使用Hexo静态博客框架，托管于Github，参考了多篇文章[^1]。
 <!--more-->
-<img alt="图 1" src="https://raw.gitmirror.com/Arrowes/Blog/main/images/Hello-blogBlogPhoto.png" width = "30%"/>  
+<img alt="图 1" src="https://raw.github.com/Arrowes/Blog/main/images/Hello-blogBlogPhoto.png" width = "30%"/>  
 
 ### 总体流程
 其中主流程参考[知乎：GitHub+Hexo 搭建个人网站详细教程](https://zhuanlan.zhihu.com/p/26625249)，虽然是老文章，但每一步都非常详细，框架搭建过程存在问题可以看文章的评论区或[Hexo官方文档](https://hexo.io/zh-cn/docs/)进行补充；
@@ -148,8 +148,8 @@ main #Branch
 https://github.com/Arrowes/Blog #Repository
 github_pat_11AV245NA0ZkjSgYjmtK5T_fyxLh1yhNVlT13FFsC #TokenMjaEB4LKd
 
-#使用raw.gitmirror.com代替raw.githubusercontent.com,实现github图片加速
-https://raw.gitmirror.com/${username}/${repository}/${branch}/${filepath} #Github: Cdn
+#使用raw.github.com代替raw.githubusercontent.com,实现github图片加速
+https://raw.github.com/${username}/${repository}/${branch}/${filepath} #Github: Cdn
 q3mbRZwwnnKUXHcibZg6UN8ulCHE2UDXMjaEB4LKd
  ```
 
