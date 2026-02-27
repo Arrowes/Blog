@@ -314,6 +314,7 @@ git fetch           #git pull = git fetch + git merge
 git submodule sync    #同步子模块
 git submodule update  #更新子模块
 git submodule update --init --recursive --remote # 初始化所有子模块（递归），并强制更新到远程仓库的最新版本。
+git submodule deinit -f . #撤销子模块在本地的初始化状态，然后可以重新update
 git config --list   #检查当前配置
 git config --global user.name "[name]"    #配置全局信息 无global则是在项目中配置
 git config --global user.email "[email address]" 
@@ -343,6 +344,9 @@ git merge --continue
 # git patch 导出最近 N 个 commit（例如最近 5 个）
 git format-patch -n 5
 git am *.patch
+# git bundle
+git bundle create online.bundle HEAD~2..HEAD
+git pull ../online.bundle HEAD
 ```
 ## 公钥和私钥
 ```sh

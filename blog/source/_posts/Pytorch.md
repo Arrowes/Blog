@@ -723,6 +723,24 @@ with open('test.txt', 'r', encoding='utf-8') as f:
 # 无需手动调用f.close()，with会自动处理
 ```
 
+## argparser 
+```py
+import argparse
+
+parser = argparse.ArgumentParser(description="argparse综合示例：支持必选、可选、布尔参数及默认值")
+
+parser.add_argument("name", help="必选：输入姓名（位置参数）")  # 位置参数（无--前缀，必须输入）
+parser.add_argument("--age", type=int, help="可选：输入年龄（整数类型）")  # 可选参数（--前缀，需赋值）
+parser.add_argument("--debug", action="store_true", help="可选：开启调试模式（无需赋值，存在即True）")  # 布尔开关
+parser.add_argument("--mode", default="train", choices=["train", "test"], help="可选：运行模式（默认train）")  # 带默认值和选项限制
+
+args = parser.parse_args()
+print(f"姓名：{args.name}，年龄：{args.age}，模式：{args.mode}")
+
+python script.py 张三 --age 25
+python script.py 李四 --debug --mode test
+python script.py -h（自动生成参数说明）
+```
 ## 数据
 glob
 
