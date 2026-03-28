@@ -264,7 +264,7 @@ vscode 文件标签栏多行显示：文件 > 首选项 > 设置 > workbench.edi
 下载 [Git](https://git-scm.com/downloads)，`sudo apt-get install git`
 与 [TortoiseGit](https://tortoisegit.org/download/) 小乌龟配合使用可以少记很多指令，在目标文件夹右键可执行push、clone、commit等操作
 ## 主要流程
-1. ``git clone <X>`` // 到本地
+1. ``git clone X`` // 到本地
 2. ``git checkout -b xxx`` 切换至新分支xxx，相当于复制了remote的仓库到本地的xxx分支上
 3. 修改或者添加本地代码（部署在硬盘的源文件上）
 4. ``git diff`` 查看自己对代码做出的改变
@@ -327,7 +327,7 @@ git reset --hard [commitId]  # 进行回溯
 
 git reset --soft HEAD^  #回退commit
 git commit --amend      #重新写commit信息
-git branch -d <branches>删除分支
+git branch -d branches  #删除分支
 git stash               #备份当前工作区的内容，保存到git栈中，从最近的一次commit中读取相关内容
 git stash pop           #恢复工作区的内容(git stash list, git stash apply stash@{1})
 
@@ -345,8 +345,9 @@ git merge --continue
 git format-patch -n 5
 git am *.patch
 # git bundle
-git bundle create online.bundle HEAD~2..HEAD
-git pull ../online.bundle HEAD
+git bundle create xxxx.bundle HEAD~2..HEAD  #最近两次commit
+git bundle create xxxx.bundle old_commit..new_commit #包含 old_commit 之后到 new_commit 的提交。
+git pull ../xxxx.bundle HEAD
 ```
 ## 公钥和私钥
 ```sh
@@ -413,13 +414,13 @@ Dockerfile 是一个文本文件，包含了一系列指令，用于构建 Docke
 # Container
 docker ps       # 查看运行中的容器列表  
 docker ps -a    # 查看所有容器（包括已停止的）  
-docker start <container_name_or_id>     # 启动容器  
-docker stop <container_name_or_id>      # 停止容器  
-docker restart <container_name_or_id>   # 重启容器  
-docker logs <container_name_or_id>      # 查看容器日志  
-docker exec -it <container_name_or_id> /bin/bash    # 进入容器交互式命令行  
-docker rm <container_name_or_id>    # 删除容器
-docker run <options> <image_name>    # 运行一个容器  --shm-size=8g[分配共享内存,默认64MB] [df -h] 查看共享内存
+docker start container_name_or_id     # 启动容器  
+docker stop container_name_or_id      # 停止容器  
+docker restart container_name_or_id   # 重启容器  
+docker logs container_name_or_id      # 查看容器日志  
+docker exec -it container_name_or_id /bin/bash    # 进入容器交互式命令行  
+docker rm container_name_or_id    # 删除容器
+docker run options image_name    # 运行一个容器  --shm-size=8g[分配共享内存,默认64MB] [df -h] 查看共享内存
 # 示例：后台运行 Nginx 容器，将主机的8080端口映射到容器的80端口  
 docker run -d -p 8080:80 nginx  
 docker run --restart always --gpus all --shm-size=32g -it -w /root/ -p 2003:22 -p 2026:2026 -v /mnt:/mnt -v /root:/root --name container_name image:name
@@ -428,15 +429,15 @@ service ssh restart #重启整个docker服务
 
 # Image
 docker images    # 查看本地镜像  
-docker pull <image_name>    # 从远程仓库拉取镜像  
-docker rmi <image_name_or_id>    # 删除镜像  
-docker build -t <image_name> <path_to_dockerfile>    # 构建镜像  
-docker history <image_name>    # 查看镜像历史  
+docker pull image_name    # 从远程仓库拉取镜像  
+docker rmi image_name_or_id    # 删除镜像  
+docker build -t image_name path_to_dockerfile    # 构建镜像  
+docker history image_name    # 查看镜像历史  
 
 docker info    # 查看 Docker 的系统信息  
 docker --version    # 查看 Docker 版本  
-docker top <container_name_or_id>    # 查看容器的进程  
-docker diff <container_name_or_id>    # 查看容器的文件系统改动 
+docker top container_name_or_id    # 查看容器的进程  
+docker diff container_name_or_id    # 查看容器的文件系统改动 
 
 # Docker用户组
 sudo groupadd docker            # 1. 创建docker用户组
@@ -447,11 +448,15 @@ docker info                     # 5. 验证 Docker 组成员身份
 
 #打包镜像
 docker images
-docker save -o <output-file.tar> <image-name:tag>
+docker save -o output-file.tar image-name:tag
 #打包容器
 docker ps -a
-docker commit <container-id> <new-image-name>
-docker save -o <output-file.tar> <new-image-name>
+docker commit container-id new-image-name
+docker save -o output-file.tar new-image-name
+# 使用
+docker load -i output-file.tar
+docker run -d --name new_container new-image-name
+docker run --restart always --gpus all --shm-size=128g -it --ulimit nofile=40960 -w /mnt -p 2006:22 -p 2026:2026 -v /root:/root -v /mnt:/mnt -v /home:/home -e TZ=Asia/Shanghai --name XXXX2026 imagename
 ```
 
 ## Docker Compose
@@ -468,7 +473,7 @@ docker-compose up
 docker-compose ps       #查看正在运行的容器状态
 docker-compose down     #停止所有正在运行的容器，加上 -v 同时删除持久化卷中的数据
 docker-compose logs     #查看容器的输出日志
-docker-compose exec <服务名称> bash #进入容器
+docker-compose exec 服务名称 bash #进入容器
 docker-compose build    #重建镜像
 ```
 
@@ -492,7 +497,7 @@ docker build -t ipxxxx:5000/Imagename:1.0.0  -f docker/Dockerfile .
 
 #为现有镜像赋个别名，可以方便管理镜像，尤其是在推送到远程仓库时
 docker tag ipxxxx:5000/Imagename:1.0.0 ipxxxx2:5000/Imagename:1.0.0
-#Docker 会根据推送的镜像名称来确定推送的目标 IP 地址和端口号，格式为：<registry>/<repository>:<tag>：
+#Docker 会根据推送的镜像名称来确定推送的目标 IP 地址和端口号，格式为：registry/repository:tag：
 docker push ipxxxx:5000/Imagename:1.0.0
 
 #手动run image:
