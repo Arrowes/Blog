@@ -11,7 +11,7 @@ tags:
 
 # Anaconda
 + Windows环境配置
-  安装[miniconda](https://repo.anaconda.com/miniconda/Miniconda3-latest-Windows-x86_64.exe), [镜像源](https://mirrors.tuna.tsinghua.edu.cn/anaconda/miniconda/?C=M&O=D) （或[**Anaconda**](https://www.anaconda.com/)，更大更全但没必要）
+  安装开源的[miniforge](https://github.com/conda-forge/miniforge) 或 [miniconda](https://repo.anaconda.com/miniconda/Miniconda3-latest-Windows-x86_64.exe), [镜像源](https://mirrors.tuna.tsinghua.edu.cn/anaconda/miniconda/?C=M&O=D) （或[**Anaconda**](https://www.anaconda.com/)，更大更全但没必要）
   防止环境装在C盘占空间：修改user目录下.condarc文件里的默认地址，或执行``conda config --add D:\Anaconda3\envs ``,然后``conda info`` 检查envs directories
   （若报错 The channel is not accessible or is invalid 运行``conda config --remove-key channels``）
 

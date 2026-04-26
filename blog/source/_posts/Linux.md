@@ -355,6 +355,9 @@ git pull ../xxxx.bundle HEAD
 ssh-keygen -t rsa -b 4096 -C "your_email@example.com"
 # 将公钥添加到远程服务器，如果 ssh-copy-id 不可用，可以手动将公钥内容（~/.ssh/id_rsa.pub）复制到远程服务器的 ~/.ssh/authorized_keys 文件中
 ssh-copy-id user@remote_host
+# 密钥权限设置，确保私钥文件权限为600，公钥文件权限为644
+chmod 600 /home/jthaler/.ssh/id_rsa
+chmod 644 /home/jthaler/.ssh/id_rsa.pub
 ```
 通过SSH隧道实现本地端口到远程服务器端口的转发:
 `ssh -L PORT:localhost:PORT awang13@10.168.60.59`
@@ -377,6 +380,12 @@ git config core.fileMode false
 git submodule foreach 'git config core.fileMode false' #对所有子仓进行操作
 git config --global core.autocrlf false
 #或者修正用户名
+
+# 文件级修复
+# 1. 将 Windows 换行符转换为 Linux 换行符 (如果没有安装 dos2unix，可以通过 apt/yum 安装)
+dos2unix XXX.sh
+# 2. 将文件中所有不间断空格替换为标准空格
+sed -i 's/\xc2\xa0/ /g' XXX.sh
 ```
 ### git clone频繁失败
 git clone频繁失败：配置Git专用代理
