@@ -267,6 +267,39 @@ BEV 图像可以通过多种方式生成，包括：
 - 特征融合、目标检测。
 - 在 BEV 视角下进行目标检测、语义分割、路径规划等任务。
 
+### LSS Fast-BEV
+4路摄像头的鱼眼图像输入 > EfficientNet-Lite 骨干网络提取特征 > LSS (Lift, Splat, Shoot) 机制（Fast-BEV）将 2D 图像特征投影到 3D 的 BEV空间下: 
+**neck**: 仅降维,抛弃了传统LSS的显式深度预测，节省了深度预测的计算量以及庞大中间张量, 直接做深度均匀。
+
+**projection**
+1. **camgeometry**: 负责计算 2D 像素到 3D 物理空间的几何映射关系的静态映射表，不处理图像特征，只处理纯几何坐标。计算出图像上每一个像素，在预设的 14 个深度点上，对应到自车 3D 坐标系下的物理坐标，一个 2D 像素就变成了 3D 空间中一串“排成一排”的 14 个点。
+2. **PointsToVoxels**: 拿到映射表，将视锥体中的 3D 点映射到 BEV 网格中,会计算一个 mapper_matrix，记录每一个 3D 点落入 BEV 网格的哪个位置。把复杂的 3D 几何坐标转换成了一张简单的索引矩阵（Mapper Matrix）。
+3. **VoxelPooling**: 负责特征的Splat:将 Backbone 提取的 2D 特征，根据 PointsToVoxels 计算出的映射矩阵，池化到 BEV 网格中。将 Z 轴的所有特征直接压扁。
+
+**HM (Height Map)**
+1. **高度回归损失**: 使用 Smooth L1 Loss 对经过压缩映射后的高度进行回归。误差大时为L1 loss 线性 离群点不敏感 防止高度突变等情况引起的梯度爆炸，误差小时为L2 loss, 二次方平滑。
+2. **置信度损失**: BCE二元交叉熵损失（>0.15m）。
+**边缘损失 (Edge Loss)**: 通过计算预测图与真值图在X, Y方向上的梯度差异来强化边缘预测，避免都预测为斜坡，其中梯度是使用 Sobel 算子卷积得到的，惩罚边缘模糊，使得预测的高度图在物体边界处更加锐利。
+3. **结构相似性损失 (SSIM, Structure Similarity Index Measure)**: 不仅计算逐像素的loss,也考虑整体的图像结构相似度，（亮度 对比度 结构->高度 坡度变化 地形） 约束预测图与真值图在 BEV 视角下的空间结构相似性 ，强制模型学习物体的 BEV 拓扑结构，而不仅仅是像素级数值 ，SSIM 指数范围在 -1 到 1 之间，1 表示完全相同。
+4. **总结**: SmoothL1管绝对高度，BCE管高低分类，SSIM管整体地形的平滑性，Edge Loss逼迫网络学出陡峭的障碍物边缘。
+
+> 将连续的高度回归问题，在评估时离散化为了 5cm 一个区间的分类问题。模型在两端（Bin 0 平地，Bin 7 极高障碍物）准确率极高，中间微小高度（如50-100mm）存在一定挑战，这也客观反映了纯视觉测高的难点。
+
+## OCC (Occupancy Network, 占用网络)
+告诉汽车周围的三维空间里，哪些地方是空的可以走，哪些地方被东西挡住了不能走。特斯拉在 2022 年 AI Day 上将纯视觉 Occupancy Network 发扬光大，证明了仅靠摄像头也能构建高精度的 3D 空间。
+**传统方案问题**：1. 长尾问题；2. 形状不准，幽灵刹车。
+**主流方案**：纯视觉 OCC（Camera-only） / 多传感器融合 OCC（LiDAR + Camera）。
+
+1. **基于 LSS（Lift-Splat-Shoot）深度估计的方案**
+   - **怎么做**：先让模型预测 2D 图像中每个像素点的深度分布（Lift），然后把这些带有深度信息的像素像“拍扁”一样投射到 3D 空间中（Splat），最后提取特征（Shoot）。
+   - **特点**：逻辑直接，比较依赖深度估计的准确性。在早期 BEV（鸟瞰图）时代非常流行，现在也常用于初始化 OCC 空间。
+2. **基于 Transformer 的 3D Query 方案（目前最主流）**
+   - **怎么做**：直接在 3D 空间中预设无数个“网格查询器”（3D Queries）。利用 Transformer 的 Cross-Attention（交叉注意力机制），让这些 3D 网格主动去 2D 环视图像中“寻找”对应的特征。
+   - **特点**：精度高，泛化能力强。著名的学术开源模型如 VoxFormer 就是此类。缺点是 3D 空间的计算量呈指数级爆炸，对车端芯片算力要求极高。
+3. **TPV（Tri-Perspective View）三视图方案**
+   - **为了解决**上述 3D Voxel 计算量太大的问题，学术界（如清华大学提出的 TPVFormer）想出了一个讨巧的办法：不直接计算 3D 体素，而是计算俯视图（Top）、正视图（Front）、侧视图（Side）三个 2D 平面，然后再把它们“正交”组合成 3D。
+   - **特点**：在保证一定 3D 空间感知能力的同时，大幅降低了算力消耗，是对车端算力妥协的一种高效折中方案。
+
 ## 余弦相似度 (Cosine Similarity)
 
 余弦相似度是一种衡量两个非零向量之间**方向**相似性的指标。它通过计算两个向量夹角的余弦值来评估它们的相似程度。
@@ -297,3 +330,188 @@ $$\|\vec{A} - \vec{B}\|^2 = 1^2 + 1^2 - 2(1)(1)\cos(\theta) = 2 - 2\cos(\theta)$
 二阶：$ B(t) = (1-t)² * P0 + 2 * (1-t) * t * P1 + t² * P2 $
 ![alt text](https://pic4.zhimg.com/v2-e40165c7c4d059db8c913daecf337d85_b.webp)
 三阶：![alt text](https://picx.zhimg.com/v2-45d35cb4e1b446501fcefac07b3dab55_b.webp)
+
+# 车道线检测
+车道线检测为车道保持辅助系统（LKA）提供
+横向控制基准。车道几何信息（曲
+率、航向角）是高精度语义地图的核心输入，支撑车
+辆定位与路径规划
+难点：
+1. 形态：弯道，分流合流，颜色，模糊
+2. 遮挡：动态物体，自然因素
+3. 环境：光照，天气
+
+车道线检测的方案经历了从**传统图像处理**到**深度学习**，再到如今向**3D/BEV（鸟瞰图）空间演进**的过程。
+
+## 2D
+传统图像处理：边缘提取，Canny+霍夫 
+变换，颜色分割，IPM逆透视变换
+几何模型：多项式拟合
+深度学习：语义分割（U-Net, SegNet），Transformer(Laneformer,LATR)
+
+## 3D
++ 基于LiDAR:法通过点云分割（如区分可驾驶区域与路标）或几何特征提取（如结合样条模型拟合道路边界）来实现车道识别
++ 基于立体视觉:立体视觉方法通过模拟人眼的深度感知，利用两台相机获取场景的深度信息，从而实现三维车道线的建模。
++ 基于深度相机的3D车道线检测方法 
++ 基于多传感器融合:数据级（RGB-D数据）/特征级（BEV,BEV-LaneDet）/决策级融合
+
+## 2D + 3D
+
+| 模型名称 | 融合机制 | 核心创新 | F1-Score (%) | AP (%) | Near Error (m) | Far Error (m) |
+| --- | --- | --- | --- | --- | --- | --- |
+| LaneCPP[67] | 物理先验+数据驱动模型 | 全 3D 连续车道+几何感知的空间变换 | 60.3 | - | 0.264 | 0.310 |
+| 3D-LaneNet[69] | 双路径架构+投影变换层 | 锚点表示+合成数据生成 | - | 91.8 | 0.133 | 0.331 |
+| Gen-LaneNet[65] | 几何引导 | 几何编码器优化 | 44.59 | 45.01 | 0.061 | 0.496 |
+| PersFormer[70] | Transformer的视角转换模块 | 透视 Transformer+统一 2D/3D 锚点设计 | 85.7 | 74.6 | 0.176 | 0.285 |
+| BEV-LaneDet[71] | 虚拟相机 | 可学习视角变换 | 54.2 | 47.5 | 0.368 | 0.430 |
+| CurveFormer[72] | 曲线查询 | 端到端曲线回归 | 56.4 | 53.6 | 0.497 | 0.554 |
+
+## 4D
+
+## 主流方案对比总结
+
+| 方案类别 | 核心思想 | 优势 | 劣势 | 适用场景 |
+| --- | --- | --- | --- | --- |
+| **传统图像处理** | 边缘提取 + 霍夫变换 | 极低算力，无需数据 | 鲁棒性极差，易受环境干扰 | 简单的辅助驾驶 (如早期 LDW) |
+| **语义分割 (2D)** | 逐像素分类 | 形状拟合好，精度高 | 计算量大，速度较慢 | 算力充足、需要高精度线型的场景 |
+| **行锚点分类 (2D)** | 预测每行横坐标位置 | 速度极快，抗遮挡好 | 精度受网格限制 | 车端算力受限的实时前视检测 |
+| **多项式回归 (2D)** | 直接回归方程参数 | 结果平滑，后处理简单 | 参数优化困难，难以拟合复杂线型 | 高速公路等线型规则的场景 |
+| **BEV/3D 检测** | 视角转换后在 3D 空间预测 | 无需平坦路面假设，空间位置准确 | 需要多相机标定，Transformer 算力消耗大 | 高阶智能驾驶 (NOA)，局部建图 |
+
+## 数据集
++ 2D: Tusimple， CULane，BDD100K 
++ 3D: Apollo-Scape, ONCE-3DLanes, KITTI 数据集, OpenLane 数据集
+
+## 评估
+像素级Precision, Recall, 实例级IOU,
+
+
+**车道检测算法综合性能对比**
+
+| 算法类别 | 算法名称 | Publication | Backbone | Accuracy (%) | FPR (%) | FNR (%) | AP (%) | Near Error (m) | Far Error (m) | F1-Score (%) | Params (M) | FPS |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 2D<br>
+<br>(TuSimple) | LaneNet[88] | IV 2018 | ENet | 96.38 | 7.8 | 2.44 | – | – | – | – | – | – |
+|  | LaneATT[89] | CVPR 2021 | ResNet-18 | 95.57 | 3.56 | 3.01 | – | – | – | 96.71 | – | 250 |
+|  |  |  | ResNet-34 | 95.63 | 3.53 | 2.92 | – | – | – | 96.77 | – | 171 |
+|  | GANet[90] | NeurIPS 2022 | ResNet-18 | 95.95 | 1.97 | 2.62 | – | – | – | 97.71 | – | 153 |
+|  |  |  | ResNet-34 | 95.84 | 1.99 | 2.64 | – | – | – | 97.68 | – | 127 |
+|  |  |  | ResNet-101 | 96.44 | 2.63 | 2.47 | – | – | – | 97.45 | – | 63 |
+|  | CondLaneNet-S[91] | ICCV 2021 | ResNet-18 | 95.48 | 2.18 | 3.80 | – | – | – | 97.01 | – | 220 |
+|  | CondLaneNet-L[91] |  | ResNet-101 | 96.54 | 2.01 | 3.50 | – | – | – | 97.24 | – | 58 |
+|  | CLRNet[92] | CVPR 2022 | ResNet-18 | 96.84 | 2.28 | 1.92 | – | – | – | 97.89 | – | 119/206 |
+|  |  |  | ResNet-34 | 96.87 | 2.27 | 2.08 | – | – | – | 97.82 | – | 103/156 |
+|  |  |  | ResNet-101 | 96.83 | 2.37 | 2.08 | – | – | – | 97.62 | – | 46/74 |
+| 3D<br>
+<br>(Open-Lane) | 3D-LaneNet[69] | ECCV 2020 | AlexNet | – | – | – | 91.8 | 0.133 | 0.331 | – | – | – |
+|  | Gen-LaneNet[65] | ECCV 2020 | ERFNet | – | – | – | 45.01 | 0.061 | 0.496 | 44.59 | – | – |
+|  | PersFormer[70] | ECCV 2022 | ResNet-18 | – | – | – | 74.63 | 0.176 | 0.285 | 85.7 | – | – |
+|  |  |  | ResNet-34 | – | – | – | 45.99 | 0.58 | 0.90 | 52.07 | – | – |
+|  | BEV-LaneDet[71] | arXiv 2022 | ResNet-34 | – | – | – | 46.9 | 0.374 | 0.434 | 53.5 | – | – |
+|  |  |  | ResNet-50 | – | – | – | 47.5 | 0.368 | 0.430 | 54.2 | – | – |
+|  | CurveFormer[72] | ECCV 2022 | ResNet-34 | – | – | – | 53.6 | 0.497 | 0.554 | 56.4 | – | – |
+| 轻量化<br>
+<br>(CULane) | LaneNet[88] | IV 2018 | ENet | – | – | – | – | – | – | – | 0.36 | – |
+|  | UFLD[93] | ECCV 2020 | ResNet-18 | 95.82 | 17.4 | 1.82 | – | – | – | 68.4 | – | 230 |
+|  | SAD[94] | ICCV 2019 | ResNet-18 | – | – | – | – | – | – | 70.5 | 12.41 | 25.3 |
+|  |  |  | ResNet-34 | – | – | – | – | – | – | 70.7 | 22.72 | 50.5 |
+|  |  |  | ENet | – | – | – | – | – | – | 70.8 | 0.98 | 13.4 |
+|  | PINet[95] | IEEE T-ITS 2021 | CNN | 96.33 | – | – | – | – | – | 74.4 | – | – |
+
+## Research
+
+### 1. LaneSeg (基于轻量化分割与区域互信息)
+
+* **MobileNetV3 论文**：[Searching for MobileNetV3](https://arxiv.org/pdf/1905.02244)
+* **RMI Loss 论文**：[Spatial As Deep: Spatial CNN for Traffic Scene Understanding (RMI部分相关引用) / 实际上更准确的RMI出处是 Semantic Segmentation with Regional Mutual Information](https://arxiv.org/pdf/1910.12037)
+* **网络主干 (Backbone)**：参考了 MobileNet V3 的分割头设计，主打轻量化与高实时性，适合车端部署。
+* **核心创新：RMI Loss (Region Mutual Information Loss)**
+* **痛点**：传统的交叉熵损失 (CE Loss) 通常是逐像素计算的，忽略了像素之间的空间依赖关系。
+* **原理**：借鉴自图像分割论文，RMI Loss 利用互信息（Mutual Information）来最大化预测概率与真实标签 (Ground Truth) 在局部区域内的结构一致性。
+* **效果**：对车道线这种细长、连续且结构性极强的目标，RMI Loss 能有效捕捉相邻像素间的依赖关系，对最终指标（如 mIoU 或 F1-Score）提升作用显著。
+
+
+
+### 2. PolyLaneNet (基于多项式回归)
+
+* **论文链接**：[PolyLaneNet: Lane Estimation via Deep Polynomial Regression](https://arxiv.org/pdf/2004.10924)
+* **核心思想**：直接输出表示图像中每条车道线标记的**多项式方程参数** (outputs polynomials representing each lane marking)。
+* **实现方式**：利用 CNN 提取特征，然后通过全连接层直接回归出多项式（如三次多项式 $y = ax^3 + bx^2 + cx + d$）的系数以及车道线的垂直边界（起点和终点）。
+* **优势**：由于是直接回归参数，网络输出维度极小，后处理非常简单且运行速度快。
+* **局限**：对复杂拓扑结构（如急弯、分叉路）的拟合能力有限，且高次多项式参数的微小扰动会导致远端车道线出现较大偏差。
+
+### 3. ULSD (基于贝塞尔曲线的超快形状检测)
+
+* **论文链接**：[Ultra Fast Structure-aware Deep Lane Detection (原引通常指UFLD，基于贝塞尔的 ULSD 链接为: BezierCurve-based Ultra-fast Shape Detection)](https://arxiv.org/pdf/2011.03174)
+* **核心思想**：使用**贝塞尔曲线 (Bézier Curve)** 来参数化表示车道线。
+* **优势**：相比于 PolyLaneNet 的多项式回归，贝塞尔曲线在控制点上的几何意义更加明确，具有极好的平滑性和边界约束能力，能够以极低的计算成本实现高精度的复杂线型拟合。
+
+### 4. GANet (基于关键点与全局关联)
+
+* **论文链接**：[A Keypoint-based Global Association Network for Lane Detection](https://arxiv.org/pdf/2204.07335)
+* **核心思想**：将车道线检测建模为关键点估计和全局关联 (Global Association) 任务。
+* **关联机制**：不依赖传统的逐点聚类或启发式后处理。关键点与其所属车道线的关联，是通过预测**每个关键点到其对应车道起点的偏移量**来实现的。
+* **优势**：这种全局关联计算在各个关键点之间是相互独立的，因此可以**完全并行执行**，显著提升了算法的运行效率和推理速度。
+
+---
+
+## 二、 3D / BEV 车道线检测 (3D/BEV Lane Detection)
+
+### 1. BEV-LaneDet (简单高效的3D车道线基线模型)
+
+* **论文链接**：[BEV-LaneDet: a Simple and Effective 3D Lane Detection Baseline](https://arxiv.org/pdf/2210.06006)
+* **核心模块**：引入了虚拟相机 (Virtual Camera) 机制来统一不同车辆的相机内外参差异。
+* **输出头设计**：采用空间网格化表示，通常使用 **0.5m x 0.5m 的 Grid Cell**。模型预测每个网格单元内是否存在车道线，以及其具体的高度和偏移量。
+* **优势**：提供了一个简单、稳健且易于复现的 Baseline，在 OpenLane 等 3D 车道线数据集上取得了极佳的精度与速度平衡。
+
+### 2. 3D-SpLineNet (基于参数化样条的3D线检测)
+
+* **论文链接**：[3D-SpLineNet: 3D Traffic Line Detection Using Parametric Spline Representations](https://openaccess.thecvf.com/content/WACV2023/papers/Pittner_3D-SpLineNet_3D_Traffic_Line_Detection_Using_Parametric_Spline_Representations_WACV_2023_paper.pdf)
+* **核心思想**：使用**参数化样条 (Parametric Spline, 如 B-spline)** 来表示 3D 交通标线。
+* **优势**：在 3D 空间中，利用样条曲线可以天然保证线条的三维连续性和平滑性，非常适合处理具有高低起伏的 3D 道路场景。
+
+### 3. LaneCPP (结合物理先验的连续3D车道线检测)
+
+* **论文链接**：[LaneCPP: Continuous 3D Lane Detection using Physical Priors](https://arxiv.org/pdf/2406.08381)
+* **核心创新**：将**物理先验知识 (Physical Priors)** 融入到数据驱动的深度学习模型中。
+* **优势**：致力于解决 3D 空间下车道线预测断裂或不符合物理常理的问题，确保生成的 3D 车道线不仅在图像特征上匹配，在三维几何和物理拓扑上也是连续且合理的。
+
+---
+
+## 三、 矢量化高精地图在线构建 (Vectorized HD Map Construction)
+
+### 1. MapTR (结构化建模与等价排列学习)
+
+* **论文链接**：[MapTR: Structured Modeling and Learning for Online Vectorized HD Map Construction](https://arxiv.org/abs/2208.14437)
+* **核心痛点**：传统序列预测中，线段或多边形的标注点顺序不唯一（如车道线可从头到尾或从尾到头；闭合人行横道可从任一顶点起始）。这种序列模糊性导致模型训练难以收敛。
+* **核心创新：等价排列建模 (Equivalent Permutation Modeling)**
+* 将地图元素统一抽象为具有排列规则的点集。
+* **开放图形**（车道线）：支持正向、反向两种排列。
+* **闭合图形**（人行横道）：支持任意顶点起始的正反向遍历。
+* 在 Loss 计算时，动态寻找与预测最匹配的等价排列来计算梯度，大幅降低学习难度。
+
+
+* **网络架构**：
+* 特征提取后转换至 BEV 空间。
+* **层次化查询 (Hierarchical Query)**：包含 Instance Query（定位整条线）和 Point Query（定位具体控制点），精准回归地图元素的类别与坐标。
+
+
+
+### 2. PivotNet (基于枢纽点的矢量地图构建)
+
+* **论文链接**：[PivotNet: Vectorized HD Map Construction with Pivot Points](https://arxiv.org/abs/2308.11776)
+* **核心痛点**：MapTR 类模型对每条线预测固定数量的点（如20个），导致直线点冗余、复杂曲线点不足。
+* **核心创新：枢纽点表示法 (Pivot Points)**
+* 聚焦于决定几何形状的关键转折点或端点（枢纽点），而非均匀分布的序列点。
+* **动态点数与掩码 (Mask)**：结合关键点预测与 Mask 预测，模型先找出离散的枢纽点。
+
+
+* **网络架构**：
+* 基于 BEV 空间，利用 **Pivot Query** 寻找关键点。
+* 包含专用模块（如注意力机制/图网络）推断枢纽点之间的拓扑连接关系。
+
+
+* **优势**：表征极度紧凑、高效。对长短不一、曲率多变的复杂地图元素（如异形路口）泛化能力更强，规避了长序列点匹配的算力浪费。
+
+### 基于针孔摄像头的车道线检测
+检测距离达100米
