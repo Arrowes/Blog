@@ -285,6 +285,75 @@ BEV 图像可以通过多种方式生成，包括：
 
 > 将连续的高度回归问题，在评估时离散化为了 5cm 一个区间的分类问题。模型在两端（Bin 0 平地，Bin 7 极高障碍物）准确率极高，中间微小高度（如50-100mm）存在一定挑战，这也客观反映了纯视觉测高的难点。
 
+
+一、 基于显式深度估计的前向投影 (Bottom-Up / LSS 架构)
+
+**核心技术路线**：提取 2D 图像特征 $\to$ 预测离散深度概率分布 $\to$ 外积生成视锥特征量 (Frustum Volume) $\to$ 结合相机内外参投影至 3D 空间 $\to$ Voxel Pooling (体素池化) 展平为 BEV 特征。
+
+### 1. LSS (Lift, Splat, Shoot)
+
+* **Lift 阶段 (特征升维)**：网络针对每张图像输出两个张量：上下文特征 $C$ 和离散深度概率分布 $D$。对两者进行外积操作 (Outer Product)，生成维度为 $D \times H \times W \times C$ 的视锥特征。
+* **Splat 阶段 (空间池化)**：利用相机的内参（焦距、光心）和外参（平移、旋转矩阵），计算视锥体中每个体素在 3D 世界坐标系下的确切坐标。随后使用 Voxel Pooling（通常采用 Sum Pooling 或 Max Pooling），将落入同一个 BEV 网格 $(x, y)$ 内的所有 3D 特征向量沿着 $Z$ 轴合并，生成 $H_{\text{bev}} \times W_{\text{bev}} \times C$ 的密集 BEV 特征图。
+* **技术局限**：外积操作和基于 `cumsum` 的体素池化过程涉及大量非连续内存访问，计算复杂度和显存占用极高。
+
+### 2. BEVDet
+
+* **核心技术思路**：高度模块化的纯视觉检测工程框架。
+* **视图级数据增强 (View-transform Augmentation)**：在 2D 图像域（缩放、裁剪）和 3D BEV 域（旋转、翻转）引入独立的数据增强。其核心贡献在于推导了空间变换矩阵的同步更新机制，确保 2D 特征经过数据增强后，仍能准确映射到增强后的 3D 坐标空间。
+* **解耦检测头**：将视图转换器 (View Transformer) 与特定的任务头解耦，直接复用 LiDAR 检测中成熟的 CenterPoint 架构，输出 Heatmap 回归目标中心点及尺寸属性。
+
+### 3. BEVDepth
+
+* **核心技术思路**：解决 LSS 架构中由于单目深度估计的不确定性导致的 BEV 特征空间发散问题。
+* **显式深度监督 (Explicit Depth Supervision)**：将多线激光雷达的点云通过内外参投影到相机的 2D 图像平面，生成稀疏的真实深度图 (Depth GT)。在训练阶段，利用二值交叉熵 (BCE Loss) 或 Focal Loss 强制约束相机的深度预测网络分支。
+* **相机感知深度 (Camera-aware Depth)**：引入了相机内参 (Intrinsics) 作为深度网络的额外条件输入，通过 MLP 层动态调整特征，以减轻因多相机焦距不同引起的深度预测偏差。
+
+### 4. Fast-BEV
+
+* **核心技术思路**：利用空间映射的静态先验，极致优化 Voxel Pooling 的延迟。
+* **预计算查找表 (LUT, Look-Up Table)**：由于车载相机的内外参在物理安装后基本固化，2D 像素点到 3D BEV 网格的映射关系是静态的。Fast-BEV 在系统初始化时预先计算好这种映射索引，并在推理时通过简单的 `Gather` 操作直接实现特征搬运，彻底绕过了耗时的视锥生成和动态体素池化过程。
+
+---
+
+二、 基于隐式查询的注意力反向提取 (Top-Down / Transformer 架构)
+
+**核心技术路线**：在 3D 空间初始化查询张量 (Queries) $\to$ 利用相机参数确定 2D 投影参考点 $\to$ 计算交叉注意力 (Cross-Attention) 以采样图像特征 $\to$ 级联更新产生最终预测。
+
+### 1. BEVFormer
+
+* **空间表示**：显式地定义一个维度为 $H \times W \times C$ 的密集 BEV Grid Query 参数矩阵。
+* **空间交叉注意力 (Spatial Cross-Attention)**：为避免全局 Attention 带来的 $O(N^2)$ 算力爆炸，引入了可变形注意力机制 (Deformable Attention)。将 BEV Grid 中每个中心点提升为 3D 柱体 (Pillar)，再利用内外参将其投影至各个 2D 相机视图中得到参考点 (Reference Points)，Query 仅在这些参考点周围的局部窗口内进行特征采样和注意力加权。
+* **时序自注意力 (Temporal Self-Attention)**：利用自车运动学信息（里程计/IMU），通过仿射变换将前一帧的 BEV 特征图与当前帧的 BEV Query 进行空间对齐。当前帧 Query 通过 Self-Attention 融合历史特征，从时间序列中直接提取目标的速度向量和运动趋势。
+
+### 2. PETR (Position Embedding Transformation)
+
+* **核心技术思路**：消灭显式的 BEV 密集特征网格生成，直接在 2D 图像域注入 3D 几何先验。
+* **3D 位置编码 (3D PE)**：将相机的视锥空间离散化为 3D 网格，利用内外参计算出每个 2D 图像特征像素对应的 3D 世界坐标。将这些坐标通过 MLP 映射为高维的 3D Position Embedding，并与 2D 图像特征相加。
+* **稀疏查询交互**：初始化固定数量（如 900 个）的稀疏 Object Queries，直接与融合了 3D PE 的多视角 2D 特征图进行全局 Cross-Attention。网络依靠 3D 位置编码的隐式指引，完成端到端的 3D 边界框回归。
+
+---
+
+三、 多模态底层特征融合 (Feature-Level Multi-Sensor Fusion)
+
+**核心技术思路**：将异构传感器数据流统一至相同的 BEV 正交坐标系下，进行高维特征的通道级拼接与融合，解决 Proposal-Level 后融合丢失上下文信息的缺陷。
+
+### 1. BEVFusion
+
+* **特征统一化**：
+* **Camera 分支**：采用高度优化的 LSS 结构，自研 CUDA Kernel 优化并行归约（Reduction）过程，加速生成 Camera-BEV 密集特征图。
+* **LiDAR 分支**：采用 VoxelNet 或 PointPillars 等 3D 稀疏卷积主干网络，提取并下采样为相同空间分辨率的 LiDAR-BEV 特征图。
+* **动态自适应融合模块**：由于相机特征提供密集的语义信息（如颜色、类别），而雷达特征提供稀疏但精确的几何深度，两者在激活模式上存在巨大差异。将两者在通道维度拼接 (Concat) 后，BEVFusion 引入了一个基于卷积的通道注意力机制（类似 SE-Net），动态地为不同空间位置和模态的特征分配权重，最终输出深度融合的 BEV 特征图供检测头调用。
+
+| 架构/算法 | 2D $\to$ 3D 投影机制 | 特征表征形态 | 时序融合机制 | 计算复杂度/落地瓶颈 |
+| --- | --- | --- | --- | --- |
+| **LSS** | 离散深度预测外积 + Voxel Pooling | 密集 BEV Grid | 早期无直接融合 | 视锥生成消耗海量显存 |
+| **BEVDet** | 改进的 LSS + 空间变换强耦合 | 密集 BEV Grid | BEVDet4D 引入历史帧 Concat | 依赖 CenterPoint，后处理仍需 NMS |
+| **BEVDepth** | LiDAR 显式监督深度预测 | 密集 BEV Grid | 滑动窗口特征融合 | 相机内外参扰动极其敏感 |
+| **Fast-BEV** | 预计算静态映射 LUT (Gather) | 密集 BEV Grid | 多帧特征张量拼接 | 对相机标定的动态变化适应性差 |
+| **BEVFormer** | 投影参考点 + Deformable Attention | 密集 BEV Grid | RNN 隐式历史 BEV 对齐 | Transformer 算子对边缘端 NPU 适配度低 |
+| **PETR** | 3D PE 注入 + 全局 Cross-Attention | 稀疏 Object Queries | 多帧 3D PE 联合编码 | 高分辨率特征图全局 Attention 导致计算量 O(N²) |
+| **BEVFusion** | 多模态 BEV 通道级拼接 + 动态加权 | 密集多模态 BEV | 融合模块自带时序缓冲 | 双模态同步推理要求极高的系统带宽和算力 |
+
 ## OCC (Occupancy Network, 占用网络)
 告诉汽车周围的三维空间里，哪些地方是空的可以走，哪些地方被东西挡住了不能走。特斯拉在 2022 年 AI Day 上将纯视觉 Occupancy Network 发扬光大，证明了仅靠摄像头也能构建高精度的 3D 空间。
 **传统方案问题**：1. 长尾问题；2. 形状不准，幽灵刹车。
@@ -431,6 +500,32 @@ $$\|\vec{A} - \vec{B}\|^2 = 1^2 + 1^2 - 2(1)(1)\cos(\theta) = 2 - 2\cos(\theta)$
 * **效果**：对车道线这种细长、连续且结构性极强的目标，RMI Loss 能有效捕捉相邻像素间的依赖关系，对最终指标（如 mIoU 或 F1-Score）提升作用显著。
 
 
+### Line Segments + Bézier Curves
+LineProposalNetwork 负责从 BEV 特征图中预测一系列的特征图（maps），这些特征图共同描述了车道线的所有信息。不直接预测线的坐标，而是通过预测多个中间特征图，然后组合这些信息来重建车道线。这是一种 **heatmap + offset** 的思想。
+
++ cmap 中心点 (1, 120, 90)
++ coff 中心点偏移 (2, 120, 90)
++ eoff 端点与中心点的偏移，用于线段组装 (4, 120, 90)
++ cls_map 线分类 (1, 120, 90)
++ color_map 线颜色 (1, 120, 90)
++ 辅助（Auxiliary）：
+  + jmap 端点 (1, 120, 90)
+  + joff 端点偏移 (2, 120, 90)
+  + lmap 辅助的语义分割图,简单地标识出图上哪里有线 (1, 120, 90)
+
+基于二次贝塞尔曲线绘制lines:
+$$ B(t) = (1-t)² * P0 + 2 * (1-t) * t * P1 + t² * P2 $$
+1. 从 cmap 找到中心点 C (也就是P1)。
+2. 用 coff 微调 C 的位置。
+3. 从 eoff 中查找 C 对应的起点偏移量和终点偏移量。
+4. 计算出起点 P0 = C + 起点偏移量 和 终点 P2 = C + 终点偏移量。
+一条完整的二次贝塞尔曲线就被唯一确定了。
+
+line_segments_loss:
+1. 置信度图损失 (lmap, jmap, cmap): 使用加权的二元交叉熵损失 (Weighted BCE Loss)。对于这些 0-1 的置信度图，BCE 是标准选择。(lmap直接用的lmap_loss = F.binary_cross_entropy)
+2. 偏移图损失 (joff, coff, eoff): 使用加权的平滑L1损失 (Weighted Smooth L1 Loss)。Smooth L1 对离群值不那么敏感，适合用于回归偏移量这类任务。
+3. 分类图损失 (cls_map, color_map): 使用交叉熵损失 (Cross-Entropy Loss)。这是多分类任务的标准损失函数。权重（type_weights 和 color_weights）可以从配置文件中加载，用于处理类别不均衡问题（例如，double_solid 线比 dashed 线少得多）。
+
 
 ### 2. PolyLaneNet (基于多项式回归)
 
@@ -447,6 +542,7 @@ $$\|\vec{A} - \vec{B}\|^2 = 1^2 + 1^2 - 2(1)(1)\cos(\theta) = 2 - 2\cos(\theta)$
 * **优势**：相比于 PolyLaneNet 的多项式回归，贝塞尔曲线在控制点上的几何意义更加明确，具有极好的平滑性和边界约束能力，能够以极低的计算成本实现高精度的复杂线型拟合。
 
 ### 4. GANet (基于关键点与全局关联)
+输入前视相机图片，依次经过主干网络（backbone）、自注意力模块（SA）、FPN模块提取图片的多尺度特征后，GANet利用一个关键点头（keypoint head）和一个偏移量头（offset head）来分别预测关键点的置信度图（confidence map）和关键点到车道线起始点的偏移量图（offset map），在推理过程中通过对这二者进行采样和组合，可以将关键点分配到所属的车道线，得到最终的车道线预测结果。LFA作为一个特征增强模块，插入在关键点头之前以帮助关键点预测。
 
 * **论文链接**：[A Keypoint-based Global Association Network for Lane Detection](https://arxiv.org/pdf/2204.07335)
 * **核心思想**：将车道线检测建模为关键点估计和全局关联 (Global Association) 任务。
@@ -455,7 +551,7 @@ $$\|\vec{A} - \vec{B}\|^2 = 1^2 + 1^2 - 2(1)(1)\cos(\theta) = 2 - 2\cos(\theta)$
 
 ---
 
-## 二、 3D / BEV 车道线检测 (3D/BEV Lane Detection)
+## 3D / BEV 车道线检测 (3D/BEV Lane Detection)
 
 ### 1. BEV-LaneDet (简单高效的3D车道线基线模型)
 
@@ -478,7 +574,7 @@ $$\|\vec{A} - \vec{B}\|^2 = 1^2 + 1^2 - 2(1)(1)\cos(\theta) = 2 - 2\cos(\theta)$
 
 ---
 
-## 三、 矢量化高精地图在线构建 (Vectorized HD Map Construction)
+## 矢量化高精地图在线构建 (Vectorized HD Map Construction)
 
 ### 1. MapTR (结构化建模与等价排列学习)
 
@@ -513,19 +609,28 @@ Loss:
 
 ### 2. PivotNet (基于枢纽点的矢量地图构建)
 
-* **论文链接**：[PivotNet: Vectorized HD Map Construction with Pivot Points](https://arxiv.org/abs/2308.11776)
+PivotNet: Vectorized Pivot Learning for End-to-end HD Map Construction https://arxiv.org/pdf/2308.16477
 * **核心痛点**：MapTR 类模型对每条线预测固定数量的点（如20个），导致直线点冗余、复杂曲线点不足。
 * **核心创新：枢纽点表示法 (Pivot Points)**
-* 聚焦于决定几何形状的关键转折点或端点（枢纽点），而非均匀分布的序列点。
-* **动态点数与掩码 (Mask)**：结合关键点预测与 Mask 预测，模型先找出离散的枢纽点。
-
+  * 聚焦于决定几何形状的关键转折点或端点（枢纽点），而非均匀分布的序列点。
+  * **动态点数与掩码 (Mask)**：结合关键点预测与 Mask 预测，模型先找出离散的枢纽点。
 
 * **网络架构**：
 * 基于 BEV 空间，利用 **Pivot Query** 寻找关键点。
 * 包含专用模块（如注意力机制/图网络）推断枢纽点之间的拓扑连接关系。
 
-
 * **优势**：表征极度紧凑、高效。对长短不一、曲率多变的复杂地图元素（如异形路口）泛化能力更强，规避了长序列点匹配的算力浪费。
+
+MapTR 使用固定数量的点来表示不同复杂度的地图元素。这种方法存在的问题是：首先，均匀化的表示包含了对几何性影响较小的冗余点。其次，使用固定数量的点表示动态形状的线可能会丢失地图元素的关键细节，特别是对于圆角和直角。因此，为了学习准确且紧凑的表示，我们将地图元素建模为有序的枢纽点列表，这种表示方法紧凑、适合处理角点且具有几何鲁棒性。
+
+1. 点线掩码模块 (Point-to-line mask module)：连接离散点和完整线条的“分配中枢”。
+作用：网络的前端（Point Decoder）像撒网一样在图上找出了所有的候选关键点，但这时候点是散的。这个模块通过预测一个 Mask（掩码矩阵），来决定“哪些点属于第 1 条车道线”、“哪些点属于第 2 个人行横道”。它成功地将点级的预测聚合成了线级/实例级的输出。
+2. 枢纽点动态匹配模块 (Pivot dynamic matching module)：
+训练时，需要将模型预测结果和Ground Truth一一对应起来计算误差。由于 PivotNet 每条线的点数是动态变化的（可能预测了 3 个点，但真值有 4 个点），传统的固定一对一匹配算法（如匈牙利算法）失效了。该模块能动态地评估不同长度的点序列之间的相似度，找到最优的匹配方案。
+    + 把地图元素建模成一个同时包含枢纽点（pivot point）和共线点（collinear point）的序列。枢纽点指的是对地图元素形状贡献度大的点，而共线点则指代相邻两个枢纽点之间的点。具体来说，我们设定了一个地图元素的最大点数量 N, 用这个长度为 N 的点序列来代表一个实例，这个点序列同时包含了枢纽点和共线点。然后我们用这个固定长度的 DT 点序列和动态长度（T）的 GT 枢纽点序列去做 pivot dynamic matching。匹配上的点我们认为是枢纽点，未匹配上的认为是共线点，同时我们会根据匹配结果对这些点进行分类。在测试阶段，被预测为共线点的点会被删掉，只保留序列中的枢纽点作为最终输出。
+    + 枢纽点动态匹配模块的中心思想是，在预测点序列（长度N）中找到一个与 GroundTruth 长度（T）相同的子序列 ，使得该子序列与 GT 点序列之间的序列距离 （sequence matching cost）最小。
+3. 动态矢量化序列损失 (Dynamic vectorized sequence loss)：
+既然匹配是动态的，计算误差（Loss）的方式也必须是动态的。这个损失函数不仅要求网络预测的点位置要准（坐标误差小），还要求点与点连接的拓扑顺序要对。它专门针对长度可变的序列进行了优化，指导网络又快又好地收敛。
 
 ### 基于针孔摄像头的车道线检测
 检测距离达100米
