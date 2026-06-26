@@ -236,7 +236,7 @@ from IPython.display import FileLink
 FileLink(zip_path) # 生成下载链接
 ```
 
-## [EdgeAI-TIDL-Tools](https://github.com/TexasInstruments/edgeai-tidl-tools/blob/08_06_00_05/docs/custom_model_evaluation.md)
+## [EdgeAI-TIDL-Tools](https://raw.githubusercontent.com/TexasInstruments/edgeai-tidl-tools/08_06_00_05/docs/custom_model_evaluation.md)
 环境搭建见：[TDA4②](https://wangyujie.space/TDA4VM2/#EdgeAI-TIDL-Tools)
 
 研读 [edgeai-tidl-tools/examples/osrt_python/ort/onnxrt_ep.py](https://github.com/TexasInstruments/edgeai-tidl-tools/blob/08_06_00_05/examples/osrt_python/ort/onnxrt_ep.py):

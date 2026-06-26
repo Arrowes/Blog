@@ -92,7 +92,7 @@ Ctrl + / 批量注释
 调试：打断点 > debug > 使用工具栏内的“下一步”或“计算器内输入表达式”进行调试
 
 调试时使用Console的python调试台，print指令
-![图 1](https://raw.github.com/Arrowes/Blog/main/images/Pytorch1.png) ![图 2](https://raw.github.com/Arrowes/Blog/main/images/Pytorch2.png)  
+![图 1](https://raw.githubusercontent.com/Arrowes/Blog/main/images/Pytorch1.png) ![图 2](https://raw.githubusercontent.com/Arrowes/Blog/main/images/Pytorch2.png)  
 
 
 ```py
@@ -220,11 +220,11 @@ if __name__ == '__main__':
 # Pytorch
 要调用GPU进行训练的话，需要安装显卡驱动对应的CUDA
 1. ``nvidia-smi`` 查询支持CUDA版本, 显卡驱动程序显示的cuda版本为电脑最高可适配的cuda版本
-![图 3](https://raw.github.com/Arrowes/Blog/main/images/Pytorch3.png)  
+![图 3](https://raw.githubusercontent.com/Arrowes/Blog/main/images/Pytorch3.png)  
 另有nvitop: 最强GPU性能实时监测工具 `pip3 install --upgrade nvitop`
 
 1. 到 [Pytorch官网](https://pytorch.org/get-started/locally/) 复制对应code进行安装
-![图 4](https://raw.github.com/Arrowes/Blog/main/images/Pytorch4.png)  
+![图 4](https://raw.githubusercontent.com/Arrowes/Blog/main/images/Pytorch4.png)  
 
 ## 安装
 **windows**
@@ -439,7 +439,7 @@ for data in dataloader:
     print(output.shape)
 ```
 ## CIFAR 10 model结构
-![图 1](https://raw.github.com/Arrowes/Blog/main/images/Network1.png)  
+![图 1](https://raw.githubusercontent.com/Arrowes/Blog/main/images/Network1.png)  
 
 ```py
 import torch
