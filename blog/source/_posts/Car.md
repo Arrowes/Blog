@@ -166,9 +166,178 @@ $$
 + Y 轴: 指向车辆右侧 (与 ISO 相反)。
 + Z 轴: 指向上方 (与 ISO 相同)。
 
+# BEV感知
+在自动驾驶领域，BEV 是指从车辆上方俯瞰的场景视图。BEV 图像可以提供车辆周围环境的完整视图，包括车辆前方、后方、两侧和顶部。
+BEV 图像可以通过多种方式生成，包括：
++ 使用激光雷达：激光雷达可以直接测量物体在三维空间中的位置，然后将这些数据转换为 BEV 图像。
++ 使用摄像头：摄像头可以通过计算图像的透视投影来生成 BEV 图像。
++ 使用混合传感器：可以使用激光雷达和摄像头的组合来生成 BEV 图像，以获得更精确和完整的视图。
+
+在纯视觉方案中又分为传统方法和深度学习方法
+1. 传统方法：IPM（Inverse Perspective Mapping，逆透视变换）
+  通过多相机的内外参标定，求得相机平面到地平面的单应性矩阵，实现平面到平面的转换，再进行多视角图像的拼接。
+
+局限性：
+- 依赖标定的准确性，且内外参必须固定。
+- 假设地面平坦、目标接地，难以应用在较远距离的感知任务中。
+
+2. 深度学习方法：
+## 鱼眼环视 Fast-BEV / Uniform-depth LSS
+项目里的 LSS 变体面向 4 路鱼眼环视输入，目标是把多视角 2D 图像特征高效投影到 Ego 坐标系下的 BEV 网格。它和经典 LSS 最大的区别是：不再预测显式深度分布，而是使用均匀深度采样、离线鱼眼 LUT 和稀疏矩阵乘法完成部署友好的 BEV 转换。
+
+整体链路如下：
+
+```text
+4 路鱼眼 YUV 图像
+  -> Backbone(EfficientNet-Lite) 提取 2D 特征
+  -> Neck/Lift 仅做 1x1 降维，不做深度概率预测
+  -> CamGeometry 根据鱼眼 LUT 与外参生成 Ego 3D 点
+  -> PointsToVoxels 生成 3D 点到 BEV 网格的 mapper
+  -> VoxelPooling 用 Sparse MatMul 完成 Splat + Pooling
+  -> BevEncoder 平滑融合，输出给下游 shared heads
+```
+
+**1. Backbone 与 Neck**
+- 输入通常是 4 路相机的 YUV 张量：`x_y: (B, N, 1, 864, 1024)`，`x_uv: (B, N, 2, 432, 512)`。
+- Backbone 输出 16 倍下采样特征，例如 `(B*N, 128, 54, 64)`。
+- Neck 只用 $1 \times 1$ 卷积把通道从 128 降到 $C=64$，再整理成 `(B*N, fH*fW, C)`，即 `(B*N, 3456, 64)`。
+- 经典 LSS 会生成 `(B*N, D, fH, fW, C)` 的深度膨胀特征；这里不复制特征到深度维，显存和带宽压力明显更小。
+
+**2. CamGeometry：鱼眼 LUT + Ego 坐标变换**
+- CamGeometry 只处理几何坐标，不处理图像特征。
+- 鱼眼去畸变关系离线预生成 LUT：根据标定Calibration 中的光心、畸变多项式等参数，用牛顿迭代反解每个像素的射入角，得到相机系单位射线方向。
+- 前向推理时直接读取 LUT，避免实时计算三角函数、畸变多项式和迭代过程，更适合 ONNX / TensorRT / NPU 部署。
+- 对每个像素射线乘以均匀深度采样 `dbound=[1.0, 15.0, 1.0]`，得到 $D=14$ 个深度点：
+
+$$
+\text{CamPoints} = \text{LUTDirection} \times \text{ds}
+$$
+
+- 再通过相机外参 `rots`、`trans` 变换到 Ego 坐标系，得到形如 `(B, N_cams, D*fH*fW, 3)` 的 3D 采样点。
+- 同时用 FOV mask 和 carbody mask 过滤视场外、车身内部等无效投影。
+
+**3. PointsToVoxels：连续 3D 点离散到 BEV**
+- 将 Ego 坐标中的连续点 $(x, y, z)$ 映射到离散 BEV 网格，例如 $80 \times 48$。
+- `get_local_ranks()` 计算每个采样点落入哪个 BEV cell。
+- `get_fov_masks()` 过滤视野边界外和自车身区域。
+- `get_mapper_matrix()` 汇总有效点与 BEV cell 的对应关系，得到从 2D 特征位置到 BEV 网格位置的稀疏索引。
+
+**4. VoxelPooling：Sparse MatMul 完成 Splat**
+传统 LSS 常用 cumsum trick 做 voxel pooling，但部署时算子拆分较多，也不利于导出。这里把映射关系编码成稀疏矩阵：
+
+$$
+\mathbf{M}_{\text{sparse}} \in \mathbb{R}^{\text{roi\_area} \times (fH \times fW)}
+$$
+
+其中行表示 BEV 网格位置，列表示 2D 特征图像素位置，非零元素表示“这个像素射线采样点会落到这个 BEV cell”。投影可以写成：
+
+$$
+\mathbf{F}_{\text{BEV}} = \mathbf{M}_{\text{sparse}} \times \mathbf{F}_{\text{2D}}
+$$
+
+形状上就是 `(roi_area, fH*fW) @ (fH*fW, C) -> (roi_area, C)`。矩阵乘法天然会对落入同一 BEV cell 的特征求和，因此同时完成 Splat 和 Pooling。多相机结果再拼合成全局 BEV 特征，例如 `(B, 64, 80, 48)`。
+
+**5. BevEncoder：抑制射线伪影并融合空间上下文**
+因为没有显式深度概率，每个像素特征会沿深度方向投出一条“等强度射线”，容易在 BEV 中产生放射状伪影。这个歧义主要依靠三点缓解：
+
+1. 多相机视野重叠：同一真实目标会在多个相机投影中交汇，重叠 BEV cell 的响应被累加增强。
+2. 地面接触约束：车道线、停车位线等目标基本位于 $z=0$ 附近，精确标定后在地面平面上具有较强几何约束。
+3. BEV Encoder 的空间先验：2D CNN 在 BEV 平面学习车辆、行人、车道线的空间形状，抑制线状伪影，增强真实目标的局部聚类。
+
+因此，这个版本可以理解为一种硬件友好的 Fast-BEV：把深度学习中昂贵的深度分布预测和 frustum 特征膨胀，换成离线几何 LUT、均匀深度采样和稀疏矩阵投影。
+
+**HM (Height Map)**
+1. **高度回归损失**: 使用 Smooth L1 Loss 对经过压缩映射后的高度进行回归。误差大时为L1 loss 线性 离群点不敏感 防止高度突变等情况引起的梯度爆炸，误差小时为L2 loss, 二次方平滑。
+2. **置信度损失**: BCE二元交叉熵损失（>0.15m）。
+3. **边缘损失 (Edge Loss)**: 通过计算预测图与真值图在X, Y方向上的梯度差异来强化边缘预测，避免都预测为斜坡，其中梯度是使用 Sobel 算子卷积得到的，惩罚边缘模糊，使得预测的高度图在物体边界处更加锐利。
+4. **结构相似性损失 (SSIM, Structure Similarity Index Measure)**: 不仅计算逐像素的loss,也考虑整体的图像结构相似度，（亮度 对比度 结构->高度 坡度变化 地形） 约束预测图与真值图在 BEV 视角下的空间结构相似性 ，强制模型学习物体的 BEV 拓扑结构，而不仅仅是像素级数值 ，SSIM 指数范围在 -1 到 1 之间，1 表示完全相同。
+5. **总结**: SmoothL1管绝对高度，BCE管高低分类，SSIM管整体地形的平滑性，Edge Loss逼迫网络学出陡峭的障碍物边缘。
+
+> 将连续的高度回归问题，在评估时离散化为了 5cm 一个区间的分类问题。模型在两端（Bin 0 平地，Bin 7 极高障碍物）准确率极高，中间微小高度（如50-100mm）存在一定挑战，这也客观反映了纯视觉测高的难点。
+
+
+## 1.Bottom-Up / LSS 架构
+
+**核心技术路线**：提取 2D 图像特征 $\to$ 预测离散深度概率分布 $\to$ 外积生成视锥特征量 (Frustum Volume) $\to$ 结合相机内外参投影至 3D 空间 $\to$ Voxel Pooling (体素池化) 展平为 BEV 特征。
+
+### 1. LSS (Lift, Splat, Shoot)
+LSS 的核心思想是：先把多视角 2D 图像特征 Lift 到相机视锥体中的 3D 采样点，再 Splat 到自车坐标系下的 BEV 网格，最后在 BEV 视角执行检测、分割、规划等任务。
+
+- 代码仓库：[GitHub](https://github.com/nv-tlabs/lift-splat-shoot)
+- 参考文章：[知乎](https://zhuanlan.zhihu.com/p/589146284)
+
+**经典 LSS 流程**
+1. **Lift 特征升维：2D -> 3D 视锥特征**
+   - Backbone 从图像中提取上下文特征 $C$。
+   - 深度分支对每个像素预测离散深度概率分布 $D$，不是直接回归一个连续深度值。
+   - 将深度概率与图像特征做外积，得到形状近似为 $D \times H \times W \times C$ 的 视锥特征frustum volume。
+2. **Splat 空间池化：3D -> BEV 网格**
+   - 根据相机内参、外参，将视锥体中的采样点转换到车辆 Ego 坐标系。
+   - 将连续 3D 点离散到 BEV pillar / voxel 网格中。
+   - 对落入同一 BEV 网格的多个点使用 Voxel Pooling（通常采用 Sum Pooling 或 Max Pooling），将落入同一个 BEV 网格 $(x, y)$ 内的所有 3D 特征向量沿着 $Z$ 轴合并，生成 $H_{\text{bev}} \times W_{\text{bev}} \times C$ 的密集 BEV 特征图。
+  > 体素池化（Voxel Pooling）的作用是把稀疏、不规则的 3D 采样点规整到 BEV 网格中。体素（Voxel）可以理解为三维空间里的像素；如果只关心 $(x, y)$ 平面并把高度方向压缩，则通常称为 pillar。Splat 本质上就是把每个视锥点分配给最近的 BEV 网格，再在网格内聚合特征。
+  外积操作和基于 `cumsum` 的体素池化过程涉及大量非连续内存访问，计算复杂度和显存占用极高。
+3. **Shoot：BEV 空间任务头**
+   - 在 BEV 特征图上接检测、语义分割、车道线、规划等下游 head。
+
+### 2. BEVDet
+
+* **核心技术思路**：高度模块化的纯视觉检测工程框架。
+* **视图级数据增强 (View-transform Augmentation)**：在 2D 图像域（缩放、裁剪）和 3D BEV 域（旋转、翻转）引入独立的数据增强。其核心贡献在于推导了空间变换矩阵的同步更新机制，确保 2D 特征经过数据增强后，仍能准确映射到增强后的 3D 坐标空间。
+* **解耦检测头**：将视图转换器 (View Transformer) 与特定的任务头解耦，直接复用 LiDAR 检测中成熟的 CenterPoint 架构，输出 Heatmap 回归目标中心点及尺寸属性。
+
+### 3. BEVDepth
+
+* **核心技术思路**：解决 LSS 架构中由于单目深度估计的不确定性导致的 BEV 特征空间发散问题。
+* **显式深度监督 (Explicit Depth Supervision)**：将多线激光雷达的点云通过内外参投影到相机的 2D 图像平面，生成稀疏的真实深度图 (Depth GT)。在训练阶段，利用二值交叉熵 (BCE Loss) 或 Focal Loss 强制约束相机的深度预测网络分支。
+* **相机感知深度 (Camera-aware Depth)**：引入了相机内参 (Intrinsics) 作为深度网络的额外条件输入，通过 MLP 层动态调整特征，以减轻因多相机焦距不同引起的深度预测偏差。
+
+### 4. Fast-BEV
+
+* **核心技术思路**：利用空间映射的静态先验，极致优化 Voxel Pooling 的延迟。
+* **预计算查找表 (LUT, Look-Up Table)**：由于车载相机的内外参在物理安装后基本固化，2D 像素点到 3D BEV 网格的映射关系是静态的。Fast-BEV 在系统初始化时预先计算好这种映射索引，并在推理时通过简单的 `Gather` 操作直接实现特征搬运，彻底绕过了耗时的视锥生成和动态体素池化过程。
+
+## 2. Top-Down / Transformer 架构
+
+**核心技术路线**：在 3D 空间初始化查询张量 (Queries) $\to$ 利用相机参数确定 2D 投影参考点 $\to$ 计算交叉注意力 (Cross-Attention) 以采样图像特征 $\to$ 级联更新产生最终预测。
+
+### 1. BEVFormer
+
+* **空间表示**：显式地定义一个维度为 $H \times W \times C$ 的密集 BEV Grid Query 参数矩阵。
+* **空间交叉注意力 (Spatial Cross-Attention)**：为避免全局 Attention 带来的 $O(N^2)$ 算力爆炸，引入了可变形注意力机制 (Deformable Attention)。将 BEV Grid 中每个中心点提升为 3D 柱体 (Pillar)，再利用内外参将其投影至各个 2D 相机视图中得到参考点 (Reference Points)，Query 仅在这些参考点周围的局部窗口内进行特征采样和注意力加权。
+* **时序自注意力 (Temporal Self-Attention)**：利用自车运动学信息（里程计/IMU），通过仿射变换将前一帧的 BEV 特征图与当前帧的 BEV Query 进行空间对齐。当前帧 Query 通过 Self-Attention 融合历史特征，从时间序列中直接提取目标的速度向量和运动趋势。
+
+### 2. PETR (Position Embedding Transformation)
+
+* **核心技术思路**：消灭显式的 BEV 密集特征网格生成，直接在 2D 图像域注入 3D 几何先验。
+* **3D 位置编码 (3D PE)**：将相机的视锥空间离散化为 3D 网格，利用内外参计算出每个 2D 图像特征像素对应的 3D 世界坐标。将这些坐标通过 MLP 映射为高维的 3D Position Embedding，并与 2D 图像特征相加。
+* **稀疏查询交互**：初始化固定数量（如 900 个）的稀疏 Object Queries，直接与融合了 3D PE 的多视角 2D 特征图进行全局 Cross-Attention。网络依靠 3D 位置编码的隐式指引，完成端到端的 3D 边界框回归。
+
+## 3.多模态底层特征融合
+
+**核心技术思路**：将异构传感器数据流统一至相同的 BEV 正交坐标系下，进行高维特征的通道级拼接与融合，解决 Proposal-Level 后融合丢失上下文信息的缺陷。
+
+### 1. BEVFusion
+
+* **特征统一化**：
+* **Camera 分支**：采用高度优化的 LSS 结构，自研 CUDA Kernel 优化并行归约（Reduction）过程，加速生成 Camera-BEV 密集特征图。
+* **LiDAR 分支**：采用 VoxelNet 或 PointPillars 等 3D 稀疏卷积主干网络，提取并下采样为相同空间分辨率的 LiDAR-BEV 特征图。
+* **动态自适应融合模块**：由于相机特征提供密集的语义信息（如颜色、类别），而雷达特征提供稀疏但精确的几何深度，两者在激活模式上存在巨大差异。将两者在通道维度拼接 (Concat) 后，BEVFusion 引入了一个基于卷积的通道注意力机制（类似 SE-Net），动态地为不同空间位置和模态的特征分配权重，最终输出深度融合的 BEV 特征图供检测头调用。
+
+| 架构/算法 | 2D $\to$ 3D 投影机制 | 特征表征形态 | 时序融合机制 | 计算复杂度/落地瓶颈 |
+| --- | --- | --- | --- | --- |
+| **LSS** | 离散深度预测外积 + Voxel Pooling | 密集 BEV Grid | 早期无直接融合 | 视锥生成消耗海量显存 |
+| **BEVDet** | 改进的 LSS + 空间变换强耦合 | 密集 BEV Grid | BEVDet4D 引入历史帧 Concat | 依赖 CenterPoint，后处理仍需 NMS |
+| **BEVDepth** | LiDAR 显式监督深度预测 | 密集 BEV Grid | 滑动窗口特征融合 | 相机内外参扰动极其敏感 |
+| **Fast-BEV** | 预计算静态映射 LUT (Gather) | 密集 BEV Grid | 多帧特征张量拼接 | 对相机标定的动态变化适应性差 |
+| **BEVFormer** | 投影参考点 + Deformable Attention | 密集 BEV Grid | RNN 隐式历史 BEV 对齐 | Transformer 算子对边缘端 NPU 适配度低 |
+| **PETR** | 3D PE 注入 + 全局 Cross-Attention | 稀疏 Object Queries | 多帧 3D PE 联合编码 | 高分辨率特征图全局 Attention 导致计算量 O(N²) |
+| **BEVFusion** | 多模态 BEV 通道级拼接 + 动态加权 | 密集多模态 BEV | 融合模块自带时序缓冲 | 双模态同步推理要求极高的系统带宽和算力 |
+
+---
+
 # Note
 FOV（Field of View，视场角）
-
 
 ## 图像数据类型
 
@@ -226,133 +395,6 @@ C：Channel，图片的通道数。
 NCHW：将同一通道的所有像素值按顺序进行存储。
 NHWC：将不同通道的同一位置的像素值按顺序进行存储。
 <img alt="picture 0" src="https://raw.githubusercontent.com/Arrowes/Blog/main/images/Car-NCHW.png" />  
-
-
-## BEV感知
-在自动驾驶领域，BEV 是指从车辆上方俯瞰的场景视图。BEV 图像可以提供车辆周围环境的完整视图，包括车辆前方、后方、两侧和顶部。
-BEV 图像可以通过多种方式生成，包括：
-+ 使用激光雷达：激光雷达可以直接测量物体在三维空间中的位置，然后将这些数据转换为 BEV 图像。
-+ 使用摄像头：摄像头可以通过计算图像的透视投影来生成 BEV 图像。
-+ 使用混合传感器：可以使用激光雷达和摄像头的组合来生成 BEV 图像，以获得更精确和完整的视图。
-
-在纯视觉方案中又分为传统方法和深度学习方法
-1. 传统方法：IPM（Inverse Perspective Mapping，逆透视变换）
-  通过多相机的内外参标定，求得相机平面到地平面的单应性矩阵，实现平面到平面的转换，再进行多视角图像的拼接。
-
-局限性：
-- 依赖标定的准确性，且内外参必须固定。
-- 假设地面平坦、目标接地，难以应用在较远距离的感知任务中。
-
-2. 深度学习方法：
-
-### LSS（Lift-Splat-Shoot）
-- 核心思想：将2D图像特征转换为3D视角，然后再投影到BEV视角进行处理。
-- 代码仓库：[GitHub](https://github.com/nv-tlabs/lift-splat-shoot)
-- 参考文章：[知乎](https://zhuanlan.zhihu.com/p/589146284)
-
-**Lift**（2D → 3D 视锥点云）
-- 深度估计、特征提取。
-- 不是直接回归深度值，而是对每个像素点预测一系列离散深度值的概率，得到深度分布特征 α 和图像特征 c。
-- 将两者做外积，得到视锥特征（frustum-shaped point cloud）。
-
-**Splat**（3D → BEV 视角）
-- 透视变换、体素池化（Voxel Pooling）。
-- 通过相机内外参，将3D点云转换到自车坐标系（Ego 坐标系）。
-- 体素池化（Voxel Pooling）
-  - 点云是稀疏的、不规则的，但 BEV 感知任务通常使用规则化的网格（体素网格）进行计算。
-  - 体素（Voxel，Volume Pixel）是三维空间中的像素单位，类似于二维图像中的像素（Pixel），存在高度信息的像素, 用于表示 3D 体积数据。具有无限高度的 voxel 称为 pillar。
-  - 体素池化：通过 Splat（投影） 操作，将 3D 视锥点云投影到 BEV 网格中的过程:每个视锥的每个点分配给最近的 pillar，再执行 sum pooling，得到 CxHxW 的 BEV 特征。对于落入同一个 BEV 网格的多个点，使用池化操作（sum-pooling 或 max-pooling）进行特征融合，生成 BEV 视角的特征图。
-
-**Shoot**（BEV 视角下的计算）
-- 特征融合、目标检测。
-- 在 BEV 视角下进行目标检测、语义分割、路径规划等任务。
-
-### LSS Fast-BEV
-4路摄像头的鱼眼图像输入 > EfficientNet-Lite 骨干网络提取特征 > LSS (Lift, Splat, Shoot) 机制（Fast-BEV）将 2D 图像特征投影到 3D 的 BEV空间下: 
-**neck**: 仅降维,抛弃了传统LSS的显式深度预测，节省了深度预测的计算量以及庞大中间张量, 直接做深度均匀。
-
-**projection**
-1. **camgeometry**: 负责计算 2D 像素到 3D 物理空间的几何映射关系的静态映射表，不处理图像特征，只处理纯几何坐标。计算出图像上每一个像素，在预设的 14 个深度点上，对应到自车 3D 坐标系下的物理坐标，一个 2D 像素就变成了 3D 空间中一串“排成一排”的 14 个点。
-2. **PointsToVoxels**: 拿到映射表，将视锥体中的 3D 点映射到 BEV 网格中,会计算一个 mapper_matrix，记录每一个 3D 点落入 BEV 网格的哪个位置。把复杂的 3D 几何坐标转换成了一张简单的索引矩阵（Mapper Matrix）。
-3. **VoxelPooling**: 负责特征的Splat:将 Backbone 提取的 2D 特征，根据 PointsToVoxels 计算出的映射矩阵，池化到 BEV 网格中。将 Z 轴的所有特征直接压扁。
-
-**HM (Height Map)**
-1. **高度回归损失**: 使用 Smooth L1 Loss 对经过压缩映射后的高度进行回归。误差大时为L1 loss 线性 离群点不敏感 防止高度突变等情况引起的梯度爆炸，误差小时为L2 loss, 二次方平滑。
-2. **置信度损失**: BCE二元交叉熵损失（>0.15m）。
-**边缘损失 (Edge Loss)**: 通过计算预测图与真值图在X, Y方向上的梯度差异来强化边缘预测，避免都预测为斜坡，其中梯度是使用 Sobel 算子卷积得到的，惩罚边缘模糊，使得预测的高度图在物体边界处更加锐利。
-3. **结构相似性损失 (SSIM, Structure Similarity Index Measure)**: 不仅计算逐像素的loss,也考虑整体的图像结构相似度，（亮度 对比度 结构->高度 坡度变化 地形） 约束预测图与真值图在 BEV 视角下的空间结构相似性 ，强制模型学习物体的 BEV 拓扑结构，而不仅仅是像素级数值 ，SSIM 指数范围在 -1 到 1 之间，1 表示完全相同。
-4. **总结**: SmoothL1管绝对高度，BCE管高低分类，SSIM管整体地形的平滑性，Edge Loss逼迫网络学出陡峭的障碍物边缘。
-
-> 将连续的高度回归问题，在评估时离散化为了 5cm 一个区间的分类问题。模型在两端（Bin 0 平地，Bin 7 极高障碍物）准确率极高，中间微小高度（如50-100mm）存在一定挑战，这也客观反映了纯视觉测高的难点。
-
-
-一、 基于显式深度估计的前向投影 (Bottom-Up / LSS 架构)
-
-**核心技术路线**：提取 2D 图像特征 $\to$ 预测离散深度概率分布 $\to$ 外积生成视锥特征量 (Frustum Volume) $\to$ 结合相机内外参投影至 3D 空间 $\to$ Voxel Pooling (体素池化) 展平为 BEV 特征。
-
-### 1. LSS (Lift, Splat, Shoot)
-
-* **Lift 阶段 (特征升维)**：网络针对每张图像输出两个张量：上下文特征 $C$ 和离散深度概率分布 $D$。对两者进行外积操作 (Outer Product)，生成维度为 $D \times H \times W \times C$ 的视锥特征。
-* **Splat 阶段 (空间池化)**：利用相机的内参（焦距、光心）和外参（平移、旋转矩阵），计算视锥体中每个体素在 3D 世界坐标系下的确切坐标。随后使用 Voxel Pooling（通常采用 Sum Pooling 或 Max Pooling），将落入同一个 BEV 网格 $(x, y)$ 内的所有 3D 特征向量沿着 $Z$ 轴合并，生成 $H_{\text{bev}} \times W_{\text{bev}} \times C$ 的密集 BEV 特征图。
-* **技术局限**：外积操作和基于 `cumsum` 的体素池化过程涉及大量非连续内存访问，计算复杂度和显存占用极高。
-
-### 2. BEVDet
-
-* **核心技术思路**：高度模块化的纯视觉检测工程框架。
-* **视图级数据增强 (View-transform Augmentation)**：在 2D 图像域（缩放、裁剪）和 3D BEV 域（旋转、翻转）引入独立的数据增强。其核心贡献在于推导了空间变换矩阵的同步更新机制，确保 2D 特征经过数据增强后，仍能准确映射到增强后的 3D 坐标空间。
-* **解耦检测头**：将视图转换器 (View Transformer) 与特定的任务头解耦，直接复用 LiDAR 检测中成熟的 CenterPoint 架构，输出 Heatmap 回归目标中心点及尺寸属性。
-
-### 3. BEVDepth
-
-* **核心技术思路**：解决 LSS 架构中由于单目深度估计的不确定性导致的 BEV 特征空间发散问题。
-* **显式深度监督 (Explicit Depth Supervision)**：将多线激光雷达的点云通过内外参投影到相机的 2D 图像平面，生成稀疏的真实深度图 (Depth GT)。在训练阶段，利用二值交叉熵 (BCE Loss) 或 Focal Loss 强制约束相机的深度预测网络分支。
-* **相机感知深度 (Camera-aware Depth)**：引入了相机内参 (Intrinsics) 作为深度网络的额外条件输入，通过 MLP 层动态调整特征，以减轻因多相机焦距不同引起的深度预测偏差。
-
-### 4. Fast-BEV
-
-* **核心技术思路**：利用空间映射的静态先验，极致优化 Voxel Pooling 的延迟。
-* **预计算查找表 (LUT, Look-Up Table)**：由于车载相机的内外参在物理安装后基本固化，2D 像素点到 3D BEV 网格的映射关系是静态的。Fast-BEV 在系统初始化时预先计算好这种映射索引，并在推理时通过简单的 `Gather` 操作直接实现特征搬运，彻底绕过了耗时的视锥生成和动态体素池化过程。
-
----
-
-二、 基于隐式查询的注意力反向提取 (Top-Down / Transformer 架构)
-
-**核心技术路线**：在 3D 空间初始化查询张量 (Queries) $\to$ 利用相机参数确定 2D 投影参考点 $\to$ 计算交叉注意力 (Cross-Attention) 以采样图像特征 $\to$ 级联更新产生最终预测。
-
-### 1. BEVFormer
-
-* **空间表示**：显式地定义一个维度为 $H \times W \times C$ 的密集 BEV Grid Query 参数矩阵。
-* **空间交叉注意力 (Spatial Cross-Attention)**：为避免全局 Attention 带来的 $O(N^2)$ 算力爆炸，引入了可变形注意力机制 (Deformable Attention)。将 BEV Grid 中每个中心点提升为 3D 柱体 (Pillar)，再利用内外参将其投影至各个 2D 相机视图中得到参考点 (Reference Points)，Query 仅在这些参考点周围的局部窗口内进行特征采样和注意力加权。
-* **时序自注意力 (Temporal Self-Attention)**：利用自车运动学信息（里程计/IMU），通过仿射变换将前一帧的 BEV 特征图与当前帧的 BEV Query 进行空间对齐。当前帧 Query 通过 Self-Attention 融合历史特征，从时间序列中直接提取目标的速度向量和运动趋势。
-
-### 2. PETR (Position Embedding Transformation)
-
-* **核心技术思路**：消灭显式的 BEV 密集特征网格生成，直接在 2D 图像域注入 3D 几何先验。
-* **3D 位置编码 (3D PE)**：将相机的视锥空间离散化为 3D 网格，利用内外参计算出每个 2D 图像特征像素对应的 3D 世界坐标。将这些坐标通过 MLP 映射为高维的 3D Position Embedding，并与 2D 图像特征相加。
-* **稀疏查询交互**：初始化固定数量（如 900 个）的稀疏 Object Queries，直接与融合了 3D PE 的多视角 2D 特征图进行全局 Cross-Attention。网络依靠 3D 位置编码的隐式指引，完成端到端的 3D 边界框回归。
-
----
-
-三、 多模态底层特征融合 (Feature-Level Multi-Sensor Fusion)
-
-**核心技术思路**：将异构传感器数据流统一至相同的 BEV 正交坐标系下，进行高维特征的通道级拼接与融合，解决 Proposal-Level 后融合丢失上下文信息的缺陷。
-
-### 1. BEVFusion
-
-* **特征统一化**：
-* **Camera 分支**：采用高度优化的 LSS 结构，自研 CUDA Kernel 优化并行归约（Reduction）过程，加速生成 Camera-BEV 密集特征图。
-* **LiDAR 分支**：采用 VoxelNet 或 PointPillars 等 3D 稀疏卷积主干网络，提取并下采样为相同空间分辨率的 LiDAR-BEV 特征图。
-* **动态自适应融合模块**：由于相机特征提供密集的语义信息（如颜色、类别），而雷达特征提供稀疏但精确的几何深度，两者在激活模式上存在巨大差异。将两者在通道维度拼接 (Concat) 后，BEVFusion 引入了一个基于卷积的通道注意力机制（类似 SE-Net），动态地为不同空间位置和模态的特征分配权重，最终输出深度融合的 BEV 特征图供检测头调用。
-
-| 架构/算法 | 2D $\to$ 3D 投影机制 | 特征表征形态 | 时序融合机制 | 计算复杂度/落地瓶颈 |
-| --- | --- | --- | --- | --- |
-| **LSS** | 离散深度预测外积 + Voxel Pooling | 密集 BEV Grid | 早期无直接融合 | 视锥生成消耗海量显存 |
-| **BEVDet** | 改进的 LSS + 空间变换强耦合 | 密集 BEV Grid | BEVDet4D 引入历史帧 Concat | 依赖 CenterPoint，后处理仍需 NMS |
-| **BEVDepth** | LiDAR 显式监督深度预测 | 密集 BEV Grid | 滑动窗口特征融合 | 相机内外参扰动极其敏感 |
-| **Fast-BEV** | 预计算静态映射 LUT (Gather) | 密集 BEV Grid | 多帧特征张量拼接 | 对相机标定的动态变化适应性差 |
-| **BEVFormer** | 投影参考点 + Deformable Attention | 密集 BEV Grid | RNN 隐式历史 BEV 对齐 | Transformer 算子对边缘端 NPU 适配度低 |
-| **PETR** | 3D PE 注入 + 全局 Cross-Attention | 稀疏 Object Queries | 多帧 3D PE 联合编码 | 高分辨率特征图全局 Attention 导致计算量 O(N²) |
-| **BEVFusion** | 多模态 BEV 通道级拼接 + 动态加权 | 密集多模态 BEV | 融合模块自带时序缓冲 | 双模态同步推理要求极高的系统带宽和算力 |
 
 ## OCC (Occupancy Network, 占用网络)
 告诉汽车周围的三维空间里，哪些地方是空的可以走，哪些地方被东西挡住了不能走。特斯拉在 2022 年 AI Day 上将纯视觉 Occupancy Network 发扬光大，证明了仅靠摄像头也能构建高精度的 3D 空间。

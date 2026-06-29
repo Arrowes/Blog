@@ -101,7 +101,8 @@ sudo apt-get install p7zip
 7z x XX.7z -o/home/xx
 #压缩
 7z a XX.7z /home/XX/
-
+# 分包
+for d in */; do 7z a -t7z "${d%/}.7z" "$d" -v20g; done
 
 # 硬盘制作与挂载
 df -h #查看所有挂载 

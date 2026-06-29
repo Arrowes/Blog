@@ -842,6 +842,35 @@ tofile 和 fromfile 用于处理二进制数据文件，通常不保存数组的
 save 和 load 使用 NumPy 的 .npy 格式，保存和加载时会包括数组的形状和数据类型信息。
 如果需要保存元数据并且确保数据的完整性，使用 .npy 格式是更好的选择；如果只是处理原始数据，使用二进制格式可能会更高效。
 
+1. 序列解包参数（Unpacking / 星号 * 运算符）
+  语法中的 *__grid_conf['dbound'] 称为参数解包（Argument Unpacking）。
+   * __grid_conf['dbound'] 是一个列表：[1.0, 17.0, 1.2]。
+   * 如果不加 *，代码等价于 np.arange([1.0, 17.0, 1.2])，这会报错，因为函数期望传入 3 个独立的数字作为参数，而你传了一个列表。
+   * 加上 * 之后，Python 会自动将列表中的元素拆开，作为独立的 positional arguments 传递。即：np.arange(*[1.0, 17.0, 1.2])  # 等价于 np.arange(1.0, 17.0, 1.2)
+
+2. np.arange(start, stop, step) 函数
+  NumPy 提供的一个用来生成等差数值序列的函数，其行为与 PyTorch 的 torch.arange 高度一致：
+   * 区间半开性：生成的值范围是 [start, stop)，包含 start，但不包含 stop。
+   * 步长支持浮点数：内置原生支持浮点数步长（而 Python 原生的 range() 仅支持整数）。
+
+### pkl
+.pkl 是 Python 标准库中 pickle 模块生成的二进制文件格式的后缀名。核心作用是对象序列化（Serialization）和反序列化（Deserialization）。它能够将内存中运行的 Python 对象保存到硬盘上，并在以后需要时原封不动地加载回来。
+```py
+import pickle
+my_data = {"vocab_size": 10000, "word_index": {"hello": 1, "world": 2}}
+with open('data.pkl', 'wb') as f:
+    pickle.dump(my_data, f)
+with open('data.pkl', 'rb') as f:
+    loaded_data = pickle.load(f)
+print(loaded_data)
+```
+.pkl 在 CV 数据集中的主要作用是“缓存（Caching）”复杂的数据结构，以空间换取时间，加速模型训练的启动过程。
+局限：内存爆炸，极差的跨平台与跨语言性，安全隐患
+建议：
++ 临时缓存解析好的 Python 标注字典以加快每次启动速度： .pkl
++ 持久化发布数据集标注：JSON 或 Parquet
++ 解决海量小图片读取慢的 I/O 瓶颈：根据框架选择 WebDataset (PyTorch) 或 TFRecord (TensorFlow)
+
 ## pdb
 在Python代码中插入import pdb; pdb.set_trace()，程序执行到该行时会暂停进入调试模式。此时可以使用以下命令：
 
