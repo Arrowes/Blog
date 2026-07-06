@@ -257,6 +257,60 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  const ensurePersistentSearchTrigger = () => {
+    if (document.querySelector('.persistent-search-trigger-mobile')) return;
+
+    const mobileTrigger = document.createElement('button');
+    mobileTrigger.type = 'button';
+    mobileTrigger.className = 'persistent-search-trigger persistent-search-trigger-mobile popup-trigger';
+    mobileTrigger.setAttribute('aria-label', '打开搜索');
+    mobileTrigger.title = '搜索';
+    mobileTrigger.innerHTML = '<i class="fa fa-search"></i><span>搜索</span>';
+    document.body.appendChild(mobileTrigger);
+  };
+
+  ensurePersistentSearchTrigger();
+
+  const keepDesktopSearchVisible = () => {
+    const searchItem = document.querySelector('#menu .menu-item-search');
+    if (!searchItem) return;
+
+    const isDesktop = () => window.matchMedia('(min-width: 992px)').matches;
+    let anchorTop = 0;
+
+    const updateAnchor = () => {
+      searchItem.classList.remove('menu-item-search-fixed');
+      document.body.classList.remove('search-menu-fixed');
+      if (!isDesktop()) return;
+
+      const rect = searchItem.getBoundingClientRect();
+      anchorTop = rect.top + window.scrollY;
+      searchItem.style.setProperty('--search-fixed-left', `${rect.left}px`);
+      searchItem.style.setProperty('--search-fixed-width', `${rect.width}px`);
+    };
+
+    const updateFixedState = () => {
+      if (!isDesktop()) {
+        searchItem.classList.remove('menu-item-search-fixed');
+        document.body.classList.remove('search-menu-fixed');
+        return;
+      }
+      const shouldFix = window.scrollY > anchorTop;
+      searchItem.classList.toggle('menu-item-search-fixed', shouldFix);
+      document.body.classList.toggle('search-menu-fixed', shouldFix);
+    };
+
+    updateAnchor();
+    updateFixedState();
+    window.addEventListener('scroll', updateFixedState, { passive: true });
+    window.addEventListener('resize', () => {
+      updateAnchor();
+      updateFixedState();
+    }, { passive: true });
+  };
+
+  keepDesktopSearchVisible();
+
   // Handle and trigger popup window
   document.querySelectorAll('.popup-trigger').forEach(element => {
     element.addEventListener('click', () => {
