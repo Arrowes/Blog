@@ -74,25 +74,52 @@
 
 // 首页文章列表更紧凑
 .index.posts-expand
-  .content
-    padding-top: 16px
+  background: var(--content-bg-color)
+  border-radius: $border-radius-inner
+  box-shadow: $box-shadow-inner
+  padding: 16px 28px 4px
 
   .post-block
-    padding-top: 22px
-    padding-bottom: 18px
+    background: transparent
+    border-bottom: 1px solid var(--body-bg-color)
+    border-radius: 0
+    box-shadow: none
+    padding: 16px 0 14px
+
+    & + .post-block
+      margin-top: 0
+
+    &:last-of-type
+      border-bottom: 0
 
   .post-header
-    margin-bottom: 10px
+    margin-bottom: 6px
+    text-align: left
 
   .post-title
-    font-size: 1.42em
+    font-size: 1.22em
     line-height: 1.35
+    margin: 0
+    text-align: left
 
   .post-meta
-    margin: 4px 0 14px
-    line-height: 1.6
+    margin: 5px 0 0
+    line-height: 1.7
+    text-align: left
+
+    br
+      display: none
+
+  .post-meta-item
+    display: inline-block
+    margin-right: 1em
 
   .post-body
+    color: $grey-dark
+    font-size: $font-size-small
+    line-height: 1.7
+    margin-top: 6px
+
     > :first-child
       margin-top: 0
 
@@ -100,7 +127,17 @@
       margin-bottom: 0
 
   .post-button
-    margin-top: 12px
+    margin-top: 8px
 
   .post-footer
-    margin-top: 10px
+    display: none
+
++tablet-mobile()
+  .index.posts-expand
+    padding: 6px 18px 2px
+
+    .post-block
+      padding: 14px 0 12px
+
+    .post-title
+      font-size: 1.12em
