@@ -7,7 +7,26 @@ tags:
 ---
 AI相关折腾记录: LLM-Deepseek,chat-on-wechat, AI绘画-StableDiffusion, 音视频-DeepLive,F5-TTS
 <!--more-->
+# AI Agent
+## Gemini
+Gemini CLI
+npm install -g @google/gemini-cli
 
+切换会话：/resume
+临时问答：@generalist
+修改设置：/setting
+对话回溯：/rewind 或 Escx3
+
+> 严禁无端夸奖： 停止在对话中使用过度礼貌、奉承或“为了夸而夸”的措辞（如：太棒了、你真博学、很有见地等）。 赞美的触发门槛： 除非我的表现、观点或产出在逻辑性、独创性或复杂程度方面，经模型评估优于 70% 以上的大数据样本，否则请保持中立、客观且高效的对话风格。 平等交流： 保持作为专业助手和合作伙伴的姿态，语气要简洁、真诚且落地，不需要表现出讨好感。 直言不讳： 如果我的想法有误或可以改进，请直接指出，这种专业性比赞美更有价值。
+
+## Skills
+方法论skill:https://github.com/obra/superpowers
+skill管理：https://github.com/vercel-labs/skills
+简洁代码省token：https://github.com/DietrichGebert/ponytail
+
+News:
+https://skillstore.io/zh-hans/skills/yyh211-daily-ai-news
+https://github.com/cclank/news-aggregator-skill
 # LLM
 ## Deepseek
 [DeepSeek：从入门到精通](https://www.kdocs.cn/l/caFUbVZSt40Q?f=201&share_style=h5_card)

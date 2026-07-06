@@ -186,6 +186,13 @@ for BDF in `lspci -d "*:*:*" | awk '{print $1}'`; do
 done
 ```
 参考文档：[nvidia-troubleshooting](https://docs.nvidia.com/deeplearning/nccl/user-guide/docs/troubleshooting.html#pci-access-control-services-acs)
+
+终端配置多色:
+```sh
+echo 'export TERM=xterm-256color' >> ~/.bashrc
+source ~/.bashrc
+```
+
 ## 虚拟机
 ### Virtual Box
 [Virtual Box](https://www.virtualbox.org/wiki/Downloads) + [Ubuntu 20.04](http://releases.ubuntu.com/20.04/), 或[18.04](https://releases.ubuntu.com/bionic/)（速度慢则换[镜像源](https://mirrors.tuna.tsinghua.edu.cn/ubuntu-releases/20.04/)）

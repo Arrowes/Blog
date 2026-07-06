@@ -59,6 +59,80 @@ $   n_{output.features}=[\frac{n_{input.features}+2p_{adding.size}-k_{ernel.size
 ## 卷积
 一个卷积核（kernel）为3×3、步长（stride）为1、填充（padding）为1的二维卷积：
 <img src="https://pic1.zhimg.com/50/v2-d552433faa8363df84c53b905443a556_720w.webp?source=1940ef5c" width = "40%" />
+
+| 组件大类 | 组件名称 | 核心功能 | 典型应用场景 | PyTorch 核心 API 及关键参数 |
+| --- | --- | --- | --- | --- |
+| **特征提取** | **卷积层**<br><br>(Convolution) | 提取局部空间特征，具有参数共享和平移不变性。 | 图像识别、目标检测等所有 CV 任务 | `nn.Conv2d(in_channels, out_channels, kernel_size, stride, padding)` |
+|  | **全连接层**<br><br>(Linear) | 全局特征组合，执行矩阵乘法 <br>$$y = xA^T + b$$<br> | 分类器末端输出、MLP（多层感知机） | `nn.Linear(in_features, out_features, bias=True)` |
+| **信息聚合** | **最大/平均池化**<br><br>(Pooling) | 下采样，降低特征图空间尺寸，减少计算量，扩大感受野。 | 降低特征维度，防止过拟合 | `nn.MaxPool2d(kernel_size, stride)` <br><br> `nn.AvgPool2d(kernel_size, stride)` |
+| **规范化** | **批量归一化**<br><br>(BatchNorm) | 跨 Batch 和空间维度规范化，消除内部协变量偏移，加速训练。 | 在每一层卷积之后，强行将特征图的分布拉回到均值为 0、方差为 1 的正态分布，从而允许使用更大的学习率，并起到一定的正则化作用。 | `nn.BatchNorm2d(num_features, eps=1e-05, momentum=0.1)` |
+|  | **层归一化**<br><br>(LayerNorm) | 针对单个样本跨所有通道归一化，不依赖 Batch 大小。 | NLP (Transformer)、序列模型 | `nn.LayerNorm(normalized_shape)` |
+|  | **组归一化**<br><br>(GroupNorm) | 将通道分组，组内进行归一化。结合了 BN 和 LN 的优点。 | 微批次（Small Batch Size）下的 CV 任务 | `nn.GroupNorm(num_groups, num_channels)` |
+| **机制架构** | **自注意力**<br><br>(Self-Attention) | 计算序列内部任意两点的相关性得分，捕捉长距离依赖。 | 大语言模型 (LLM)、Vision Transformer | `nn.MultiheadAttention(embed_dim, num_heads)` |
+|  | **残差连接**<br><br>(Skip Connection) | 将输入直接加到输出上 (<br>$$y=f(x)+x$$<br>)，解决梯度消失。 | 支撑深层网络（如 ResNet、Transformer） | *无现成 API，需在 `forward` 中手动实现*：<br><br>`out = self.layer(x) + x` || **结构控制** | **丢弃层**<br><br>(Dropout) | 训练时随机让部分神经元失活，强迫网络学习鲁棒特征。 | 抑制网络过拟合 | `nn.Dropout(p=0.5)` |
+---
+
+### PyTorch 代码综合调用示例
+
+以下展示如何在 PyTorch 中组合使用上述部分核心组件来构建一个标准的前向传播网络块：
+
+```python
+import torch
+import torch.nn as nn
+
+class CoreComponentsBlock(nn.Module):
+    def __init__(self, in_channels, out_channels):
+        super(CoreComponentsBlock, self).__init__()
+        
+        # 1. Convolutional Layer
+        self.conv = nn.Conv2d(in_channels, out_channels, kernel_size=3, padding=1, bias=False)
+        
+        # 2. BatchNorm Layer
+        self.bn = nn.BatchNorm2d(out_channels)
+        
+        # 3. Activation (Transcendental Function derivative)
+        self.relu = nn.ReLU()
+        
+        # 4. Dropout Layer
+        self.dropout = nn.Dropout(p=0.2)
+        
+        # 5. Pooling Layer
+        self.pool = nn.MaxPool2d(kernel_size=2, stride=2)
+        
+        # Shortcut identity mapping if channels change (for Residual Connection)
+        self.downsample = None
+        if in_channels != out_channels:
+            self.downsample = nn.Conv2d(in_channels, out_channels, kernel_size=1, bias=False)
+
+    def forward(self, x):
+        # Save input for Residual Connection
+        identity = x
+        if self.downsample is not None:
+            identity = self.downsample(x)
+            
+        # Feature extraction pipeline
+        out = self.conv(x)
+        out = self.bn(out)
+        out = self.relu(out)
+        out = self.dropout(out)
+        
+        # Residual Connection (Add input back to output)
+        out += identity
+        
+        # Downsampling via Pooling
+        out = self.pool(out)
+        return out
+
+# Instantiate and test the block
+# [Batch=2, Channel=3, Height=32, Width=32]
+block = CoreComponentsBlock(in_channels=3, out_channels=16)
+dummy_input = torch.randn(2, 3, 32, 32)
+output = block(dummy_input)
+
+print("Output shape:", output.shape) # Expected: torch.Size([2, 16, 16, 16])
+
+```
+
 <img alt="图 37" src="https://raw.githubusercontent.com/Arrowes/Blog/main/images/DL-Conv.jpg" />  
 
 ### 空洞卷积（膨胀卷积）（Dilated Convolution / Atrous Convolution）
@@ -119,9 +193,9 @@ $   n_{output.features}=[\frac{n_{input.features}+2p_{adding.size}-k_{ernel.size
 
 假设目标点坐标为 $(x, y)$，其周围四个像素点分别为：
 
-> |$Q_{11}(x_1,y_1)$------$Q_{21}(x_2,y_1)$|
-|-----------------(x,y)-----------------|
-|$Q_{12}(x_1,y_2)$------$Q_{22}(x_2,y_2)$|
+> |$Q_{11}(x_1,y_1)$---$Q_{21}(x_2,y_1)$|
+|--------------(x,y)--------------|
+|$Q_{12}(x_1,y_2)$---$Q_{22}(x_2,y_2)$|
 
 则双线性插值结果为：
 $$
@@ -360,7 +434,7 @@ $$
 - **IoU**：
   $$IoU = \frac{\text{Area of Overlap}}{\text{Area of Union}}$$
 
-- **GIoU Loss**：
+#### GIoU Loss
 GIOU Loss 是传统 IoU Loss 的改进版，它在 IoU 的基础上增加了一个惩罚项，解决了当预测框与真实框**不相交**时 IoU Loss=0, 梯度为零、无法优化的问题，使得模型能够学习如何将分离的框相互靠近。
 
 $$L_{GIoU} = 1 - GIOU$$
@@ -383,6 +457,25 @@ $$GIOU = IoU - \frac{|C| - |A \cup B|}{|C|}$$
 
 - **CIoU Loss**：
   在 DIoU 基础上增加形状约束项，综合角度与纵横比。
+
+#### PIoU Loss (Pixels-IoU Loss)
+是在 ECCV 2020 中提出的一种专门用于旋转/定向目标检测（OBB, Oriented Object Detection）的损失函数。
+
+* **传统方法缺陷**：传统的旋转检测器（如使用 $L1$ 或 $Smooth\text{-}L1$ 损失）通常将角度 $\theta$ 作为一个独立的距离参数进行回归。这种设计**对高长宽比（细长型）物体极不敏感**。在相同角度误差下，细长物体的真实 IoU 会急剧下降，而传统损失无法感知这一变化。
+
+PIoU 通过像素级（Pixel-wise）的交并比计算，直接将角度信息和 IoU 融合进同一个损失函数中：
+
+* **像素点判断**：对边界框区域内的像素点进行采样，利用数学公式（如判断点到包围框四条边的距离）计算每个像素点是否在预测框和真实框内部。
+* **连续可导化**：由于“点是否在框内”是不可导的阶跃函数，PIoU 引入了**贡献度函数（Contribution Function）**，使用类似 Sigmoid 的软阈值函数，将像素点的归属度转化为 $[0, 1]$ 之间的连续值，使得整个过程端到端可导。
+* **IoU 计算**：通过对所有像素点的交集和并集进行加权求和，直接算得交并比：
+
+$$\text{PIoU} = \frac{\sum p_{\text{intersection}}}{\sum p_{\text{union}}}$$
+
+
+$$\text{PIoU Loss} = 1 - \text{PIoU}$$
+
+* **对长宽比敏感**：完美解决了细长物体（如零售货架商品、遥感图像中的船舶、桥梁）稍微偏转导致 IoU 暴跌、而损失函数不敏感的问题。
+* **通用性强**：同时适用于基于锚框（Anchor-based）和无锚框（Anchor-free）的检测框架。
 
 IoU Loss 系列通过引入几何对齐、惩罚项等方式，让模型在训练时更关注框的位置与形状，提升检测精度和稳定性。
 
