@@ -88,6 +88,21 @@ document.addEventListener('DOMContentLoaded', () => {
     return result;
   };
 
+  const escapeRegExp = text => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+  const getHighlightIndex = (text, position, keywordList) => {
+    const highlightWords = [...new Set(keywordList.filter(Boolean))].sort((left, right) => right.length - left.length);
+    if (!highlightWords.length) return 0;
+
+    const regex = new RegExp(highlightWords.map(escapeRegExp).join('|'), 'gi');
+    let index = 0;
+    let match;
+    while ((match = regex.exec(text)) !== null && match.index < position) {
+      index++;
+    }
+    return index;
+  };
+
   const inputEventFunction = () => {
     if (!isfetched) return;
     let searchText = input.value.trim().toLowerCase();
@@ -111,9 +126,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Show search results
         if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
-            // 【新增】将搜索关键词编码并附加到 URL 后面
-          const searchParam = encodeURIComponent(searchText);
           const finalUrl = `${url}?highlight=${encodeURIComponent(searchText)}`;
+          const titleUrl = `${finalUrl}&index=0`;
 
           let hitCount = indexOfTitle.length + indexOfContent.length;
           // Sort index by position of keyword
@@ -173,18 +187,14 @@ document.addEventListener('DOMContentLoaded', () => {
           let resultItem = '';
 
           if (slicesOfTitle.length !== 0) {
-            // 标题链接使用基础 URL
-          resultItem += `<li><a href="${finalUrl}" class="search-result-title">${highlightKeyword(title, slicesOfTitle[0])}</a>`;
+            resultItem += `<li><a href="${titleUrl}" class="search-result-title">${highlightKeyword(title, slicesOfTitle[0])}</a>`;
           } else {
-            // 标题链接使用基础 URL
-            resultItem += `<li><a href="${finalUrl}" class="search-result-title">${title}</a>`;
+            resultItem += `<li><a href="${titleUrl}" class="search-result-title">${title}</a>`;
           }
 
-          // 【核心修改】将 forEach 循环改为可以获取索引的模式
-          slicesOfContent.forEach((slice, index) => {
-            // 为每个内容摘要链接创建一个带索引的特定 URL
-            const snippetUrl = `${finalUrl}&index=${index}`;
-            // 【核心修改】在 a 标签的 href 中使用这个特定的 URL
+          slicesOfContent.forEach(slice => {
+            const hitPosition = slice.hits[0]?.position ?? slice.start;
+            const snippetUrl = `${finalUrl}&index=${getHighlightIndex(contentInLowerCase, hitPosition, keywords)}`;
             resultItem += `<a href="${snippetUrl}"><p class="search-result">${highlightKeyword(content, slice)}...</p></a>`;
           });
 
