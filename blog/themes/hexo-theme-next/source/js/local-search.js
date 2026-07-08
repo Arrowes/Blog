@@ -14,6 +14,8 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   const input = document.querySelector('.search-input');
   const resultContent = document.getElementById('search-result');
+  const historyContent = document.querySelector('.search-history');
+  const historyKey = 'local-search-history';
 
   const getIndexByWord = (word, text, caseSensitive) => {
     if (CONFIG.localsearch.unescape) {
@@ -101,6 +103,50 @@ document.addEventListener('DOMContentLoaded', () => {
       index++;
     }
     return index;
+  };
+
+  const getSearchHistory = () => {
+    try {
+      return JSON.parse(localStorage.getItem(historyKey) || '[]');
+    } catch (error) {
+      return [];
+    }
+  };
+
+  const renderSearchHistory = () => {
+    if (!historyContent) return;
+    const history = getSearchHistory();
+    historyContent.innerHTML = '';
+    historyContent.classList.toggle('search-history-empty', history.length === 0);
+    if (history.length === 0) return;
+
+    history.forEach(keyword => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'search-history-item';
+      button.textContent = keyword;
+      button.addEventListener('click', () => {
+        input.value = keyword;
+        isfetched ? inputEventFunction() : fetchData();
+        input.focus();
+      });
+      historyContent.appendChild(button);
+    });
+  };
+
+  const saveSearchHistory = keyword => {
+    keyword = keyword.trim();
+    if (!keyword) return;
+
+    const lowerKeyword = keyword.toLowerCase();
+    const history = getSearchHistory().filter(item => item.toLowerCase() !== lowerKeyword);
+    history.unshift(keyword);
+    try {
+      localStorage.setItem(historyKey, JSON.stringify(history.slice(0, 6)));
+    } catch (error) {
+      return;
+    }
+    renderSearchHistory();
   };
 
   const inputEventFunction = () => {
@@ -259,13 +305,25 @@ document.addEventListener('DOMContentLoaded', () => {
   if (CONFIG.localsearch.trigger === 'auto') {
     input.addEventListener('input', inputEventFunction);
   } else {
-    document.querySelector('.search-icon').addEventListener('click', inputEventFunction);
+    document.querySelector('.search-icon').addEventListener('click', () => {
+      saveSearchHistory(input.value);
+      inputEventFunction();
+    });
     input.addEventListener('keypress', event => {
       if (event.key === 'Enter') {
+        saveSearchHistory(input.value);
         inputEventFunction();
       }
     });
   }
+
+  resultContent.addEventListener('click', event => {
+    if (event.target.closest('a[href]')) {
+      saveSearchHistory(input.value);
+    }
+  });
+
+  renderSearchHistory();
 
   const ensurePersistentSearchTrigger = () => {
     if (document.querySelector('.persistent-search-trigger-mobile')) return;
@@ -326,6 +384,7 @@ document.addEventListener('DOMContentLoaded', () => {
     element.addEventListener('click', () => {
       document.body.style.overflow = 'hidden';
       document.querySelector('.search-pop-overlay').classList.add('search-active');
+      renderSearchHistory();
       input.focus();
       if (!isfetched) fetchData();
     });

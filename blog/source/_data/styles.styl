@@ -77,6 +77,19 @@
   border-bottom-color: #ffb300
   border-radius: 2px
 
+.post-body a[target='_blank']:not(.fancybox)::after
+  content: "\f35d"
+  display: inline-block
+  font-family: "Font Awesome 5 Free"
+  font-size: 0.72em
+  font-weight: 900
+  margin-left: 0.25em
+  opacity: 0.65
+  transform: translateY(-0.08em)
+
+.post-body a[target='_blank']:has(img)::after
+  display: none
+
 .persistent-search-trigger
   align-items: center
   background: var(--card-bg-color)
@@ -158,6 +171,32 @@
 .search-result-list
   li > a
     display: block
+
+.search-history
+  display: flex
+  flex-wrap: wrap
+  gap: 6px
+  padding: 0 10px 10px 42px
+
+  &.search-history-empty
+    display: none
+
+.search-history-item
+  background: var(--body-bg-color)
+  border: 0
+  border-radius: 4px
+  color: $grey-dark
+  cursor: pointer
+  font-size: $font-size-smaller
+  line-height: 1.4
+  max-width: 160px
+  overflow: hidden
+  padding: 3px 7px
+  text-overflow: ellipsis
+  white-space: nowrap
+
+  &:hover
+    color: var(--link-hover-color)
 
 .right-posts-card
   background: var(--content-bg-color)

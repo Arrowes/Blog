@@ -4,6 +4,7 @@ var pjax = new Pjax({
     'head title',
     '#page-configurations',
     '.content-wrap',
+    '.right-posts-card',
     '.post-toc-wrap',
     '.languages',
     '#pjax'
@@ -45,6 +46,15 @@ window.addEventListener('pjax:success', () => {
     parent.appendChild(script);
   });
   NexT.boot.refresh();
+  if (window.MathJax) {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    if (MathJax.typesetPromise) {
+      MathJax.typesetPromise();
+    } else {
+      MathJax.typeset();
+    }
+  }
   // Define Motion Sequence & Bootstrap Motion.
   if (CONFIG.motion.enable) {
     NexT.motion.integrator

@@ -10,6 +10,7 @@ if (document.querySelectorAll('pre.mermaid').length) {
       gantt    : { axisFormat: '%m/%d/%Y' },
       sequence : { actorMargin: 50 }
     });
+    mermaid.init(undefined, document.querySelectorAll('pre.mermaid'));
   }, window.mermaid);
 }
 </script>
