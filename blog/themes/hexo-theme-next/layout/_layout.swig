@@ -31,6 +31,22 @@
         {%- if theme.sidebar.display !== 'remove' %}
           {% block sidebar %}{% endblock %}
         {%- endif %}
+        {%- if site.posts.length > 0 %}
+          <aside class="right-posts-card">
+            <div class="right-posts-title">
+              <i class="fa fa-list-ul fa-fw"></i>文章
+            </div>
+            <ol class="right-posts-list">
+              {%- for post in site.posts.sort('-date').toArray() %}
+                <li class="right-posts-item{% if page.path == post.path %} right-posts-item-active{% endif %}">
+                  <a href="{{ url_for(post.path) }}" title="{{ post.title or __('post.untitled') }}">
+                    {{ post.title or __('post.untitled') }}
+                  </a>
+                </li>
+              {%- endfor %}
+            </ol>
+          </aside>
+        {%- endif %}
       </div>
     </main>
 

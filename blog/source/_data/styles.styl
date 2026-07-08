@@ -159,6 +159,64 @@
   li > a
     display: block
 
+.right-posts-card
+  background: var(--content-bg-color)
+  border-radius: $border-radius
+  box-shadow: $box-shadow
+  font-size: $font-size-smaller
+  padding: 12px 10px
+  position: fixed
+  right: 24px
+  text-align: left
+  top: 112px
+  width: 220px
+  z-index: $zindex-1
+
+.right-posts-title
+  border-bottom: 1px dotted $grey-light
+  color: var(--text-color)
+  font-size: $font-size-small
+  font-weight: 600
+  margin: 0 0 8px
+  padding-bottom: 8px
+  text-align: center
+
+.right-posts-list
+  list-style: none
+  margin: 0
+  max-height: calc(100vh - 190px)
+  overflow-y: auto
+  padding: 0
+
+.right-posts-item
+  line-height: 1.45
+  margin: 0
+
+  a
+    border-bottom: 0
+    color: $grey-dark
+    display: block
+    overflow: hidden
+    padding: 4px 6px
+    text-overflow: ellipsis
+    white-space: nowrap
+
+    &:hover
+      background: var(--body-bg-color)
+      border-bottom: 0
+      border-radius: 4px
+      color: var(--link-hover-color)
+
+.right-posts-item-active
+  a
+    background: var(--body-bg-color)
+    border-radius: 4px
+    color: var(--link-hover-color)
+
+@media (max-width: 1500px)
+  .right-posts-card
+    display: none
+
 +tablet-mobile()
   .persistent-search-trigger
     border-radius: 0
