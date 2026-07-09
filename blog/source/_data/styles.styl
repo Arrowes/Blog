@@ -199,17 +199,19 @@
     color: var(--link-hover-color)
 
 .right-posts-card
+  align-self: flex-start
   background: var(--content-bg-color)
   border-radius: $border-radius
   box-shadow: $box-shadow
+  flex: 0 0 220px
   font-size: $font-size-smaller
+  margin-left: $sidebar-offset
   padding: 12px 10px
-  position: fixed
-  right: 24px
+  order: -1
+  position: sticky
   text-align: left
   top: 112px
   width: 220px
-  z-index: $zindex-1
 
 .right-posts-title
   border-bottom: 1px dotted $grey-light
@@ -252,27 +254,23 @@
     border-radius: 4px
     color: var(--link-hover-color)
 
-@media (min-width: 1401px) and (max-width: 1700px)
+@media (min-width: 1421px)
   .header,
   .main-inner
-    transform: translateX(-120px)
+    width: 1412px
 
-@media (min-width: 1401px) and (max-width: 1599px)
-  .right-posts-card
-    left: calc(50% + 476px)
-    right: auto
+  .content-wrap
+    width: calc(100% - 504px)
 
-@media (min-width: 1600px) and (max-width: 1700px)
-  .right-posts-card
-    left: calc(86.5vw - 104px)
-    right: auto
+@media (min-width: 1600px)
+  .header,
+  .main-inner
+    width: calc(73% + 252px)
 
-@media (min-width: 1701px)
-  .right-posts-card
-    left: calc(86.5vw + 16px)
-    right: auto
+@media (max-width: 1420px)
+  .content-wrap
+    width: $content-wrap
 
-@media (max-width: 1400px)
   .right-posts-card
     display: none
 
