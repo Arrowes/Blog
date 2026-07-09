@@ -109,6 +109,7 @@ deploy:
   type: git
   repo: https://github.com/Arrowes/Arrowes.github.io.git
   branch: master
+  ignore_hidden: false
 
 
 #阅读全文
