@@ -10,6 +10,48 @@ tags:
 
 # 炼丹经验
 ## MTN多任务训练
+多任务训练主要问题有四类：
+1. 数据不一致：不同任务标注不一定同时存在，数据分布和采样比例不同。
+    任务均衡采样、mask loss 只计算有标注任务
+2. loss scale 不一致：检测、分割、回归 loss 数值范围不同，直接相加会导致某个任务主导。
+    loss 权重调节
+3. 梯度冲突：不同任务对共享 backbone 的优化方向可能相反，导致一个任务提升、另一个任务下降。
+    GradNorm/uncertainty/DWA/PCGrad
+4. 任务容量竞争：共享 backbone 容量有限，复杂任务可能占用更多表示能力。
+    多阶段训练、冻结/解冻策略、任务私有 neck 或 adapter
+    
+主流多任务训练合并方法：
+### 1.端到端联合训练（联合 Backbone）
+
+这是最标准的做法，两个任务同时输入、同时反向传播。
+
+* **结构设计：** 共享一个 Backbone（如 ResNet/ViT），后面接两个独立的 Head（比如 Head A 负责检测，Head B 负责分割）。
+* **训练流程：**
+1. 前向传播：图片过 Backbone 提取特征，特征分别输入 Head A 和 Head B，得到 $Loss_A$ 和 $Loss_B$。
+2. 损失聚合：$Loss_{total} = w_A \cdot Loss_A + w_B \cdot Loss_B$。
+3. 反向传播：根据 $Loss_{total}$ 更新整个网络的参数。
+
+* **难点：** 容易发生梯度冲突和 Loss Scale 不一致。必须引入 **PCGrad（梯度投影消除冲突）** 或 **GradNorm**。
+
+### 2. 分别训练再拼接（多阶段/热启动）
+#### 方案 A：预训练 + 微调拼接（最推荐）
+1. **任务 A 预训练:**
+用任务 A（通常是数据量大、任务更基础的那个，比如分类或自监督）完整训练一个模型，获得一个对图像有强大泛化特征提取能力的 Backbone。
+
+2. **锁定 Backbone，初始化任务 B:**
+把这个 Backbone 拿过来，后面拼接上任务 A 的 Head 和任务 B 的 Head。**锁定（Freeze）Backbone 的参数**，只训练任务 B 的 Head，让其适应这个 Backbone 的特征空间。
+
+3. **联合微调（Fine-tuning）:**
+**解冻（Unfreeze）整个网络**，以一个**非常小的学习率**（例如平时的 $1/10$），让任务 A 和任务 B 联合训练几个 Epoch。这一步叫**特征对齐**，让 Backbone 微调到同时兼顾两个任务。
+
+
+#### 方案 B：引入 Adapter / 任务私有 Neck（不改变原模型）
+
+如果无法改动已经分别训练好的任务 A 和任务 B 的 Backbone，你可以通过“加外挂”的方式拼到一起：
+
+* **做法：** 固定住任务 A 的 Backbone。在 Backbone 的不同层后面，挂载轻量级的 **Adapter（适配器模块）** 或者 **任务私有 Neck**（如各自的 FPN）。
+* **训练：** 训练时只更新任务 B 的 Head 和这些外挂的 Adapter。这样任务 A 的性能完全不受影响（因为 Backbone 没变），而任务 B 通过 Adapter 强行把任务 A 的特征“扭转”成自己需要的特征。
+
 ### GradNorm
 Grad norm,- [Gradient Normalization Paper](https://arxiv.org/abs/2210.13438)
 

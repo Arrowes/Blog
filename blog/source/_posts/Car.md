@@ -415,6 +415,73 @@ NCHW：将同一通道的所有像素值按顺序进行存储。
 NHWC：将不同通道的同一位置的像素值按顺序进行存储。
 <img alt="picture 0" src="https://raw.githubusercontent.com/Arrowes/Blog/main/images/Car-NCHW.png" />  
 
+### 按压缩方式分
+BMP 基本不压缩，读写简单但文件大，适合调试或中间结果保存。
+JPEG 是有损压缩，文件小，适合自然图像存储和传输，但会引入压缩伪影，不适合精密测量或像素级缺陷分析。
+PNG 是无损压缩，支持透明通道，适合保存标注 mask、截图、需要无损的中间结果。
+TIFF 支持无损、多页、高 bit depth，工业相机和医学图像中常见，适合高精度图像保存。
+RAW 是传感器原始数据，保留信息最多，但需要 ISP 或专门解析。
+
+## CV2颜色空间转换
+OpenCV 用 cv2.cvtColor 做颜色空间转换，本质上是在像素上做**矩阵乘法（线性组合）**。
+接口函数 cv2.cvtColor() 通过传入不同的整型 Flag（如 cv2.COLOR_GRAY2BGR、cv2.COLOR_BGR2RGB）来告诉这个统一的函数内部应该调用哪一段具体的像素计算逻辑。
+
+以灰度化（Gray）为例，它基于人眼对不同颜色的敏感度，对 $R, G, B$ 进行加权求和（通常采用 ITU-R BT.601 标准）：
+$$\text{Gray} = 0.299 \times R + 0.587 \times G + 0.114 \times B$$
+那么`cv2.COLOR_BGR2GRAY`和`cv2.COLOR_RGB2GRAY`在加权的顺序就会有所不同
+
+```python
+import cv2
+import numpy as np
+
+# Simulate a single-channel grayscale image (H=480, W=640)
+gray = np.zeros((480, 640), dtype=np.uint8)
+# Method 1: OpenCV built-in function (Recommended: Fast, utilizes hardware optimization)
+bgr_1 = cv2.cvtColor(gray, cv2.COLOR_GRAY2BGR)
+# Method 2: Numpy stacking along the third axis
+bgr_2 = np.stack([gray, gray, gray], axis=-1)
+# Method 3: Numpy repeat (Relatively slow because of memory allocation)
+bgr_3 = np.repeat(gray[:, :, np.newaxis], 3, axis=-1)
+```
+
+在网络输入的前一刻，要显式地统一通道。如果是混合使用 `PIL` 和 `OpenCV`，可以用以下标准代码互转：
+```python
+from PIL import Image
+import cv2
+import numpy as np
+
+# Case A: PIL to OpenCV
+pil_img = Image.open("test.jpg") # RGB
+cv2_img = cv2.cvtColor(np.array(pil_img), cv2.COLOR_RGB2BGR) # To BGR
+
+# Case B: OpenCV to PIL
+cv2_img = cv2.imread("test.jpg") # BGR
+pil_img = Image.fromarray(cv2.cvtColor(cv2_img, cv2.COLOR_BGR2RGB)) # To RGB
+```
+
+除了颜色通道（RGB vs BGR），还需要注意**维度排列（Layout）**：
+
+* **OpenCV/Numpy** 默认是 `HWC` 格式（行、列、通道）。
+* **PyTorch** 期望的输入是 `CHW` 格式（通道、行、列）。
+
+在将 OpenCV 读取的图送入 PyTorch 之前，常规的标准流程是：
+
+```python
+import cv2
+import torch
+
+img = cv2.imread("test.jpg")
+img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+
+# Convert HWC to CHW and wrap into a torch tensor
+tensor_img = torch.from_numpy(img_rgb).permute(2, 0, 1).float()
+# Add batch dimension: (C, H, W) -> (1, C, H, W)
+tensor_img = tensor_img.unsqueeze(0) 
+```
+如果模型在 Python 端用 PyTorch (RGB) 训练，最后用 C++ OpenCV 动态链接库部署：
+C++ 端必须同样执行 `cv::cvtColor(src, dst, cv::COLOR_BGR2RGB)`，并且减去均值（Mean）和除以方差（Std）时，**这两个三维向量的顺序必须与 RGB 完全对应**。这是很多工程落地时模型精度下降的隐蔽原因。
+
+
 ## OCC (Occupancy Network, 占用网络)
 告诉汽车周围的三维空间里，哪些地方是空的可以走，哪些地方被东西挡住了不能走。特斯拉在 2022 年 AI Day 上将纯视觉 Occupancy Network 发扬光大，证明了仅靠摄像头也能构建高精度的 3D 空间。
 **传统方案问题**：1. 长尾问题；2. 形状不准，幽灵刹车。
@@ -461,6 +528,9 @@ $$\|\vec{A} - \vec{B}\|^2 = 1^2 + 1^2 - 2(1)(1)\cos(\theta) = 2 - 2\cos(\theta)$
 ![alt text](https://pic4.zhimg.com/v2-e40165c7c4d059db8c913daecf337d85_b.webp)
 三阶：![alt text](https://picx.zhimg.com/v2-45d35cb4e1b446501fcefac07b3dab55_b.webp)
 
+## 传统图像处理
+
+
 # 车道线检测
 车道线检测为车道保持辅助系统（LKA）提供
 横向控制基准。车道几何信息（曲
@@ -472,6 +542,13 @@ $$\|\vec{A} - \vec{B}\|^2 = 1^2 + 1^2 - 2(1)(1)\cos(\theta) = 2 - 2\cos(\theta)$
 3. 环境：光照，天气
 
 车道线检测的方案经历了从**传统图像处理**到**深度学习**，再到如今向**3D/BEV（鸟瞰图）空间演进**的过程。
+
+主流车道线方法包括：
+1. 分割类：SCNN、LaneNet 等，像素级表达强，但后处理复杂。
+2. Row-anchor/grid 分类：Ultra Fast Lane Detection，速度快，适合前视行车。
+3. 关键点/offset：GA-Net 这类方法预测起点和逐点偏移，减少聚类后处理。
+4. 曲线参数：BezierLaneNet、PolyLaneNet，用贝塞尔/多项式参数表达车道线，结构紧凑但复杂拓扑受限。
+5. BEV/矢量化：MapTR、TopoNet、VectorMapNet 等，输出结构化地图元素，适合多相机 BEV 感知，但训练、匹配和部署复杂。
 
 ## 2D
 传统图像处理：边缘提取，Canny+霍夫 
