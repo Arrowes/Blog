@@ -96,7 +96,12 @@ const styles = fs.readFileSync(
   'utf8'
 );
 
-assert(/search-option-active\s*{[^}]*background:/s.test(styles), 'active search option should have a visible background state');
+const activeStyleBlocks = [...styles.matchAll(/search-option-active\s*{([^}]*)}/g)].map(match => match[1]).join('\n');
+assert(!/background:/.test(activeStyleBlocks), 'active search option should not use a background color');
+assert(!/\$red|#ff|rgba\(255/i.test(activeStyleBlocks), 'active search option should not use accent colors');
+assert(/color:\s*\$black-deep/.test(activeStyleBlocks), 'active search option should use a darker text color');
+assert(/font-weight:\s*bold/.test(activeStyleBlocks), 'active search option should be bold');
+assert(/box-shadow:/.test(activeStyleBlocks), 'active search option should have a shadow');
 
 if (template.includes('search-option-case')) elements['.search-option-case'] = new FakeElement();
 if (template.includes('search-option-whole')) elements['.search-option-whole'] = new FakeElement();
