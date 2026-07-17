@@ -91,6 +91,10 @@ const template = fs.readFileSync(
   path.join(__dirname, '../blog/themes/hexo-theme-next/layout/_partials/search/localsearch.swig'),
   'utf8'
 );
+const scriptTemplate = fs.readFileSync(
+  path.join(__dirname, '../blog/themes/hexo-theme-next/layout/_third-party/search/localsearch.swig'),
+  'utf8'
+);
 const styles = fs.readFileSync(
   path.join(__dirname, '../blog/themes/hexo-theme-next/source/css/_common/components/third-party/search.styl'),
   'utf8'
@@ -102,6 +106,8 @@ assert(!/\$red|#ff|rgba\(255/i.test(activeStyleBlocks), 'active search option sh
 assert(/color:\s*\$black-deep/.test(activeStyleBlocks), 'active search option should use a darker text color');
 assert(/font-weight:\s*bold/.test(activeStyleBlocks), 'active search option should be bold');
 assert(/box-shadow:/.test(activeStyleBlocks), 'active search option should have a shadow');
+assert(/p\.search-result\s*{[^}]*white-space:\s*pre-line/s.test(styles), 'search result snippets should display preserved line breaks');
+assert(/local-search\.js\?v=/.test(scriptTemplate), 'local search script should use a version query to avoid stale search JS');
 
 if (template.includes('search-option-case')) elements['.search-option-case'] = new FakeElement();
 if (template.includes('search-option-whole')) elements['.search-option-whole'] = new FakeElement();
@@ -150,7 +156,12 @@ const context = {
   },
   fetch: () => Promise.resolve({
     text: () => Promise.resolve(JSON.stringify([
-      { title: 'Car Guide', content: 'car scar CAR carModel', url: '/car/' }
+      { title: 'Car Guide', content: 'car scar CAR carModel', url: '/car/' },
+      {
+        title: 'Code Guide',
+        content: '<figure class="highlight"><pre><span>const alpha = 1;</span><br><span>const betaTarget = 2;</span><br><span>const gamma = 3;</span></pre></figure>',
+        url: '/code/'
+      }
     ]))
   }),
   DOMParser: function DOMParser() {},
@@ -198,6 +209,14 @@ const flushPromises = () => new Promise(resolve => setImmediate(resolve));
   assert(!result.innerHTML.includes('<b class="search-keyword">Car</b> Guide'));
   assert(!result.innerHTML.includes('<b class="search-keyword">CAR</b>'));
   assert(result.innerHTML.includes('<b class="search-keyword">car</b>'));
+
+  caseButton.listeners.click();
+  wholeButton.listeners.click();
+  input.value = 'betaTarget';
+  input.listeners.input();
+  assert(result.innerHTML.includes('Code Guide'));
+  assert(result.innerHTML.includes('alpha = 1;\n'), result.innerHTML);
+  assert(result.innerHTML.includes('<b class="search-keyword">betaTarget</b>'));
 
   console.log('local search options ok');
 })();

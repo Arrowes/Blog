@@ -50,6 +50,12 @@ document.addEventListener('DOMContentLoaded', () => {
     return index;
   };
 
+  const stripSearchContent = content => content
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<\/(p|div|li|tr|pre|figure|h[1-6])>/gi, '\n')
+    .replace(/<[^>]+>/g, '')
+    .replace(/\n{3,}/g, '\n\n');
+
   // Merge hits into slices
   const mergeIntoSlice = (start, end, index, searchText) => {
     let item = index[index.length - 1];
@@ -322,7 +328,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Only match articles with not empty titles
         datas = datas.filter(data => data.title).map(data => {
           data.title = data.title.trim();
-          data.content = data.content ? data.content.trim().replace(/<[^>]+>/g, '') : '';
+          data.content = data.content ? stripSearchContent(data.content).trim() : '';
           data.url = decodeURIComponent(data.url).replace(/\/{2,}/g, '/');
           return data;
         });
