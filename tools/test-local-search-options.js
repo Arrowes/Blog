@@ -91,6 +91,12 @@ const template = fs.readFileSync(
   path.join(__dirname, '../blog/themes/hexo-theme-next/layout/_partials/search/localsearch.swig'),
   'utf8'
 );
+const styles = fs.readFileSync(
+  path.join(__dirname, '../blog/themes/hexo-theme-next/source/css/_common/components/third-party/search.styl'),
+  'utf8'
+);
+
+assert(/search-option-active\s*{[^}]*background:/s.test(styles), 'active search option should have a visible background state');
 
 if (template.includes('search-option-case')) elements['.search-option-case'] = new FakeElement();
 if (template.includes('search-option-whole')) elements['.search-option-whole'] = new FakeElement();

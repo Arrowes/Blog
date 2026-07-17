@@ -82,7 +82,7 @@
 
   .search-option {
     background: transparent;
-    border: 0;
+    border: 1px solid transparent;
     border-radius: 3px;
     color: $grey-dark;
     cursor: pointer;
@@ -97,6 +97,11 @@
     &:hover,
     &.search-option-active {
       color: $red;
+    }
+
+    &.search-option-active {
+      background: rgba(255, 0, 0, .08);
+      border-color: $red;
     }
   }
 }
