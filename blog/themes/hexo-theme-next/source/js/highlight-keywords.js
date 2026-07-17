@@ -5,6 +5,13 @@
 
   const escapeRegExp = text => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
+  const isAsciiWordChar = char => Boolean(char && /[A-Za-z0-9_]/.test(char));
+
+  const isWholeWordMatch = (text, position, word) => {
+    if (!/[A-Za-z0-9_]/.test(word)) return true;
+    return !isAsciiWordChar(text[position - 1]) && !isAsciiWordChar(text[position + word.length]);
+  };
+
   const clearPreviousHighlight = postBody => {
     document.querySelector('.search-hit-nav')?.remove();
     postBody.querySelectorAll('b.search-keyword').forEach(element => {
@@ -19,7 +26,16 @@
     return [...new Set(words)].sort((left, right) => right.length - left.length);
   };
 
-  const highlightTextNode = (node, regex) => {
+  const hasMatchedKeyword = (text, regex, wholeWord) => {
+    regex.lastIndex = 0;
+    let match;
+    while ((match = regex.exec(text)) !== null) {
+      if (!wholeWord || isWholeWordMatch(text, match.index, match[0])) return true;
+    }
+    return false;
+  };
+
+  const highlightTextNode = (node, regex, wholeWord) => {
     const text = node.nodeValue;
     const fragment = document.createDocumentFragment();
     let lastIndex = 0;
@@ -27,6 +43,8 @@
 
     regex.lastIndex = 0;
     while ((match = regex.exec(text)) !== null) {
+      if (wholeWord && !isWholeWordMatch(text, match.index, match[0])) continue;
+
       fragment.appendChild(document.createTextNode(text.slice(lastIndex, match.index)));
 
       const keyword = document.createElement('b');
@@ -119,6 +137,8 @@
     const params = new URLSearchParams(window.location.search);
     const highlightQuery = params.get('highlight');
     const highlightIndex = parseInt(params.get('index'), 10);
+    const caseSensitive = params.get('case') === '1';
+    const wholeWord = params.get('whole') === '1';
     const postBody = document.querySelector('.post-body');
 
     keywordElements = [];
@@ -134,20 +154,19 @@
 
       clearPreviousHighlight(postBody);
 
-      const regex = new RegExp(keywords.map(escapeRegExp).join('|'), 'gi');
+      const regex = new RegExp(keywords.map(escapeRegExp).join('|'), caseSensitive ? 'g' : 'gi');
       const walk = document.createTreeWalker(postBody, NodeFilter.SHOW_TEXT, {
         acceptNode: node => {
           const parent = node.parentElement;
           if (!parent || parent.closest('script, style')) return NodeFilter.FILTER_REJECT;
-          regex.lastIndex = 0;
-          return regex.test(node.nodeValue) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+          return hasMatchedKeyword(node.nodeValue, regex, wholeWord) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
         }
       });
 
       const nodesToReplace = [];
       let node;
       while ((node = walk.nextNode())) nodesToReplace.push(node);
-      nodesToReplace.forEach(textNode => highlightTextNode(textNode, regex));
+      nodesToReplace.forEach(textNode => highlightTextNode(textNode, regex, wholeWord));
 
       keywordElements = [...postBody.querySelectorAll('.search-keyword')];
       if (!keywordElements.length) return;

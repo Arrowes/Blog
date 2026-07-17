@@ -15,9 +15,18 @@ document.addEventListener('DOMContentLoaded', () => {
   const input = document.querySelector('.search-input');
   const resultContent = document.getElementById('search-result');
   const historyContent = document.querySelector('.search-history');
+  const caseOption = document.querySelector('.search-option-case');
+  const wholeOption = document.querySelector('.search-option-whole');
   const historyKey = 'local-search-history';
 
-  const getIndexByWord = (word, text, caseSensitive) => {
+  const isAsciiWordChar = char => Boolean(char && /[A-Za-z0-9_]/.test(char));
+
+  const isWholeWordMatch = (text, position, word) => {
+    if (!/[A-Za-z0-9_]/.test(word)) return true;
+    return !isAsciiWordChar(text[position - 1]) && !isAsciiWordChar(text[position + word.length]);
+  };
+
+  const getIndexByWord = (word, text, caseSensitive, wholeWord) => {
     if (CONFIG.localsearch.unescape) {
       let div = document.createElement('div');
       div.innerText = word;
@@ -33,7 +42,9 @@ document.addEventListener('DOMContentLoaded', () => {
       word = word.toLowerCase();
     }
     while ((position = text.indexOf(word, startPosition)) > -1) {
-      index.push({ position, word });
+      if (!wholeWord || isWholeWordMatch(text, position, word)) {
+        index.push({ position, word });
+      }
       startPosition = position + wordLen;
     }
     return index;
@@ -92,17 +103,35 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const escapeRegExp = text => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
-  const getHighlightIndex = (text, position, keywordList) => {
+  const getHighlightIndex = (text, position, keywordList, caseSensitive, wholeWord) => {
     const highlightWords = [...new Set(keywordList.filter(Boolean))].sort((left, right) => right.length - left.length);
     if (!highlightWords.length) return 0;
 
-    const regex = new RegExp(highlightWords.map(escapeRegExp).join('|'), 'gi');
+    const regex = new RegExp(highlightWords.map(escapeRegExp).join('|'), caseSensitive ? 'g' : 'gi');
     let index = 0;
     let match;
     while ((match = regex.exec(text)) !== null && match.index < position) {
-      index++;
+      if (!wholeWord || isWholeWordMatch(text, match.index, match[0])) {
+        index++;
+      }
     }
     return index;
+  };
+
+  const isSearchOptionEnabled = button => button?.getAttribute('aria-pressed') === 'true';
+
+  const setSearchOptionState = (button, enabled) => {
+    if (!button) return;
+    button.setAttribute('aria-pressed', String(enabled));
+    button.classList.toggle('search-option-active', enabled);
+  };
+
+  const bindSearchOption = button => {
+    if (!button) return;
+    button.addEventListener('click', () => {
+      setSearchOptionState(button, !isSearchOptionEnabled(button));
+      inputEventFunction();
+    });
   };
 
   const getSearchHistory = () => {
@@ -151,7 +180,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const inputEventFunction = () => {
     if (!isfetched) return;
-    let searchText = input.value.trim().toLowerCase();
+    const rawSearchText = input.value.trim();
+    const caseSensitive = isSearchOptionEnabled(caseOption);
+    const wholeWord = isSearchOptionEnabled(wholeOption);
+    let searchText = caseSensitive ? rawSearchText : rawSearchText.toLowerCase();
     let keywords = searchText.split(/[-\s]+/);
     if (keywords.length > 1) {
       keywords.push(searchText);
@@ -160,19 +192,18 @@ document.addEventListener('DOMContentLoaded', () => {
     if (searchText.length > 0) {
       // Perform local searching
       datas.forEach(({ title, content, url }) => {
-        let titleInLowerCase = title.toLowerCase();
-        let contentInLowerCase = content.toLowerCase();
         let indexOfTitle = [];
         let indexOfContent = [];
         let searchTextCount = 0;
         keywords.forEach(keyword => {
-          indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
-          indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+          indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, title, caseSensitive, wholeWord));
+          indexOfContent = indexOfContent.concat(getIndexByWord(keyword, content, caseSensitive, wholeWord));
         });
 
         // Show search results
         if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
-          const finalUrl = `${url}?highlight=${encodeURIComponent(searchText)}`;
+          const searchOptions = `${caseSensitive ? '&case=1' : ''}${wholeWord ? '&whole=1' : ''}`;
+          const finalUrl = `${url}?highlight=${encodeURIComponent(rawSearchText)}${searchOptions}`;
           const titleUrl = `${finalUrl}&index=0`;
 
           let hitCount = indexOfTitle.length + indexOfContent.length;
@@ -189,7 +220,7 @@ document.addEventListener('DOMContentLoaded', () => {
           let slicesOfTitle = [];
           if (indexOfTitle.length !== 0) {
             let tmp = mergeIntoSlice(0, title.length, indexOfTitle, searchText);
-            searchTextCount += tmp.searchTextCountInSlice;
+            searchTextCount += tmp.searchTextCount;
             slicesOfTitle.push(tmp);
           }
 
@@ -210,7 +241,7 @@ document.addEventListener('DOMContentLoaded', () => {
               end = content.length;
             }
             let tmp = mergeIntoSlice(start, end, indexOfContent, searchText);
-            searchTextCount += tmp.searchTextCountInSlice;
+            searchTextCount += tmp.searchTextCount;
             slicesOfContent.push(tmp);
           }
 
@@ -240,7 +271,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
           slicesOfContent.forEach(slice => {
             const hitPosition = slice.hits[0]?.position ?? slice.start;
-            const snippetUrl = `${finalUrl}&index=${getHighlightIndex(contentInLowerCase, hitPosition, keywords)}`;
+            const snippetUrl = `${finalUrl}&index=${getHighlightIndex(content, hitPosition, keywords, caseSensitive, wholeWord)}`;
             resultItem += `<a href="${snippetUrl}"><p class="search-result">${highlightKeyword(content, slice)}...</p></a>`;
           });
 
@@ -271,6 +302,9 @@ document.addEventListener('DOMContentLoaded', () => {
       window.pjax && window.pjax.refresh(resultContent);
     }
   };
+
+  bindSearchOption(caseOption);
+  bindSearchOption(wholeOption);
 
   const fetchData = () => {
     fetch(CONFIG.root + searchPath)

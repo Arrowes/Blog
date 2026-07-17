@@ -7,6 +7,14 @@
            placeholder="{{ __('search.placeholder') }}" spellcheck="false"
            type="search" class="search-input">
   </div>
+  <div class="search-options" aria-label="搜索选项">
+    <button class="search-option search-option-case" type="button" aria-pressed="false" title="区分大小写" aria-label="区分大小写">
+      Aa
+    </button>
+    <button class="search-option search-option-whole" type="button" aria-pressed="false" title="完整选词" aria-label="完整选词">
+      W
+    </button>
+  </div>
   <span class="popup-btn-close">
     <i class="fa fa-times-circle"></i>
   </span>
