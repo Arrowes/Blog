@@ -51,6 +51,7 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   const stripSearchContent = content => content
+    .replace(/<td\b[^>]*class=(["'])[^"']*\bgutter\b[^"']*\1[^>]*>[\s\S]*?<\/td>/gi, '')
     .replace(/<br\s*\/?>/gi, '\n')
     .replace(/<\/(p|div|li|tr|pre|figure|h[1-6])>/gi, '\n')
     .replace(/<[^>]+>/g, '')

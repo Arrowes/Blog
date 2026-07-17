@@ -159,7 +159,7 @@ const context = {
       { title: 'Car Guide', content: 'car scar CAR carModel', url: '/car/' },
       {
         title: 'Code Guide',
-        content: '<figure class="highlight"><pre><span>const alpha = 1;</span><br><span>const betaTarget = 2;</span><br><span>const gamma = 3;</span></pre></figure>',
+        content: '<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span></pre></td><td class="code"><pre><span class="line">const alpha = 1;</span><br><span class="line">const betaTarget = 2;</span><br><span class="line">const gamma = 3;</span></pre></td></tr></table></figure>',
         url: '/code/'
       }
     ]))
@@ -212,11 +212,13 @@ const flushPromises = () => new Promise(resolve => setImmediate(resolve));
 
   caseButton.listeners.click();
   wholeButton.listeners.click();
-  input.value = 'betaTarget';
+  input.value = 'alpha';
   input.listeners.input();
   assert(result.innerHTML.includes('Code Guide'));
-  assert(result.innerHTML.includes('alpha = 1;\n'), result.innerHTML);
-  assert(result.innerHTML.includes('<b class="search-keyword">betaTarget</b>'));
+  assert(result.innerHTML.includes('<b class="search-keyword">alpha</b> = 1;'), result.innerHTML);
+  assert(!result.innerHTML.includes('1\n'));
+  assert(!result.innerHTML.includes('2\n'));
+  assert(!result.innerHTML.includes('3\n'));
 
   console.log('local search options ok');
 })();
