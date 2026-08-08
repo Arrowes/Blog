@@ -189,19 +189,19 @@ BEV 图像可以通过多种方式生成，包括：
 在纯视觉方案中又分为传统方法和深度学习方法
 1. 传统方法：IPM（Inverse Perspective Mapping，逆透视变换）
   通过多相机的内外参标定，求得相机平面到地平面的单应性矩阵，实现平面到平面的转换，再进行多视角图像的拼接。
+局限性：依赖标定的准确性，且内外参必须固定；假设地面平坦、目标接地，难以应用在较远距离的感知任务中。
 
-局限性：
-- 依赖标定的准确性，且内外参必须固定。
-- 假设地面平坦、目标接地，难以应用在较远距离的感知任务中。
+1. 深度学习方法：
+## 多任务感知BEV
+LSS 的目标是把多相机图像特征转换到统一的 BEV 坐标系：
+1. Image backbone：对每路鱼眼图像提取 2D feature。
+2. Lift：网络从每个相机图像提取 2D 特征，并使用均匀深度采样预测离散深度分布，把每个像素特征提升到一组 3D frustum points
+3. Splat/BEV pooling：利用相机内参、外参、图像增强矩阵，把 frustum points 从 image/camera 坐标变换到 ego 坐标。把落入同一 BEV grid 的特征聚合，得到 BEV feature map。
+4. Shoot：在 BEV feature map 上接检测、分割、高度等任务头。
 
-2. 深度学习方法：
-## 鱼眼环视 Fast-BEV / Uniform-depth LSS
-项目里的 LSS 变体面向 4 路鱼眼环视输入，目标是把多视角 2D 图像特征高效投影到 Ego 坐标系下的 BEV 网格。它和经典 LSS 最大的区别是：不再预测显式深度分布，而是使用均匀深度采样、离线鱼眼 LUT 和稀疏矩阵乘法完成部署友好的 BEV 转换。
+Lift阶段采用FastBEV的思想，和经典 LSS 最大的区别是：不再预测显式深度分布，而是使用离散深度、预计算索引、LUT、简化 pooling完成部署友好的 BEV 转换。更强调工程效率，会减少显式深度预测或复杂投影计算，牺牲一部分精细深度表达，换取低算力平台上的实时性，更适合 TDA4 这类低算力平台。
 
-> LSS 可以概括为 Lift、Splat、Shoot。首先图像经过 backbone 提取 2D 特征，Lift 阶段结合深度分布或离散深度 bin，把每个像素特征扩展到 3D 视锥；然后根据相机内参、外参和数据增强矩阵，把视锥点转换到车体坐标系，并聚合到 BEV 网格，这一步就是 Splat 或 BEV pooling；最后 Shoot 阶段在 BEV 特征图上接检测、分割、height map 等任务头。FastBEV 更强调工程效率，会减少显式深度预测或复杂投影计算，常通过离散深度、预计算索引、LUT、简化 pooling 等方式提升速度，更适合 TDA4 这类低算力平台。
-
-整体链路如下：
-
+具体链路如下：
 ```text
 4 路鱼眼 YUV 图像
   -> Backbone(EfficientNet-Lite) 提取 2D 特征
@@ -261,7 +261,17 @@ $$
 
 因此，这个版本可以理解为一种硬件友好的 Fast-BEV：把深度学习中昂贵的深度分布预测和 frustum 特征膨胀，换成离线几何 LUT、均匀深度采样和稀疏矩阵投影。
 
-**HM (Height Map)**
+### OD
+
+截断目标是泊车检测常见难点，尤其在 BEV 边界、遮挡、相机视野边缘处。解决思路包括：
+
+1. 标注规则：对截断比例、可见区域、是否 ignore 做明确规定。
+2. 训练策略：对边界截断目标使用 ignore mask 或降低 loss 权重，避免模型学习不稳定标签。
+3. 数据增强：模拟截断、遮挡、边界裁剪，增强鲁棒性。
+4. 模型输出：对于只看到局部的目标，可预测可见框和完整框，或增加 visibility/truncation 属性。
+5. 评估策略：边界目标单独统计，设置合理距离和可见性容忍度。
+
+### HM (Height Map)
 1. **高度回归损失**: 使用 Smooth L1 Loss 对经过压缩映射后的高度进行回归。误差大时为L1 loss 线性 离群点不敏感 防止高度突变等情况引起的梯度爆炸，误差小时为L2 loss, 二次方平滑。
 2. **置信度损失**: BCE二元交叉熵损失（>0.15m）。
 3. **边缘损失 (Edge Loss)**: 通过计算预测图与真值图在X, Y方向上的梯度差异来强化边缘预测，避免都预测为斜坡，其中梯度是使用 Sobel 算子卷积得到的，惩罚边缘模糊，使得预测的高度图在物体边界处更加锐利。
@@ -283,10 +293,55 @@ $$
    + PTQ量化: 在量产落地中，我们发现有些任务头（如用来做微距高精度定位的车位角点回归检测头）对定点数极其敏感。因为回归任务需要极其平滑、高分辨率的特征差值，在 INT8下会因为分辨率不够产生严重的“像素级跳跃”和台阶效应。混合精度部署（Mixed-Precision）：INT8 全速运行（占 95% 算力）：Backbone、Neck、LSS Projection、BevEncoder 等占据模型 95% 以上算力和计算瓶颈的特征提取干线，全量进行 INT8 全速量化。FP16 精度保障（占 5% 算力）：对于最后的 PolygonObjectDetectionHead 检测头，在部署编译时指定为 FP16（半精度浮点数） 运行。
 
 ---
+常见 2D 到 BEV 可以分几类:
+1. 几何显式投影：例如 IPM，依赖地面平面假设，轻量但对坡度和外参敏感。
+2. LSS 系列：例如 LSS、BEVDepth、BEVDet，先预测深度或利用深度监督，再把图像特征 lift-splat 到 BEV。
+3. 快速工程化方案：例如 FastBEV，通过预计算投影、均匀深度假设或简化深度建模降低计算量。
+4. Transformer 查询式方案：例如 BEVFormer，用 BEV query 通过 cross-attention 从多相机特征中采样聚合，表达能力强但算力和部署难度更高。
+5. 多模态方案：例如 BEVFusion，把 camera 和 LiDAR/radar 特征统一到 BEV。
+
+BEV 的优势是：
+- 空间几何更接近下游规控需求。
+- 多相机/多传感器更容易融合。
+- 目标位置、FreeSpace、车道线、occupancy 等任务可以统一建模。
+
+BEV 的难点是：
+- 从图像到 BEV 需要深度或几何投影，存在深度误差。
+- 相机内外参和时间同步非常关键。
+- BEV 分辨率、范围和算力之间需要权衡。
+
+BEVDet：基于 LSS 思路的纯视觉 BEV 检测框架。
+BEVDepth：引入更强的深度监督，改善纯视觉 BEV 中深度估计不准的问题。
+BEVFormer：使用 transformer 和时序信息，在 BEV query 上融合多视角多帧特征。
+BEVFusion：融合相机和激光雷达 BEV 特征，利用相机语义和点云几何互补。
+Occupancy Network：预测 3D 空间中每个 voxel 是否被占据，比检测框更细粒度，近年自动驾驶感知常见。
+
+### 轻量化设计
+模型层：选 MobileNetV3、EfficientNet-Lite、CSPDarknet-nano、RepVGG/RepConv 等部署友好 backbone；
+共享 backbone/neck，多任务 head 轻量化；降低 BEV 分辨率或使用分层 ROI。
+算子层：避免动态 shape、scatter/gather、复杂 attention、deformable conv 等平台不友好算子；使用 conv、BN、ReLU、concat、upsample 等高支持算子。
+压缩层：PTQ/QAT、结构化剪枝、蒸馏、通道裁剪、低分辨率输入。
+系统层：减少 CPU fallback，前后处理下沉到硬件可加速链路，控制 NMS/后处理复杂度。最终用端到端延迟、峰值内存、NPU 利用率和 KPI 共同评估。
+
+## 0. IPM
+IPM 的核心假设是地面近似平面，且相机外参稳定。一旦车辆经过坡道、减速带、路面起伏或悬架姿态变化，平面假设被破坏，投影到 TOP View 的车位线会产生偏移或形变。工程上可以从几方面缓解：
+
+1. 标定和在线补偿：结合车身姿态、IMU、轮速或悬架信息，对 pitch/roll 做动态补偿。
+2. 数据增强：训练中加入抖动、局部透视扰动、模糊和几何变换，提高模型对 IPM 误差的鲁棒性。
+3. 输出过滤：对车位角点做时序稳定、几何约束和置信度过滤。
+4. 模型升级：将车位检测迁移到 BEV feature 空间，减少对可视化 IPM 图像的依赖。
+5. 场景降级：遇到坡道/颠簸等异常姿态时降低置信度或触发保守策略。
+
+轻量级车位关键点检测方案: 模型以 YOLOX 为基础，不直接回归完整车位框，而是检测车位入口点、入口方向相关点和对侧角点，再通过几何规则恢复车位矩形。选择关键点方案的原因是车位线通常结构规则，关键点检测比直接做复杂分割或不规则框检测更轻量，适合 TDA4 这类低算力平台。后处理会根据关键点置信度、几何约束、平行/垂直关系和尺寸范围过滤异常结果。
 
 ## 1.Bottom-Up / LSS 架构
 
 **核心技术路线**：提取 2D 图像特征 $\to$ 预测离散深度概率分布 $\to$ 外积生成视锥特征量 (Frustum Volume) $\to$ 结合相机内外参投影至 3D 空间 $\to$ Voxel Pooling (体素池化) 展平为 BEV 特征。
+
+LSS 类方法可以有几种深度处理方式：
+1. 无显式深度监督：只通过最终 BEV 检测/分割 loss 反向学习深度分布。
+2. 有显式深度监督：使用 LiDAR、深度图或 3D 标注生成 depth target，对 depth distribution 加 depth loss。
+3. FastBEV/轻量化方案：弱化或跳过在线深度预测，用固定深度 bins、均匀深度假设或预计算投影索引换取速度。
 
 ### 1. LSS (Lift, Splat, Shoot)
 LSS 的核心思想是：先把多视角 2D 图像特征 Lift 到相机视锥体中的 3D 采样点，再 Splat 到自车坐标系下的 BEV 网格，最后在 BEV 视角执行检测、分割、规划等任务。
@@ -374,20 +429,7 @@ LSS 的核心思想是：先把多视角 2D 图像特征 Lift 到相机视锥体
 * **LiDAR 分支**：采用 VoxelNet 或 PointPillars 等 3D 稀疏卷积主干网络，提取并下采样为相同空间分辨率的 LiDAR-BEV 特征图。
 * **动态自适应融合模块**：由于相机特征提供密集的语义信息（如颜色、类别），而雷达特征提供稀疏但精确的几何深度，两者在激活模式上存在巨大差异。将两者在通道维度拼接 (Concat) 后，BEVFusion 引入了一个基于卷积的通道注意力机制（类似 SE-Net），动态地为不同空间位置和模态的特征分配权重，最终输出深度融合的 BEV 特征图供检测头调用。
 
-| 架构/算法 | 2D $\to$ 3D 投影机制 | 特征表征形态 | 时序融合机制 | 计算复杂度/落地瓶颈 |
-| --- | --- | --- | --- | --- |
-| **LSS** | 离散深度预测外积 + Voxel Pooling | 密集 BEV Grid | 早期无直接融合 | 视锥生成消耗海量显存 |
-| **BEVDet** | 改进的 LSS + 空间变换强耦合 | 密集 BEV Grid | BEVDet4D 引入历史帧 Concat | 依赖 CenterPoint，后处理仍需 NMS |
-| **BEVDepth** | LiDAR 显式监督深度预测 | 密集 BEV Grid | 滑动窗口特征融合 | 相机内外参扰动极其敏感 |
-| **Fast-BEV** | 预计算静态映射 LUT (Gather) | 密集 BEV Grid | 多帧特征张量拼接 | 对相机标定的动态变化适应性差 |
-| **BEVFormer** | 投影参考点 + Deformable Attention | 密集 BEV Grid | RNN 隐式历史 BEV 对齐 | Transformer 算子对边缘端 NPU 适配度低 |
-| **PETR** | 3D PE 注入 + 全局 Cross-Attention | 稀疏 Object Queries | 多帧 3D PE 联合编码 | 高分辨率特征图全局 Attention 导致计算量 O(N²) |
-| **BEVFusion** | 多模态 BEV 通道级拼接 + 动态加权 | 密集多模态 BEV | 融合模块自带时序缓冲 | 双模态同步推理要求极高的系统带宽和算力 |
-BEVDet：基于 LSS 思路的纯视觉 BEV 检测框架。
-BEVDepth：引入更强的深度监督，改善纯视觉 BEV 中深度估计不准的问题。
-BEVFormer：使用 transformer 和时序信息，在 BEV query 上融合多视角多帧特征。
-BEVFusion：融合相机和激光雷达 BEV 特征，利用相机语义和点云几何互补。
-Occupancy Network：预测 3D 空间中每个 voxel 是否被占据，比检测框更细粒度，近年自动驾驶感知常见。
+
 ---
 
 # Note
