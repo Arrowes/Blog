@@ -410,6 +410,69 @@ raw_result = torch.sparse.mm(mapper_matrix, feature_matrix)
 # 4. 显式转换为 COO 稀疏张量结构 
 output_sparse = torch.sparse_coo_tensor(raw_result._indices(), raw_result._values(), raw_result.shape)
 ```
+### register_buffer
+在 PyTorch 中，`register_buffer` 是 `torch.nn.Module` 提供的一个方法，用于向模型注册一个不需要计算梯度（不需要求导）的张量（Tensor）。
+
+核心作用是：**让某个张量成为模型状态（State）的一部分，但不会作为参数被优化器（Optimizer）更新。**
+
+在 PyTorch 中，构建模型时经常会有一些“状态”数据：
+   * Parameter（模型参数）： 比如卷积层的权重（Weights）和偏置（Bias）。这些是在训练中需要通过反向传播（梯度下降）来不断更新和学习的。
+   * Buffer（缓冲区变量）： 这些是不需要学习（不需要计算梯度），但依然是模型运行不可或缺的一部分的数据。
+
+在编写神经网络模块时，张量通常分为三种情况：
+1. 普通的局部变量/张量
+* 特点：随函数调用生成，生命周期短。
+* 缺点：不会保存到 `model.state_dict()` 中，保存/加载模型（`torch.save` / `torch.load`）时会丢失；且不会自动跟随模型改变设备（如从 CPU 移到 GPU）。
+2. 模型参数（`nn.Parameter`）
+* 特点：会被保存到 `state_dict()`，自动跟随模型转移设备（`.to(device)`），且会被 `optimizer` 自动记录并更新（例如卷积层的权重和偏置）。
+3. Buffer（缓冲区张量，即用 `register_buffer` 注册）
+* 特点：会被保存到 `state_dict()`，自动跟随模型转移设备（`.to(device)`），但不需要计算梯度，不会被 `optimizer` 更新。
+
+典型使用场景
+* 批归一化（BatchNorm）的均值和方差：训练过程中需要记录全局的 `running_mean` 和 `running_var`，它们需要在评估/推理时使用，也需要随模型保存，但不是通过梯度下降更新的，而是通过移动平均计算得到的。
+* 位置编码（Positional Encoding）：Transformer 中的固定位置编码矩阵，不需要训练，但需要在前向传播中使用并跟随模型放入 GPU。
+* 掩码（Mask）：注意力机制中的 causal mask 或 padding mask。
+
+
+```python
+import torch
+import torch.nn as nn
+
+class MyModel(nn.Module):
+    def __init__(self):
+        super().__init__()
+        # 1. 注册一个 Buffer（例如一个固定的位置掩码或均值）
+        # 参数: (名称, 张量, 是否保存到 state_dict)
+        self.register_buffer('running_mean', torch.zeros(5))
+        
+        # 2. 普通的可学习参数
+        self.weight = nn.Parameter(torch.randn(5, 5))
+
+    def forward(self, x):
+        # 在 forward 中可以直接当作普通的 Tensor 使用
+        return x + self.running_mean
+
+model = MyModel()
+
+# 优点 1：自动跟随设备转移
+model.to("cuda") 
+print(model.running_mean.device)  # 输出: cuda:0
+
+# 优点 2：保存到 state_dict
+print(model.state_dict().keys())  
+# 输出: odict_keys(['running_mean', 'weight'])
+
+# 优点 3：不会出现在 parameters() 中，优化器不会更新它
+print([p.shape for p in model.parameters()]) 
+# 只会包含 self.weight，不包含 running_mean
+
+```
+
+当模型里有一个张量，满足以下条件时，就应该使用 `register_buffer`：
+
+1. 它不是通过梯度下降（Backprop）来训练更新的。
+2. 它需要随模型一起保存和加载（`state_dict`）。
+3. 它需要随着模型调用 `.cuda()` 或 `.to(device)` 时自动切换运行设备。
 
 
 ## TORCH.NN

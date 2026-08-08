@@ -12,6 +12,7 @@ AI相关折腾记录: LLM-Deepseek,chat-on-wechat, AI绘画-StableDiffusion, 音
 Gemini CLI
 npm install -g @google/gemini-cli
 
+YOLO模式: Ctrl+Y
 切换会话：/resume
 临时问答：@generalist
 修改设置：/setting
@@ -23,7 +24,9 @@ npm install -g @google/gemini-cli
 方法论skill:https://github.com/obra/superpowers
 skill管理：https://github.com/vercel-labs/skills
 简洁代码省token：https://github.com/DietrichGebert/ponytail
-
+视频口播剪辑：https://github.com/browser-use/video-use
+搜索：https://github.com/anysearch-ai/anysearch-skill
+文字去AI味：https://github.com/op7418/Humanizer-zh.git
 News:
 https://skillstore.io/zh-hans/skills/yyh211-daily-ai-news
 https://github.com/cclank/news-aggregator-skill

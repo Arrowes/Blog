@@ -71,7 +71,52 @@ $   n_{output.features}=[\frac{n_{input.features}+2p_{adding.size}-k_{ernel.size
 | **机制架构** | **自注意力**<br><br>(Self-Attention) | 计算序列内部任意两点的相关性得分，捕捉长距离依赖。 | 大语言模型 (LLM)、Vision Transformer | `nn.MultiheadAttention(embed_dim, num_heads)` |
 |  | **残差连接**<br><br>(Skip Connection) | 将输入直接加到输出上 (<br>$$y=f(x)+x$$<br>)，解决梯度消失。 | 支撑深层网络（如 ResNet、Transformer） | *无现成 API，需在 `forward` 中手动实现*：<br><br>`out = self.layer(x) + x` || **结构控制** | **丢弃层**<br><br>(Dropout) | 训练时随机让部分神经元失活，强迫网络学习鲁棒特征。 | 抑制网络过拟合 | `nn.Dropout(p=0.5)` |
 ---
+在卷积神经网络（CNN）中，理解数学表达式 W ∈ R^{Cₒᵤₜ × Cᵢₙ × K × K} 是掌握模型结构、剪枝和量化策略的基石。
 
+  我们可以从物理多维形状、计算过程以及物理意义三个维度来剖析这句话和“权重”这个参数：
+
+  1. 维度分解：W ∈ R^{Cₒᵤₜ × Cᵢₙ × K × K} 怎么看？
+
+  这代表卷积层（如 PyTorch 中的 nn.Conv2d）的权重张量（Weight Tensor）是一个 4维实数矩阵（4D Tensor），其每一个维度的物理含义如下：
+
+   1. Cₒᵤₜ（输出通道数 / Filter 数量）：
+      * 这一层中包含的独立卷积核（滤波器）的数量。
+      * 每一个滤波器负责提取一种特定的视觉特征（如：车位线横向边缘、立柱垂直边缘等）。如果这一层有 64 个滤波器，那么输出的特征图就会有 64 个通道。
+   2. Cᵢₙ（输入通道数 / 滤波器深度）：
+      * 输入给当前层的特征图通道数（或者是原始图像的通道数，如 RGB 的 3 通道，YUV 的 2 通道）。
+      * 物理对齐规则：每一个单独的滤波器本身必须是个 3D 实体，其深度（Channel Depth）必须严格等于输入通道数 Cᵢₙ，才能与输入图像在通道维度上完全重合。
+   3. K × K（卷积核高与宽 / Kernel Size）：
+      * 滤波器在空间维度上的感受野窗口大小（如 3 × 3、5 × 5 或者是 1 × 1）。
+
+  举个具体的自动驾驶物理案例：
+  假设我们输入的图像是 YUV 图像（输入通道数 Cᵢₙ = 2），我们用一个卷积层提取特征，输出 16 个通道特征图（输出通道数 Cₒᵤₜ = 16），卷积核大小设为 3 × 3（即 $K = 3$）。
+   * 那么，这层卷积的权重张量 W 的形状就是：[16, 2, 3, 3]。
+   * 参数个数：16 × 2 × 3 × 3 = 288 个实型浮点数。
+
+  ---
+
+  2. “权重”在这里是一个什么参数？
+
+  在 PyTorch 的 nn.Conv2d 内部包含两个主要的 trainable 参数：weight（权重）和 bias（偏置）。
+
+  在这里，“权重（Weight）”指的就是可学习的局部特征提取系数（Feature Extraction Coefficients / Filter Weights）。
+
+  ① 在前向传播（Forward Pass）中的计算角色：
+  当我们对第 i 个滤波器（Wᵢ ∈ R^{Cᵢₙ × K × K}）进行前向计算时，这个 3D 的局部滑动窗口在输入特征图上滑过。在每一个位置，它会将滤波器里的 288 个权重值与输入特征图上局部重叠的 288
+  个激活值，执行点对点相乘并全部相加的操作（Frobenius 内积），最后加上偏置 biasᵢ：
+
+  yᵢ = ∑_{c=1}^{Cᵢₙ} ∑ᵤ₌₁^{K} ∑ᵥ₌₁^{K} Wᵢ(c, u, v) · X(c, x+u, y+v) + biasᵢ
+
+  因此，每一个权重实数，本质上就是对输入特征图中特定通道、特定空间相对位置的信号强度进行标定和缩放的“放大/缩小乘数”。
+
+  ② 权重在模型训练、剪枝与量化中的物理演变：
+   * 训练前：这些权重是完全随机的噪音（如服从均值为 0 窄方差的随机初始化分布）。
+   * 训练后：通过反向传播，权重收敛为具有具体几何意义的参数（如捕获车位角点的算子、捕捉车线颜色的算子）。
+   * 在结构化剪枝中（Pruning）：
+    我们评分的“第 i 个通道 Wᵢ”，其实指的就是 W 中大小为 Cᵢₙ × K × K 的 3D 权重切片（Slice）。如果我们对模型剪枝 25%：
+     1. 计算这 16 个滤波器各自的绝对值之和（L₁ 范数评分）；
+     2. 找出评分最低的 4 个滤波器；
+     3. 在物理上直接把这 4 个 3D 滤波器 Wᵢ 从张量 W 中整条删去，此时 W 的形状从 [16, 2, 3, 3] 缩减到了 [12, 2, 3, 3]。
 ### PyTorch 代码综合调用示例
 
 以下展示如何在 PyTorch 中组合使用上述部分核心组件来构建一个标准的前向传播网络块：
@@ -130,10 +175,50 @@ dummy_input = torch.randn(2, 3, 32, 32)
 output = block(dummy_input)
 
 print("Output shape:", output.shape) # Expected: torch.Size([2, 16, 16, 16])
-
 ```
 
+## BatchNorm
+BatchNorm 的作用是在 mini-batch 维度上对每个通道的激活做归一化，使其均值接近 0、方差接近 1，再通过可学习参数 gamma 和 beta 做缩放和平移。它可以缓解训练过程中特征分布变化，改善梯度传播，加快收敛，并有一定正则化效果。
+
+以 `BatchNorm2d(C)` 为例，主要参数/状态包括：
+
+- `num_features=C`：通道数。
+- `eps`：防止除零的小常数。
+- `momentum`：更新 running mean/variance 的动量。
+- `affine=True`：是否学习 gamma 和 beta。
+- `running_mean`、`running_var`：推理阶段使用的滑动均值和方差。
+- `weight(gamma)`、`bias(beta)`：可学习缩放和平移参数。
+
+训练时用 batch 统计量，推理时用 running mean/var。部署时常把 Conv + BN 融合成一个 Conv，以减少计算。
+
+对某个通道的特征，训练时计算 batch 维和空间维上的均值与方差：
+`x_hat = (x - mean) / sqrt(var + eps)`
+然后用可学习参数恢复表达能力：
+`y = gamma * x_hat + beta`
+
+即：
+1. 标准化 (Standardization)
+$$\hat{x} = \frac{x - \mu}{\sqrt{\sigma^2 + \epsilon}}$$
+
+2. 仿射变换 (Affine Transformation)
+$$y = \gamma \hat{x} + \beta$$
+
+* $x$：输入的特征值。
+* $\mu$ (`mean`)：特征的均值。
+* $\sigma^2$ (`var`)：特征的方差。
+* $\epsilon$ (`eps`)：为了数值稳定性添加的极小数，防止分母为 0。
+* $\gamma$ (`gamma`)：网络通过反向传播学习到的缩放因子。
+* $\beta$ (`beta`)：网络通过反向传播学习到的平移因子。
+
+如果输入是 `B x H x W x C`，常见 BN 按通道归一化，每个通道有一个 `gamma` 和一个 `beta`，所以可学习参数是 `2C`。此外还有非可学习的 running_mean 和 running_var，用于推理阶段。部署时 Conv + BN 可以融合到卷积权重和 bias 里。
+
+
+---
+
 <img alt="图 37" src="https://raw.githubusercontent.com/Arrowes/Blog/main/images/DL-Conv.jpg" />  
+
+
+---
 
 ### 空洞卷积（膨胀卷积）（Dilated Convolution / Atrous Convolution）
 为扩大感受野，在卷积核里面的元素之间插入空格来“膨胀”内核，形成“空洞卷积”（或称膨胀卷积），并用膨胀率参数L表示要扩大内核的范围，即在内核元素之间插入L-1个空格。当L=1时，则内核元素之间没有插入空格，变为标准卷积。

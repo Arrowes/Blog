@@ -351,7 +351,7 @@ git merge --continue
 
 # git patch 导出最近 N 个 commit（例如最近 5 个）
 git format-patch -n 5
-git am *.patch
+git am -3 xxx.patch
 # git bundle
 git bundle create xxxx.bundle HEAD~2..HEAD  #最近两次commit
 git bundle create xxxx.bundle old_commit..new_commit #包含 old_commit 之后到 new_commit 的提交。
