@@ -21,15 +21,29 @@ YOLO模式: Ctrl+Y
 > 严禁无端夸奖： 停止在对话中使用过度礼貌、奉承或“为了夸而夸”的措辞（如：太棒了、你真博学、很有见地等）。 赞美的触发门槛： 除非我的表现、观点或产出在逻辑性、独创性或复杂程度方面，经模型评估优于 70% 以上的大数据样本，否则请保持中立、客观且高效的对话风格。 平等交流： 保持作为专业助手和合作伙伴的姿态，语气要简洁、真诚且落地，不需要表现出讨好感。 直言不讳： 如果我的想法有误或可以改进，请直接指出，这种专业性比赞美更有价值。
 
 ## Skills
-方法论skill:https://github.com/obra/superpowers
-skill管理：https://github.com/vercel-labs/skills
-简洁代码省token：https://github.com/DietrichGebert/ponytail
-视频口播剪辑：https://github.com/browser-use/video-use
-搜索：https://github.com/anysearch-ai/anysearch-skill
-文字去AI味：https://github.com/op7418/Humanizer-zh.git
-News:
-https://skillstore.io/zh-hans/skills/yyh211-daily-ai-news
-https://github.com/cclank/news-aggregator-skill
+
+### 搜索与技能发现
+
+| Skill | 来源 | 作用 |
+| --- | --- | --- |
+| `anysearch` | [anysearch-ai/anysearch-skill](https://github.com/anysearch-ai/anysearch-skill) | 实时网页搜索、垂直搜索、批量搜索和网页内容提取。 |
+| `find-skills` | [vercel-labs/skills](https://github.com/vercel-labs/skills) | 搜索并安装开放 Agent Skill。 |
+
+### 软件开发
+
+| Skill | 来源 | 作用 |
+| --- | --- | --- |
+| `ponytail` | [DietrichGebert/ponytail](https://github.com/DietrichGebert/ponytail) | 强制采用简单、短小、低依赖且真正可行的编码方案。 |
+| `superpowers` | [obra/superpowers](https://github.com/obra/superpowers) | 提供需求澄清、计划、TDD、调试、代理协作、审查和验证等完整开发方法论。 |
+| `grill-me` | [mattpocock/skills](https://github.com/mattpocock/skills/tree/main/skills/productivity/grill-me) | 在代码审查中，提供针对代码的深入问题和改进建议。 |
+
+### 视觉与视频创作
+
+| Skill | 来源 | 作用 |
+| --- | --- | --- |
+| `cinematic-director-frame` | [zhu930824/cinematic-director-frame](https://github.com/zhu930824/cinematic-director-frame) | 生成具有导演风格、镜头语言和宽银幕构图的电影画面。 |
+| `chatcut` | [ChatCut-Inc/agent-plugin](https://github.com/ChatCut-Inc/agent-plugin) | 在 Codex 中完成素材导入、时间线剪辑、字幕、配音、生成和导出。 |
+
 # LLM
 ## Deepseek
 [DeepSeek：从入门到精通](https://www.kdocs.cn/l/caFUbVZSt40Q?f=201&share_style=h5_card)
