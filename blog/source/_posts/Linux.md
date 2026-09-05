@@ -53,7 +53,7 @@ mount /dev/sda1 /mnt      # 将 /dev/sda1 分区挂载到 /mnt 目录
 umount /mnt              # 卸载挂载点
 scp username@asd-123:/path/to/file /path/to/destination #复制文件夹：scp -r /folder/
 #rsync 其实就是"远程同步"（remote sync）的意思。与其他文件传输工具（如 FTP 或 scp）不同，rsync 的最大特点是会检查发送方和接收方已有的文件，仅传输有变动的部分（默认规则是文件大小或修改时间有变动）。
-rsync -avz user@remote_host:/path/to/source/ destination/
+rsync -avzP user@remote_host:/path/to/source/ destination/
 rsync -av --exclude='*.log' source/ destination/
 
 cd -                #切换到上一工作目录
@@ -349,9 +349,11 @@ git merge origin/develop
 git add . 
 git merge --continue
 
-# git patch 导出最近 N 个 commit（例如最近 5 个）
-git format-patch -n 5
+# git patch 导出最近 N 个 commit（例如最近 3 个）
+git format-patch -n 3
 git am -3 xxx.patch
+git am --keep-non-patch -3 *.patch
+
 # git bundle
 git bundle create xxxx.bundle HEAD~2..HEAD  #最近两次commit
 git bundle create xxxx.bundle old_commit..new_commit #包含 old_commit 之后到 new_commit 的提交。

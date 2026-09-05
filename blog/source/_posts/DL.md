@@ -720,15 +720,353 @@ map*map是下个featuremap的大小，也就是上个weight*weight到底做了�
 
 **换算计算量**,一般一个参数是指一个float，也就是４个字节,1kb=1024字节
 
+# EfficientNet
+EfficientNet 是 Google 在 2019 年提出的一组 CNN。它先用神经架构搜索得到较高效的基准网络 **EfficientNet-B0**，再使用 **compound scaling（复合缩放）** 同时调整网络的深度、宽度和输入分辨率，在相近计算预算下取得更好的精度与效率平衡。
+
+## 复合缩放（Compound Scaling）
+
+只增加网络深度、只增加通道宽度，或者只提高输入分辨率，都会使另外两个维度成为瓶颈。EfficientNet 用一个缩放系数 $\phi$ 同时控制三个维度：
+
+$$
+depth=\alpha^\phi,\qquad width=\beta^\phi,\qquad resolution=\gamma^\phi
+$$
+
+其中 $\alpha$、$\beta$、$\gamma$ 分别控制深度、宽度和分辨率，通常通过网格搜索确定，并满足近似约束：
+
+$$
+\alpha\cdot\beta^2\cdot\gamma^2\approx 2
+$$
+
+原因是：深度增加大致线性增加计算量，卷积的通道数和特征图面积分别与计算量近似呈平方关系。固定 $\phi$ 后，得到 EfficientNet-B0 到 B7；B0 是基准模型，B1-B7 逐渐增加模型规模和输入分辨率。
+
+### 深度、通道宽度和分辨率的影响
+
+复合缩放中的三个维度分别作用于网络的不同能力。它们不是越大越好，而是在精度、计算量、显存和延迟之间进行权衡。
+
+| 缩放维度 | 主要改变 | 可能带来的收益 | 主要代价与风险 |
+| --- | --- | --- | --- |
+| **深度（Depth）** | 网络层数和特征变换次数 | 逐步提取更高级的语义特征，扩大有效感受野，提升复杂任务的表达能力 | 计算量和延迟大致随层数增加；网络过深可能梯度传播困难、收益递减，端侧还可能增加 kernel launch 开销 |
+| **通道宽度（Width）** | 每层特征图的通道数 | 同一层能够表示更多种特征，增强特征的多样性和模型容量 | 卷积计算量、参数量和激活显存明显增加；宽度过大可能过拟合，并受到内存带宽限制 |
+| **输入分辨率（Resolution）** | 输入图像及中间特征图的空间尺寸 | 保留更多细节，对小目标、细边缘和纹理更友好；特征图空间尺寸变大也会增加有效感受野覆盖范围 | 特征图面积随高和宽的乘积增长，FLOPs、显存和延迟通常近似按分辨率平方增加；过高分辨率可能放大噪声，收益递减 |
+
+可以这样理解：**深度**决定“能进行多少次推理和抽象”，**宽度**决定“每一步能同时表示多少种特征”，**分辨率**决定“输入中有多少空间细节能够被保留”。
+
+- 分类任务中，增加深度和宽度通常更直接地提升语义表达能力；
+- 小目标检测、关键点和分割任务通常对输入分辨率更敏感，但还需要匹配多尺度特征提取结构；
+- 低算力部署中，不能只看参数量。宽度会影响内存访问，深度会影响串行延迟，分辨率会显著影响中间激活显存，三者都应在目标设备上实测；
+- 当数据量较小时，盲目增大模型规模容易过拟合，应配合数据增强、权重衰减、Dropout 或冻结部分 backbone。
+
+| 模型 | 常见输入分辨率 | 特点 |
+| --- | ---: | --- |
+| EfficientNet-B0 | 224 | 最小基准模型，适合资源受限场景 |
+| EfficientNet-B1/B2 | 240/260 | 在精度和计算量之间折中 |
+| EfficientNet-B3/B4 | 300/380 | 更高精度，计算和显存开销明显增加 |
+| EfficientNet-B5/B6/B7 | 456/528/600 | 精度较高，但训练、推理和部署成本较大 |
+
+这里的分辨率是论文和预训练权重常用的默认值，实际项目应根据数据分布、显存和端侧延迟重新选择，不应机械套用。
+
+## MBConv
+
+EfficientNet 的基本模块是 **MBConv（Mobile Inverted Bottleneck Convolution）**。它把 MobileNetV2 的 inverted bottleneck 与 squeeze-and-excitation（SE）结合起来，典型数据流如下：
+
+1. **Expansion 1x1 卷积**：将输入通道从 $C$ 扩展到 $tC$，提升特征表达能力。
+2. **Depthwise 3x3/5x5 卷积**：每个通道单独做空间卷积，降低计算量。
+3. **SE 注意力**：全局池化后学习通道权重，重新标定重要通道。
+4. **Projection 1x1 卷积**：将通道数压回输出通道数。
+5. **残差连接**：当 stride=1 且输入输出通道相同时，执行 $y=F(x)+x$。
+
+与普通卷积相比，深度可分离卷积的参数量近似为：
+
+$$
+K^2C_{in}+C_{in}C_{out}
+$$
+
+而普通卷积为：
+
+$$
+K^2C_{in}C_{out}
+$$
+
+因此 MBConv 能以较低的参数量和 FLOPs 获得较大的感受野。但它并不是“免费加速”：depthwise convolution 的算术强度较低，实际延迟还会受到内存访问、算子融合和硬件 kernel 支持的影响。
+
+### MBConv 的简化 PyTorch 实现
+
+```python
+import torch
+from torch import nn
+
+
+class MBConv(nn.Module):
+  def __init__(self, in_channels, out_channels, expansion=6, stride=1):
+    super().__init__()
+    hidden_channels = in_channels * expansion
+    # 只有尺寸和通道数都不变时，输入才能与输出逐元素相加。
+    self.use_residual = stride == 1 and in_channels == out_channels
+
+    layers = []
+    if expansion != 1:
+      # 1x1 卷积先扩展通道，提升瓶颈块的表达能力。
+      layers.extend([
+        nn.Conv2d(in_channels, hidden_channels, 1, bias=False),
+        nn.BatchNorm2d(hidden_channels),
+        nn.SiLU(inplace=True),
+      ])
+    layers.extend([
+      # groups=hidden_channels 表示每个通道独立进行空间卷积。
+      nn.Conv2d(
+        hidden_channels,
+        hidden_channels,
+        3,
+        stride=stride,
+        padding=1,
+        # 1x1 投影将扩展后的通道压缩为输出通道数。
+        groups=hidden_channels,
+        bias=False,
+      ),
+      nn.BatchNorm2d(hidden_channels),
+      nn.SiLU(inplace=True),
+      nn.Conv2d(hidden_channels, out_channels, 1, bias=False),
+      nn.BatchNorm2d(out_channels),
+    ])
+    self.block = nn.Sequential(*layers)
+
+  def forward(self, x):
+    out = self.block(x)
+    # 残差连接有助于梯度传播；stride=1 且通道一致时才启用。
+    return x + out if self.use_residual else out
+```
+
+上面代码用于说明 MBConv 的主干结构，省略了 SE、DropConnect/Stochastic Depth 和不同 stage 的配置。实际使用中优先采用经过验证的实现，例如 torchvision 提供的 `efficientnet_b0`、`efficientnet_b1` 等预训练模型。
+
+```python
+from torchvision.models import EfficientNet_B0_Weights, efficientnet_b0
+
+model = efficientnet_b0(weights=EfficientNet_B0_Weights.DEFAULT)
+model.classifier[1] = nn.Linear(model.classifier[1].in_features, num_classes)
+```
+
+## EfficientNet-Lite
+
+EfficientNet-Lite 是面向移动端和边缘设备重新调整的系列，不是简单地把 B0-B7 改名。其目标是减少移动端不友好的算子和运行时开销，常见调整包括：
+
+- 使用 `ReLU6` 替代 `Swish/SiLU`，便于整数化和 TFLite 等推理后端支持；
+- 移除或简化部分 SE 等额外结构，降低访存和算子开销；
+- 调整 stem、分类头、正则化和输入尺寸，使模型更适合移动端训练与部署。
+
+具体结构应以目标框架和对应 checkpoint 的实现为准，不同仓库中的 “Lite” 变体并不一定完全相同。部署前至少要检查算子是否被后端支持，以及 FP32、FP16、INT8 量化后的精度和延迟。
+
+## 选型与工程注意点
+
+选择 EfficientNet-Lite 的理由：参数量较小、FLOPs 较低、卷积算子部署友好，能够在精度和端侧延迟之间取得较好平衡。没选 FPN/Transformer，通常是因为当前低算力平台对显存、访存带宽和算子支持更加敏感；但如果任务需要多尺度检测，EfficientNet-Lite 仍可以作为 backbone，搭配轻量级 FPN 或检测头，而不是二选一。
+
+### 参数量、激活显存、计算量与延迟
+
+这四个指标描述的是模型的不同方面，不能互相替代：
+
+| 指标 | 回答的问题 | 主要由什么决定 | 常见影响 |
+| --- | --- | --- | --- |
+| **参数量（Params）** | 模型中有多少个需要保存和训练的权重？ | 层数、卷积核大小、输入/输出通道数、全连接层规模；BN 的 affine 参数也属于参数 | 决定权重文件大小、模型存储占用和一部分训练显存；参数越多不一定延迟越高 |
+| **激活显存（Activation Memory）** | 前向和反向过程中间特征图需要占多少内存？ | Batch size、输入分辨率、各层通道数、特征图尺寸、数据类型，以及训练时需要保存的中间结果 | 训练显存通常比推理显存大；高分辨率和大 batch 往往首先增加激活显存 |
+| **计算量（FLOPs/MACs）** | 完成一次前向传播需要执行多少数学运算？ | 输入尺寸、输出特征图尺寸、卷积核大小、输入/输出通道数、层数和 batch size | 反映理论计算工作量；FLOPs 低通常更容易做到低延迟，但不是绝对关系 |
+| **延迟（Latency）** | 一次推理实际需要多长时间？ | 硬件算力和内存带宽、算子实现、并行度、kernel launch、算子融合、量化、线程数、batch size 和数据搬运 | 是部署最关心的实际指标，必须在目标设备和完整推理流程上实测 |
+
+对于一个**普通卷积**，忽略 bias 时，参数量近似为：
+
+$$
+Params=K^2C_{in}C_{out}
+$$
+
+若输出特征图大小为 $H_{out}\times W_{out}$，则单张图片的 MACs 近似为：
+
+$$
+MACs=H_{out}W_{out}K^2C_{in}C_{out}
+$$
+
+若把一次乘法和一次加法分别计作一次 FLOP，则通常有 $FLOPs\approx2\times MACs$。不同工具对 MACs、FLOPs 是否包含加法、激活函数和 BN 的统计口径可能不同，比较结果时必须确认口径一致。
+
+$$
+计算量\approx参数量\times每个参数参与计算的次数
+$$
+
+同一组卷积参数会在输出特征图的每个空间位置重复使用，所以当输出特征图为 $H_{out}\times W_{out}$ 时，每个参数大约参与 $H_{out}W_{out}$ 次乘法。由此可见：
+
+- 卷积层的**参数量主要由通道数和卷积核大小决定**；
+- 卷积层的**计算量还会受到输出特征图分辨率影响**；
+- 即使两个卷积层参数量相同，只要输出分辨率不同，计算量也可能相差很大。
+
+**全连接层**则不同。若输入维度为 $N$、输出维度为 $M$：
+
+$$
+Params=N\times M,\qquad MACs\approx N\times M
+$$
+
+单次推理时，全连接层中的每个权重通常只参与一次乘法，因此它的参数量和单样本计算量数量级接近。但在 batch size 为 $B$ 时，整个 batch 的计算量约为 $B\times N\times M$，而参数量仍然只有 $N\times M$。
+
+深度卷积进一步说明了两者的区别：它的参数量和计算量都比普通卷积小，但由于每个参数仍会在所有空间位置重复使用，所以分辨率提高后计算量仍会明显增加。
+
+因此，判断模型大小主要看 Params 和权重文件大小；判断理论运算工作量要看 FLOPs/MACs；判断实际运行速度还必须结合硬件、内存访问和算子实现测量延迟。
+
+对于**深度卷积**，参数量和计算量分别近似为：
+
+$$
+Params=K^2C,\qquad MACs=H_{out}W_{out}K^2C
+$$
+
+它比普通卷积省参数和运算，但不一定按相同比例降低延迟，因为深度卷积的计算密度较低，可能受内存访问和硬件 kernel 效率限制。
+
+**激活显存**可以用一个中间特征图粗略估算：
+
+$$
+Memory\approx B\times C\times H\times W\times bytes(dtype)
+$$
+
+例如 `B x C x H x W` 的 FP16 特征图每个元素占 2 字节，FP32 占 4 字节。训练时还要保存多个中间激活用于反向传播，实际峰值显存还包括参数、梯度、优化器状态、临时 workspace 和框架缓存，因此不能只把所有参数量乘以 4 作为训练显存。
+
+几个容易混淆的结论：
+
+- **参数量小，不代表激活显存小**：高分辨率特征图可能只有少量参数，却产生很大的激活张量；
+- **FLOPs 少，不代表延迟低**：算子不被硬件高效支持、访存开销大或 kernel 数量多时，低 FLOPs 模型仍可能较慢；
+- **延迟和吞吐量不同**：延迟是单次或单 batch 的完成时间，吞吐量是单位时间处理的样本数，大 batch 可能提高吞吐量但增加单次延迟和显存；
+- **训练和推理的资源不同**：推理通常不保存反向图，也不需要梯度和优化器状态；训练则需要更多激活显存和额外状态；
+- **改变缩放维度的影响不同**：增加深度主要增加串行层数，增加宽度同时增加参数量、计算量和激活通道，增加分辨率主要放大特征图面积以及激活显存和空间计算量。
+
+使用时需要注意：
+
+- 预训练权重通常要求固定的归一化方式和输入尺寸，训练和推理必须保持一致；
+- 仅比较 Params 或 FLOPs 不能代表真实速度，应在目标设备上测量端到端延迟、峰值内存和功耗；
+- 迁移学习时可先冻结 backbone，再逐步解冻；小数据集上应同时关注分类头过拟合和 BatchNorm 统计量漂移；
+- 端侧 INT8 部署需要校准数据，量化后应重新评估精度，尤其关注小目标和细粒度类别；
+- EfficientNet 原始模型使用 SiLU/Swish 时，训练精度可能较好，但某些 NPU 不支持或代价较高，Lite 版本的部署优势需要通过实际 benchmark 验证。
+
 # Transformer
+Transformer 是一种以 **Attention（注意力）** 为核心的序列建模架构。它不像传统 RNN 那样必须按时间顺序逐个处理输入，而是让序列中的元素相互计算关系，因此更容易并行训练，也更擅长建模长距离依赖。
+
 Transformer 的核心在于注意力机制（Attention Mechanism），注意力机制由三个字母构建：Q (Query)、K (Key)、V (Value)。
 用经典的“图书馆检索”类比来解释 Q、K、V：
-Query (Q - 查询)：相当于你走到图书馆系统前，输入的“搜索词”（例如：“机器学习入门”）。它是你带着的目的或问题。
-Key (K - 键)：相当于图书馆里每一本书背面的“标签或书名”。系统会用你的 Q 去和所有的 K 进行比对，计算相似度。
-Value (V - 值)：相当于这本“书的具体内容”。当系统发现某本书的 K 和你的 Q 高度匹配时，它就会把这本书的 V（内容）提取出来交给你。
++ Query (Q - 查询)：相当于你走到图书馆系统前，输入的“搜索词”（例如：“机器学习入门”）。它是你带着的目的或问题。
++ Key (K - 键)：相当于图书馆里每一本书背面的“标签或书名”。系统会用你的 Q 去和所有的 K 进行比对，计算相似度。
++ Value (V - 值)：相当于这本“书的具体内容”。当系统发现某本书的 K 和你的 Q 高度匹配时，它就会把这本书的 V（内容）提取出来交给你。
 数学表达如下：
 $$Attention(Q, K, V) = \text{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right)V$$
 公式的物理意义是：用 Q 和 K 算点积（计算相似度打分），然后把分数作为权重，去对 V 进行加权求和。
+
+### Q、K、V 是怎样计算出来的
+
+假设输入序列为 $X\in\mathbb{R}^{N\times d_{model}}$，其中 $N$ 是 token 数量，$d_{model}$ 是特征维度。Self-Attention 会通过三个可学习的线性层生成 Q、K、V：
+
+$$
+Q=XW_Q+b_Q,\qquad K=XW_K+b_K,\qquad V=XW_V+b_V
+$$
+
+其中 $W_Q$、$W_K$、$W_V$ 是训练得到的投影矩阵。若单个注意力头的维度为 $d_k$，则：
+
+$$
+W_Q,W_K,W_V\in\mathbb{R}^{d_{model}\times d_k},\qquad Q,K,V\in\mathbb{R}^{N\times d_k}
+$$
+
+具体计算可以拆成四步：
+
+1. **生成 Q、K、V**：把每个 token 投影到查询、匹配和内容三个子空间；
+2. **计算相似度**：$QK^T$ 的形状为 $N\times N$，第 $i,j$ 个元素表示第 $i$ 个 token 对第 $j$ 个 token 的关注程度；
+3. **归一化权重**：对每一行做 softmax，得到每个 Query 对所有 Key 的注意力权重；
+4. **聚合 Value**：用注意力权重对 V 加权求和，得到新的 token 表示。
+
+多头注意力会使用多组不同的 $W_Q,W_K,W_V$，每个头独立计算注意力，最后拼接并通过一个输出投影：
+
+$$
+MultiHead(Q,K,V)=Concat(head_1,\ldots,head_h)W_O
+$$
+
+### 为什么要除以 $\sqrt{d_k}$
+
+如果 Q 和 K 的每个元素都近似服从均值为 0、方差为 1 的分布，那么点积：
+
+$$
+q\cdot k=\sum_{i=1}^{d_k}q_i k_i
+$$
+
+其方差大致会随着 $d_k$ 增长。$d_k$ 越大，$QK^T$ 的数值越容易变大。直接把这些大数送入 softmax，会使最大值接近 1、其余值接近 0，softmax 进入饱和区，梯度变小，训练不稳定。
+
+除以 $\sqrt{d_k}$ 可以把点积的数值尺度拉回相对稳定的范围，使 softmax 不容易过早饱和。因此它是为了**稳定数值范围和梯度**，不是为了改变 Query 与 Key 的语义。
+
+### Self-Attention 与 Cross-Attention
+
+两者使用的计算公式相同，核心区别是 Q、K、V 的来源不同：
+
+| 类型 | Q 的来源 | K、V 的来源 | 直观含义 |
+| --- | --- | --- | --- |
+| **Self-Attention** | 同一个输入 $X$ | 同一个输入 $X$ | 序列内部互相交流，回答“我应该关注同一序列中的谁” |
+| **Cross-Attention** | 一个序列 $X_q$ | 另一个序列 $X_{kv}$ | 一个序列去读取另一个序列，回答“查询应该从外部信息中取什么” |
+
+Self-Attention 的写法是：
+
+$$
+Q=XW_Q,\qquad K=XW_K,\qquad V=XW_V
+$$
+
+Cross-Attention 的写法是：
+
+$$
+Q=X_qW_Q,\qquad K=X_{kv}W_K,\qquad V=X_{kv}W_V
+$$
+
+例如 Encoder-Decoder Transformer 中，Decoder 的 token 生成 Q，Encoder 输出的特征生成 K 和 V。自动驾驶感知中，BEV Query 生成 Q，多相机图像特征生成 K 和 V，这就是 Cross-Attention。
+
+### Deformable Attention 的基本原理
+
+标准全局 Attention 会让每个 Query 与所有 Key 计算相关性。如果 Query 数量为 $N_q$、图像特征 token 数量为 $N_k$，其注意力矩阵大小为 $N_q\times N_k$，计算量和显存开销近似为：
+
+$$
+O(N_qN_kd_k)
+$$
+
+对于高分辨率图像，$N_k$ 很大，所有位置都参与匹配，其中大部分位置其实与当前 Query 无关。
+
+Deformable Attention 不再让一个 Query 关注所有位置，而是为每个 Query 预测少量**采样点（sampling points）**及其权重：
+
+1. 根据 Query 预测采样偏移量 $\Delta p$；
+2. 以一个参考点 $p_q$ 为中心，得到采样位置 $p_q+\Delta p$；
+3. 在这些位置对特征图做双线性插值，取出对应的 Value；
+4. 用预测的注意力权重对少量采样特征加权求和。
+
+单尺度 Deformable Attention 可以写成：
+
+$$
+DeformAttn(z_q,x)=\sum_{m=1}^{M}W_m\sum_{k=1}^{K}A_{mqk}\,x\left(p_q+\Delta p_{mqk}\right)
+$$
+
+其中 $M$ 是注意力头数，$K$ 是每个头的采样点数量，$A_{mqk}$ 是采样权重，$\Delta p_{mqk}$ 是可学习偏移量，$x(\cdot)$ 表示在连续坐标处插值取值。
+
+全局 Attention 需要比较所有 Key，而 Deformable Attention 每个 Query 只读取 $M\times K$ 个位置，因此复杂度近似变为：
+
+$$
+O(N_qMKd_k),\qquad MK\ll N_k
+$$
+
+所以它能显著节省计算量和注意力矩阵显存，尤其适合高分辨率检测和多尺度视觉特征。代价是采样位置是稀疏的，模型可能漏掉有用区域；采样点数量、参考点质量和特征尺度设计会影响最终效果。
+
+### BEVFormer 中 BEV Query 如何读取多相机特征
+
+BEVFormer 的目标是把环视多相机图像转换成统一的鸟瞰视角（Bird's-Eye View，BEV）特征。可以把它理解为：先在 BEV 平面上放置一张可学习的“查询网格”，每个网格位置都向多相机图像询问信息。
+
+其 Spatial Cross-Attention 的主要流程如下：
+
+1. **初始化 BEV Query**：在 BEV 平面建立 $H_{bev}\times W_{bev}$ 个网格，每个网格对应一个 BEV Query。Query 可以是可学习参数，也可以与 BEV 位置编码相加；
+2. **生成参考点**：为每个 BEV Query 在三维空间中设置一个或多个参考高度，得到参考点 $p_{bev}$；
+3. **坐标投影**：利用车辆坐标系到各相机坐标系的外参，以及相机内参，将 BEV 参考点投影到每个相机的图像平面：
+
+  $$
+  p_{img}=K_{cam}[R\mid t]p_{bev}
+  $$
+
+  再进行齐次坐标归一化，得到图像上的二维采样坐标。落在相机视野外的点会被 mask 掉；
+4. **从多尺度图像特征采样**：每个投影点不需要读取整张图像，而是在不同 FPN 特征层附近采样少量点，采样值通过双线性插值得到；
+5. **Cross-Attention 聚合**：BEV Query 作为 Q，投影位置附近的多相机图像特征作为 K/V，Deformable Attention 预测各采样点的偏移和权重，再把有效相机、多个尺度和多个采样点的特征融合起来；
+6. **更新 BEV 特征**：每个 BEV 网格得到融合后的视觉信息，形成统一的 BEV 特征图，后续检测头可以在这个特征图上预测 3D 框、地图元素或其他自动驾驶目标。
+
+需要注意，BEVFormer 不是简单地把所有相机图像拼接后做一次全局 Attention。它利用相机标定把“BEV 位置”与“图像位置”对应起来，再通过稀疏可变形采样读取相关区域，因此既保留了几何关系，又避免了极高的全局注意力开销。
+
+此外，BEVFormer 还包含 **Temporal Self-Attention**：当前帧的 BEV Query 不仅与当前多相机图像做 Spatial Cross-Attention，还会与历史 BEV 特征进行时序交互，从而利用前后帧信息改善遮挡和检测稳定性。
 
 在自动驾驶感知中，图像特征图（BEV 特征）本身充当了浩如烟海的图书馆（它提供了 Keys 和 Values）。
 Q: Object Query（对象查询/可学习查询）。
@@ -736,6 +1074,82 @@ Q: Object Query（对象查询/可学习查询）。
 + 无中生有的“参数”：在网络刚开始训练时，Point Query 可能只是一组随机生成的、没有任何意义的数字向量。
 + 不断进化的“侦察兵”：在经过成千上万张图片的训练后，这些 Query 通过梯度下降“学习”到了特定的技能。如寻找高对比度的“边缘”、寻找“黄色与黑色的交界点”。
 + 交叉注意力 (Cross-Attention)：在推理时，这些训练有素的 Query 会带着它们各自学到的“问题（特征偏好和位置偏好）”，去和 BEV 特征图（Keys 和 Values）进行交互。
+
+## Transformer Block 的组成
+
+一个标准 Transformer Block 通常包括：
+
+1. **Multi-Head Self-Attention**：使用多个注意力头，从不同子空间学习关系；
+2. **残差连接和 LayerNorm**：稳定训练并保留原始特征，常见形式是 `x + Attention(x)`；
+3. **FFN（Feed-Forward Network）**：对每个位置独立地进行通道维度上的非线性变换，常见结构是 Linear-GELU-Linear；
+4. **位置编码（Positional Encoding）**：注意力本身不感知顺序，需要额外注入位置信息。
+
+注意力主要负责“不同位置之间的信息混合”，FFN 主要负责“每个位置内部的特征变换”。多头注意力则可以同时学习不同类型的关系，例如语法关系、空间邻近关系或远距离依赖。
+
+## Transformer 在大语言模型中的使用
+
+大语言模型（LLM）通常先把文本切分为 token，再把 token 映射成向量。一个 token 可以是一个字、一个词、词的一部分或标点，具体由 tokenizer 决定。
+
+以 GPT 类模型为例，典型流程是：
+
+1. 文本经过 tokenizer 变成 token ID；
+2. token ID 查表得到词向量，并加入位置编码；
+3. 多层 **Decoder-only Transformer** 处理这些 token；
+4. 最后一层 Linear 将隐藏向量映射到词表大小，得到下一个 token 的 logits；
+5. 经过 softmax 得到概率，选择或采样下一个 token，再把它追加到输入中循环生成。
+
+LLM 训练通常使用因果语言建模（Causal Language Modeling）：预测当前位置的下一个 token。为了防止模型偷看答案，Self-Attention 使用**因果 mask**，第 $i$ 个位置只能关注第 $i$ 个及其之前的位置：
+
+$$
+P(x_t|x_{<t})
+$$
+
+所以 LLM 中的 Transformer 重点是：**理解 token 之间的语言关系，并根据上下文生成下一个 token**。它的输出通常是词表上的概率分布，而不是图像中的像素或边界框。
+
+BERT 则是另一种常见形式：主要使用 **Encoder-only Transformer**，通过双向注意力理解上下文，适合分类、匹配和抽取等理解任务；T5 等模型使用 Encoder-Decoder 结构，适合输入到输出的文本转换任务。
+
+## Transformer 在计算机视觉中的使用
+
+图像不是天然的一维 token 序列，因此视觉 Transformer（Vision Transformer，ViT）通常先把图像切成固定大小的 patch。例如输入图像为 $H\times W$，patch 大小为 $P\times P$，则 token 数量约为：
+
+$$
+N=\frac{H}{P}\times\frac{W}{P}
+$$
+
+每个 patch 经过线性投影变成一个视觉 token，再加入二维位置编码，随后送入 Transformer Encoder。以图像分类为例，数据流可以概括为：
+
+1. 图像切分为 patch；
+2. 每个 patch 展平并投影为固定维度的 token；
+3. 添加位置编码和可选的 `[CLS]` token；
+4. Encoder 通过 Self-Attention 建模不同图像区域之间的关系；
+5. 使用分类头输出类别。
+
+视觉任务不同，Transformer 的输出形式也不同：
+
+- **分类**：使用 `[CLS]` token 或全局池化后的特征输出类别；
+- **目标检测**：使用 object query 查询图像特征，输出类别和边界框，DETR 就属于这一类；
+- **语义分割**：保留空间位置，将 token 特征恢复或映射到像素网格；
+- **图像生成**：将图像 patch 或离散视觉 token 按序预测和生成。
+
+CV 中的注意力既可以是 patch 之间的全局注意力，也可以限制在局部窗口内。全局注意力能捕捉远距离空间关系，但计算量随 token 数量 $N$ 近似按 $O(N^2)$ 增长；高分辨率图像会产生大量 token，因此 Swin Transformer 等方法采用窗口注意力、层级特征和窗口移动来降低开销。
+
+## LLM 与 CV 中 Transformer 的区别
+
+两者使用相同的注意力基本公式，但输入、位置关系、mask 和输出目标不同：
+
+| 对比维度 | 大语言模型（LLM） | 计算机视觉（CV） |
+| --- | --- | --- |
+| 输入 | 文本 token，通常是一维序列 | 图像 patch token，来源于二维网格，也可能来自 CNN 特征图 |
+| 位置关系 | 词语的先后顺序，常使用绝对或相对位置编码、RoPE | patch 的二维空间位置，通常需要二维位置编码或窗口位置偏置 |
+| 注意力范围 | Decoder-only LLM 使用因果 mask，只看当前位置及之前的 token | 图像理解通常允许 patch 之间双向关注；检测器也会使用 query 与图像特征交互 |
+| 主要任务 | 预测下一个 token、文本理解、问答、翻译和生成 | 分类、检测、分割、跟踪、姿态估计和图像生成 |
+| 常见输出 | 词表上的 logits 或文本序列 | 类别、边界框、掩码、关键点或图像特征图 |
+| 主要瓶颈 | 上下文长度、KV Cache、显存和生成速度 | 高分辨率导致 token 数量多、空间细节和全局建模的平衡 |
+| 常见结构 | GPT：Decoder-only；BERT：Encoder-only；T5：Encoder-Decoder | ViT、Swin、DETR，以及 CNN-Transformer 混合架构 |
+
+最容易混淆的一点是：**LLM 中的 token 是语言切分单元，CV 中的 token 通常是图像 patch 或特征位置**。二者都叫 token，但含义不同。LLM 多数是“根据前文生成后文”，CV 多数是“理解整张图并输出结构化预测”。
+
+在自动驾驶感知中，图像特征图或 BEV 特征可以作为 Key 和 Value，Point Query、Line Query 或 Object Query 作为 Query，通过 Cross-Attention 从视觉特征中提取目标、点或线的信息。这些 Query 可以是可学习的向量，也可以由其他网络根据输入动态生成。
 
 
 ## DETR (DEtection TRansformer)
