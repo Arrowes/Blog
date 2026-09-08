@@ -46,7 +46,9 @@ YOLO模式: Ctrl+Y
 
 # LLM
 [DeepSeek：从入门到精通](https://www.kdocs.cn/l/caFUbVZSt40Q?f=201&share_style=h5_card)
+
 ## Deepseek 本地部署
+
 ### ollama + Deepseek
 1. 下载并安装ollama： https://ollama.com/download （关闭开机自启动：C:\Users\Arrow\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup 删除快捷方式）
 2. 修改模型下载路径，避免占C盘：设置>系统>系统信息>高级系统设置>环境变量>在系统变量中新建：OLLAMA_MODELS D:\XXX\models 重启电脑（默认在C:\Users\XX\.Ollama\models）（顺便加一下OLLAMA_HOST 0.0.0.0）

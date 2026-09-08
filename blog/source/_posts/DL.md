@@ -3,8 +3,6 @@ title: DL：深度学习相关概念
 date: 2022-12-28 20:22:05
 updated: 2026-09-08
 mathjax: true
-categories:
-- 深度学习
 tags:
 - 深度学习
 ---
