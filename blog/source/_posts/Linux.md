@@ -397,6 +397,29 @@ dos2unix XXX.sh
 # 2. 将文件中所有不间断空格替换为标准空格
 sed -i 's/\xc2\xa0/ /g' XXX.sh
 ```
+### Git提交后全部显示changes
+Windows 和 Linux 换行符冲突的问题。
+* Windows 系统的换行符是 **CRLF**（回车+换行，即 `\r\n`）。
+* Linux/Unix/Mac 系统的换行符是 **LF**（换行，即 `\n`）。
+
+为了避免以后每次都要手动跑 `dos2unix`，需要规范换行符：
+1. VS Code 设置层面（修改默认换行符）
+* **单文件临时改：** 注意看 VS Code 界面**右下角状态栏**，如果显示 `CRLF`，点击它，然后在顶部弹出的菜单中选择 **LF**。
+* **全局永久改：**
+打开 VS Code 设置（快捷键 `Ctrl + ,`），搜索 `eol`（End of Line），找到 **Files: Eol**，将其从 `auto` 或 `\r\n` 修改为 **`\n`**。
+2. Git 配置层面（让 Git 自动转换）
+```bash
+# 提交时自动将 CRLF 转换为 LF，拉取时不转换（保持 LF）
+git config --global core.autocrlf input
+```
+3. 项目仓库层面
+在代码仓的根目录下新建或修改一个名为 **`.gitattributes`** 的文件，加入以下这行：
+```text
+* text=auto eol=lf
+```
+**作用：** 只要把这个 `.gitattributes` 文件提交到代码库，任何人在任何系统（不管他本地怎么设置）拉取或提交这个项目时，Git 都会强制将所有文本文件的换行符统一规范为 `LF`，从此彻底告别整个文件变动的问题。
+
+
 ### git clone频繁失败
 git clone频繁失败：配置Git专用代理
 如果上网工具有提供HTTP代理端口（例如Clash 127.0.0.1:7890），可以为Git单独设置代理，这样就不需要开启全局代理了。在命令行中输入以下命令：

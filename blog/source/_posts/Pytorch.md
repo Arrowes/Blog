@@ -182,9 +182,18 @@ drive.mount('/content/drive')
    linux自带的命令，忽略终端挂断信号（SIGHUP），确保即使关闭终端或退出 SSH 连接，程序仍继续运行
 2. tmux
   一个终端复用工具（Terminal Multiplexer），需要单独安装，可以在单个终端窗口中创建多个虚拟终端会话，并支持会话的持久化（即使断开 SSH 连接也不会中断任务）。
-
-**dlview**
-a  Python package dlview (short for deep learning view), a print tool to simplify APN debugging
+```py
+#在终端输入的命令（进入 tmux 前）：
+tmux new -s <名字>  #新建一个带名字的会话（比直接敲 tmux 更好管理）。
+tmux ls             #查看当前后台有哪些 tmux 会话。
+tmux a -t <名字>    #重新连回之前挂起的会话（a 代表 attach）。
+#在 tmux 内部的快捷键（必须先按 Ctrl + b 并松开，再按下面按键）：
+d   #脱离会话（Detach）。这是最核心的功能，把当前会话挂到后台运行，你可以安心关闭终端，程序不会断。
+%   #左右分屏。一边写代码，一边看运行结果。
+"   #上下分屏。在下方留一小块区域敲命令。
+c   #新建一个窗口（当分屏太挤时，新开一个像浏览器标签页一样的窗口），用 0-9 数字键在窗口间切换。
+    #方向键：在各个分屏（窗格）之间移动光标。
+```
 
 ## DataLoader的num_works参数设置
 数据集较小时（小于2W）建议num_works不用管默认就行，因为用了反而比没用慢。
