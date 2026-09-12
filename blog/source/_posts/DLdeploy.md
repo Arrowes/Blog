@@ -1,18 +1,30 @@
 ---
-title: DL模型转换及部署：torch > onnx > deploy
+title: DLdeploy：torch > onnx > deploy
 date: 2023-06-09 11:36:00
+updated: 2026-09-12
 tags:
 - 嵌入式
 - 深度学习
+- 模型部署
 ---
-深度学习模型部署相关记录，目前仅开了个头，项目地址：[DLpractice](https://github.com/Arrowes/DLpractice)
+从 PyTorch 模型到 ONNX、压缩量化、端侧编译和 SDK 集成的部署笔记。项目地址：[DLpractice](https://github.com/Arrowes/DLpractice)
 <!--more-->
 
-**算法部署**
-+ Network selection：
-+ Optimization：分组卷积、深度可分离卷积、稀疏卷积
-+ Deployment：
-<img alt="图 1" src="https://raw.githubusercontent.com/Arrowes/Blog/main/images/TDA4VMdeploy.png" width="70%"/>  
+## 学习路线与速查
+
+| 顺序 | 主题 | 复习重点 |
+| --- | --- | --- |
+| 1 | [部署总览](#deployment-overview) | 场景、指标、硬件和完整链路 |
+| 2 | [压缩与量化工作流](#compression-workflow) | 结构化剪枝、PTQ、QAT 如何衔接 |
+| 3 | [量化原理与案例](#quantization) | Scale、Zero-point、校准和混合精度 |
+| 4 | [剪枝实践](#pruning) | 重要性评分、依赖图和物理通道裁剪 |
+| 5 | [ONNX 转换与优化](#onnx) | 导出、校验、算子兼容和改写 |
+| 6 | [部署框架与 SDK](#deployment-sdk) | 转换器、前后处理、runtime 和封装 |
+| 7 | [部署验收清单](#deployment-checklist) | 精度、性能、内存、功耗与可回退性 |
+
+核心链路：模型选择与训练 → 结构/算子优化 → 模型转换 → 压缩与量化 → 目标后端编译 → 端侧验证 → SDK 集成。
+
+<img alt="图 1" src="https://raw.githubusercontent.com/Arrowes/Blog/main/images/TDA4VMdeploy.png" width="70%"/>
 
 Netron神经网络可视化: [软件下载](https://github.com/lutzroeder/netron/releases/tag/v7.0.0), [在线网站](https://netron.app/)
 
@@ -21,11 +33,13 @@ Netron神经网络可视化: [软件下载](https://github.com/lutzroeder/netron
 
 ---
 
-# 模型部署
+<span id="deployment-overview"></span>
+
+# 部署总览
 [AI 框架部署方案之模型部署概述](https://zhuanlan.zhihu.com/p/367042545)
 [AI 框架部署方案之模型转换](https://zhuanlan.zhihu.com/p/396781295)
 
-学术界负责各种 SOTA(State of the Art) 模型的训练和结构探索，而工业界负责将这些 SOTA 模型应用落地，赋能百业。模型部署一般无需再考虑如何修改训练方式或者修改网络结构以提高模型精度，更多的是需要明确部署的场景、部署方式（中心服务化还是本地终端部署）、模型的优化指标，以及如何提高吞吐率和减少延迟等。
+模型部署需要把训练框架中的模型转换成目标运行时可执行的计算图，并对齐前处理、后处理和数值精度。部署阶段仍可能反向影响网络结构与训练方式，例如用部署友好算子替换不支持算子，或通过 QAT 恢复量化精度。
 
 ## 模型部署场景
 + 云端部署：模型部署在云端服务器，用户通过网页访问或者 API 接口调用等形式向云端服务器发出请求，云端收到请求后处理并返回结果。 
@@ -46,10 +60,10 @@ Netron神经网络可视化: [软件下载](https://github.com/lutzroeder/netron
 <img alt="图 3" src="https://pic2.zhimg.com/80/v2-ffd5625be23ba4fa8a56f5232a3f9c95_720w.webp" width="80%"/>  
 
 ## 部署优化指标
-成本、功耗、性价比
 
-AI 模型部署到硬件上的成本将极大限制用户的业务承受能力。
-成本问题主要聚焦于芯片的选型，比如，对比**寒武纪 MLU220** 和 MLU270，MLU270 主要用作数据中心级的加速卡，其算力和功耗都相对于边缘端的人工智能加速卡MLU220要高。至于 Nvida 推出的 Jetson 和 Tesla T4 也是类似思路，Tesla T4 是主打数据中心的推理加速卡，而 Jetson 则是嵌入式设备的加速卡。对于终端场景，还会根据对算力的需求进一步细分，比如表中给出的高通骁龙芯片，除 GPU 的浮点算力外，还会增加 DSP 以增加定点算力
+部署优化通常同时考虑：任务 KPI、端到端延迟、吞吐量、峰值内存、模型大小、功耗、成本、冷启动时间和稳定性。TOPS 只是理论算力指标，不能替代目标模型在真实输入、编译器和频率配置下的测量。
+
+下表是早期硬件资料快照，只用于理解数据中心与边缘设备的功耗/算力定位；规格可能随工作模式和厂商口径变化，选型时应查询当前官方手册。
 
 | 芯片型号          | 算力                                    | 功耗          |
 | ---------------- | --------------------------------------- | ------------- |
@@ -60,13 +74,7 @@ AI 模型部署到硬件上的成本将极大限制用户的业务承受能力�
 | Jetson-TX2       | 1.30 TOPS (FP16)                        | 7.5 W / 15 W  |
 | T4               | 130 TOPS (INT8)                         | 70 W          |
 
-在数据中心服务场景，对于功耗的约束要求相对较低；在边缘终端设备场景，硬件的功耗会影响边缘设备的电池使用时长。因此，对于功耗要求相对较高，一般来说，利用 NPU 等专用优化的加速器单元来处理神经网络等高密度计算，能节省大量功耗。
-
-不同的业务场景对于芯片的选择有所不同，以达到更高的性价比。 从公司业务来看，云端相对更加关注是多路的吞吐量优化需求，而终端场景则更关注单路的延时需要。
-
-在目前主流的 CV 领域，低比特模型相对成熟，且 INT8/INT4 芯片因成本低，且算力比高的原因已被广泛使用；但在NLP或者语音等领域，对于精度的要求较高，低比特模型精度可能会存在难以接受的精度损失，因此 FP16 是相对更优的选择。
-
-在 CV 领域的芯片性价比选型上，在有 INT8/INT4 计算精度的芯片里，主打低精度算力的产品是追求高性价比的主要选择之一，但这也为平衡精度和性价比提出了巨大的挑战。
+云端服务通常更关注多路吞吐、资源利用率和成本；边缘设备通常更关注单路延迟、峰值内存、功耗和热设计。INT8、INT4、FP16 或混合精度是否更合适，取决于模型类型、目标硬件支持和精度容忍度，必须通过实测选择。
 
 ## 部署流程
 模型转换、模型量化压缩、模型打包封装 SDK。
@@ -90,11 +98,11 @@ AI 模型部署到硬件上的成本将极大限制用户的业务承受能力�
 
 **模型量化压缩**：终端场景中，一般会有内存和速度的考虑，因此会要求模型尽量小，同时保证较高的吞吐率。除了人工针对嵌入式设备设计合适的模型，如 MobileNet 系列，通过 NAS(Neural Architecture Search) 自动搜索小模型，以及通过蒸馏/剪枝的方式压缩模型外，一般还会使用量化来达到减小模型规模和加速的目的。
 
-量化的过程主要是将原始浮点 FP32 训练出来的模型压缩到定点 INT8(或者 INT4/INT1) 的模型，由于 INT8 只需要 8 比特来表示，因此相对于 32 比特的浮点，其模型规模理论上可以直接降为原来的 1/4，这种压缩率是非常直观的。
+量化把权重或激活映射到 INT8、INT4 等低位宽表示，以减少模型存储和内存带宽，并在目标硬件支持时加速计算。裸 FP32 权重转换为 INT8 后理论大小约为四分之一，但完整模型大小和速度还受图结构、量化参数及算子支持影响。
 另外，大部分终端设备都会有专用的定点计算单元，通过低比特指令实现的低精度算子，速度上会有很大的提升，当然，这部分还依赖协同体系结构和算法来获得更大的加速。
 + 量化训练（QAT, Quantization Aware Training）：即量化感知训练方案，在浮点训练的时候，就先对浮点模型结构进行干预，使得模型能够感知到量化带来的损失，减少量化损失精度的方案。通过对模型插入伪量化算子（这些算子用来模拟低精度运算的逻辑），通过梯度下降等优化方式在原始浮点模型上进行微调，从来调整参数得到精度符合预期的模型。量化训练基于原始浮点模型的训练逻辑进行训练，理论上更能保证收敛到原始模型的精度，但需要精细调参且生产周期较长；
 + 离线量化（PTQ）：即训练后量化方案，先训练浮点模型，然后使用校准图片计算量化参数，将浮点模型转为量化模型的量化方法。主要是通过少量校准数据集（从原始数据集中挑选 100-1000 张图，不需要训练样本的标签）获得网络的 activation 分布，通过统计手段或者优化浮点和定点输出的分布来获得量化参数，从而获取最终部署的模型。离线量化只需要基于少量校准数据，因此生产周期短且更加灵活，缺点是精度可能略逊于量化训练。
- 实际落地过程中，发现大部分模型通过离线量化就可以获得不错的模型精度（1% 以内的精度损失，当然这部分精度的提升也得益于优化策略的加持），剩下少部分模型可能需要通过量化训练来弥补精度损失，因此实际业务中会结合两者的优劣来应用。
+实际流程通常先尝试 PTQ；若验证集 KPI 不达标，再分析敏感层、调整校准或使用 QAT。精度损失没有通用的固定百分比。
 
 两大难点：一是如何平衡模型的吞吐率和精度，二是如何结合推理引擎充分挖掘芯片的能力。 比特数越低其吞吐率可能会越大，但其精度损失可能也会越大，因此，如何通过算法提升精度至关重要，这也是组内的主要工作之一。另外，压缩到低比特，某些情况下吞吐率未必会提升，还需要结合推理引擎优化一起对模型进行图优化，甚至有时候会反馈如何进行网络设计，因此会是一个算法与工程迭代的过程。
 
@@ -102,7 +110,7 @@ AI 模型部署到硬件上的成本将极大限制用户的业务承受能力�
 
 另外，考虑到模型很大程度是研究员的研究成果，对外涉及保密问题，因此会对模型进行加密，以保证其安全性。加密算法的选择需要根据实际业务需求来决定，诸如不同加密算法其加解密效率不一样，加解密是否有中心验证服务器，其核心都是为了保护研究成果。
 
-## GPU CPU NPU
+## CPU、GPU 与 NPU
 CPU 是通用处理器，控制能力强，适合复杂逻辑、分支判断、系统调度和少量串行计算，但大规模矩阵并行计算效率不如 GPU/NPU。
 
 GPU 是通用并行计算处理器，核心数量多，擅长大规模浮点矩阵运算、卷积、图形渲染和深度学习训练/推理。优点是灵活、生态成熟，支持算子多；缺点是功耗和成本较高。
@@ -114,7 +122,7 @@ NPU 是面向神经网络推理的专用加速器，通常对 INT8/FP16 卷积�
 产生这些区别的根本原因在于**芯片架构设计上的取舍（Trade-off）**，即硅片面积（晶体管）的分配策略和最初的设计目标不同：
 1. CPU：低延迟与通用性优先
 
-* **设计初衷：** 尽可能快地执行单一、复杂的线程，应对极其多变的通用任务。
+* **设计初衷：** 以较低延迟执行复杂控制流和通用任务。
 * **架构取舍：** 芯片上绝大部分面积被分配给了**控制单元（Control Unit）**和**大容量缓存（Cache）**。通过复杂的乱序执行、分支预测和数据预取来降低延迟。
 * **结果：** 真正用于算术运算的单元（ALU）占比较小。这解释了为什么它控制能力极强、能处理各种复杂逻辑，但在面对需要海量并发的矩阵计算时显得力不从心。
 
@@ -127,7 +135,7 @@ NPU 是面向神经网络推理的专用加速器，通常对 INT8/FP16 卷积�
 3. NPU：领域定制架构（DSA）与极致能效
 
 * **设计初衷：** 深度学习爆发后，为了解决 GPU 功耗过高和数据搬运瓶颈，专门为神经网络定制的加速架构。
-* **架构取舍：** 彻底放弃了通用计算的灵活性。NPU 直接在物理硬件级别设计了针对矩阵乘加运算（MAC）的专用电路（如脉动阵列 Systolic Array）。
+* **架构取舍：** 以部分通用性换取特定神经网络算子的能效，常提供矩阵乘加专用电路；具体架构并不都采用同一种脉动阵列。
 * **结果：** 因为算子是“硬连线”在物理电路上的，数据流动路径极短，所以它在处理常规卷积和矩阵运算时能效比极高、功耗极低。但代价是灵活性被锁死在硬件层面——一旦遇到芯片设计之初没有预料到的新算子或动态结构，硬件就无法直接处理，只能交回给 CPU（Fallback）或重新进行硬件迭代。
 
 
@@ -135,10 +143,121 @@ CPU 将空间用来做**复杂控制**，GPU 将空间用来堆砌**通用计算
 
 ---
 
-# 量化
-量化一般是指把模型的单精度参数（Float32）转化为低精度参数(Int8,Int4)，把推理过程中的浮点运算转化为定点运算。是目前工业界最有效的模型优化方法之一，
-量化是指定点与浮点等数据之间建立一种数据映射关系，使得以较小的精度损失代价获得了推理性能收益，可简单理解为用“低比特”数字表示FP32等数值，如FP32–>INT8可以实现4倍的参数压缩，在压缩内存的同时可以实现更快速的计算。
-*（float和int的本质区别在于小数点是否固定）*
+<span id="compression-workflow"></span>
+
+# 模型压缩与量化部署工作流
+
+结构化剪枝、训练后量化（PTQ）和量化感知训练（QAT）可以组成一条可重复的模型压缩管线：
+
+$$
+\text{FP32 基线}
+\xrightarrow{\text{结构化剪枝}}
+\text{通道裁剪模型}
+\xrightarrow{\text{微调}}
+\text{精度恢复}
+\xrightarrow{\text{PTQ；不足时 QAT}}
+\text{量化模型}
+\xrightarrow{\text{ONNX / 后端编译}}
+\text{端侧模型}
+$$
+
+推荐按以下顺序执行，每一步都保存模型、配置和评估结果，避免最后只知道“精度掉了”，却无法定位从哪一步开始偏离。
+
+1. **冻结 FP32 基线**：记录代码版本、权重、输入预处理、数据集版本和 KPI。
+2. **建立目标端基准**：确认算子支持、精度类型、静态/动态 shape、内存和延迟预算。
+3. **结构化剪枝**：按依赖关系删除通道或分组，重新统计参数量和 MACs。
+4. **微调恢复**：逐步提高剪枝率，每轮微调并在验证集检查 KPI。
+5. **优先尝试 PTQ**：使用有代表性的校准集生成量化参数，并分析逐层误差。
+6. **必要时进行 QAT**：在前向中模拟量化噪声，通过微调恢复精度。
+7. **导出和编译**：根据 runtime 选择 QDQ ONNX、浮点图 + Encodings，或厂商中间格式。
+8. **端侧验收**：比较训练框架、ONNX Runtime、后端模拟器和真机输出，并测量端到端性能。
+
+## 1. 结构化剪枝
+
+非结构化剪枝虽然能将权重稀疏化，但在没有专门稀疏算子支持的端侧芯片上，无法带来实质上的算力释放。因此我们采用结构化剪枝，直接在物理通道维度上进行裁剪，从而降低内存带宽和计算开销。
+
+**通道重要性评估**
+裁剪通道前需要评估它们对输出特征的贡献。主要实现了三种评估算法：
+
+* **量级剪枝（Magnitude Pruning）**：它基于“小权重贡献小”的假设，直接计算卷积核权重 $W \in \mathbb{R}^{C_{out} \times C_{in} \times K \times K}$ 的范数。对于第 $i$ 个输出通道的权重 $W_i$，其 $L_1$ 范数评分为 $S(i) = \sum |W_i|$，而 $L_2$ 范数评分则为其元素的平方和开根。若某个通道的权重范数极小，说明其输出特征图的幅值也极小，对后层特征的贡献微乎其微，因此可以安全剪裁。
+* **BN 缩放因子剪枝（BN Scale Pruning）**：Batch Normalization 层的公式为 $y = \gamma \cdot \hat{x} + \beta$。其中可学习的缩放因子 $\gamma$ 直接决定了该通道输出的幅值。在训练时，我们在损失函数中引入关于 $\gamma$ 的 $L_1$ 稀疏惩罚项（$\mathcal{L}_{\text{total}} = \mathcal{L} + \lambda \sum |\gamma|$），强迫不重要通道的 $\gamma$ 趋近于 0。剪枝时，直接将 $\gamma_i$ 接近 0 的通道整条裁掉。这种方法比单纯看权重大小更直接地反映了激活流的信息量。
+* **二阶梯度与泰勒展开剪枝（Group-based Hessian Pruning）**：有些通道虽然权重幅值偏小，但损失函数对它的微小变化却极度敏感。为了解决量级剪枝的这一盲区，我们评估裁剪掉参数 $\Delta \theta$ 后损失函数 $\mathcal{L}$ 的变化量。通过在收敛状态下进行二阶泰勒展开，由于此时一阶梯度趋近于 0，损失的变化量 $\Delta \mathcal{L}$ 可以近似为：
+  $$\Delta \mathcal{L} \approx \frac{1}{2} \Delta \theta^T H \Delta \theta$$
+  如果我们强行裁剪参数 $\theta_i$（即令其变化量为 $\Delta \theta_i = -\theta_i$），该参数的重要性评分可以近似表示为 $S(i) \approx \frac{1}{2} \theta_i^2 H_{ii}$。这里 $H_{ii}$ 是 Hessian 矩阵的对角线元素。该方法引入了表示曲率的二阶偏导数，即便权重很小，只要其所在方向的曲率极高，也会被强制保留。
+> 什么是 Hessian 矩阵与曲率？
+Hessian 矩阵是损失函数对模型权重的二阶偏导数组成的方阵。在机器学习中，它描述了损失函数在参数空间中的“曲率”（Curvature）。
+曲率小（平坦区域）：即使权重发生较大变化，损失函数的上升也非常缓慢，说明该参数对最终精度不敏感，可以被安全剪掉。
+曲率大（陡峭区域）：权重哪怕只有极其微小的改变，也会导致损失函数剧烈飙升，说明该参数非常关键，必须保留。
+泰勒展开剪枝正是利用了这一几何特性，保护了那些“体量虽小，但处于陡峭峡谷区”的核心参数。
+
+**依赖图感知**
+在复杂的泊车网络（如带有 ResNet 残差连接或 FPN 特征金字塔）中，前一个卷积的输出通道必须与后一个卷积的输入通道严格一致，残差相加分支的通道也必须对齐。
+为解决层与层之间的拓扑耦合，利用 `torch_pruning` 库构建了**依赖图（Dependency Graph）**。当决定裁剪某一层时，依赖图会将所有相互关联的层打包成一个“剪枝群组（Pruning Group）”，并将裁剪指令在群组内进行拓扑传递。这确保了通道裁剪在整个计算图中的同步性，避免了维度不匹配导致的运行时崩溃。
+> 什么是依赖图？
+神经网络本质上是一个有向无环图（DAG）。当你剪掉 Conv A 的 10 个输出通道时，紧跟在其后的 BatchNorm A、ReLU 以及 Conv B 的 10 个输入通道必须同时被剪掉。如果在残差网络中，Conv A 还要和 Conv C 进行相加（Add），那么 Conv C 的输出通道也必须同步裁剪。
+依赖图就是一种拓扑排序工具，它能自动追踪这些网络结构的绑定关系，将关联的层打包成一个“剪枝群组”，保证“一剪全剪”，避免张量形状不匹配引发内存崩溃。
+## 2. 低比特量化
+
+量化是将浮点数值（FP32）映射到窄带宽定点数值（INT8/INT4）的过程，能够大幅缩减内存占用并激活 DSP/NPU 的 SIMD 或张量硬件加速。
+
+采用均匀线性量化，其数学表达为：
+* **量化 (FP32 $\to$ INT8)**：
+  $$q = \text{clamp}\left( \text{round}\left( \frac{x}{S} \right) + Z, \, q_{\min}, \, q_{\max} \right)$$
+* **反量化 (INT8 $\to$ FP32)**：
+  $$\hat{x} = S \cdot (q - Z)$$
+> 反量化 (Dequantization, INT8 $\to$ FP32)：由于部分算子（如 Softmax 或最终的检测框解码）必须在浮点空间运行，我们需要将 INT8 整数重新乘以缩放因子 $S$，还原成 FP32 格式。注意：反量化回来的 FP32 并不等于原始的 FP32，它带有量化噪声。
+
+其中 $S$ (Scale) 是缩放因子，代表定点格点之间的最小物理间距；$Z$ (Zero-Point) 是零点，代表 FP32 中的 $0$ 在量化空间的整型映射值。根据硬件平台的特点，量化可以分为对称与非对称两类：
+* **对称量化（HTP 常用）**：强制令零点 $Z = 0$，量化边界关于 0 完全对称。缩放因子计算为 $S = \max(|x_{\min}|, |x_{\max}|) / q_{\max}$。由于在反量化时无需减去非零零点，它极大地节省了车端加速器的通用寄存器带宽。
+* **非对称量化（TDA4 常用）**：允许 $Z \neq 0$，量化区间自适应贴合浮点分布，公式为 $S = \frac{x_{\max} - x_{\min}}{q_{\max} - q_{\min}}$。这种方式量化误差更低，但端侧推理时需要多进行一步减去偏置的整型加法。
+
+确定缩放因子 $S$ 与零点 $Z$ 的本质，是在**截断误差**（超出量化范围的值被饱和截断导致的信号丢失）与**取整误差**（量化范围过大导致格点变粗、分辨率下降）之间取得平衡。代码底层调用了两种校准算法来寻找最佳截断点 $[x_{\min}, x_{\max}]$：
+* **Min-Max 校准**：直接收集校准批次中激活值的物理绝对极值作为边界。这种方式容易受到激活值中个别噪点（Outliers）的干扰，导致量化范围被异常拉大，拉低主体数据的数值分辨率。
+* **KL 散度校准（Entropy Calibration）**：将量化前后的特征分布 $P$ 和 $Q$ 视为概率密度函数，通过最小化两者的相对熵（Kullback-Leibler Divergence），寻找让整体分布最匹配的截断点 $T$：
+  $$D_{\text{KL}}(P \parallel Q) = \sum_{i} P(i) \log \frac{P(i)}{Q(i)}$$
+  这种方法在数学上保证了核心特征分布的一致性，能够有效消除极少数噪点对量化范围的干扰，是自动驾驶泊车网络的首选。
+
+## 3. 从静态校准到感知训练：PTQ 与 QAT 的工程实现
+
+在模型最终烧录进端侧定点芯片前，我们必须在服务器上提前模拟定点化带来的数值截断与溢出。这就是为什么即使在不需要反向梯度更新的 **训练后量化（PTQ）** 中，也需要插入量化模拟节点（QuantSim/QDQ 算子）的原因。若不插入这些节点，前向推理依旧是全浮点计算，无法评估校准参数和低比特精度的表现。
+
+### 训练后量化（PTQ）
+PTQ 是一种超快的模型压缩技术，无需基于梯度的微调，通常在几分钟内即可完成。其基本工作流如下：
+1. **加载 FP32 权重**：获取已收敛的全精度浮点模型。
+2. **算子合并（BatchNorm Folding）**：在数学上将紧密相邻的卷积层与 BN 层折叠融合，消除部署时的多余计算层。
+3. **注入模拟节点**：在特征图和权重的输入输出端包装伪量化算子，在模拟前向传播时引入低比特精度截断。
+4. **运行动态校准**：输入一小批真实样本（500 到 1000 张图像）跑前向传播（不计算梯度），收集激活特征图的统计范围，利用 Min-Max 或 KL 散度算法计算出每一层的最优缩放因子与零点（Encodings）。
+5. **精度评估与敏感度剖析**：在测试集上测试量化后的 KPI。泊车网络中的车位多边形角点回归和三维深度映射对低比特量化非常敏感，我们使用 `QuantAnalyzer` 进行逐层 MSE 损失分析。若发现关键层崩溃，则将其加入 `modules_to_ignore` 中维持 FP32/FP16 精度，其余大部分算子依然保持 INT8 运行，以此实现混合精度部署。
+6. **导出部署包**：剥离无用模拟节点，生成带有标准 QDQ 算子的部署 ONNX 计算图和 Encodings JSON 描述文件。
+
+### 量化感知训练（QAT）
+如果 PTQ 无法挽回精度损失，就需要使用 QAT。它在前向传播时引入模拟量化噪声，在反向传播时微调底层浮点权重，从而补偿精度损失。QAT 能够成功运作，依赖两个数学原理：
+* **BatchNorm 折叠原理**：在推理时，BN 层会被合并到卷积层权重 $W$ 和偏置 $b$ 中：
+  $$W_{\text{fold}} = W \cdot \frac{\gamma}{\sqrt{\sigma^2 + \epsilon}}, \quad b_{\text{fold}} = (b - \mu) \cdot \frac{\gamma}{\sqrt{\sigma^2 + \epsilon}} + \beta$$
+  如果在微调时先量化再融合，BN 参数的微小抖动会在部署融合时被放大，导致量化失配（Quantization Mismatch）。为此，我们在初始化时先进行数学折叠，再对融合后的 $W_{\text{fold}}$ 进行量化节点模拟，确保训练与车端运行时计算逻辑高度等价。
+* **直通估计器（STE）**：取整操作 $\text{round}(\cdot)$ 的导数在非整数点处为 0，会导致反向传播时梯度流断流。STE 方案强制将量化节点的偏导数设为 1（等价于恒等映射），使误差梯度顺利流回前层的浮点权重：
+  $$\frac{\partial \, \text{round}(x)}{\partial x} \approx 1 \implies \frac{\partial \mathcal{L}}{\partial x} \approx \frac{\partial \mathcal{L}}{\partial \hat{x}}$$
+  这使得网络能够不断微调底层的 FP32 权重，使其收敛到能够天然容忍 INT8 误差的最优参数空间。
+
+在工程实现中，`QATHook` 串联起了完整的闭环：在训练启动前，Hook 自动将 `Conv -> BN` 以及 `ConvTranspose -> BN` 结构进行数学折叠。接着，使用 `QuantizationSimModel` 在每个支持量化的算子输入输出端包装一层 `QcQuantizeWrapper` 伪量化节点。随后，使用小批数据运行前向传播，利用 KL 散度初始化所有节点的 Scale 与 Offset。
+在微调训练中，数据流经每个节点时执行伪量化 $\hat{x} = \text{Dequantize}(\text{Quantize}(x))$，主动注入量化噪声。反向传播时激活 STE 机制，更新底层的 FP32 参数。训练结束后，剥离量化模拟节点，导出纠偏后的纯浮点权重文件（`_without_quant_nodes.pth`），以及内嵌 QDQ 节点的 ONNX 部署计算图与 Encodings JSON 文件。
+
+### 自动化流水线的产物
+
+每次运行至少保存：
+
+* FP32、剪枝后、微调后和 QAT 后权重；
+* 剪枝配置、通道依赖与模型结构描述；
+* 校准集清单、量化 scheme、位宽、scale/zero-point 或 encodings；
+* ONNX/后端模型、编译日志、fallback 算子清单；
+* 每个阶段的 KPI、延迟、内存与功耗报告。
+
+---
+
+<span id="quantization"></span>
+
+# 量化原理与案例
+量化使用较低位宽表示权重和激活。若权重都从 FP32 存为 INT8，裸权重体积理论上可降到约四分之一；实际模型文件还包含图结构、量化参数和可能保留的高精度张量。运行速度取决于硬件是否提供相应低精度内核，以及量化/反量化和数据搬运开销。
 
 浮点数格式 (float32)：$$V = (-1)^s×M×2^E$$
 符号位s|阶码E|尾数M|
@@ -197,7 +316,7 @@ MSE（Mean Squared Error）校准，是通过最小化“原始 FP32 张量”�
      我们的目标是寻找一个 T，使得 X 与 $\hat{X}$ 之间的均方误差最小：
      $argmin_{T} MSE(T) = argmin_{T} (1)/(N) ∑ᵢ₌₁^{N} \left( Xᵢ - \hat{X}_i(T) \right)²$
 
-  MSE 的均方误差公式在数学上非常优美地平衡了两种量化误差的博弈：
+  MSE 目标同时反映两类误差：
   Total Error = Clipping Error (截断误差) + Rounding Error (舍入误差)
 ```
     1           ▲ 概率密度
@@ -214,7 +333,7 @@ MSE（Mean Squared Error）校准，是通过最小化“原始 FP32 张量”�
    12                               ▼
    13                         Clipping Error (缩尺太窄，大特征截断失真)
 ```
-MSE 校准算法通过在校准数据集（Calibration Dataset）上，利用黄金分割法或网格搜索法（Grid Search）在 T ∈ [0.5 × Tₘₐₓ, Tₘₐₓ] 之间不断迭代计算上述公式，精确找到那个让“截断误差 + 舍入误差”总和最小的黄金平衡点Tₒₚₜ
+MSE 校准可通过网格搜索等方式比较候选阈值。搜索区间和算法由实现决定，不固定为 $[0.5T_{max},T_{max}]$。
 
 ### 绝对最大值校准（MinMax Calibration）
    * 原理：最简单直接的校准方法。不裁剪任何数据，直接将校准数据集中出现过的绝对最大值作为截断阈值：
@@ -228,7 +347,7 @@ MSE 校准算法通过在校准数据集（Calibration Dataset）上，利用黄
    * 原理：它将 FP32 特征值和 INT8 特征值看作两个概率分布（Probability Distributions） P 和 Q。它通过计算 KL 散度（相对熵），来衡量这两个概率分布之间的相似度。通过搜索一个截断阈值 T，使得截断前后的信息失真（相对熵损失）达到最小：
     $argmin_{T} D_{KL}(P || Q(T)) = ∑ᵢ Pᵢ log\left((Pᵢ)/(Qᵢ(T))\right)$
    * 优点：从信息论角度出发，它不仅平衡了误差，而且最大程度地保留了特征图的原始概率特征和信息分布。
-   * 缺点：
+   * 缺点：结果依赖直方图分桶、候选阈值和实现细节，不保证任务 KPI 最优。
 ### 百分比校准（Percentile Calibration）
    * 原理：非常简单粗暴但异常有效的工程方案。通过直接统计校准数据集中的特征值分布，强行将排在最远端的固定百分比（如 99.9% 或 99.99%）的数据保留，其余 0.01% 的极大值直接切掉：
     $T_{clip} = Percentile(X, 99.99\%)$
@@ -238,7 +357,7 @@ MSE 校准算法通过在校准数据集（Calibration Dataset）上，利用黄
 
 ## QAT量化优化案例
 
-  在将 FP32 模型量化为 INT8 过程中，我们面临着由于 3D 几何投影的特殊性带来的激活值范围爆炸（Scale Mismatch）和溢出（Overflow）问题。
+以下是特定泊车 BEV 项目的排查记录。张量形状、14 个深度格、95%/5% 算力占比和精度变化都属于当时配置，复用前应重新测量。
 
 ### 空间特征累加导致的定点数溢出 (Integer Overflow)
    * 问题描述：在 VoxelPooling 的矩阵乘法投影阶段，由于我们使用的是 Uniform Depth（均匀深度），同一个 2D 像素的特征会被投射到射线穿过的 14 个深度格子里。在矩阵乘法进行特征累加（Pooling）时：$F{BEV} = Mₛₚₐᵣₛₑ × F{2D}$
@@ -252,7 +371,7 @@ MSE 校准算法通过在校准数据集（Calibration Dataset）上，利用黄
 ### YUV 输入端定点化精度丢失
    * 问题描述：我们的 Backbone 输入是 YUV 格式数据（亮度 x_y 为 1 通道，色度 x_uv 为 2 通道）。由于 YUV 数据中亮度和色度的动态数值范围（Dynamic Range）差异极大，直接使用统一的 Scale
      进行量化会导致色度特征丢失。
-   * 我们的对策：在 QAT 阶段，我们为 x_y 和 x_uv 分别注册了独立的量化观察器（Quantization Observer），使 Backbone 在输入端拥有独立的量化阶（Scale）和零点偏移（Zero-point），完美保全了 YUV底层色彩和纹理特征的完整度。
+   * 对策：为 `x_y` 和 `x_uv` 分别注册量化观察器，使用独立的 scale 和 zero-point，避免两个分布共享同一组量化参数。
     在训练时，模型使用 HistogramObserver（直方图观察器）分别收集 x_y 和 x_uv 在数万帧数据中的激活值分布。对于噪声多、动态范围广的色度通道，计算出专属的 $Scale_{uv}$ 和 $Zero_Point_{uv}$。
    * 优化收益：使色度通道的微弱特征（如暗色泊车位线、暗光地标特征）在经过 INT8 定点化后依然能够保留其完整的对比度信息，彻底消除了在暗光或地标边缘区域的漏检和抖动。
 
@@ -286,8 +405,7 @@ from common import utils
 import model.net as net
 
 # 加载model
-json_path = 'experiments\params.json'
-params = utils.Params(json_path)
+json_path = r'experiments\params.json'
 params = utils.Params(json_path)
 model = net.fetch_net(params)
 state_dict = torch.load('509_best.pth', map_location=torch.device('cpu'))
@@ -315,12 +433,12 @@ def remove_pruning_masks(model):
         if isinstance(module, torch.nn.Conv2d) or isinstance(module, torch.nn.Linear):
             try:
                 prune.remove(module, 'weight')  #移除指定参数上的剪枝掩码
-            except:
+            except ValueError:
                 pass
     return model
 
 
-pruning_amount = 0.99    #剪枝率
+pruning_amount = 0.30    # 示例：全局裁掉 30% 权重；实际比例由验证集决定
 model = global_pruning(model, pruning_amount)   #全局剪枝
 
 # 移除剪枝掩码
@@ -337,15 +455,17 @@ torch.onnx.export(model,dummy_input, onnx_path, verbose=False, export_params=Tru
 # 简化 ONNX 模型
 onnx_model = onnx.load(onnx_path)
 simplified_model, check = simplify(onnx_model)
-
-
+if not check:
+    raise RuntimeError("ONNX simplification check failed")
 onnx.save(simplified_model, '509_best_pruned.onnx')
 print("Done")
 ```
 
 
 
-# ONNX
+<span id="onnx"></span>
+
+# ONNX 转换与优化
 [模型部署简介 --- mmdeploy 1.3.1 文档](https://mmdeploy.readthedocs.io/zh-cn/latest/tutorial/01_introduction_to_model_deployment.html)
 
 神经网络实际上只是描述了数据计算的过程，其结构可以用计算图表示。比如 `a+b` 可以用下面的计算图来表示：
@@ -375,27 +495,25 @@ PyTorch 对 ONNX 的算子支持:[官方算子文档](https://github.com/onnx/on
 ## ONNX 算子优化案例
 ### Slice替换Gather, 替换索引取值
    在多相机循环投影时，模型最初直接通过相机索引从 batch 特征图中拿取单视角特征：x[cam_id]
-  + 编译结果：在导出 ONNX 时，这行代码会被编译为 Gather 或 GatherND 算子。由于 NPU 硬件无法预测非连续地址的跳转，Gather 算子在几乎所有车载 DPU/NPU 上都会强制降级（Fallback）到 CPU运行
+  + 编译结果：标量索引通常会导出为 Gather 类算子。该算子在特定目标 NPU 上发生 CPU fallback；是否支持以及性能如何取决于编译器版本和索引形式。
   > Gather：x[cam_id] （使用单个整型索引提取第 cam_id 个相机的特征，返回的张量少了一个维度）。代表离散、非连续、不确定寻址 (Random/Indirect Memory Access)。对于以高并行乘加（MAC）为核心、但片外 SRAM / DRAM 带宽受限的车载 NPU 来说，这种不确定的跳转会导致频繁的 Cache Miss（缓存不命中） 和总线等待，从而造成严重的计算管线停顿
-  + 优化原理：x[cam_id:cam_id+1] 语法在导出 ONNX 时会被编译为 Slice 算子。Slice 对应的是硬件极其友好的连续内存、按固定步长（Stride）的寻址读取。
-   推理时间瞬间缩短了数毫秒，且保证了 100% 的 NPU 硬件全算子加速。
+  + 优化原理：`x[cam_id:cam_id+1]` 可导出为 Slice，并保留该维度。在当时目标后端中，Slice 获得了更好的算子支持和延迟；切换平台后必须重新编译与 profiling。
   > Slice：x[cam_id : cam_id + 1] （使用区间切片提取，返回的张量保留原有维度，形状为 (1, fH*fW, C)）。代表连续内存访问 (Sequential Memory Access)。它在物理内存中只需要提供一个 Start_Address（起始地址）和 Length（步长长度），然后通过 DMA（直接内存访问）将一整块连续的数据一次性拷贝到 NPU的片上高速缓存（SRAM）中。
 
 ### MatMul换ScatterND
 
-  ONNX 标准规范虽然支持稀疏格式，但是几乎所有量产芯片标配的硬件编译器都不支持编译 SparseTensor 以及 torch.sparse.mm 算子。
-   1. MatMul（矩阵乘法算子）：将映射索引转换为稠密/稀疏矩阵，与特征做矩阵相乘。对于支持大尺寸 2D/3D 矩阵相乘（GEMM 硬件加速器）的芯片，这是执行投影的最快途径。
+  ONNX 能表达部分稀疏数据和算子，但目标编译器的支持范围各不相同。应同时保留可替换实现并根据编译报告选择：
+   1. MatMul（矩阵乘法算子）：将映射关系编码为矩阵并与特征相乘。适合支持相应矩阵尺寸且内存开销可接受的后端。
    2. ScatterND（散布写入算子）：根据索引，将一个特征张量中的数据直接“分发并写入”到目标全景 BEV 零张量的对应物理槽位中
       * 由于硬件编译器的局限性：某些老一代车载 NPU 芯片，其 GEMM 乘法加速器内存极度受限（无法一次性载入巨大的静态映射矩阵），但是它的片上 DMA 控制器却支持高速的数据多路写入（即 Scatter 硬件支持）。
-        * 若芯片支持大矩阵：直接走 MatMul 投影，效率最高。
-        * 若芯片矩阵乘法器受阻，但 DMA 写入器强：将模型编译为 ONNX 标准的 ScatterND 运行分支，为多款不同的量产主流芯片提供了完备的兼容保障方案。
+        * 若后端能高效执行该尺寸的 MatMul，可优先测量矩阵方案。
+        * 若 ScatterND 支持更好，可测量索引散布方案。最终选择依据端到端延迟、内存、精度和 fallback 情况。
 
 
 
 ## 以超分辨率模型为例
 参考：[模型部署那些事](https://www.zhihu.com/column/c_1497987564452114432)
-以超分辨率模型为例，实现pytorch模型转onnx
-其中， PyTorch 的 interpolate 插值算子可以在运行阶段选择放大倍数，但该算子不兼容，需要**自定义算子**:
+以下是早期 symbolic 导出接口的超分辨率示例。现代 PyTorch 导出器和 ONNX Resize 支持会随版本变化；只有目标 opset 或后端不能表达所需语义时才考虑自定义 symbolic，并应先查阅当前 [`torch.onnx`](https://docs.pytorch.org/docs/stable/onnx.html) 文档。
 ```py
 class NewInterpolate(torch.autograd.Function):
     # 自定义的插值算子，继承自torch.autograd.Function
@@ -464,7 +582,10 @@ def init_torch_model():
 model = init_torch_model()
 factor = torch.tensor([1, 1, 3, 3], dtype=torch.float)
 
-input_img = cv2.imread('face.png').astype(np.float32)
+input_img = cv2.imread('face.png')
+if input_img is None:
+    raise FileNotFoundError('face.png')
+input_img = input_img.astype(np.float32)
 
 # HWC to NCHW
 input_img = np.transpose(input_img, [2, 0, 1])
@@ -503,7 +624,7 @@ with torch.no_grad():
 
 
 # 验证onnx, 此外可以使用Netron可视化检查网络结构
-onnx_model = onnx.load("srcnn.onnx")
+onnx_model = onnx.load("srcnn2.onnx")
 try:
     onnx.checker.check_model(onnx_model)
 except Exception:
@@ -525,29 +646,22 @@ cv2.imwrite("face_torch2_run.png", ort_output)  # 生成上采样图片，运行
 ```
 <img alt="picture 0" src="https://raw.githubusercontent.com/Arrowes/Blog/main/images/DLdeploynetron.png" width="80%"/>  
 
-## torch.onnx.export模型转换接口
-Pytorch 模型导出使用自带的接口：`torch.onnx.export`
-`torch.onnx.export(model,x,onnx_file,opset_version=11)`
-[torch.onnx ‒ PyTorch 1.11.0 documentation](https://link.zhihu.com/?target=https%3A//pytorch.org/docs/stable/onnx.html%23functions)
+## `torch.onnx.export` 转换接口
+
+PyTorch 可通过 `torch.onnx.export(model, args, path, ...)` 导出 ONNX。接口和默认导出器会随 PyTorch 版本变化，使用时应查阅当前 [`torch.onnx` 文档](https://docs.pytorch.org/docs/stable/onnx.html)。重点确认输入分支、dtype、shape、输入输出名称、opset 以及目标 runtime 的动态维支持。
 [TorchScript](https://link.zhihu.com/?target=https%3A//pytorch.org/docs/stable/jit.html) 是一种序列化和优化 PyTorch 模型的格式，在优化过程中，一个`torch.nn.Module`模型会被转换成 TorchScript 的 `torch.jit.ScriptModule`模型。
-而要把普通 PyTorch 模型转一个 TorchScript 模型，有跟踪（trace）和记录（script）两种导出计算图的方法：
-+ trace: 以上一节为例，跟踪法只能通过实际运行一遍模型的方法导出模型的静态图，即无法识别出模型中的控制流（如循环）,对于循环中不同的n, ONNX 模型的结构是不一样的
-+ script: 记录法则能通过解析模型来正确记录所有的控制流,模型不需要实际运行，用 Loop 节点来表示循环
+Tracing 只记录示例输入实际经过的路径，因此数据相关控制流可能被固化。遇到循环、条件分支或不支持算子时，应先检查当前导出器的图捕获能力，再考虑改写模型或自定义算子。
 
 ```py
-def export(model, args, f, export_params=True, verbose=False, training=TrainingMode.EVAL, 
-           input_names=None, output_names=None, aten=False, export_raw_ir=False, 
-           operator_export_type=None, opset_version=None, _retain_param_name=True, 
-           do_constant_folding=True, example_outputs=None, strip_doc_string=True, 
-           dynamic_axes=None, keep_initializers_as_inputs=None, custom_opsets=None, 
-           enable_onnx_checker=True, use_external_data_format=False): 
 
 # model: 模型， args：输入， f：导出文件名，
 # export_params：是否存储模型权重， ONNX 是用同一个文件表示记录模型的结构和权重的,默认True
 # input_names, output_names：设置输入和输出张量的名称。如果不设置的话，会自动分配一些简单的名字（如数字），最好设置，保证 ONNX 和推理引擎中使用同一套名称。
-# opset_version：转换时参考哪个 ONNX 算子集版本，默认为 9。
+# opset_version：选择目标 runtime 支持且能表达所需算子的版本，不依赖旧版默认值。
 # dynamic_axes：指定输入输出张量的哪些维度是动态的。为了效率，ONNX 默认所有参与运算的张量都是静态的（张量的形状不发生改变），必要时需要显式地指明输入输出张量的哪几个维度的大小是可变的。
 ```
+
+导出后至少执行 `onnx.checker`，再使用 ONNX Runtime 和固定测试样本与 PyTorch 输出做数值对齐。只有导出、校验、数值对齐和目标后端编译全部通过，才能认为转换链路成立。
 
 ## 自定义算子
 -   PyTorch 算子
@@ -565,7 +679,9 @@ def export(model, args, f, export_params=True, verbose=False, training=TrainingM
 [模型部署入门教程（四）：在 PyTorch 中支持更多 ONNX 算子](https://zhuanlan.zhihu.com/p/513387413)
 
 
-# 模型部署的软件设计（以商汤的MMdeploy部署工具箱为例）
+<span id="deployment-sdk"></span>
+
+# 部署框架与 SDK（以 MMDeploy 为例）
 ## 模型转换器设计
 [千行百业智能化落地，MMDeploy 助你一"部"到位 - 知乎 (zhihu.com)](https://zhuanlan.zhihu.com/p/450342651)
 <img alt="图 3" src="https://pic1.zhimg.com/80/v2-a076d9317d2167d9d6d8898e0db0fd7c_1440w.webp?source=1940ef5c" width="80%"/>  
@@ -597,7 +713,30 @@ SDK 把模型推理统一抽象为计算流水线，包括前处理、网络推�
     + 模型组件（Model）：支持 SDK Model 不同的文件格式
     + 任务组件（Task）：模型推理过程中，流水线的最小执行单元。它包括:
         + 预处理（preprocess）：与 OpenMMLab Transform 算子对齐，比如 Resize、Crop、Pad、Normalize等等。每种算子均提供了 cpu、cuda 两种实现方式。
-        + 网络推理引擎（net）：对推理引擎的封装。目前，SDK 可以接入5种推理引擎：PPL.NN, TensorRT, ONNX Runtime, NCNN 和 OpenVINO
+        + 网络推理引擎（net）：对 TensorRT、ONNX Runtime、NCNN、OpenVINO 等后端的封装；当前支持列表以所用 MMDeploy 版本文档为准。
         + 后处理（postprocess）：对应与 OpenMMLab 各算法库的后处理功能。
 + 核心层
 核心层是 SDK 的基石，定义了 SDK 最基础、最核心的数据结构。
+
+<span id="deployment-checklist"></span>
+
+# 部署验收清单
+
+| 阶段 | 必查项 |
+| --- | --- |
+| 基线 | 代码、权重、数据版本、预处理、随机种子与 FP32 KPI 可复现 |
+| 剪枝 | 参数量/MACs 确实下降；残差与拼接维度正确；微调后 KPI 达标 |
+| 量化 | 校准集覆盖关键场景；逐层误差、饱和率和敏感层记录完整 |
+| ONNX | checker 通过；输入输出名称与 shape 正确；PyTorch/ORT 数值对齐 |
+| 编译 | 无意外 CPU fallback；算子融合、精度分区和编译警告已审查 |
+| 真机 | 预热后测 P50/P95 延迟、峰值内存、功耗和长时间稳定性 |
+| SDK | 前后处理、颜色空间、layout、归一化、NMS 与训练配置一致 |
+| 发布 | 模型、encodings、配置、runtime 版本和回退包一起归档 |
+
+## 复习自测
+
+1. 为什么 mask pruning 不一定减少真机延迟，而结构化剪枝更容易产生实际收益？
+2. PTQ 的校准集为什么不需要标签，却仍必须覆盖真实输入分布？
+3. Scale、zero-point、截断误差和取整误差之间是什么关系？
+4. 什么情况下应从 PTQ 升级到 QAT，什么情况下应使用混合精度？
+5. ONNX 导出通过后，为什么仍要做 ORT 对齐、后端编译和真机验证？

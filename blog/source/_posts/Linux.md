@@ -458,7 +458,8 @@ docker ps       # 查看运行中的容器列表
 docker ps -a    # 查看所有容器（包括已停止的）  
 docker start container_name_or_id     # 启动容器  
 docker stop container_name_or_id      # 停止容器  
-docker restart container_name_or_id   # 重启容器  
+docker restart container_name_or_id   # 重启容器 
+systemctl restart docker    # 重启 Docker 服务  
 docker logs container_name_or_id      # 查看容器日志  
 docker exec -it container_name_or_id /bin/bash    # 进入容器交互式命令行  
 docker rm container_name_or_id    # 删除容器
