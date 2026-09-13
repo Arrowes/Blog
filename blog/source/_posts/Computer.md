@@ -97,9 +97,336 @@ vscode安装插件：Remote - SSH
 ssh XXX@10.99.1.55
 密码：XXX204
 
+# Redmi K30 Ultra 闲置手机服务器
+
+> 记录时间：2026-09-14。设备为 Redmi K30 至尊纪念版（`cezanne`），Android 12，局域网地址暂为 `192.168.15.153`。地址可能随 DHCP 变化，长期使用应在路由器中为手机设置静态租约。
+
+## 当前方案
+
+保留原厂 Android，通过 Termux 运行服务，不需要 Root，也不需要安装完整 Ubuntu：
+
+```text
+Redmi K30 Ultra
+├── OpenSSH             8022  SSH 远程管理
+├── ttyd + tmux         7681  浏览器终端
+├── copyparty           3923  全部内部存储文件管理
+├── aria2 RPC           6800  下载后端
+│   └── AriaNg          6880  下载管理网页
+└── Termux:API                电池、通知、相机、传感器等 Android API
+```
+
+| 服务 | 局域网入口 | 用途 |
+|---|---|---|
+| SSH | `ssh -p 8022 u0_a363@192.168.15.153` | 主要远程管理入口，推荐使用密钥登录 |
+| ttyd | `http://192.168.15.153:7681` | 在浏览器中打开 Termux Shell |
+| copyparty | `http://192.168.15.153:3923` | 管理 `/storage/emulated/0`，包括相册、下载、音乐等全部共享内部存储 |
+| AriaNg | `http://192.168.15.153:6880` | 添加和管理 HTTP、BT、磁力链接任务 |
+| aria2 JSON-RPC | `http://192.168.15.153:6800/jsonrpc` | 供 AriaNg 或其他程序控制 aria2，不直接在浏览器中使用 |
+
+当前已验证 SSH、copyparty、AriaNg、ttyd 和 aria2 RPC 均能访问。ttyd 未登录时返回 HTTP `401` 是正常的鉴权行为。
+
+这套方案适合低功耗常驻服务，也能利用手机自带的电池、屏幕、摄像头、GPS 和传感器；但 Android/Termux 不是完整 Linux，不能直接提供 Docker、内核模块和常规 `systemd`。无 Root 的 Termux 也不能绑定 DNS 的 53 端口。
+
+## 准备 Android 应用
+
+从同一来源安装以下应用，推荐统一使用 [F-Droid](https://f-droid.org/packages/com.termux/) 版本，避免签名不一致：
+
+- Termux：Linux 命令行环境。
+- Termux:Boot：重启后执行 `~/.termux/boot/` 中的脚本。
+- [Termux:API](https://f-droid.org/packages/com.termux.api/)：把 Android 功能暴露给 Termux 命令。
+
+安装 Termux:Boot 后至少手动打开一次，并在 MIUI 中允许自启动、后台运行，将省电策略设为“不限制”。先给 Termux 授予内部存储权限：
+
+```bash
+termux-setup-storage
+```
+
+## 安装基础组件
+
+```bash
+pkg update && pkg upgrade -y
+pkg install openssh python aria2 ttyd tmux unzip curl btop termux-api -y
+
+mkdir -p ~/server/logs ~/server/ariang
+mkdir -p ~/.aria2 ~/.config/copyparty ~/.termux/boot
+mkdir -p ~/storage/shared/Download/aria2
+touch ~/.aria2/aria2.session
+```
+
+### SSH
+
+```bash
+sshd
+whoami
+```
+
+Termux 的 SSH 默认端口为 `8022`。密码登录可用 `passwd` 设置密码，但长期使用更推荐把电脑的 SSH 公钥写入：
+
+```bash
+mkdir -p ~/.ssh
+chmod 700 ~/.ssh
+nano ~/.ssh/authorized_keys
+chmod 600 ~/.ssh/authorized_keys
+```
+
+这里只能放公钥；私钥必须留在电脑上，不能上传到手机或博客。
+
+### copyparty 文件服务器
+
+当前使用 copyparty 的单文件 SFX 版本：
+
+```bash
+curl -fL https://github.com/9001/copyparty/releases/latest/download/copyparty-sfx.py \
+  -o ~/server/copyparty-sfx.py
+python ~/server/copyparty-sfx.py --version
+```
+
+创建 `~/.config/copyparty/copyparty.conf`：
+
+```ini
+[global]
+  p: 3923
+  usernames
+
+[accounts]
+  arrow: CHANGE_ME_FILE_PASSWORD
+
+[/]
+  /storage/emulated/0
+  accs:
+    A: arrow
+```
+
+根卷 `/` 映射到 `/storage/emulated/0`，所以登录后能管理全部共享内部存储。`A` 是完整管理权限，包含读取、上传、移动和删除；重要照片仍应另做备份。
+
+手动测试：
+
+```bash
+python ~/server/copyparty-sfx.py -c ~/.config/copyparty/copyparty.conf
+```
+
+浏览器打开 `http://192.168.15.153:3923`，使用账户 `arrow` 和配置文件中的密码登录。
+
+### aria2 下载器
+
+创建 `~/.aria2/aria2.conf`：
+
+```ini
+dir=/storage/emulated/0/Download/aria2
+continue=true
+max-concurrent-downloads=3
+split=8
+max-connection-per-server=8
+min-split-size=5M
+file-allocation=none
+
+enable-rpc=true
+rpc-listen-all=true
+rpc-listen-port=6800
+rpc-allow-origin-all=true
+rpc-secret=CHANGE_ME_RPC_SECRET
+
+input-file=/data/data/com.termux/files/home/.aria2/aria2.session
+save-session=/data/data/com.termux/files/home/.aria2/aria2.session
+save-session-interval=60
+```
+
+`rpc-secret` 应使用随机长密码，不能省略。手动启动并检查：
+
+```bash
+aria2c --conf-path="$HOME/.aria2/aria2.conf" -D
+pgrep -a aria2c
+```
+
+BT 没速度不一定是配置故障，常见原因是资源无做种者、DHT 尚未找到节点或运营商网络限制。可使用 Ubuntu 官网提供的合法 `.torrent` 验证 BT 链路；本机已经通过 Ubuntu 官方镜像测试，能够取得元数据、连接做种者并下载。
+
+当前配置还加入了 [ngosang/trackerslist](https://github.com/ngosang/trackerslist) 的公共 Tracker。需要刷新时：
+
+```bash
+trackers=$(curl -fsSL https://raw.githubusercontent.com/ngosang/trackerslist/master/trackers_best.txt \
+  | sed '/^$/d' | paste -sd, -)
+sed -i '/^bt-tracker=/d' ~/.aria2/aria2.conf
+printf 'bt-tracker=%s\n' "$trackers" >> ~/.aria2/aria2.conf
+pkill aria2c
+aria2c --conf-path="$HOME/.aria2/aria2.conf" -D
+```
+
+公共 Tracker 只能帮助发现 Peer，不能让本来无人做种的资源凭空产生速度。
+
+### AriaNg 下载管理网页
+
+从 [AriaNg Releases](https://github.com/mayswind/AriaNg/releases) 下载 `AllInOne.zip`，解压到固定目录：
+
+```bash
+unzip -o ~/storage/shared/Download/AriaNg-*-AllInOne.zip -d ~/server/ariang
+python -m http.server 6880 --bind 0.0.0.0 --directory ~/server/ariang
+```
+
+浏览器打开 `http://192.168.15.153:6880`，在“AriaNg 设置 → RPC”中填写：
+
+```text
+协议：HTTP
+地址：192.168.15.153
+端口：6800
+接口：jsonrpc
+RPC Secret：与 aria2.conf 中一致
+```
+
+显示“已连接”后，下载链路为：
+
+```text
+浏览器 AriaNg → aria2 RPC → 手机后台下载 → /storage/emulated/0/Download/aria2
+```
+
+### ttyd 网页终端
+
+```bash
+ttyd -W -p 7681 -c "arrow:CHANGE_ME_WEB_PASSWORD" \
+  tmux new-session -A -s web
+```
+
+`-W` 允许在网页终端中输入命令。网页终端具有接近 SSH 的高权限，只能在可信局域网或 Tailscale 中使用，不能直接做公网端口映射。
+
+### Termux:API
+
+Termux:API 由 Android 插件和 Termux 命令包两部分组成，两者都必须安装。若通过 Termux 打开 APK 时出现 `TermuxContentProvider requires allow-external-apps...`，编辑 `~/.termux/termux.properties`：
+
+```properties
+allow-external-apps = true
+```
+
+然后执行：
+
+```bash
+termux-reload-settings
+termux-api-start
+termux-battery-status
+```
+
+确认安装结束且不需要外部应用调用 Termux 后，可以把 `allow-external-apps` 改回 `false`，缩小攻击面。调用相机、定位、通知或短信时，还要在 Android 设置中授予对应权限。
+
+常用玩法：
+
+```bash
+termux-battery-status
+termux-notification --title "服务器" --content "服务运行正常"
+termux-tts-speak "下载已经完成"
+termux-camera-photo -c 0 ~/storage/shared/DCIM/server-test.jpg
+termux-sensor -s accelerometer -n 5
+termux-torch on
+termux-torch off
+```
+
+它适合实现电池温度报警、下载完成通知、定时拍照、GPS/传感器记录和语音播报。无 Root 时只能监测电池并报警，不能真正切断充电。
+
+## 开机自启
+
+创建 `~/.termux/boot/start-server`：
+
+```bash
+#!/data/data/com.termux/files/usr/bin/bash
+termux-wake-lock >/dev/null 2>&1 || true
+termux-api-start >/dev/null 2>&1 || true
+sshd
+sleep 2
+
+mkdir -p "$HOME/server/logs" "$HOME/storage/shared/Download/aria2"
+touch "$HOME/.aria2/aria2.session"
+
+if ! pgrep -x aria2c >/dev/null; then
+  aria2c --conf-path="$HOME/.aria2/aria2.conf" -D
+fi
+
+if ! pgrep -f '[c]opyparty-sfx.py' >/dev/null; then
+  nohup python "$HOME/server/copyparty-sfx.py" \
+    -c "$HOME/.config/copyparty/copyparty.conf" \
+    </dev/null >"$HOME/server/logs/copyparty.log" 2>&1 &
+fi
+
+if ! pgrep -f '[t]tyd.*7681' >/dev/null; then
+  nohup ttyd -W -p 7681 -c "arrow:CHANGE_ME_WEB_PASSWORD" \
+    tmux new-session -A -s web \
+    </dev/null >"$HOME/server/logs/ttyd.log" 2>&1 &
+fi
+
+if ! pgrep -f '[h]ttp.server 6880' >/dev/null; then
+  nohup python -m http.server 6880 --bind 0.0.0.0 \
+    --directory "$HOME/server/ariang" \
+    </dev/null >"$HOME/server/logs/ariang.log" 2>&1 &
+fi
+```
+
+启用并立即测试：
+
+```bash
+chmod 700 ~/.termux/boot/start-server
+~/.termux/boot/start-server
+
+pgrep -a aria2c
+pgrep -af copyparty
+pgrep -af ttyd
+pgrep -af 'http.server 6880'
+termux-battery-status
+```
+
+重启手机后通常需要先解锁一次屏幕，Android 才会允许访问加密存储。
+
+## 运维与安全
+
+```bash
+# 查看资源
+btop
+df -h /storage/emulated/0
+
+# 查看日志
+tail -f ~/server/logs/copyparty.log
+tail -f ~/server/logs/ttyd.log
+tail -f ~/server/logs/ariang.log
+
+# 检查监听端口
+ss -lntup
+```
+
+安全注意事项：
+
+1. 不要把 `3923`、`6800`、`6880`、`7681`、`8022` 直接映射到公网，远程访问优先使用 Tailscale。
+2. copyparty 账户密码、ttyd 密码和 aria2 RPC Secret 必须各自使用随机长密码，不能写入公开博客。
+3. `rpc-listen-all=true` 和 `rpc-allow-origin-all=true` 方便局域网管理，但必须配合 RPC Secret。
+4. copyparty 当前能删除整个内部存储中的文件，重要资料需要保留第二份副本。
+5. MIUI 系统升级、清理后台或更换 Wi-Fi 后，重新检查自启动、IP 地址和存储权限。
+
+修改配置后，备份到内部存储：
+
+```bash
+tar -czf ~/storage/shared/Download/k30-server-config-$(date +%F).tar.gz \
+  ~/.aria2 ~/.config/copyparty ~/.termux/boot ~/server/logs
+```
+
+生成后还要把压缩包复制到电脑或其他设备；解锁 Bootloader 会连内部存储一起清空。不要把包含真实密码的配置备份上传到公开仓库。
+
+## 还能扩展的服务
+
+无需 Root 可以继续增加：
+
+- Tailscale：在外网安全访问 SSH、文件和下载管理页面。
+- Syncthing：电脑、笔记本和手机之间自动同步目录。
+- FastAPI/Flask/Node.js：部署个人网页、Webhook 和轻量 API。
+- Git：建立裸仓库，作为局域网私人 Remote。
+- MQTT：作为 Home Assistant 的传感器或自动化节点。
+- 摄像头与 Termux:API：定时拍照、延时摄影、宠物监控和简单视觉推理。
+- 下载完成钩子：通知、震动、媒体扫描或自动归档。
+
+需要 Root 的功能：
+
+- ACC 充电保护：按电量或温度真正暂停/恢复充电。
+- AdGuard Home 标准 DNS：监听局域网 DNS 使用的 53 端口。
+- chroot、底层网络规则和更深层的系统控制。
+
+Redmi K30 Ultra 成功解锁 Bootloader 会清除全部用户数据，包括 Termux 环境和内部存储。只为当前文件/下载服务器没有必要 Root；确实需要 ACC 或标准 53 端口 DNS 时，应先完成整机和 Termux 配置备份，再解锁和安装 Magisk。
+
 # 拯救者R720-15IKBN
 ```sh
-制造商: LENOVO 
+制造商: LENOVO
 设备型号: Lenovo R720-15IKBN
 设备代号: 80WW
 序列号: PF0S8CHZ
