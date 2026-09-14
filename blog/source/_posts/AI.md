@@ -20,7 +20,135 @@ YOLO模式: Ctrl+Y
 
 > 严禁无端夸奖： 停止在对话中使用过度礼貌、奉承或“为了夸而夸”的措辞（如：太棒了、你真博学、很有见地等）。 赞美的触发门槛： 除非我的表现、观点或产出在逻辑性、独创性或复杂程度方面，经模型评估优于 70% 以上的大数据样本，否则请保持中立、客观且高效的对话风格。 平等交流： 保持作为专业助手和合作伙伴的姿态，语气要简洁、真诚且落地，不需要表现出讨好感。 直言不讳： 如果我的想法有误或可以改进，请直接指出，这种专业性比赞美更有价值。
 
+## Codex + 飞书自动化
+
+这套方案把飞书消息桥接到本地 Codex CLI，并用 PowerShell、Windows 计划任务和飞书卡片实现自动提醒。设计目标是在新机器上能够快速重建，同时不把 App Secret、访问令牌、用户 ID 或会话 ID 写进 Git。
+
+### 组件
+
+| 组件 | 当前版本（2026-09-13） | 来源 | 作用 |
+| --- | --- | --- | --- |
+| `@larksuite/cli`（命令 `lark-cli`） | `1.0.89` | [larksuite/cli](https://github.com/larksuite/cli) | 飞书/Lark 官方 CLI，用于配置身份并调用消息、文档、日历等开放平台接口。 |
+| `lark-channel-bridge` | `0.7.0` | [zarazhangrui/feishu-claude-code-bridge](https://github.com/zarazhangrui/feishu-claude-code-bridge) | 社区桥接工具，把飞书私聊或群聊消息转给本地 Codex/Claude CLI，并将结果发回飞书。 |
+
+新机器优先安装最新版；表中版本用于复现和排障，不作为版本锁定要求。`lark-channel-bridge` 不是飞书官方项目。
+
+### 安装与基本使用
+
+前置条件：Node.js `>= 20.12.0`、已安装并登录 Codex CLI，以及一个飞书/Lark PersonalAgent 应用。
+
+```powershell
+# 安装飞书官方 CLI
+npx @larksuite/cli@latest install
+
+# 验证；访问个人日历、云文档等资源时才需要用户授权
+lark-cli --version
+lark-cli config init
+lark-cli auth login --recommend
+lark-cli auth status
+
+# 用机器人身份发消息
+lark-cli im +messages-send --as bot --chat-id "oc_xxx" --text "Hello"
+
+# 安装并首次运行 Codex bridge
+npm i -g lark-channel-bridge
+lark-channel-bridge run --profile codex --agent codex
+
+# 验证后注册为 Windows 后台服务
+lark-channel-bridge start --profile codex --agent codex
+lark-channel-bridge status --profile codex
+lark-channel-bridge restart --profile codex
+```
+
+bridge 在 Windows 上使用计划任务维持后台服务。每个 profile 的配置、身份和日志位于 `~/.lark-channel/profiles/<profile>/`。bridge 环境中调用 `lark-cli` 时，应保留 `LARK_CHANNEL`、`LARK_CHANNEL_HOME`、`LARK_CHANNEL_PROFILE`、`LARK_CHANNEL_CONFIG` 和 `LARKSUITE_CLI_CONFIG_DIR`，不要绕回普通本机配置。
+
+### 不消耗模型 Token 的原则
+
+定时任务直接运行 PowerShell 和 `lark-cli`，不向 Codex 发送自然语言请求：
+
+1. 额度查询通过 `codex app-server --stdio` 的 `account/rateLimits/read` 读取状态，不创建模型对话。
+2. 消息通过 `lark-cli im +messages-send --as bot` 直接发送到飞书私聊。
+3. 卡片按钮只携带固定格式的本地 `cmd`，bridge 记录事件后不转发给 Agent。
+4. 本地监听器只接受指定私聊、当天有效且位于白名单中的命令。
+
+零模型 Token 的按钮不能使用 `__bridge_cb: true`，否则 bridge 会把点击交给 Codex，产生一次模型调用。飞书开放平台请求、bridge 和本地脚本仍会产生少量网络、CPU 与日志开销。
+
+### Codex 额度提醒
+
+脚本：`~/.codex/quota-notifier/Send-CodexQuota.ps1`。
+
+| 项目 | 当前行为 |
+| --- | --- |
+| 开机推送 | Windows 登录后启动 bridge；确认 `codex` profile 上线后立即私聊推送一次。同一次 Windows 开机按系统启动时间去重，发送成功后才记录状态。 |
+| 定时推送 | 每天 `00:00`，以及活动时段的 `10:00、12:00、14:00、16:00、18:00、20:00、22:00` 推送。午休后的 `13:00` 延后到 `14:00`。 |
+| 低额度监控 | `10:05–23:50` 每 15 分钟检查；5 小时或 7 天额度首次低于 20% 时提醒一次。 |
+| 手动查询 | 卡片底部“查询额度”按钮写入本地 `quota.refresh`；监听器调用同一脚本重新查询并发送新卡。 |
+| 数据来源 | `account/rateLimits/read`，读取 5 小时额度、7 天额度、重置次数、最近到期时间和额外额度。 |
+| 计划任务 | `CodexQuotaNotifier`、`CodexQuotaLowAlert`、`CodexQuotaCardActions`。 |
+
+开机推送复用 `~/.lark-channel/startup/start-codex-bridge.ps1`。脚本优先读取 `supervisor/profile-online` 日志；若当前 bridge 版本没有生成该 JSONL 事件，则以本次开机后稳定运行的 bridge 进程作为兼容信号。随后调用额度脚本，并仅在飞书返回成功后写入去重状态。
+
+额度卡使用 CardKit 2.0：
+
+- 标题显示总体状态和查询时间，不显示套餐信息。
+- 第一块显示 5 小时额度，第二块显示 7 天额度；上下排列并使用相同标签宽度。
+- 每块第一行显示名称、剩余百分比和具体重置日期；第二行显示进度条和距离重置的剩余时间。
+- 两块颜色独立变化：剩余 `<20%` 为红色，`20%–49%` 为橙色，`>=50%` 为绿色。
+- 下方显示可用重置次数和最近到期时间。大于 2 天使用普通颜色，不超过 2 天为橙色，不超过 1 天为红色；没有次数时显示“无”。
+- 只有确实存在额外额度或无限额度时，才追加“额外额度”一行。
+- 底部放置小号“查询额度”按钮；`CodexQuotaCardActions` 登录后启动，每 2 秒检查新点击并去重。
+
+### 关机提醒
+
+脚本：
+
+- `~/.lark-channel/send-shutdown-reminder.ps1`
+- `~/.lark-channel/handle-shutdown-card-actions.ps1`
+
+当前行为：
+
+1. 每天 `00:30、01:00、01:30` 私聊发送紧凑 CardKit 2.0 卡片。
+2. 卡片正文保留一句状态说明，底部横排“今晚不关”和“立即关机”。
+3. “立即关机”带二次确认，确认后发送回执并在 5 秒后关机。
+4. “今晚不关”写入当天状态、取消已经安排的关机，并停止当晚后续提醒。
+5. 如果 `01:30` 仍未回应，且提醒发送成功、bridge 正常运行，则安排 `01:45` 自动关机；期间选择“今晚不关”仍可取消。
+6. bridge 未运行时不安排自动关机，避免无法操作按钮而误关机。
+
+计划任务：
+
+- `Codex-Lark-Shutdown-Reminder-0030`：触发三次提醒。
+- `Codex-Lark-Shutdown-Card-Actions`：每天 `00:29` 启动监听，并在用户登录时补启动；每 15 秒检查一次按钮事件，到 `01:46` 结束。监听器只处理本次启动后的新点击，避免重放旧卡。
+
+按钮命令带当天日期，例如 `shutdown.skip.20260913` 和 `shutdown.now.20260913`。监听器还会校验目标私聊 ID、去重事件并忽略旧日期。
+
+### 新机器重建清单
+
+1. 安装最新版 `@larksuite/cli` 和 `lark-channel-bridge`，使用 `codex` profile。
+2. 检查 Node.js、Codex CLI、现有飞书应用和计划任务，不覆盖可用配置。
+3. 通过当前 bridge/profile 获取实际用户与私聊标识，不沿用旧机器的 ID。
+4. 创建额度提醒和关机提醒脚本，注册上述 Windows 计划任务，并加入开机上线检测与发送成功校验。
+5. 定时查询和卡片按钮使用本地白名单命令，不使用 `__bridge_cb`。
+6. 不把 App Secret、token、用户 ID、chat ID 写入仓库或日志输出。
+7. 先执行 PowerShell 语法检查、额度卡结构测试和关机动作 dry-run；测试期间不真正关机。
+8. 最后核对触发时间、bridge 状态、私聊收件人、开机去重状态和日志。
+
+迁移到新机器时仍需重新完成 PersonalAgent 绑定；Git 只保存技术方案，不保存身份凭据。
+
 ## Skills
+
+### 自定义 Skill
+
+`interview-review-coach` 面向计算机视觉、自动驾驶感知、BEV、模型部署和算法工程岗位。它可以把面试录音、转录或笔记整理为真实回答记录、改进回答、知识缺口和下一轮复习计划，并附带本地 Whisper 转录脚本。
+
+### Codex 系统能力
+
+| Skill | 来源 | 作用 |
+| --- | --- | --- |
+| `imagegen` | [openai/skills](https://github.com/openai/skills) | 生成和编辑照片、插画、纹理及透明背景位图。 |
+| `openai-docs` | [openai/skills](https://github.com/openai/skills) | 查询 Codex、ChatGPT、OpenAI API、模型和配置的官方资料。 |
+| `plugin-creator` | [openai/skills](https://github.com/openai/skills) | 创建 Codex 插件、MCP 配置和个人市场条目。 |
+| `skill-creator` | [openai/skills](https://github.com/openai/skills) | 设计、创建、修改和验证 Agent Skill。 |
+| `skill-installer` | [openai/skills](https://github.com/openai/skills) | 从官方目录或 GitHub 仓库安装 Skill。 |
 
 ### 搜索与技能发现
 
@@ -37,12 +165,37 @@ YOLO模式: Ctrl+Y
 | `superpowers` | [obra/superpowers](https://github.com/obra/superpowers) | 提供需求澄清、计划、TDD、调试、代理协作、审查和验证等完整开发方法论。 |
 | `grill-me` | [mattpocock/skills](https://github.com/mattpocock/skills/tree/main/skills/productivity/grill-me) | 在代码审查中，提供针对代码的深入问题和改进建议。 |
 
+### 求职与面试
+
+| Skill | 来源 | 作用 |
+| --- | --- | --- |
+| `interview-review-coach` | 本地自定义 | 复盘技术面试，整理真实回答、建议回答、知识缺口和学习计划。 |
+| `job-hunter` | [Donzhu2020/job-tracker](https://github.com/Donzhu2020/job-tracker) | 搜索职位、匹配简历、生成求职信并将结果保存到 Obsidian。 |
+
 ### 视觉与视频创作
 
 | Skill | 来源 | 作用 |
 | --- | --- | --- |
 | `cinematic-director-frame` | [zhu930824/cinematic-director-frame](https://github.com/zhu930824/cinematic-director-frame) | 生成具有导演风格、镜头语言和宽银幕构图的电影画面。 |
 | `chatcut` | [ChatCut-Inc/agent-plugin](https://github.com/ChatCut-Inc/agent-plugin) | 在 Codex 中完成素材导入、时间线剪辑、字幕、配音、生成和导出。 |
+| `anything2explainer` | [Vincentwei1021/anything2explainer](https://github.com/Vincentwei1021/anything2explainer) | 将主题或文章制作成带配音、字幕和章节进度条的 MG 科普视频。 |
+
+### anything2explainer：代码生成科普视频
+
+[anything2explainer](https://github.com/Vincentwei1021/anything2explainer) 是 Claude Code / Codex Skill。输入主题、语言和时长后，它会生成黑底 MG 风格的 1280×720 视频；画面使用 React + TypeScript 编写，并由 [Remotion](https://www.remotion.dev/) 按帧拼接和渲染。中文默认可使用 edge-tts `zh-CN-YunxiNeural` 配音。
+
+基本工作流：
+
+1. 从模板建立 Remotion 项目并安装依赖。
+2. 调研主题，核对事实、数字和引用来源。
+3. 编写解说词；用户确认后锁定文案。
+4. 生成 TTS 配音，根据词语时间边界换算成 30fps 时间轴和字幕。
+5. 为每句解说设计一个镜头，整理完整分镜表。
+6. 用多个构建组编写 Remotion 镜头组件，并先渲染前 30 秒样片确认风格。
+7. 完成剩余镜头，检查字幕安全区、构图、动画节奏和音画同步。
+8. Remotion 逐帧生成画面，再通过 FFmpeg 编码为 H.264 + AAC 的 MP4。
+
+主要产物：调研文档、解说词、配音、帧级时间轴、分镜表、Remotion 源码、QC 报告和最终 MP4。它使用代码绘制画面，不依赖传统剪辑软件或文生视频模型，适合批量生成统一风格的技术科普内容。
 
 # LLM
 [DeepSeek：从入门到精通](https://www.kdocs.cn/l/caFUbVZSt40Q?f=201&share_style=h5_card)

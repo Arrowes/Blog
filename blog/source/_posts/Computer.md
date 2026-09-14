@@ -113,6 +113,7 @@ Redmi K30 Ultra
 ├── aria2 RPC           6800  下载后端
 │   └── AriaNg          6880  下载管理网页
 └── Termux:API                电池、通知、相机、传感器等 Android API
+    └── late-night-guard      光线/姿态熬夜检测、警报与每周豁免额度
 ```
 
 | 服务 | 局域网入口 | 用途 |
@@ -423,6 +424,90 @@ tar -czf ~/storage/shared/Download/k30-server-config-$(date +%F).tar.gz \
 - chroot、底层网络规则和更深层的系统控制。
 
 Redmi K30 Ultra 成功解锁 Bootloader 会清除全部用户数据，包括 Termux 环境和内部存储。只为当前文件/下载服务器没有必要 Root；确实需要 ACC 或标准 53 端口 DNS 时，应先完成整机和 Termux 配置备份，再解锁和安装 Magisk。
+
+
+## 熬夜检测仪：用光线和姿态约束关灯
+
+旧手机平时竖直放在桌面上，可以把环境光、距离和重力传感器组合成一个不需要单独 App 的熬夜检测仪。实现文件如下：
+
+```text
+~/server/late-night-guard.py                 检测、警报和每周额度状态机
+~/.termux/boot/start-late-night-guard        开机启动入口
+~/server/ensure-services                     重新打开 Termux 时补齐全部服务
+~/.local/state/late-night-guard/state.json   校准值、额度和当晚状态
+~/server/logs/late-night-guard.log           正式运行日志
+```
+
+当前规则：
+
+| 时间或事件 | 行为 |
+|---|---|
+| `00:25` | 发出预警通知，显示仍可使用的“延迟”和“取消”按钮 |
+| `00:30` | 若房间仍亮，开始循环播放提示音、振动并显示高优先级通知 |
+| 点击“延迟15分钟” | 立即停止警报，从点击时刻延后15分钟；每个 ISO 自然周最多3次 |
+| 点击“取消今晚” | 立即停止并结束当晚检测；每个 ISO 自然周最多1次 |
+| 有效关灯 | 连续确认两次黑暗后尽快停声，并进入15分钟防复亮期 |
+| 防复亮期重新开灯 | 重新报警，关灯后重新计算15分钟 |
+| `01:00` | 无条件停止提示音、振动和当晚检测；延迟不能越过这个硬截止时间 |
+
+按钮同时出现在预警通知和正式警报通知中，MIUI 上可能需要下拉并展开通知才能看到。额度按自然周记录，重启脚本或手机不会重置。
+
+### 防止遮挡伪装成关灯
+
+只看照度会被盖住手机或扣在桌面上绕过，因此“有效关灯”必须同时满足：
+
+```text
+环境光：light <= 2 lux（按实际房间校准）
+无遮挡：proximity >= 4
+保持竖直：gravity.y >= 6.5
+稳定性：连续两次采样都满足
+```
+
+- 光线传感器判断房间是否关灯。
+- 距离传感器排除手掌、布料等贴近屏幕上方的遮挡。
+- 重力方向排除把手机正面朝下扣在桌面的情况。
+- 阈值与手机型号、支架角度和房间余光有关，换位置后应重新校准，不能照搬到其他设备。
+
+读取与校准命令：
+
+```bash
+# 查看当前照度、距离、重力和判定原因
+python ~/server/late-night-guard.py sample
+
+# 保持手机竖直、无遮挡并关灯，然后校准黑暗阈值
+python ~/server/late-night-guard.py calibrate-dark
+
+# 查看阈值、当周剩余额度和当前状态
+python ~/server/late-night-guard.py status
+
+# 只检查状态机与防遮挡逻辑，不触发警报
+python ~/server/late-night-guard.py self-test
+```
+
+当前 Redmi K30 Ultra 在关灯、竖直且无遮挡时测得约 `0 lux`，最终黑暗阈值取 `2 lux`。这是本机实测值，不是通用常量。
+
+### 警报、测试与省电
+
+警报使用系统内置的 `Alarm_Classic.ogg`，通过 `termux-media-player` 循环播放，并配合 `termux-vibrate`。开始警报前保存 alarm、music、notification 三类音量并临时调高，停止后恢复，避免测试永久改变日常音量。
+
+```bash
+# 模拟已经到达检测时间；不消耗周额度，也不写入当晚完成状态
+python ~/server/late-night-guard.py test-now
+
+# 中止模拟测试并恢复安静状态
+pkill -f '[l]ate-night-guard.py test-now'
+termux-media-player stop
+```
+
+`test-now` 只测试亮灯报警、关灯停止和防复亮，不显示会改变真实额度的按钮。正式通知中的操作按钮由 `delay` 和 `cancel` 子命令处理。
+
+白天守护进程不读取传感器，只计算下一次预警时间并长时间休眠；夜间等待截止时间时也低频唤醒，只有报警和15分钟防复亮阶段才密集采样。这样既保留常驻能力，也减少旧手机的耗电和发热。
+
+### 自动恢复与系统边界
+
+`~/.termux/boot/start-late-night-guard` 由 Termux:Boot 在手机启动后运行；`~/server/ensure-services` 则复用开机脚本，在每次打开 Termux 终端时静默检查 SSH、文件服务、下载服务和熬夜检测进程，已存在的进程不会重复启动。
+
+Android 的“强行停止”是系统级禁令：被强行停止后，Termux、Termux:Boot、定时器和广播都不能自行复活。此时至少要重新打开一次 Termux，随后终端启动钩子才会恢复服务。MIUI 中还应为 Termux 与 Termux:Boot 同时开启自启动、允许后台运行，并把电池策略设为“不限制”。因此这套方案能增加绕过成本，但无法在无 Root 条件下做到绝对不可关闭。
 
 # 拯救者R720-15IKBN
 ```sh
