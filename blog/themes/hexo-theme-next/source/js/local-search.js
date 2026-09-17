@@ -276,11 +276,19 @@ document.addEventListener('DOMContentLoaded', () => {
             resultItem += `<li><a href="${titleUrl}" class="search-result-title">${title}</a>`;
           }
 
+          if (slicesOfContent.length !== 0) {
+            resultItem += `<details class="search-result-article"><summary>${slicesOfContent.length} 个匹配片段</summary>`;
+          }
+
           slicesOfContent.forEach(slice => {
             const hitPosition = slice.hits[0]?.position ?? slice.start;
             const snippetUrl = `${finalUrl}&index=${getHighlightIndex(content, hitPosition, keywords, caseSensitive, wholeWord)}`;
             resultItem += `<a href="${snippetUrl}"><p class="search-result">${highlightKeyword(content, slice)}...</p></a>`;
           });
+
+          if (slicesOfContent.length !== 0) {
+            resultItem += '</details>';
+          }
 
           resultItem += '</li>';
           resultItems.push({
