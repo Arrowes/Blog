@@ -99,7 +99,7 @@ SLAM (Simultaneous Localization And Mapping，同步定位与地图构建)，主
 激光雷达提供精准的三维空间信息，摄像头提供丰富的语义细节，而毫米波雷达提供恶劣天气下的安全冗余和精准的速度数据。这种互补被称为“多传感器融合”。
 
 # 相机几何与标定
-
+FOV（Field of View，视场角）
 ## 相机模型
 
 ### 针孔相机模型
@@ -749,11 +749,7 @@ LSS 的核心思想是：先把多视角 2D 图像特征 Lift 到相机视锥体
 * **LiDAR 分支**：采用 VoxelNet 或 PointPillars 等 3D 稀疏卷积主干网络，提取并下采样为相同空间分辨率的 LiDAR-BEV 特征图。
 * **融合模块**：相机和 LiDAR 特征先统一到 BEV，再在通道维拼接并通过卷积融合。具体结构以 [BEVFusion](https://arxiv.org/abs/2205.13542) 论文和代码版本为准，不应概括成 SE-Net 式动态注意力。
 
-
----
-
 # 图像数据与颜色
-FOV（Field of View，视场角）
 
 ## 图像数据类型
 

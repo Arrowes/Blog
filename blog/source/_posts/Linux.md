@@ -173,7 +173,8 @@ echo -e "APT::Periodic::Update-Package-Lists \"0\";\nAPT::Periodic::Download-Upg
 echo -e "APT::Periodic::Update-Package-Lists \"0\";\nAPT::Periodic::Unattended-Upgrade \"0\";" | sudo tee /etc/apt/apt.conf.d/20auto-upgrades
 ```
 
-N卡多卡训练时会挂死的问题（现象是显存各占一点点，GPU utils占满 max， 训练卡住），临时方法是通过配置export NCCL_P2P_DISABLE=1或backend='gloo'，现在发现可以手动关闭PCI bridge的ACS来解决，因为服务器没有ACS的BIOS配置, 需要把这个脚本配置为开机运行：
+> N卡多卡训练时会挂死的问题（现象是显存各占一点点，GPU utils占满 max， 训练卡住）
+> 临时方法是通过配置export NCCL_P2P_DISABLE=1或backend='gloo'，现在发现可以手动关闭PCI bridge的ACS来解决，参考文档：[nvidia-troubleshooting](https://docs.nvidia.com/deeplearning/nccl/user-guide/docs/troubleshooting.html#pci-access-control-services-acs), 有些服务器没有ACS的BIOS配置, 需要把这个脚本配置为开机运行：
 ```bash
 #!/bin/bash
 for BDF in `lspci -d "*:*:*" | awk '{print $1}'`; do
@@ -185,7 +186,21 @@ for BDF in `lspci -d "*:*:*" | awk '{print $1}'`; do
   setpci -v -s ${BDF} ECAP_ACS+0x6.w=0000
 done
 ```
-参考文档：[nvidia-troubleshooting](https://docs.nvidia.com/deeplearning/nccl/user-guide/docs/troubleshooting.html#pci-access-control-services-acs)
+
+> 显卡驱动Bug在线重置: `RuntimeError: CUDA unknown error`
+显卡在物理/总线层面掉线（硬件假死），导致底层的 NVIDIA 驱动模块（`nvidia_uvm`）全面挂起，从而引发了整个容器内 PyTorch 的 CUDA 初始化崩溃。
+```sh
+# 1. 解除驱动占用: 停止 Docker 服务, 杀死所有残余的显卡进程
+systemctl stop docker
+fuser -k -9 /dev/nvidia*
+# 2. 重置底层驱动
+rmmod nvidia_uvm
+rmmod nvidia
+# 3. 重新加载健康的驱动,恢复容器服务
+modprobe nvidia
+systemctl start docker
+# 4. 隔离坏卡并恢复训练(必须等当前任务跑完后，通过对宿主机执行整机重启（`sudo reboot`）才有可能重新找回。如果重启后仍不出现，则需要联系机房检修硬件。)
+```
 
 终端配置多色:
 ```sh
