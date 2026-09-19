@@ -136,20 +136,6 @@ bridge 在 Windows 上使用计划任务维持后台服务。每个 profile 的�
 
 ## Skills
 
-### 自定义 Skill
-
-`interview-review-coach` 面向计算机视觉、自动驾驶感知、BEV、模型部署和算法工程岗位。它可以把面试录音、转录或笔记整理为真实回答记录、改进回答、知识缺口和下一轮复习计划，并附带本地 Whisper 转录脚本。
-
-### Codex 系统能力
-
-| Skill | 来源 | 作用 |
-| --- | --- | --- |
-| `imagegen` | [openai/skills](https://github.com/openai/skills) | 生成和编辑照片、插画、纹理及透明背景位图。 |
-| `openai-docs` | [openai/skills](https://github.com/openai/skills) | 查询 Codex、ChatGPT、OpenAI API、模型和配置的官方资料。 |
-| `plugin-creator` | [openai/skills](https://github.com/openai/skills) | 创建 Codex 插件、MCP 配置和个人市场条目。 |
-| `skill-creator` | [openai/skills](https://github.com/openai/skills) | 设计、创建、修改和验证 Agent Skill。 |
-| `skill-installer` | [openai/skills](https://github.com/openai/skills) | 从官方目录或 GitHub 仓库安装 Skill。 |
-
 ### 搜索与技能发现
 
 | Skill | 来源 | 作用 |
@@ -164,6 +150,9 @@ bridge 在 Windows 上使用计划任务维持后台服务。每个 profile 的�
 | `ponytail` | [DietrichGebert/ponytail](https://github.com/DietrichGebert/ponytail) | 强制采用简单、短小、低依赖且真正可行的编码方案。 |
 | `superpowers` | [obra/superpowers](https://github.com/obra/superpowers) | 提供需求澄清、计划、TDD、调试、代理协作、审查和验证等完整开发方法论。 |
 | `grill-me` | [mattpocock/skills](https://github.com/mattpocock/skills/tree/main/skills/productivity/grill-me) | 在代码审查中，提供针对代码的深入问题和改进建议。 |
+| `OpenResearch` | [alphaXiv/OpenResearch](https://github.com/alphaXiv/OpenResearch) | 科研工作流系统 |
+| `graphify` | [Graphify-Labs/graphify](https://github.com/Graphify-Labs/graphify) | 理解项目，构建知识图谱：`graphify explain "YOLOXHead"` |
+| `last30days-skill-cn` | [Jesseovo/last30days-skill-cn](https://github.com/Jesseovo/last30days-skill-cn) | 最近 30 天中文互联网搜索研究能力 |
 
 ### 求职与面试
 
@@ -179,6 +168,7 @@ bridge 在 Windows 上使用计划任务维持后台服务。每个 profile 的�
 | `cinematic-director-frame` | [zhu930824/cinematic-director-frame](https://github.com/zhu930824/cinematic-director-frame) | 生成具有导演风格、镜头语言和宽银幕构图的电影画面。 |
 | `chatcut` | [ChatCut-Inc/agent-plugin](https://github.com/ChatCut-Inc/agent-plugin) | 在 Codex 中完成素材导入、时间线剪辑、字幕、配音、生成和导出。 |
 | `anything2explainer` | [Vincentwei1021/anything2explainer](https://github.com/Vincentwei1021/anything2explainer) | 将主题或文章制作成带配音、字幕和章节进度条的 MG 科普视频。 |
+| `claude-video` | [bradautomates/claude-video](https://github.com/bradautomates/claude-video) | 抽帧 + 音频转写近似理解视频 `$watch` |
 
 ### anything2explainer：代码生成科普视频
 
