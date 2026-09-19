@@ -654,7 +654,7 @@ BEVFormer：使用 transformer 和时序信息，在 BEV query 上融合多视�
 BEVFusion：融合相机和激光雷达 BEV 特征，利用相机语义和点云几何互补。
 Occupancy Network：预测 3D 空间中每个 voxel 是否被占据，比检测框更细粒度，近年自动驾驶感知常见。
 
-### Bottom-Up / LSS 架构
+## Bottom-Up / LSS 架构
 
 **核心技术路线**：提取 2D 图像特征 $\to$ 预测离散深度概率分布 $\to$ 外积生成视锥特征量 (Frustum Volume) $\to$ 结合相机内外参投影至 3D 空间 $\to$ Voxel Pooling (体素池化) 展平为 BEV 特征。
 
@@ -663,7 +663,7 @@ LSS 类方法可以有几种深度处理方式：
 2. 有显式深度监督：使用 LiDAR、深度图或 3D 标注生成 depth target，对 depth distribution 加 depth loss。
 3. Fast-BEV/轻量化方案：弱化或跳过在线深度预测，用预计算投影或简化深度建模换取速度；均匀深度是本项目变体的选择，不应视为所有 Fast-BEV 实现的定义。
 
-#### LSS (Lift, Splat, Shoot)
+### LSS (Lift, Splat, Shoot)
 LSS 的核心思想是：先把多视角 2D 图像特征 Lift 到相机视锥体中的 3D 采样点，再 Splat 到自车坐标系下的 BEV 网格，最后在 BEV 视角执行检测、分割、规划等任务。
 
 - 论文：[Lift, Splat, Shoot](https://proceedings.mlr.press/v155/philion21a.html)
@@ -684,36 +684,36 @@ LSS 的核心思想是：先把多视角 2D 图像特征 Lift 到相机视锥体
    - 在 BEV 特征图上接检测、语义分割、车道线、规划等下游 head。
 
 
-#### BEVDet
+### BEVDet
 
 * **核心技术思路**：高度模块化的纯视觉检测工程框架。
 * **视图级数据增强 (View-transform Augmentation)**：在 2D 图像域（缩放、裁剪）和 3D BEV 域（旋转、翻转）引入独立的数据增强。其核心贡献在于推导了空间变换矩阵的同步更新机制，确保 2D 特征经过数据增强后，仍能准确映射到增强后的 3D 坐标空间。
 * **解耦检测头**：将视图转换器 (View Transformer) 与特定的任务头解耦，直接复用 LiDAR 检测中成熟的 CenterPoint 架构，输出 Heatmap 回归目标中心点及尺寸属性。
 
-#### BEVDepth
+### BEVDepth
 
 * **核心技术思路**：解决 LSS 架构中由于单目深度估计的不确定性导致的 BEV 特征空间发散问题。
 * **显式深度监督 (Explicit Depth Supervision)**：将激光雷达点云通过内外参投影到图像平面，生成稀疏 Depth GT，并按论文或具体实现定义的分类损失监督深度分支。不要脱离实现笼统指定 BCE 或 Focal Loss。
 * **相机感知深度 (Camera-aware Depth)**：引入了相机内参 (Intrinsics) 作为深度网络的额外条件输入，通过 MLP 层动态调整特征，以减轻因多相机焦距不同引起的深度预测偏差。
 
-#### Fast-BEV
+### Fast-BEV
 
 * **核心技术思路**：通过简化视图转换和预计算部分映射降低延迟，具体算子链路以论文和实现为准。
 * **预计算映射**：相机安装与输入尺寸固定时，可以预计算不随图像内容变化的投影关系，从而减少在线几何计算；标定、裁剪或增强变化时必须同步更新。参考 [Fast-BEV](https://arxiv.org/abs/2301.07870)。
 
 
-### LSS 中深度分布的构造
+## LSS 中深度分布的构造
 
 在 LSS 的前向流中，如何分配每一个 2D 像素沿着深度射线的特征比重，决定了“Lift”步骤的精度和运算效率。本项目支持两种深度构造模式：
 
-#### 1. 动态深度概率预测 (原版 LSS)
+### 1. 动态深度概率预测 (原版 LSS)
 单目图像具有深度多义性，因此网络预测离散的深度分布概率，而不是单个深度值。
   1. **定义深度区间（Depth Bins）**：通过 `dbound`（如 `[1.0, 18.0, 1.0]`，代表 $1.0\text{m} \sim 18.0\text{m}$，共 $D=17$ 个离散深度值）。
   2. **双分支预测**：2D 特征图输入深度分支，网络为每个像素预测 $D$ 个通道的深度分量，并在 $D$ 维度上做 **Softmax 归一化**，输出该像素在各个深度区间上的概率分布 $P \in \mathbb{R}^{D \times H \times W}$。
   3. **特征与深度外积（Outer Product）**：将语义上下文特征 $C \in \mathbb{R}^{C_{bev} \times H \times W}$ 与深度概率相乘，获得视锥特征 $F_{3d} \in \mathbb{R}^{C_{bev} \times D \times H \times W}$：
      $$F_{3d}(c, d_i, u, v) = C(c, u, v) \cdot P(d_i, u, v)$$
 
-#### 2. 均匀深度分布 (Uniform Depth - 端侧加速方案)
+### 2. 均匀深度分布 (Uniform Depth - 端侧加速方案)
 原版的 Softmax 以及大尺度外积（$D \times C_{bev} \times H \times W$ 密集相乘）在车载端侧芯片上存在极大的内存带宽瓶颈和高算力延迟。为此采用`uniform_depth` 模式。
   1. **放弃深度预测**：不通过 2D 神经网络动态估计每个像素的 Softmax 深度，而是默认 2D 特征沿着视锥射线的方向呈均匀分布。
   2. **几何求解静态映射矩阵 (Mapper Matrix)**：
@@ -722,27 +722,27 @@ LSS 的核心思想是：先把多视角 2D 图像特征 Lift 到相机视锥体
   3. **极速矩阵乘法投影 (`voxel_pooling_uniform_depth`)**：
      在 `voxel_pooling` 中，多相机投影可转换为 `torch.matmul` 或 `torch.sparse.mm`。这种形式便于某些硬件加速，但吞吐率仍取决于矩阵尺寸、稀疏支持和内存带宽。
 
-### Top-Down / Transformer 架构
+## Top-Down / Transformer 架构
 
 **核心技术路线**：在 3D 空间初始化查询张量 (Queries) $\to$ 利用相机参数确定 2D 投影参考点 $\to$ 计算交叉注意力 (Cross-Attention) 以采样图像特征 $\to$ 级联更新产生最终预测。
 
-#### BEVFormer
+### BEVFormer
 
 * **空间表示**：显式地定义一个维度为 $H \times W \times C$ 的密集 BEV Grid Query 参数矩阵。
 * **空间交叉注意力 (Spatial Cross-Attention)**：为避免全局 Attention 带来的 $O(N^2)$ 算力爆炸，引入了可变形注意力机制 (Deformable Attention)。将 BEV Grid 中每个中心点提升为 3D 柱体 (Pillar)，再利用内外参将其投影至各个 2D 相机视图中得到参考点 (Reference Points)，Query 仅在这些参考点周围的局部窗口内进行特征采样和注意力加权。
 * **时序自注意力 (Temporal Self-Attention)**：利用自车运动信息对齐并融合历史 BEV 特征，帮助处理遮挡和运动目标；速度等属性通常由下游检测头预测。参考 [BEVFormer](https://arxiv.org/abs/2203.17270)。
 
-#### PETR (Position Embedding Transformation)
+### PETR (Position Embedding Transformation)
 
 * **核心技术思路**：不显式构建密集 BEV 特征网格，而是在 2D 图像特征中注入 3D 位置编码。参考 [PETR](https://arxiv.org/abs/2203.05625)。
 * **3D 位置编码 (3D PE)**：将相机的视锥空间离散化为 3D 网格，利用内外参计算出每个 2D 图像特征像素对应的 3D 世界坐标。将这些坐标通过 MLP 映射为高维的 3D Position Embedding，并与 2D 图像特征相加。
 * **稀疏查询交互**：初始化固定数量（如 900 个）的稀疏 Object Queries，直接与融合了 3D PE 的多视角 2D 特征图进行全局 Cross-Attention。网络依靠 3D 位置编码的隐式指引，完成端到端的 3D 边界框回归。
 
-### 多模态底层特征融合
+## 多模态底层特征融合
 
 **核心技术思路**：将异构传感器数据流统一至相同的 BEV 正交坐标系下，进行高维特征的通道级拼接与融合，解决 Proposal-Level 后融合丢失上下文信息的缺陷。
 
-#### BEVFusion
+### BEVFusion
 
 * **特征统一化**：
 * **Camera 分支**：采用高度优化的 LSS 结构，自研 CUDA Kernel 优化并行归约（Reduction）过程，加速生成 Camera-BEV 密集特征图。
@@ -915,7 +915,7 @@ $$\|\vec{A} - \vec{B}\|^2 = 1^2 + 1^2 - 2(1)(1)\cos(\theta) = 2 - 2\cos(\theta)$
 
 # 传统图像处理
 
-### 滤波算法
+## 滤波算法
 
 1. 均值滤波 (Blur)
 核内所有系数全部相等且归一化。例如 $3 \times 3$ 的核，每个系数都是 $\frac{1}{9}$。它本质上是给图像区域做像素“混色”。
@@ -948,7 +948,7 @@ $$W = G_{\text{空间}}(x, y) \times G_{\text{灰度}}(\Delta I)$$
 `cv2.fastNlMeansDenoising(src, h, templateWindowSize, searchWindowSize)`
 它通常以更高计算成本换取纹理保留效果；能否用于实时链路，需要在目标分辨率、窗口参数和硬件上 profiling。
 
-### 边缘提取
+## 边缘提取
 
 传统边缘提取主要基于灰度变化，也就是图像梯度。常见方法包括 Sobel、Scharr、Prewitt、Roberts、Laplacian、LoG 和 Canny。
 
@@ -994,7 +994,7 @@ CNN 第一层卷积学到的很多 kernel 本质上也类似边缘、纹理、�
 * **BDCN (Bi-Directional Cascade Network)**：采用双向级联结构，能更好地处理不同尺度的边缘特征，生成的线条比 HED 更清晰、连贯。
 * **特点**：高度抗干扰，能够理解“哪些轮廓是你想要的，哪些是背景噪点”，但代价是需要大量标记数据进行训练，且推理速度远低于 Canny。
 
-### 缺陷检测
+## 缺陷检测
 工业视觉中的**缺陷检测（Defect Detection）** 核心任务是在生产线上利用相机、光源和图像处理算法，自动识别产品表面或内部存在的各类异常，如划伤、破损、脏污、缺失、变形等。
 
 难点：缺陷的不可预测性，正负样本极度不均衡，环境与表面干扰
@@ -1028,7 +1028,7 @@ CNN 第一层卷积学到的很多 kernel 本质上也类似边缘、纹理、�
 
 这种组合可在规则稳定时减少深度模型的处理量，但整体召回率受粗筛阶段限制。
 
-### 二值化
+## 二值化
 二值化（Binarization） 是传统图像处理中最基础、最核心的技术之一。
 二值化就是将一张彩色或灰度图像（像素值介于 $0 \sim 255$ 之间），根据某一个阈值（Threshold, 记为 $T$），强制转化为只有黑色（0）和白色（255）的图像。
 
