@@ -39,7 +39,7 @@
   <meta name="baidu-site-verification" content="{{ theme.baidu_site_verification }}">
 {%- endif %}
 
-<link rel="stylesheet" href="{{ url_for(theme.css) }}/main.css?v=20260717">
+<link rel="stylesheet" href="{{ url_for(theme.css) }}/main.css?v=20260919">
 
 {{ next_font() }}
 

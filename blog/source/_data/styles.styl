@@ -173,17 +173,40 @@
     display: block
 
 .search-result-article
-  margin-top: 4px
+  margin-top: 8px
 
-  summary
+.search-result-header
+  align-items: center
+  background: var(--content-bg-color)
+  display: flex
+  gap: 10px
+  list-style: none
+  padding: 7px 0
+  position: sticky
+  top: 0
+  z-index: 1
+
+  &::-webkit-details-marker
+    display: none
+
+  &::after
     color: $grey-dark
+    content: "\25B6"
     cursor: pointer
     font-size: $font-size-smaller
-    padding: 4px 0
+    margin-left: auto
+    padding: 4px
     user-select: none
 
-    &:hover
-      color: var(--link-hover-color)
+  &:hover::after
+    color: var(--link-hover-color)
+
+  .search-result-title
+    flex: 1
+    min-width: 0
+
+.search-result-article[open] > .search-result-header::after
+  content: "\25BC"
 
 .search-history
   display: flex
