@@ -1,5 +1,12 @@
 /* global CONFIG */
 
+const renderSearchResultItem = (titleUrl, title, snippets) => {
+  if (snippets.length === 0) {
+    return `<li><a href="${titleUrl}" class="search-result-title">${title}</a></li>`;
+  }
+  return `<li><details class="search-result-article" open><summary class="search-result-header"><a href="${titleUrl}" class="search-result-title">${title}</a></summary>${snippets.join('')}</details></li>`;
+};
+
 document.addEventListener('DOMContentLoaded', () => {
   // Popup Window
   let isfetched = false;
@@ -268,29 +275,16 @@ document.addEventListener('DOMContentLoaded', () => {
             slicesOfContent = slicesOfContent.slice(0, upperBound);
           }
 
-          let resultItem = '';
-
-          if (slicesOfTitle.length !== 0) {
-            resultItem += `<li><a href="${titleUrl}" class="search-result-title">${highlightKeyword(title, slicesOfTitle[0])}</a>`;
-          } else {
-            resultItem += `<li><a href="${titleUrl}" class="search-result-title">${title}</a>`;
-          }
-
-          if (slicesOfContent.length !== 0) {
-            resultItem += `<details class="search-result-article"><summary>${slicesOfContent.length} 个匹配片段</summary>`;
-          }
+          const titleContent = slicesOfTitle.length !== 0 ? highlightKeyword(title, slicesOfTitle[0]) : title;
+          const snippets = [];
 
           slicesOfContent.forEach(slice => {
             const hitPosition = slice.hits[0]?.position ?? slice.start;
             const snippetUrl = `${finalUrl}&index=${getHighlightIndex(content, hitPosition, keywords, caseSensitive, wholeWord)}`;
-            resultItem += `<a href="${snippetUrl}"><p class="search-result">${highlightKeyword(content, slice)}...</p></a>`;
+            snippets.push(`<a href="${snippetUrl}"><p class="search-result">${highlightKeyword(content, slice)}...</p></a>`);
           });
 
-          if (slicesOfContent.length !== 0) {
-            resultItem += '</details>';
-          }
-
-          resultItem += '</li>';
+          const resultItem = renderSearchResultItem(titleUrl, titleContent, snippets);
           resultItems.push({
             item: resultItem,
             id  : resultItems.length,
