@@ -181,18 +181,24 @@ drive.mount('/content/drive')
 1. nohup python train.py > train_output.log 2>&1 &
    linux自带的命令，忽略终端挂断信号（SIGHUP），确保即使关闭终端或退出 SSH 连接，程序仍继续运行
 2. tmux
-  一个终端复用工具（Terminal Multiplexer），需要单独安装，可以在单个终端窗口中创建多个虚拟终端会话，并支持会话的持久化（即使断开 SSH 连接也不会中断任务）。
-```py
-#在终端输入的命令（进入 tmux 前）：
-tmux new -s <名字>  #新建一个带名字的会话（比直接敲 tmux 更好管理）。
-tmux ls             #查看当前后台有哪些 tmux 会话。
-tmux a -t <名字>    #重新连回之前挂起的会话（a 代表 attach）。
-#在 tmux 内部的快捷键（必须先按 Ctrl + b 并松开，再按下面按键）：
-d   #脱离会话（Detach）。这是最核心的功能，把当前会话挂到后台运行，你可以安心关闭终端，程序不会断。
-%   #左右分屏。一边写代码，一边看运行结果。
-"   #上下分屏。在下方留一小块区域敲命令。
-c   #新建一个窗口（当分屏太挤时，新开一个像浏览器标签页一样的窗口），用 0-9 数字键在窗口间切换。
-    #方向键：在各个分屏（窗格）之间移动光标。
+  一个终端复用工具，适合让训练任务在 SSH 断开后继续运行。完整的安装、会话管理、分屏和鼠标模式配置请参阅 [Linux 笔记中的 tmux 章节](https://wangyujie.space/Linux/#tmux)。
+3. 停止后台训练任务
+```sh
+# 向命令行中包含 train 的进程发送 SIGTERM，尝试优雅退出
+pkill -f train
+
+# 如果进程没有响应 SIGTERM，再强制终止（SIGKILL）
+pkill -9 -f train
+
+# 或先检查匹配到的进程
+pgrep -a -f train
+
+# 确认进程列表无误后，再终止对应进程
+pgrep -f train | xargs kill -9
+
+# 如果没有 pkill / pgrep：
+# 过滤进程并杀死 PID，同时排除 grep 进程自身
+ps -ef | grep 'train' | grep -v 'grep' | awk '{print $2}' | xargs kill -9
 ```
 
 ## DataLoader的num_works参数设置

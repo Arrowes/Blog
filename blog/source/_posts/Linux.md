@@ -134,6 +134,30 @@ Ctrl + Z：中断程序放到后台，唤醒使用“fg”命令。
 Ctrl + Backspace 删除整个单词
 多个语句可以通过`;`分割 `&&` 表示上一句返回码0才会执行 `||` 表示上一句返回码非0才会执行 `;` 无论如何都执行
 
+## tmux
+一个终端复用工具（Terminal Multiplexer），支持在单个终端窗口中创建多个虚拟终端会话，并持久化后台任务，即使断开 SSH 连接也不会中断任务。
+```sh
+# 在终端输入的命令（进入 tmux 前）
+tmux new -s <名字>  # 新建一个带名字的会话（比直接敲 tmux 更好管理）
+tmux ls             # 查看当前后台有哪些 tmux 会话
+tmux a -t <名字>    # 重新连回之前挂起的会话（a 代表 attach）
+
+# 在 tmux 内部的快捷键（必须先按 Ctrl + b 并松开，再按下面按键）
+d   # 脱离会话（Detach），让任务在后台继续运行
+%   # 左右分屏
+"   # 上下分屏
+c   # 新建一个窗口，用 0-9 数字键在窗口间切换
+  # 方向键：在各个分屏（窗格）之间移动光标
+
+# 离开与分屏（进入 tmux 后：先按 Ctrl + b，松开后再按对应按键）
+D   # 离开并保持后台
+%   # 左右分屏
+Z   # 全屏放大/还原
+
+# 一键开启鼠标模式：按 Ctrl + b，再按 :，输入下面这行并回车
+set -g mouse on
+```
+
 # Ubuntu
 ```sh
 cat /proc/version   #查版本信息
@@ -282,7 +306,10 @@ vscode 文件标签栏多行显示：文件 > 首选项 > 设置 > workbench.edi
 1. 设置断点：单击行号左侧的空白区域，可以设置或取消断点。
 2. 启动调试会话：点击左侧的调试图标（或者使用快捷键F5），选择想要调试的环境（比如Node.js、Python等），然后启动调试会话。
 3. Run and Debug - Add configuration - .vscode/launch.json
- 
+
+> 修复VScode版本和linux服务器 /root/.vscode-server 版本不一致造成的无法连接（Dowloading failed）:
+> : VScode Setting > 搜索ssh.server > remote.SSH.serverInstallPath > Item填入IP, Value 填入指定的.vscode-server匹配版本的位置 > 拷贝正确版本到该位置
+
 # Git
 下载 [Git](https://git-scm.com/downloads)，`sudo apt-get install git`
 与 [TortoiseGit](https://tortoisegit.org/download/) 小乌龟配合使用可以少记很多指令，在目标文件夹右键可执行push、clone、commit等操作
